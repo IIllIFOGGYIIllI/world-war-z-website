@@ -785,9 +785,24 @@ const applyLiveStatus = (payload) => {
   const operationUpdatedAt = formatUpdatedAt(operations.last_successful_update || payload.updated_at);
   const discordHealthy = Boolean(operations.discord_connected && operations.discord_ready);
   const nitradoState = titleCaseState(operations.nitrado_state || 'unknown');
+  const restartConfigured = Boolean(operations.restart_schedule_configured);
+  const restartSynchronised = Boolean(operations.restart_schedule_synchronised);
+  const restartIntervalMinutes = Math.max(0, Math.trunc(Number(operations.restart_interval_minutes) || 0));
   const nextRestart = operations.next_scheduled_restart
     ? formatUpdatedAt(operations.next_scheduled_restart)
-    : 'Not provided by Nitrado';
+    : restartConfigured
+      ? 'Waiting for restart sync'
+      : 'No automatic restart configured';
+  const restartCountdown = restartSynchronised && operations.restart_countdown_seconds != null
+    ? formatDuration(operations.restart_countdown_seconds)
+    : restartConfigured
+      ? 'Syncs on the next observed DayZ restart'
+      : 'Unavailable';
+  const restartInterval = restartIntervalMinutes > 0
+    ? `Every ${formatDuration(restartIntervalMinutes * 60)}`
+    : 'Not configured';
+  const restartSource = String(operations.restart_source || 'unavailable');
+  const restartWarning = String(operations.restart_warning_text || '').trim() || 'No restart warning text available';
 
   setConnectionState('online', 'Bot API connected');
   if (dashboardMode) dashboardMode.textContent = 'Live status';
@@ -817,6 +832,10 @@ const applyLiveStatus = (payload) => {
   setText('[data-operations-nitrado]', nitradoState);
   setText('[data-operations-updated]', operationUpdatedAt);
   setText('[data-operations-next-restart]', nextRestart);
+  setText('[data-operations-restart-countdown]', restartCountdown);
+  setText('[data-operations-restart-interval]', restartInterval);
+  setText('[data-operations-restart-source]', restartSource);
+  setText('[data-operations-restart-warning]', restartWarning);
   setText('[data-map-name]', serverMap.toUpperCase());
   setText('[data-map-server-name]', serverName);
   setText('[data-map-platform]', platform);
@@ -860,7 +879,11 @@ const showStatusUnavailable = () => {
   setText('[data-operations-discord]', 'Unavailable');
   setText('[data-operations-nitrado]', 'Unavailable');
   setText('[data-operations-updated]', 'Unable to refresh');
-  setText('[data-operations-next-restart]', 'Not provided by Nitrado');
+  setText('[data-operations-next-restart]', 'Unavailable');
+  setText('[data-operations-restart-countdown]', 'Unavailable');
+  setText('[data-operations-restart-interval]', 'Unavailable');
+  setText('[data-operations-restart-source]', 'Unavailable');
+  setText('[data-operations-restart-warning]', 'Unavailable');
   document.querySelectorAll('[data-server-status-badge], [data-live-status-class]').forEach((element) => {
     setStatusClass(element, 'unavailable');
   });

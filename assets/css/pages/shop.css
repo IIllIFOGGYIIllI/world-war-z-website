@@ -34,7 +34,7 @@
 .shop-hero-image>div { position:absolute; z-index:2; right:28px; bottom:24px; display:grid; text-align:right; }
 .shop-hero-image span,.shop-hero-image small { color:#bbb2ab; font-size:10px; letter-spacing:.15em; text-transform:uppercase; }
 .shop-hero-image strong { font-family:Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif; font-size:34px; letter-spacing:.05em; }
-.member-shop-page .shop-account-strip { margin-top:16px; }
+.member-shop-page .shop-account-strip { margin-top:16px; grid-template-columns:repeat(5,minmax(0,1fr)); }
 .member-shop-notice { margin:16px 0 34px; }
 .member-shop-section { scroll-margin-top:96px; margin-top:34px; padding:24px; border:1px solid var(--line); background:rgba(15,13,13,.94); }
 .shop-section-heading { margin-bottom:22px; }
@@ -75,6 +75,7 @@
   .shop-hero { grid-template-columns:1fr; }
   .shop-hero-image { min-height:240px; }
   .member-shop-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .member-shop-page .shop-account-strip { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
 @media (max-width:720px) {
   .shop-topbar { align-items:flex-start; flex-wrap:wrap; gap:10px; }
@@ -85,6 +86,7 @@
   .shop-hero-image { display:none; }
   .member-shop-section { padding:14px; }
   .member-shop-grid { grid-template-columns:1fr; }
+  .member-shop-page .shop-account-strip { grid-template-columns:1fr; }
   .member-coordinate-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .member-shop-footer { flex-direction:column; }
 }

@@ -1,4 +1,8 @@
 
+## Version 1.22.38 — Next Restart Display
+
+Pairs with Bot v1.18.42. The dashboard and standalone Survivor Shop now show the next configured DayZ restart, live remaining time when synchronized, the messages.xml restart interval and schedule source. Pending Normal Item orders can show the same restart context without changing the automatic delivery backend.
+
 
 ## Version 1.22.37
 

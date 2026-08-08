@@ -8,7 +8,8 @@ const URLS = {
   catalogue: `${API_BASE}/api/shop/catalogue`,
   account: `${API_BASE}/api/account/shop`,
   purchase: `${API_BASE}/api/account/shop/purchase`,
-  locations: `${API_BASE}/api/account/delivery/locations`
+  locations: `${API_BASE}/api/account/delivery/locations`,
+  serverStatus: `${API_BASE}/api/server/status`
 };
 const SESSION_KEY = 'wwz_dashboard_session';
 const $ = (selector) => document.querySelector(selector);
@@ -25,7 +26,8 @@ const state = {
   mode: 'manual',
   selectedItem: null,
   loading: false,
-  purchasing: false
+  purchasing: false,
+  restart: null
 };
 
 const elements = {
@@ -36,6 +38,7 @@ const elements = {
   title: $('[data-member-shop-title]'), description: $('[data-member-shop-description]'),
   instructions: $('[data-member-shop-instructions]'), wallet: $('[data-member-shop-wallet]'),
   count: $('[data-member-shop-count]'), openOrders: $('[data-member-shop-open-orders]'),
+  nextRestart: $('[data-member-shop-next-restart]'), restartCountdown: $('[data-member-shop-restart-countdown]'),
   access: $('[data-member-shop-access]'), accessNote: $('[data-member-shop-access-note]'),
   notice: $('[data-member-shop-notice]'), noticeTitle: $('[data-member-shop-notice-title]'),
   noticeCopy: $('[data-member-shop-notice-copy]'), heroImage: $('[data-shop-hero-image]'),
@@ -70,6 +73,12 @@ const dateText = (value) => {
   }).format(date);
 };
 const titleCase = (value) => String(value || 'unknown').replace(/[_-]+/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
+const durationText = (seconds) => {
+  const totalMinutes = Math.max(0, Math.trunc((Number(seconds) || 0) / 60));
+  const hours = Math.trunc(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+};
 const fetchJson = (url, options = {}, timeoutMs = 15_000) =>
   window.WWZHttp.json(url, options, timeoutMs);
 const authHeaders = (extra = {}) => ({ Accept: 'application/json', ...(state.token ? { Authorization: `Bearer ${state.token}` } : {}), ...extra });
@@ -242,6 +251,15 @@ const renderOrders = () => {
     card.append(head, meta);
     if (order.discount) { const line = document.createElement('small'); line.textContent = `Discount applied: ${order.discount.label}`; card.append(line); }
     if (order.delivery) { const line = document.createElement('small'); const point = order.delivery.location || {}; line.textContent = `Delivery: ${titleCase(order.delivery.status)} · X ${point.x}, Y ${point.y}, Z ${point.z}, A ${point.rotation}°`; card.append(line); }
+    if (order.delivery?.status === 'restart_pending' && state.restart) {
+      const restartLine = document.createElement('small');
+      restartLine.textContent = state.restart.next_scheduled_restart
+        ? `Next server restart: ${dateText(state.restart.next_scheduled_restart)} · ${durationText(state.restart.restart_countdown_seconds)} remaining`
+        : state.restart.restart_schedule_configured
+          ? 'Next server restart: waiting for restart synchronization'
+          : 'Next server restart: schedule unavailable';
+      card.append(restartLine);
+    }
     if (order.fulfilment_note) { const line = document.createElement('small'); line.textContent = `Order update: ${order.fulfilment_note}`; card.append(line); }
     elements.orderList.append(card);
   });
@@ -281,6 +299,39 @@ const applyPayload = (payload, member = false) => {
     }
   }
   populateCategories(); renderCatalogue(); renderOrders();
+};
+
+const applyRestartStatus = (payload) => {
+  const operations = payload?.operations || {};
+  const configured = Boolean(operations.restart_schedule_configured);
+  const synchronised = Boolean(operations.restart_schedule_synchronised);
+  state.restart = operations;
+  if (elements.nextRestart) {
+    elements.nextRestart.textContent = operations.next_scheduled_restart
+      ? dateText(operations.next_scheduled_restart)
+      : configured
+        ? 'Waiting for sync'
+        : 'Not configured';
+  }
+  if (elements.restartCountdown) {
+    const interval = Math.max(0, Math.trunc(Number(operations.restart_interval_minutes) || 0));
+    elements.restartCountdown.textContent = synchronised && operations.restart_countdown_seconds != null
+      ? `${durationText(operations.restart_countdown_seconds)} remaining · ${operations.restart_source || 'messages.xml + ADM'}`
+      : configured
+        ? `Every ${durationText(interval * 60)} · syncs after the next observed restart`
+        : 'No automatic shutdown message found';
+  }
+  renderOrders();
+};
+const loadRestartStatus = async () => {
+  try {
+    const { response, payload } = await fetchJson(URLS.serverStatus, { headers: { Accept: 'application/json' } }, 8_000);
+    if (!response.ok) throw new Error('Restart status unavailable');
+    applyRestartStatus(payload);
+  } catch {
+    if (elements.nextRestart) elements.nextRestart.textContent = 'Unavailable';
+    if (elements.restartCountdown) elements.restartCountdown.textContent = 'Unable to reach restart schedule';
+  }
 };
 
 const loadLocations = async () => {
@@ -471,6 +522,8 @@ const initialise = async () => {
   } else {
     try { await loadIdentity(); } catch { setSignedOut(); }
   }
+  await loadRestartStatus();
   await loadShop();
+  window.setInterval(loadRestartStatus, 30_000);
 };
 initialise();
