@@ -1,3 +1,5 @@
+[![Deploy World War Z Website](https://github.com/IIllIFOGGYIIllI/world-war-z-website/actions/workflows/pages.yml/badge.svg?event=status)](https://github.com/IIllIFOGGYIIllI/world-war-z-website/actions/workflows/pages.yml)
+
 ## Version 1.22.40 — Header Logo Clarity Fix
 
 Pairs with Bot v1.18.42. Compact navigation/header branding now uses the dedicated `assets/world-war-z-icon.png` artwork, fixing the cramped top-left dashboard logo while preserving the full logo for large hero/emblem placements. This is a presentation-only hotfix on top of the v1.22.39 site-wide UI overhaul.
