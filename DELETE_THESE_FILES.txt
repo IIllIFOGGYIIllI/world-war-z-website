@@ -1,5 +1,3 @@
-world-war-z-website v1.22.36
+World War Z Website v1.22.37
 
 Files to delete: NONE
-
-Do not delete the production Chernarus satellite tiles, road overlay, place-name data, or any existing website assets not included in this patch.

@@ -465,7 +465,7 @@
     if (!sessionToken) return;
     requestInProgress = true;
     syncRolesButton.disabled = true;
-    setAdminMessage('Creating dividers, binding official roles and arranging the hierarchy…');
+    setAdminMessage('Finding existing progression roles, binding milestones and syncing member roles…');
     try {
       const payload = await requestJson(ADMIN_PROGRESSION_CONFIG_URL, {
         method: 'POST',
@@ -475,13 +475,16 @@
       adminData = payload;
       renderAdmin(payload);
       const sync = payload?.role_sync || {};
-      const missing = Array.isArray(sync.missing_roles) ? sync.missing_roles.length : 0;
-      const created = Array.isArray(sync.created_dividers) ? sync.created_dividers.length : 0;
+      const missingAchievements = Array.isArray(sync.missing_roles) ? sync.missing_roles.length : 0;
+      const missingDividers = Array.isArray(sync.missing_dividers) ? sync.missing_dividers.length : 0;
+      const missing = missingAchievements + missingDividers;
+      const dividerFound = Number(sync.divider_roles_found || 0);
+      const dividerExpected = Number(sync.expected_dividers || 4);
       const suffix = missing
-        ? ` ${missing} official role${missing === 1 ? '' : 's'} could not be found by exact name.`
-        : ' All official progression roles were found.';
+        ? ` ${missing} existing progression role${missing === 1 ? '' : 's'} could not be found by exact name.`
+        : ' All existing progression roles were found.';
       setAdminMessage(
-        `Role sync complete: ${sync.bound_level_roles || 0} level roles, ${sync.bound_prestige_roles || 0} prestige roles, ${created} divider role${created === 1 ? '' : 's'} created, ${sync.synced_members || 0} member${Number(sync.synced_members) === 1 ? '' : 's'} updated.${suffix}`,
+        `Role sync complete: ${sync.bound_level_roles || 0} level roles, ${sync.bound_prestige_roles || 0} prestige roles, ${dividerFound}/${dividerExpected} header/footer roles found, ${sync.synced_members || 0} member${Number(sync.synced_members) === 1 ? '' : 's'} updated. No roles were created.${suffix}`,
         missing ? 'error' : 'success'
       );
     } catch (error) {

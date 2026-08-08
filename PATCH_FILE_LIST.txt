@@ -1,19 +1,15 @@
-world-war-z-website v1.22.36 patch files
+World War Z Website v1.22.37 patch files
 
 Updated:
 - PATCH_FILE_LIST.txt
 - PATCH_NOTES.md
-- DELETE_THESE_FILES.txt
 - README.md
-- assets/css/dashboard/progression.css
-- assets/js/dashboard/progression.js
 - changelog.html
 - dashboard.html
 - index.html
 - scripts/validate_site.py
-- public HTML pages with local asset cache-buster updates
+- assets/js/dashboard/progression.js
+- policy/shop page cache markers where present
 
-Adds searchable progression role selectors, Save All Changes, and Bot v1.18.35 progression/economy controls.
-Pairs with Bot v1.18.35.
-No satellite JPG tiles, production road GeoJSON, or authoritative place-name data are changed by this patch.
-No Railway database file is included.
+Pairs with Bot v1.18.37.
+No database or map assets are included.

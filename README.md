@@ -1,3 +1,8 @@
+
+
+## Version 1.22.37
+
+Progression role sync now uses existing Discord roles only. The website Sync Discord Roles action does not create roles; it binds the existing official Level/Prestige roles and existing WWZ header/footer roles, then synchronizes all non-bot members through Bot v1.18.37.
 # World War Z Bot Website
 
 The official website of the World War Z community's unofficial DayZ Discord bot.
