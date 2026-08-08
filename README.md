@@ -1,3 +1,7 @@
+## Version 1.22.40 — Header Logo Clarity Fix
+
+Pairs with Bot v1.18.42. Compact navigation/header branding now uses the dedicated `assets/world-war-z-icon.png` artwork, fixing the cramped top-left dashboard logo while preserving the full logo for large hero/emblem placements. This is a presentation-only hotfix on top of the v1.22.39 site-wide UI overhaul.
+
 ## Version 1.22.39 — Site-Wide UI Overhaul
 
 Pairs with Bot v1.18.42. This release applies one unified professional visual system across the full website: homepage, dashboard, standalone Survivor Shop, map workspaces, member/Admin/Owner controls, dialogs, tables, forms, progression, delivery, moderation, configuration, legal/policy pages and the 404 screen. It modernises rounded geometry, spacing, depth, interactions, focus states and responsive behaviour without changing existing APIs or workflows.
@@ -41,7 +45,7 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 
 - `index.html` — website content and structure
 - `assets/css/pages/home.css` — public homepage design and mobile layout
-- `assets/css/site-polish.css` — site-wide v1.22.39 visual system loaded last on every HTML page
+- `assets/css/site-polish.css` — site-wide v1.22.40 visual layer (introduced in v1.22.39) loaded last on every HTML page
 - `assets/js/pages/home.js` — homepage navigation, header and scroll effects
 - `dashboard.html` — live status, personal profile and economy dashboard
 - `assets/css/dashboard/` — ordered core, moderation, workspace and catalogue dashboard style bundles

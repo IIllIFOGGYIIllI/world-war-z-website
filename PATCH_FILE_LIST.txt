@@ -1,4 +1,4 @@
-World War Z Website v1.22.39 patch files
+World War Z Website v1.22.40 patch files
 
 Updated/added:
 - 404.html

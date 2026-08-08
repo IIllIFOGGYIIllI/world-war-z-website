@@ -1,3 +1,3 @@
-World War Z Website v1.22.39
+World War Z Website v1.22.40
 
 Files to delete: NONE

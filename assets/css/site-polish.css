@@ -199,9 +199,31 @@ body {
 .service-context-card,
 .access-card { border-radius: var(--radius-sm) !important; }
 .service-context-icon { border-radius: 10px !important; }
-.nav-group { border-radius: 10px !important; }
+.sidebar-navigation { gap: 10px !important; }
+.nav-group {
+  border-radius: 10px !important;
+  overflow: clip;
+}
+.nav-group[open] {
+  padding-bottom: 5px;
+  border-color: rgba(255,255,255,.045) !important;
+  background: rgba(255,255,255,.014) !important;
+}
+.nav-group > summary {
+  min-height: 42px !important;
+  padding: 8px 10px !important;
+}
+.nav-group-links {
+  gap: 5px !important;
+  padding: 5px 6px 7px 14px !important;
+}
 .nav-group > summary,
 .side-link { border-radius: 9px !important; }
+.side-link {
+  min-height: 48px !important;
+  margin: 0 !important;
+  padding: 7px 9px !important;
+}
 .side-link-icon,
 .side-link > span.side-link-icon { border-radius: 8px !important; }
 .side-link:hover,
