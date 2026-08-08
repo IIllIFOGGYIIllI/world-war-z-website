@@ -22,7 +22,7 @@ RETIRED_MAP_PATHS = (
     MAP_ROOT / "tiles",
     ROOT / "assets/images/maps/chernarus-vector.svg",
 )
-EXPECTED_ASSET_VERSION = "1.22.38"
+EXPECTED_ASSET_VERSION = "1.22.39"
 
 EXPECTED_ROAD_GROUPS = {
     "paved_primary",
@@ -338,6 +338,7 @@ def validate_required_files(errors: list[str]) -> None:
         "dashboard.html",
         "shop.html",
         "assets/css/pages/home.css",
+        "assets/css/site-polish.css",
         "assets/css/dashboard/core.css",
         "assets/css/dashboard/moderation.css",
         "assets/css/dashboard/workspace.css",
@@ -368,6 +369,16 @@ def validate_required_files(errors: list[str]) -> None:
         if not (ROOT / relative_path).is_file():
             errors.append(f"Missing required website file: {relative_path}")
 
+
+
+def validate_site_wide_theme(errors: list[str]) -> None:
+    expected = f'assets/css/site-polish.css?v={EXPECTED_ASSET_VERSION}'
+    for html_path in sorted(ROOT.glob("*.html")):
+        source = html_path.read_text(encoding="utf-8")
+        if expected not in source:
+            errors.append(
+                f"{html_path.name}: missing site-wide UI theme reference {expected}"
+            )
 
 def validate_retired_map_assets(errors: list[str]) -> None:
     for path in RETIRED_MAP_PATHS:
@@ -637,6 +648,7 @@ def main() -> int:
     errors: list[str] = []
     info: list[str] = []
     validate_required_files(errors)
+    validate_site_wide_theme(errors)
     validate_html_references(errors, require_map_assets=args.require_map_assets)
     validate_css_references(errors)
     validate_interactions(errors, info)

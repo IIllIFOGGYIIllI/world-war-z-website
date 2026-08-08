@@ -1,13 +1,7 @@
-World War Z Website v1.22.38 patch files
+World War Z Website v1.22.39 patch files
 
-Updated:
-- DELETE_THESE_FILES.txt
-- PATCH_FILE_LIST.txt
-- PATCH_NOTES.md
-- README.md
-- assets/css/pages/shop.css
-- assets/js/dashboard/account.js
-- assets/js/pages/shop.js
+Updated/added:
+- 404.html
 - changelog.html
 - community-guidelines.html
 - dashboard.html
@@ -15,9 +9,14 @@ Updated:
 - legal.html
 - moderation-policy.html
 - privacy.html
-- scripts/validate_site.py
 - shop.html
 - terms.html
+- assets/css/site-polish.css
+- scripts/validate_site.py
+- README.md
+- PATCH_NOTES.md
+- PATCH_FILE_LIST.txt
+- DELETE_THESE_FILES.txt
 
 Files to delete: NONE
 Pairs with Bot v1.18.42.

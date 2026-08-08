@@ -1,3 +1,8 @@
+## Version 1.22.39 — Site-Wide UI Overhaul
+
+Pairs with Bot v1.18.42. This release applies one unified professional visual system across the full website: homepage, dashboard, standalone Survivor Shop, map workspaces, member/Admin/Owner controls, dialogs, tables, forms, progression, delivery, moderation, configuration, legal/policy pages and the 404 screen. It modernises rounded geometry, spacing, depth, interactions, focus states and responsive behaviour without changing existing APIs or workflows.
+
+The public and dashboard roadmaps are also refreshed to match the production state. Natural XP/Prestige QA is deferred until it is convenient to confirm through real use. Historical PvP XP backfill is not planned. Livonia is now an explicit future expansion, including a dedicated validated Livonia satellite/road/place-name map stack, map-aware markers and delivery coordinates, followed by broader multi-server architecture work.
 
 ## Version 1.22.38 — Next Restart Display
 
@@ -36,6 +41,7 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 
 - `index.html` — website content and structure
 - `assets/css/pages/home.css` — public homepage design and mobile layout
+- `assets/css/site-polish.css` — site-wide v1.22.39 visual system loaded last on every HTML page
 - `assets/js/pages/home.js` — homepage navigation, header and scroll effects
 - `dashboard.html` — live status, personal profile and economy dashboard
 - `assets/css/dashboard/` — ordered core, moderation, workspace and catalogue dashboard style bundles
