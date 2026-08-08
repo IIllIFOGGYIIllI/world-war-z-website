@@ -1,9 +1,11 @@
-# world-war-z-website v1.22.41
+# world-war-z-website v1.22.42
 
 ## Summary
-- Refined WWZ logo presentation across the full website.
-- Changed compact WWZ logo containers to circular framing for better fit.
-- Updated homepage, dashboard, policy pages, and shop branding slots to use round frames with contained logo artwork.
+- Corrected the WWZ compact logo treatment after the v1.22.41 frame-only change remained visually too similar.
+- Removed the separate dark square/rounded-card wrapper around compact WWZ branding.
+- The circular logo artwork now defines the visible shape directly.
+- Added an alpha-following red drop shadow so the glow follows the round artwork rather than the CSS box.
+- Applied consistently to homepage, dashboard, shop, and policy/legal headers.
 
 ## Updated Files
 - index.html
@@ -16,7 +18,13 @@
 - community-guidelines.html
 - moderation-policy.html
 - changelog.html
+- assets/css/pages/home.css
+- assets/css/dashboard/core.css
+- assets/css/dashboard/workspace.css
+- assets/css/pages/policies.css
+- assets/css/pages/shop.css
 - assets/css/site-polish.css
+- scripts/validate_site.py
 - PATCH_NOTES.md
 - PATCH_FILE_LIST.txt
 - DELETE_THESE_FILES.txt

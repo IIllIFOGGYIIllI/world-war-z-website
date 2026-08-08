@@ -11,7 +11,7 @@
   background: rgba(7,6,6,.94); backdrop-filter: blur(18px);
 }
 .shop-brand { display:flex; align-items:center; gap:12px; text-decoration:none; min-width:max-content; }
-.shop-brand img { width:48px; height:48px; object-fit:contain; border:1px solid rgba(243,58,40,.45); border-radius:12px; }
+.shop-brand img { width:48px; height:48px; object-fit:contain; border:0; border-radius:50%; background:transparent; filter:drop-shadow(0 0 8px rgba(217,39,27,.28)); }
 .shop-brand span { display:grid; line-height:1.05; }
 .shop-brand strong { letter-spacing:.17em; font-size:13px; }
 .shop-brand small { margin-top:6px; color:var(--muted); font-size:9px; letter-spacing:.22em; }

@@ -557,3 +557,29 @@ code { border-radius: var(--radius-xs); }
   background: radial-gradient(circle at 35% 30%, #201b1a 0%, #0a0909 72%) !important;
   box-shadow: 0 0 0 4px rgba(217,39,27,.055), 0 14px 34px rgba(0,0,0,.28) !important;
 }
+
+
+/* v1.22.42 — use the circular artwork itself; no square/rounded-card frame */
+.brand-mark,
+.page-brand-mark,
+.dashboard-brand-mark {
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+.brand-mark img,
+.page-brand-mark img,
+.dashboard-brand-mark img,
+.shop-brand img {
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  object-fit: contain !important;
+  clip-path: circle(50% at 50% 50%);
+  filter: drop-shadow(0 0 8px rgba(217,39,27,.30));
+}
