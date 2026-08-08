@@ -45,7 +45,7 @@ Do not select **Deploy from a branch** while the included Pages workflow is bein
 
 - `index.html` — website content and structure
 - `assets/css/pages/home.css` — public homepage design and mobile layout
-- `assets/css/site-polish.css` — site-wide v1.22.40 visual layer (introduced in v1.22.39) loaded last on every HTML page
+- `assets/css/site-polish.css` — site-wide v1.22.41 visual layer (introduced in v1.22.39) loaded last on every HTML page
 - `assets/js/pages/home.js` — homepage navigation, header and scroll effects
 - `dashboard.html` — live status, personal profile and economy dashboard
 - `assets/css/dashboard/` — ordered core, moderation, workspace and catalogue dashboard style bundles

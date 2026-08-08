@@ -1,22 +1,25 @@
-# Website v1.22.40 — Header & Sidebar Clarity Fix
+# world-war-z-website v1.22.41
 
-## Fixed
+## Summary
+- Refined WWZ logo presentation across the full website.
+- Changed compact WWZ logo containers to circular framing for better fit.
+- Updated homepage, dashboard, policy pages, and shop branding slots to use round frames with contained logo artwork.
 
-- Replaced the full-size World War Z logo with the dedicated compact application icon in small navigation/header brand slots.
-- Fixes the cramped/cropped-looking top-left dashboard logo seen after the v1.22.39 UI overhaul.
-- Applies the compact-brand treatment consistently to the dashboard, homepage, standalone Survivor Shop and policy/changelog headers.
-- Keeps the full 512px World War Z logo for larger hero/emblem artwork where it has enough space to render properly.
-- Increased spacing between sidebar navigation groups and child rows so adjacent controls no longer visually crowd or appear to overlap.
-- Keeps the sidebar compact while giving active states, icons and labels their own clear hit areas.
-- Advanced local asset cache versions and visible website release labels to v1.22.40.
+## Updated Files
+- index.html
+- dashboard.html
+- shop.html
+- 404.html
+- privacy.html
+- terms.html
+- legal.html
+- community-guidelines.html
+- moderation-policy.html
+- changelog.html
+- assets/css/site-polish.css
+- PATCH_NOTES.md
+- PATCH_FILE_LIST.txt
+- DELETE_THESE_FILES.txt
 
-## Compatibility
-
-- Pairs with Bot v1.18.42.
-- Website-only presentation hotfix.
-- No Railway API contract, database record, shop/rental delivery logic, Nitrado controls, Chernarus map geometry, satellite tiles, progression logic or permissions are changed.
-
-## Validation
-
-- `python scripts/validate_site.py --require-map-assets` — PASS.
-- Existing v1.22.39 site-wide UI overhaul remains intact.
+## Files To Delete
+- NONE

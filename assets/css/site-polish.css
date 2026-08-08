@@ -527,3 +527,33 @@ code { border-radius: var(--radius-xs); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
 }
+
+
+/* v1.22.41 — circular WWZ brand framing across the site */
+.brand-mark,
+.page-brand-mark,
+.dashboard-brand-mark {
+  border-radius: 50% !important;
+  overflow: hidden !important;
+  box-sizing: border-box;
+  padding: 4px !important;
+  background: radial-gradient(circle at 35% 30%, #201b1a 0%, #0a0909 72%) !important;
+}
+
+.brand-mark img,
+.page-brand-mark img,
+.dashboard-brand-mark img {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  object-fit: contain !important;
+  border-radius: 50% !important;
+}
+
+.shop-brand img {
+  box-sizing: border-box;
+  padding: 4px;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 35% 30%, #201b1a 0%, #0a0909 72%) !important;
+  box-shadow: 0 0 0 4px rgba(217,39,27,.055), 0 14px 34px rgba(0,0,0,.28) !important;
+}
