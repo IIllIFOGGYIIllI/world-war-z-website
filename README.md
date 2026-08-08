@@ -1,4 +1,4 @@
-[![Deploy World War Z Website](https://github.com/IIllIFOGGYIIllI/world-war-z-website/actions/workflows/pages.yml/badge.svg?event=status)](https://github.com/IIllIFOGGYIIllI/world-war-z-website/actions/workflows/pages.yml)
+[![Deploy World War Z Website](https://github.com/IIllIFOGGYIIllI/world-war-z-website/actions/workflows/pages.yml/badge.svg?event=push)](https://github.com/IIllIFOGGYIIllI/world-war-z-website/actions/workflows/pages.yml)
 
 ## Version 1.22.40 — Header Logo Clarity Fix
 
