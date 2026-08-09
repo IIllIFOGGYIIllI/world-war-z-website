@@ -1,3 +1,9 @@
+## Website v1.22.51 — Bulk Catalogue Administration
+
+- Adds safe multi-select and filtered bulk editing for the 1,900+ item Owner catalogue.
+- Supports batch availability, pricing, stock and purchase-limit changes through Bot v1.18.47.
+- Keeps rental vehicles at exactly $1 per restart and preserves existing orders.
+
 
 ## Website v1.22.50 — Progression & Survivor Profile Analytics
 

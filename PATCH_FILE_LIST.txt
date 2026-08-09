@@ -1,7 +1,6 @@
-World War Z Website v1.22.50 — Updated / Added Files
+world-war-z-website v1.22.51 — Updated / Added Files
 
 UPDATED
-- README.md
 - 404.html
 - changelog.html
 - community-guidelines.html
@@ -12,8 +11,10 @@ UPDATED
 - privacy.html
 - shop.html
 - terms.html
-- assets/css/dashboard/progression.css
-- assets/js/dashboard/progression.js
+- README.md
+- assets/css/dashboard/catalogue.css
+- assets/js/dashboard/core.js
+- assets/js/dashboard/shop.js
 - scripts/validate_site.py
 
 RELEASE METADATA

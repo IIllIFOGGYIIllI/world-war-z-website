@@ -1,20 +1,21 @@
-# World War Z Website v1.22.50
+# World War Z Website v1.22.51
 
-## Progression & Survivor Profile Analytics
+## Bulk Catalogue Administration
 
-### Added and improved
-- Survivor Profile progression summary with rank, Level/Prestige, Lifetime XP, rolling 24-hour/7-day XP, current progress and earned badges.
-- XP & Prestige workspace with recent XP history, rolling analytics, badges/titles and Prestige history.
-- Selectable Overall, Last 24 Hours, Last 7 Days, Lifetime XP, Combat XP and Prestige leaderboards.
-- Clear next-reward presentation using the existing Bot v1.18.46 progression economy configuration.
-- Updated roadmap and changelog for the progression/profile release.
+### Added
+- Multi-select checkboxes for the Owner regular-item catalogue.
+- Select This Page, Select All Filtered and Clear Selection controls.
+- Status filter for active/inactive catalogue entries.
+- Source filter for DayZ-synced versus manually created items.
+- Protected bulk actions for availability, exact/percentage pricing, stock, per-order/per-player limits and timed purchase windows.
+- Live selection/action preview before applying a batch change.
+- Confirmation prompt showing affected item/category counts before Railway receives the write.
 
-### Compatibility
-- Requires Bot v1.18.46 for the new analytics payloads.
-- Existing XP rates, role synchronization, reward payout logic and Lifetime XP are unchanged.
-- No historical PvP XP backfill, progression reset or destructive Railway database migration is included.
-- Natural Level/Prestige production QA remains deferred until genuine milestones are reached.
-- Survivor Shop, rentals, restart intelligence and the closed Chernarus map stack are unchanged.
+### Safety
+- Requires Bot v1.18.47 for the protected bulk endpoint.
+- Bulk pricing targets regular items only; rental/Event Item pricing remains $1 per restart.
+- Existing orders retain their original snapshots and are never rewritten by catalogue edits.
+- No map, delivery, economy, progression or persistent-data workflow is replaced.
 
 ## Files to delete
 NONE

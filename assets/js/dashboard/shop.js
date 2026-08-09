@@ -110,6 +110,26 @@ const shopMapFullscreen = document.querySelector('[data-shop-map-fullscreen]');
 const shopMapSelected = document.querySelector('[data-shop-map-selected]');
 const ownerShopSearch = document.querySelector('[data-owner-shop-search]');
 const ownerShopCategory = document.querySelector('[data-owner-shop-category]');
+const ownerShopStatus = document.querySelector('[data-owner-shop-status]');
+const ownerShopSource = document.querySelector('[data-owner-shop-source]');
+const ownerShopBulkCount = document.querySelector('[data-owner-shop-bulk-count]');
+const ownerShopFilteredCount = document.querySelector('[data-owner-shop-filtered-count]');
+const ownerShopSelectPageButton = document.querySelector('[data-owner-shop-select-page]');
+const ownerShopSelectFilteredButton = document.querySelector('[data-owner-shop-select-filtered]');
+const ownerShopClearSelectionButton = document.querySelector('[data-owner-shop-clear-selection]');
+const ownerShopBulkAction = document.querySelector('[data-owner-shop-bulk-action]');
+const ownerShopBulkValueField = document.querySelector('[data-owner-shop-bulk-value-field]');
+const ownerShopBulkValueLabel = document.querySelector('[data-owner-shop-bulk-value-label]');
+const ownerShopBulkValue = document.querySelector('[data-owner-shop-bulk-value]');
+const ownerShopBulkSecondaryField = document.querySelector('[data-owner-shop-bulk-secondary-field]');
+const ownerShopBulkSecondary = document.querySelector('[data-owner-shop-bulk-secondary]');
+const ownerShopBulkPeriodUnit = document.querySelector('[data-owner-shop-bulk-period-unit]');
+const ownerShopBulkSharedField = document.querySelector('[data-owner-shop-bulk-shared-field]');
+const ownerShopBulkShared = document.querySelector('[data-owner-shop-bulk-shared]');
+const ownerShopBulkPreviewTitle = document.querySelector('[data-owner-shop-bulk-preview-title]');
+const ownerShopBulkPreviewCopy = document.querySelector('[data-owner-shop-bulk-preview-copy]');
+const ownerShopApplyBulkButton = document.querySelector('[data-owner-shop-apply-bulk]');
+const ownerShopBulkMessage = document.querySelector('[data-owner-shop-bulk-message]');
 const ownerEventSearch = document.querySelector('[data-owner-event-search]');
 const ownerEventCategory = document.querySelector('[data-owner-event-category]');
 const ownerShopPageSummary = document.querySelector('[data-owner-shop-page-summary]');
@@ -137,6 +157,8 @@ let savedDeliveryLocations = [];
 let shopCatalogueMode = 'manual';
 let shopCoordinateMapInstance = null;
 let ownerShopPage = 1;
+let ownerShopSelectedIds = new Set();
+let ownerShopBulkInProgress = false;
 let ownerEventPage = 1;
 let shopRestartOperations = null;
 const OWNER_SHOP_PAGE_SIZE = 50;
@@ -837,23 +859,248 @@ const renderOwnerPager = (container, summary, total, page, setPage, label) => {
   return current;
 };
 
+const getOwnerManualFilteredItems = () => {
+  const query = String(ownerShopSearch?.value || '').trim().toLowerCase();
+  const category = ownerShopCategory?.value || 'all';
+  const status = ownerShopStatus?.value || 'all';
+  const source = ownerShopSource?.value || 'all';
+  return ownerShopItems.filter((item) => {
+    if (item.fulfilment_type === 'event') return false;
+    if (category !== 'all' && item.category !== category) return false;
+    if (status === 'active' && !item.active) return false;
+    if (status === 'inactive' && item.active) return false;
+    const synced = Boolean(String(item.source_key || '').trim());
+    if (source === 'synced' && !synced) return false;
+    if (source === 'manual' && synced) return false;
+    if (!query) return true;
+    const haystack = [
+      item.item_id, item.name, item.sku, item.category, item.source_key,
+      ...(Array.isArray(item.types) ? item.types : []),
+    ].join(' ').toLowerCase();
+    return haystack.includes(query);
+  });
+};
+
+const getOwnerEventFilteredItems = () => {
+  const query = String(ownerEventSearch?.value || '').trim().toLowerCase();
+  const category = ownerEventCategory?.value || 'all';
+  return ownerShopItems.filter((item) => item.fulfilment_type === 'event'
+    && (category === 'all' || item.category === category)
+    && (!query || `${item.item_id} ${item.name} ${item.sku} ${item.category} ${item.delivery_profile?.child_type || ''}`.toLowerCase().includes(query)));
+};
+
+const readOwnerBulkAction = ({ strict = false } = {}) => {
+  const choice = String(ownerShopBulkAction?.value || '');
+  const raw = ownerShopBulkValue?.value ?? '';
+  const number = raw === '' ? NaN : Number(raw);
+  const requireNumber = (label, minimum, maximum) => {
+    if (!Number.isInteger(number) || number < minimum || number > maximum) {
+      if (strict) throw new Error(`${label} must be a whole number between ${minimum.toLocaleString()} and ${maximum.toLocaleString()}.`);
+      return null;
+    }
+    return number;
+  };
+  switch (choice) {
+    case 'enable': return { action: 'set_active', value: true, description: 'enable selected items' };
+    case 'disable': return { action: 'set_active', value: false, description: 'disable selected items' };
+    case 'set_price': {
+      const value = requireNumber('Price', 0, 1_000_000_000); if (value == null) return null;
+      return { action: 'set_price', value, description: `set price to ${formatMoney(value)}` };
+    }
+    case 'increase_price_pct': {
+      const value = requireNumber('Price increase', 1, 1000); if (value == null) return null;
+      return { action: 'adjust_price_percent', value, description: `increase prices by ${value}%` };
+    }
+    case 'decrease_price_pct': {
+      const value = requireNumber('Price decrease', 1, 100); if (value == null) return null;
+      return { action: 'adjust_price_percent', value: -value, description: `decrease prices by ${value}%` };
+    }
+    case 'set_stock': {
+      const value = requireNumber('Stock', 0, 1_000_000); if (value == null) return null;
+      return { action: 'set_stock', value, description: `set stock to ${value.toLocaleString()}` };
+    }
+    case 'unlimited_stock': return { action: 'set_stock', value: null, description: 'set unlimited stock' };
+    case 'set_max_per_order': {
+      const value = requireNumber('Maximum per order', 1, 100); if (value == null) return null;
+      return { action: 'set_max_per_order', value, description: `set maximum per order to ${value}` };
+    }
+    case 'set_max_per_player': {
+      const value = requireNumber('Maximum per player', 1, 1_000_000); if (value == null) return null;
+      return { action: 'set_max_per_player', value, description: `set player limit to ${value.toLocaleString()}` };
+    }
+    case 'unlimited_max_per_player': return { action: 'set_max_per_player', value: null, description: 'remove the lifetime player limit' };
+    case 'set_purchase_window': {
+      const value = requireNumber('Maximum purchases', 1, 10_000); if (value == null) return null;
+      const periodValue = Number(ownerShopBulkSecondary?.value || 0);
+      const unit = Number(ownerShopBulkPeriodUnit?.value || 3600);
+      const seconds = periodValue * unit;
+      if (!Number.isInteger(periodValue) || periodValue < 1 || !Number.isInteger(seconds) || seconds < 1 || seconds > 31_536_000) {
+        if (strict) throw new Error('Purchase-limit period must be between 1 second and 365 days.');
+        return null;
+      }
+      const global = Boolean(ownerShopBulkShared?.checked);
+      return {
+        action: 'set_purchase_window', value, secondary_value: seconds,
+        shared_across_players: global,
+        description: `limit purchases to ${value.toLocaleString()} per ${periodValue.toLocaleString()} ${ownerShopBulkPeriodUnit?.selectedOptions?.[0]?.textContent?.toLowerCase() || 'hours'}${global ? ' globally' : ' per player'}`,
+      };
+    }
+    case 'clear_purchase_window': return { action: 'clear_purchase_window', description: 'clear the timed purchase limit' };
+    default: return null;
+  }
+};
+
+const syncOwnerBulkFields = () => {
+  const choice = String(ownerShopBulkAction?.value || '');
+  const labels = {
+    set_price: 'Price', increase_price_pct: 'Increase by %', decrease_price_pct: 'Decrease by %',
+    set_stock: 'Stock quantity', set_max_per_order: 'Maximum per order', set_max_per_player: 'Maximum per player',
+    set_purchase_window: 'Maximum purchases',
+  };
+  const needsValue = Object.hasOwn(labels, choice);
+  if (ownerShopBulkValueField) ownerShopBulkValueField.hidden = !needsValue;
+  if (ownerShopBulkValueLabel) ownerShopBulkValueLabel.textContent = labels[choice] || 'Value';
+  if (ownerShopBulkSecondaryField) ownerShopBulkSecondaryField.hidden = choice !== 'set_purchase_window';
+  if (ownerShopBulkSharedField) ownerShopBulkSharedField.hidden = choice !== 'set_purchase_window';
+  if (ownerShopBulkValue) {
+    const limits = {
+      set_price: [0, 1_000_000_000], increase_price_pct: [1, 1000], decrease_price_pct: [1, 100],
+      set_stock: [0, 1_000_000], set_max_per_order: [1, 100], set_max_per_player: [1, 1_000_000],
+      set_purchase_window: [1, 10_000],
+    }[choice];
+    if (limits) { ownerShopBulkValue.min = String(limits[0]); ownerShopBulkValue.max = String(limits[1]); ownerShopBulkValue.step = '1'; }
+  }
+};
+
+const renderOwnerBulkState = (filteredItems, pageItems) => {
+  const validManualIds = new Set(ownerShopItems.filter((item) => item.fulfilment_type !== 'event').map((item) => Number(item.item_id)));
+  ownerShopSelectedIds = new Set([...ownerShopSelectedIds].filter((id) => validManualIds.has(Number(id))));
+  const selectedItems = ownerShopItems.filter((item) => item.fulfilment_type !== 'event' && ownerShopSelectedIds.has(Number(item.item_id)));
+  if (ownerShopBulkCount) ownerShopBulkCount.textContent = `${selectedItems.length.toLocaleString()} selected`;
+  if (ownerShopFilteredCount) ownerShopFilteredCount.textContent = `${filteredItems.length.toLocaleString()} filtered item${filteredItems.length === 1 ? '' : 's'}`;
+  if (ownerShopSelectPageButton) {
+    const pageSelected = pageItems.length > 0 && pageItems.every((item) => ownerShopSelectedIds.has(Number(item.item_id)));
+    ownerShopSelectPageButton.textContent = pageSelected ? 'Unselect This Page' : 'Select This Page';
+    ownerShopSelectPageButton.disabled = pageItems.length === 0 || ownerShopBulkInProgress;
+  }
+  if (ownerShopSelectFilteredButton) ownerShopSelectFilteredButton.disabled = filteredItems.length === 0 || ownerShopBulkInProgress;
+  if (ownerShopClearSelectionButton) ownerShopClearSelectionButton.disabled = selectedItems.length === 0 || ownerShopBulkInProgress;
+
+  syncOwnerBulkFields();
+  let action = null;
+  try { action = readOwnerBulkAction(); } catch (_error) { action = null; }
+  if (!selectedItems.length) {
+    if (ownerShopBulkPreviewTitle) ownerShopBulkPreviewTitle.textContent = 'Select catalogue items to begin.';
+    if (ownerShopBulkPreviewCopy) ownerShopBulkPreviewCopy.textContent = 'Use the row checkboxes, Select This Page, or Select All Filtered.';
+  } else {
+    const categories = [...new Set(selectedItems.map((item) => String(item.category)))];
+    const imported = selectedItems.filter((item) => Boolean(String(item.source_key || '').trim())).length;
+    if (ownerShopBulkPreviewTitle) ownerShopBulkPreviewTitle.textContent = `${selectedItems.length.toLocaleString()} item${selectedItems.length === 1 ? '' : 's'} selected${action ? ` · ${action.description}` : ''}`;
+    if (ownerShopBulkPreviewCopy) ownerShopBulkPreviewCopy.textContent = `${categories.length.toLocaleString()} categor${categories.length === 1 ? 'y' : 'ies'} · ${imported.toLocaleString()} DayZ-synced · ${(selectedItems.length - imported).toLocaleString()} manual. ${action ? 'Railway will validate every selected item again before committing.' : 'Choose one bulk action to continue.'}`;
+  }
+  if (ownerShopApplyBulkButton) {
+    ownerShopApplyBulkButton.disabled = ownerShopBulkInProgress || !selectedItems.length || !action;
+    ownerShopApplyBulkButton.textContent = selectedItems.length ? `Apply to ${selectedItems.length.toLocaleString()} Item${selectedItems.length === 1 ? '' : 's'}` : 'Apply Bulk Change';
+  }
+};
+
 const renderOwnerShopItems = () => {
   if (!ownerShopItemList) return;
-  ownerShopItemList.replaceChildren(); if (ownerEventItemList) ownerEventItemList.replaceChildren();
-  const manualQuery = String(ownerShopSearch?.value || '').trim().toLowerCase();
-  const eventQuery = String(ownerEventSearch?.value || '').trim().toLowerCase();
-  const manualCategory = ownerShopCategory?.value || 'all'; const eventCategory = ownerEventCategory?.value || 'all';
-  const manualItems = ownerShopItems.filter((item) => item.fulfilment_type !== 'event' && (manualCategory === 'all' || item.category === manualCategory) && (!manualQuery || `${item.item_id} ${item.name} ${item.sku} ${item.category}`.toLowerCase().includes(manualQuery)));
-  const eventItems = ownerShopItems.filter((item) => item.fulfilment_type === 'event' && (eventCategory === 'all' || item.category === eventCategory) && (!eventQuery || `${item.item_id} ${item.name} ${item.sku} ${item.category} ${item.delivery_profile?.child_type || ''}`.toLowerCase().includes(eventQuery)));
-  ownerShopPage = renderOwnerPager(ownerShopPagination, ownerShopPageSummary, manualItems.length, ownerShopPage, (value)=>{ownerShopPage=value;}, 'items');
-  ownerEventPage = renderOwnerPager(ownerEventPagination, ownerEventPageSummary, eventItems.length, ownerEventPage, (value)=>{ownerEventPage=value;}, 'rentals');
-  const manualPageItems = manualItems.slice((ownerShopPage-1)*OWNER_SHOP_PAGE_SIZE, ownerShopPage*OWNER_SHOP_PAGE_SIZE);
-  const eventPageItems = eventItems.slice((ownerEventPage-1)*OWNER_SHOP_PAGE_SIZE, ownerEventPage*OWNER_SHOP_PAGE_SIZE);
-  manualPageItems.forEach((item) => { const row=document.createElement('tr'); const itemCell=document.createElement('td'); const strong=document.createElement('strong'); strong.textContent=`#${item.item_id} · ${item.name}`; const small=document.createElement('small'); small.textContent=item.sku; itemCell.append(strong,document.createElement('br'),small); const category=document.createElement('td'); category.textContent=item.category; const scope=document.createElement('td'); scope.textContent=String(item.catalogue_scope||'local').toLowerCase()==='global'?'Global':'Local'; const price=document.createElement('td'); price.textContent=formatMoney(item.price); const stock=document.createElement('td'); stock.textContent=item.stock_quantity==null?'Unlimited':String(item.stock_quantity); const limits=document.createElement('td'); limits.textContent=`${item.max_per_order}/order · ${item.max_per_player==null?'No player limit':`${item.max_per_player}/player`}`; const state=document.createElement('td'); const pill=document.createElement('span'); pill.className=`table-status ${item.active?'online':'offline'}`; pill.textContent=item.active?'Active':'Inactive'; state.append(pill); const action=document.createElement('td'); action.append(ownerShopEditButton(item)); row.append(itemCell,category,scope,price,stock,limits,state,action); ownerShopItemList.append(row); });
-  eventPageItems.forEach((item) => { const profile=item.delivery_profile||{}; const row=document.createElement('tr'); const name=document.createElement('td'); const strong=document.createElement('strong'); strong.textContent=`#${item.item_id} · ${item.name}`; const small=document.createElement('small'); small.textContent=item.sku; name.append(strong,document.createElement('br'),small); const category=document.createElement('td'); category.textContent=item.category; const child=document.createElement('td'); child.textContent=profile.child_type||'Missing profile'; const price=document.createElement('td'); price.textContent=`${formatMoney(item.price)} / restart`; const restarts=document.createElement('td'); restarts.textContent=`${Number(profile.minimum_restarts||1).toLocaleString()}–${Number(profile.maximum_restarts||30000).toLocaleString()}`; const approval=document.createElement('td'); approval.textContent='Automatic queue'; const state=document.createElement('td'); const pill=document.createElement('span'); pill.className=`table-status ${item.active?'online':'offline'}`; pill.textContent=item.active?'Active':'Inactive'; state.append(pill); const action=document.createElement('td'); action.append(ownerShopEditButton(item)); row.append(name,category,child,price,restarts,approval,state,action); ownerEventItemList.append(row); });
+  ownerShopItemList.replaceChildren();
+  if (ownerEventItemList) ownerEventItemList.replaceChildren();
+  const manualItems = getOwnerManualFilteredItems();
+  const eventItems = getOwnerEventFilteredItems();
+  ownerShopPage = renderOwnerPager(ownerShopPagination, ownerShopPageSummary, manualItems.length, ownerShopPage, (value) => { ownerShopPage = value; }, 'items');
+  ownerEventPage = renderOwnerPager(ownerEventPagination, ownerEventPageSummary, eventItems.length, ownerEventPage, (value) => { ownerEventPage = value; }, 'rentals');
+  const manualPageItems = manualItems.slice((ownerShopPage - 1) * OWNER_SHOP_PAGE_SIZE, ownerShopPage * OWNER_SHOP_PAGE_SIZE);
+  const eventPageItems = eventItems.slice((ownerEventPage - 1) * OWNER_SHOP_PAGE_SIZE, ownerEventPage * OWNER_SHOP_PAGE_SIZE);
+
+  manualPageItems.forEach((item) => {
+    const row = document.createElement('tr');
+    if (ownerShopSelectedIds.has(Number(item.item_id))) row.classList.add('shop-bulk-row-selected');
+    const selectCell = document.createElement('td'); selectCell.className = 'shop-bulk-checkbox-column';
+    const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.className = 'shop-bulk-row-checkbox'; checkbox.setAttribute('aria-label', `Select ${item.name}`); checkbox.checked = ownerShopSelectedIds.has(Number(item.item_id));
+    checkbox.addEventListener('change', () => { if (checkbox.checked) ownerShopSelectedIds.add(Number(item.item_id)); else ownerShopSelectedIds.delete(Number(item.item_id)); renderOwnerShopItems(); });
+    selectCell.append(checkbox);
+    const itemCell = document.createElement('td'); const strong = document.createElement('strong'); strong.textContent = `#${item.item_id} · ${item.name}`; const small = document.createElement('small'); small.textContent = item.sku; itemCell.append(strong, document.createElement('br'), small);
+    const category = document.createElement('td'); category.textContent = item.category;
+    const scope = document.createElement('td'); scope.textContent = String(item.catalogue_scope || 'local').toLowerCase() === 'global' ? 'Global' : 'Local';
+    const price = document.createElement('td'); price.textContent = formatMoney(item.price);
+    const stock = document.createElement('td'); stock.textContent = item.stock_quantity == null ? 'Unlimited' : String(item.stock_quantity);
+    const limits = document.createElement('td'); limits.textContent = `${item.max_per_order}/order · ${item.max_per_player == null ? 'No player limit' : `${item.max_per_player}/player`}`;
+    const state = document.createElement('td'); const pill = document.createElement('span'); pill.className = `table-status ${item.active ? 'online' : 'offline'}`; pill.textContent = item.active ? 'Active' : 'Inactive'; state.append(pill);
+    const action = document.createElement('td'); action.append(ownerShopEditButton(item));
+    row.append(selectCell, itemCell, category, scope, price, stock, limits, state, action);
+    ownerShopItemList.append(row);
+  });
+
+  eventPageItems.forEach((item) => {
+    const profile = item.delivery_profile || {};
+    const row = document.createElement('tr'); const name = document.createElement('td'); const strong = document.createElement('strong'); strong.textContent = `#${item.item_id} · ${item.name}`; const small = document.createElement('small'); small.textContent = item.sku; name.append(strong, document.createElement('br'), small);
+    const category = document.createElement('td'); category.textContent = item.category; const child = document.createElement('td'); child.textContent = profile.child_type || 'Missing profile'; const price = document.createElement('td'); price.textContent = `${formatMoney(item.price)} / restart`; const restarts = document.createElement('td'); restarts.textContent = `${Number(profile.minimum_restarts || 1).toLocaleString()}–${Number(profile.maximum_restarts || 30000).toLocaleString()}`; const approval = document.createElement('td'); approval.textContent = 'Automatic queue'; const state = document.createElement('td'); const pill = document.createElement('span'); pill.className = `table-status ${item.active ? 'online' : 'offline'}`; pill.textContent = item.active ? 'Active' : 'Inactive'; state.append(pill); const action = document.createElement('td'); action.append(ownerShopEditButton(item)); row.append(name, category, child, price, restarts, approval, state, action); ownerEventItemList.append(row);
+  });
+  renderOwnerBulkState(manualItems, manualPageItems);
   if (ownerShopEmpty) ownerShopEmpty.hidden = manualItems.length !== 0;
   if (ownerEventItemEmpty) ownerEventItemEmpty.hidden = eventItems.length !== 0;
 };
+
+const ownerBulkCurrentPageItems = () => {
+  const filtered = getOwnerManualFilteredItems();
+  const pages = Math.max(1, Math.ceil(filtered.length / OWNER_SHOP_PAGE_SIZE));
+  const current = Math.min(Math.max(1, ownerShopPage), pages);
+  return filtered.slice((current - 1) * OWNER_SHOP_PAGE_SIZE, current * OWNER_SHOP_PAGE_SIZE);
+};
+
+ownerShopSelectPageButton?.addEventListener('click', () => {
+  const pageItems = ownerBulkCurrentPageItems();
+  const allSelected = pageItems.length > 0 && pageItems.every((item) => ownerShopSelectedIds.has(Number(item.item_id)));
+  pageItems.forEach((item) => { if (allSelected) ownerShopSelectedIds.delete(Number(item.item_id)); else ownerShopSelectedIds.add(Number(item.item_id)); });
+  renderOwnerShopItems();
+});
+ownerShopSelectFilteredButton?.addEventListener('click', () => {
+  getOwnerManualFilteredItems().forEach((item) => ownerShopSelectedIds.add(Number(item.item_id)));
+  renderOwnerShopItems();
+});
+ownerShopClearSelectionButton?.addEventListener('click', () => { ownerShopSelectedIds.clear(); renderOwnerShopItems(); });
+ownerShopBulkAction?.addEventListener('change', renderOwnerShopItems);
+[ownerShopBulkValue, ownerShopBulkSecondary, ownerShopBulkPeriodUnit, ownerShopBulkShared].forEach((field) => field?.addEventListener('input', renderOwnerShopItems));
+ownerShopBulkPeriodUnit?.addEventListener('change', renderOwnerShopItems);
+ownerShopBulkShared?.addEventListener('change', renderOwnerShopItems);
+
+ownerShopApplyBulkButton?.addEventListener('click', async () => {
+  const sessionToken = storageGet(AUTH_SESSION_KEY);
+  if (!sessionToken || dashboardAccessLevel !== 'owner' || ownerShopBulkInProgress) return;
+  const selectedItems = ownerShopItems.filter((item) => item.fulfilment_type !== 'event' && ownerShopSelectedIds.has(Number(item.item_id)));
+  if (!selectedItems.length) return;
+  let action;
+  try { action = readOwnerBulkAction({ strict: true }); } catch (error) { showInlineMessage(ownerShopBulkMessage, error.message || 'Complete the bulk action fields.'); return; }
+  if (!action) { showInlineMessage(ownerShopBulkMessage, 'Choose a bulk action first.'); return; }
+  const categoryCount = new Set(selectedItems.map((item) => String(item.category))).size;
+  const confirmation = `Apply this bulk catalogue change?\n\n${selectedItems.length.toLocaleString()} item(s) across ${categoryCount.toLocaleString()} categor${categoryCount === 1 ? 'y' : 'ies'}\nAction: ${action.description}\n\nExisting orders are not rewritten.`;
+  if (!window.confirm(confirmation)) return;
+  ownerShopBulkInProgress = true;
+  ownerShopApplyBulkButton.setAttribute('disabled', '');
+  showInlineMessage(ownerShopBulkMessage, `Applying bulk change to ${selectedItems.length.toLocaleString()} item(s)…`, 'info');
+  try {
+    const response = await protectedActionFetch(OWNER_SHOP_BULK_URL, {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken}` },
+      body: JSON.stringify({ item_ids: selectedItems.map((item) => Number(item.item_id)), ...action }),
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: true })) return;
+    if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Bulk catalogue change failed.');
+    showInlineMessage(ownerShopBulkMessage, payload.message || 'Bulk catalogue change applied.', 'success');
+    ownerShopSelectedIds.clear();
+    await Promise.all([loadOwnerShopConfig(sessionToken), loadMemberShop(sessionToken)]);
+  } catch (error) {
+    showInlineMessage(ownerShopBulkMessage, error.message || 'Bulk catalogue change failed.');
+  } finally {
+    ownerShopBulkInProgress = false;
+    ownerShopApplyBulkButton?.removeAttribute('disabled');
+    renderOwnerShopItems();
+  }
+});
 
 const profileListText = (items) => (Array.isArray(items) ? items : []).map((entry) => {
   if (typeof entry === 'string') return entry;
@@ -1442,6 +1689,8 @@ const loadOwnerShopConfig = async (sessionToken = storageGet(AUTH_SESSION_KEY)) 
 ownerShopSearch?.addEventListener('input', () => { ownerShopPage = 1; renderOwnerShopItems(); });
 ownerEventSearch?.addEventListener('input', () => { ownerEventPage = 1; renderOwnerShopItems(); });
 ownerShopCategory?.addEventListener('change', () => { ownerShopPage = 1; renderOwnerShopItems(); });
+ownerShopStatus?.addEventListener('change', () => { ownerShopPage = 1; renderOwnerShopItems(); });
+ownerShopSource?.addEventListener('change', () => { ownerShopPage = 1; renderOwnerShopItems(); });
 ownerEventCategory?.addEventListener('change', () => { ownerEventPage = 1; renderOwnerShopItems(); });
 refreshShopConfigButton?.addEventListener('click', () => loadOwnerShopConfig());
 refreshShopSettingsButton?.addEventListener('click', () => loadOwnerShopConfig());
