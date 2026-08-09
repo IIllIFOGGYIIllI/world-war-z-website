@@ -599,7 +599,7 @@ const applyPayload = (payload, member = false) => {
 };
 
 const applyRestartStatus = (payload) => {
-  const operations = payload?.operations || {};
+  const operations = window.WWZHttp?.normaliseRestartOperations?.(payload?.operations || {}) || (payload?.operations || {});
   const configured = Boolean(operations.restart_schedule_configured);
   const synchronised = Boolean(operations.restart_schedule_synchronised);
   state.restart = operations;

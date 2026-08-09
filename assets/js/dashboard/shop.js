@@ -511,7 +511,7 @@ const loadShopRestartStatus = async () => {
     const response = await authFetch(SERVER_STATUS_URL, { headers: { Accept: 'application/json' } });
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error('Restart status unavailable');
-    shopRestartOperations = payload?.operations || null;
+    shopRestartOperations = window.WWZHttp?.normaliseRestartOperations?.(payload?.operations || {}) || (payload?.operations || null);
     window.WWZShopRestartOperations = shopRestartOperations;
     window.dispatchEvent(new CustomEvent('wwz:restartstatus', { detail: shopRestartOperations }));
     if (memberShopOrders.length) renderMemberShopOrders(memberShopOrders);

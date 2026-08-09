@@ -1,3 +1,10 @@
+## Version 1.22.49 — Restart Rollover Reliability
+
+- Prevents an expired next-restart timestamp from remaining on screen as `0m remaining`.
+- Normalises restart-status responses in the shared HTTP layer so Dashboard, Survivor Shop and delivery/order surfaces immediately fall back to `Restart sync pending` when a target is already in the past.
+- Pairs with Bot v1.18.45, which strengthens new-ADM discovery and authoritative restart-session rollover handling.
+- No database, shop catalogue, economy, rental pricing, delivery workflow or Chernarus map changes.
+
 ## Version 1.22.48 — Order & Delivery Tracking
 
 ### v1.22.48 order tracking UX

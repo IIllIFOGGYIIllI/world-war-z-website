@@ -781,7 +781,7 @@ const applyLiveStatus = (payload) => {
   const serverMap = String(payload.server.map || 'Chernarus');
   const platform = String(payload.server.platform || 'PlayStation 4 & 5');
   const updatedAt = formatUpdatedAt(payload.updated_at);
-  const operations = payload.operations || {};
+  const operations = window.WWZHttp?.normaliseRestartOperations?.(payload.operations || {}) || (payload.operations || {});
   const operationUpdatedAt = formatUpdatedAt(operations.last_successful_update || payload.updated_at);
   const discordHealthy = Boolean(operations.discord_connected && operations.discord_ready);
   const nitradoState = titleCaseState(operations.nitrado_state || 'unknown');

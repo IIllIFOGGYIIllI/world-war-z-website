@@ -32,5 +32,17 @@
     return { response, payload };
   };
 
-  window.WWZHttp = Object.freeze({ request, json });
+  const normaliseRestartOperations = (operations = {}) => {
+    const value = { ...(operations || {}) };
+    const target = value.next_scheduled_restart ? Date.parse(value.next_scheduled_restart) : NaN;
+    if (Number.isFinite(target) && target <= Date.now()) {
+      value.next_scheduled_restart = null;
+      value.restart_countdown_seconds = null;
+      value.restart_schedule_synchronised = false;
+      value.restart_sync_state = 'waiting_for_restart_rollover';
+    }
+    return value;
+  };
+
+  window.WWZHttp = Object.freeze({ request, json, normaliseRestartOperations });
 })();

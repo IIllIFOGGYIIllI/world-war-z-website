@@ -1,9 +1,11 @@
-World War Z Website v1.22.48 — Updated / Added Files
+World War Z Website v1.22.49 — Updated / Added Files
 
 UPDATED
-- 404.html
 - README.md
 - PATCH_NOTES.md
+- PATCH_FILE_LIST.txt
+- DELETE_THESE_FILES.txt
+- 404.html
 - changelog.html
 - community-guidelines.html
 - dashboard.html
@@ -13,14 +15,11 @@ UPDATED
 - privacy.html
 - shop.html
 - terms.html
-- assets/css/dashboard/workspace.css
-- assets/css/pages/shop.css
-- assets/js/dashboard/delivery.js
+- assets/js/core/http.js
+- assets/js/dashboard/account.js
 - assets/js/dashboard/shop.js
 - assets/js/pages/shop.js
 - scripts/validate_site.py
-- PATCH_FILE_LIST.txt
-- DELETE_THESE_FILES.txt
 
 FILES TO DELETE
 NONE
