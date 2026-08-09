@@ -27,7 +27,11 @@ const state = {
   selectedItem: null,
   loading: false,
   purchasing: false,
-  restart: null
+  restart: null,
+  cataloguePage: 1,
+  cataloguePageSize: 24,
+  catalogueSort: 'recommended',
+  detailItem: null
 };
 
 const elements = {
@@ -42,7 +46,10 @@ const elements = {
   access: $('[data-member-shop-access]'), accessNote: $('[data-member-shop-access-note]'),
   notice: $('[data-member-shop-notice]'), noticeTitle: $('[data-member-shop-notice-title]'),
   noticeCopy: $('[data-member-shop-notice-copy]'), heroImage: $('[data-shop-hero-image]'),
-  search: $('[data-member-shop-search]'), category: $('[data-member-shop-category]'),
+  search: $('[data-member-shop-search]'), category: $('[data-member-shop-category]'), sort: $('[data-member-shop-sort]'),
+  pageSize: $('[data-member-shop-page-size]'), resetFilters: $('[data-member-shop-reset-filters]'),
+  categoryList: $('[data-member-shop-category-list]'), categorySummary: $('[data-member-category-summary]'),
+  resultsCount: $('[data-member-shop-results-count]'), resultsSummary: $('[data-member-shop-results-summary]'), pagination: $('[data-member-shop-pagination]'),
   catalogue: $('[data-member-shop-catalogue]'), empty: $('[data-member-shop-empty]'),
   error: $('[data-member-shop-error]'), refresh: $('[data-member-shop-refresh]'),
   modeLabel: $('[data-member-shop-mode-label]'), manualCount: $('[data-member-manual-count]'),
@@ -61,7 +68,13 @@ const elements = {
   mapReadout: $('[data-member-map-readout]'),
   coordinateConfirm: $('[data-member-coordinate-confirm]'), note: $('[data-member-purchase-note]'),
   total: $('[data-member-purchase-total]'), purchaseMessage: $('[data-member-purchase-message]'),
-  purchaseConfirm: $('[data-member-purchase-confirm]')
+  purchaseConfirm: $('[data-member-purchase-confirm]'),
+  detailDialog: $('[data-member-item-detail-dialog]'), detailPreview: $('[data-member-item-detail-preview]'),
+  detailCategory: $('[data-member-item-detail-category]'), detailTitle: $('[data-member-item-detail-title]'),
+  detailPrice: $('[data-member-item-detail-price]'), detailSku: $('[data-member-item-detail-sku]'),
+  detailDescription: $('[data-member-item-detail-description]'), detailMeta: $('[data-member-item-detail-meta]'),
+  detailTypes: $('[data-member-item-detail-types]'), detailClassname: $('[data-member-item-detail-classname]'),
+  detailBuy: $('[data-member-item-detail-buy]')
 };
 let checkoutMapInstance = null;
 
@@ -185,37 +198,172 @@ const previewImage = (item) => {
   return image;
 };
 
+const itemMode = (item) => item?.delivery_type === 'event' ? 'event' : 'manual';
+const itemHaystack = (item) => `${item?.name || ''} ${item?.category || ''} ${item?.sku || ''} ${item?.description || ''} ${(item?.types || []).join(' ')} ${(item?.required_roles || []).map((role) => role.name).join(' ')}`.toLowerCase();
+const catalogueModeItems = () => state.items.filter((item) => itemMode(item) === state.mode);
+const purchaseButtonLabel = (item) => {
+  if (!state.user) return 'Sign in to buy';
+  if (!state.access.website_enabled) return 'Member shop disabled';
+  if (!state.access.has_required_role) return 'Required role missing';
+  if (!state.access.can_purchase && !state.access.linked) return 'Link PSN to buy';
+  if (!state.settings.enabled) return 'Purchases paused';
+  if (item?.has_required_roles === false) return 'Required item role missing';
+  if (!item?.available) return 'Unavailable';
+  return item.delivery_type === 'event' ? 'Order rental' : 'Buy item';
+};
+const resetCataloguePage = () => { state.cataloguePage = 1; };
+const filteredModeItems = ({ ignoreCategory = false } = {}) => {
+  const query = String(elements.search?.value || '').trim().toLowerCase();
+  const category = elements.category?.value || 'all';
+  return catalogueModeItems().filter((item) => {
+    if (!ignoreCategory && category !== 'all' && item.category !== category) return false;
+    return !query || itemHaystack(item).includes(query);
+  });
+};
+const sortCatalogueItems = (items) => {
+  const sort = state.catalogueSort || 'recommended';
+  return items.map((item, index) => ({ item, index })).sort((left, right) => {
+    const a = left.item, b = right.item;
+    if (sort === 'name-asc') return String(a.name).localeCompare(String(b.name));
+    if (sort === 'name-desc') return String(b.name).localeCompare(String(a.name));
+    if (sort === 'price-asc') return Number(a.price || 0) - Number(b.price || 0) || String(a.name).localeCompare(String(b.name));
+    if (sort === 'price-desc') return Number(b.price || 0) - Number(a.price || 0) || String(a.name).localeCompare(String(b.name));
+    if (sort === 'category') return String(a.category).localeCompare(String(b.category)) || String(a.name).localeCompare(String(b.name));
+    if (Boolean(a.available) !== Boolean(b.available)) return a.available ? -1 : 1;
+    return left.index - right.index;
+  }).map((entry) => entry.item);
+};
+
+const renderCategoryList = () => {
+  if (!elements.categoryList) return;
+  const selected = elements.category?.value || 'all';
+  const matching = filteredModeItems({ ignoreCategory: true });
+  const counts = new Map();
+  matching.forEach((item) => counts.set(item.category || 'Uncategorised', (counts.get(item.category || 'Uncategorised') || 0) + 1));
+  const totalMode = catalogueModeItems().length;
+  const queryActive = Boolean(String(elements.search?.value || '').trim());
+  elements.categoryList.replaceChildren();
+  const makeButton = (value, label, count) => {
+    const button = document.createElement('button'); button.type = 'button'; button.className = `member-category-button${selected === value ? ' active' : ''}`;
+    const name = document.createElement('span'); name.textContent = label;
+    const badge = document.createElement('b'); badge.textContent = Number(count || 0).toLocaleString();
+    button.append(name, badge);
+    button.addEventListener('click', () => {
+      if (elements.category) elements.category.value = value;
+      resetCataloguePage(); renderCatalogue();
+    });
+    return button;
+  };
+  elements.categoryList.append(makeButton('all', 'All categories', matching.length));
+  [...counts.entries()].sort((a, b) => String(a[0]).localeCompare(String(b[0]))).forEach(([category, count]) => {
+    elements.categoryList.append(makeButton(category, category, count));
+  });
+  if (elements.categorySummary) elements.categorySummary.textContent = queryActive
+    ? `${matching.length.toLocaleString()} search match${matching.length === 1 ? '' : 'es'}`
+    : `${totalMode.toLocaleString()} ${state.mode === 'event' ? 'rental' : 'item'}${totalMode === 1 ? '' : 's'}`;
+};
+
 const populateCategories = () => {
+  if (!elements.category) return;
   const selected = elements.category.value || 'all';
   elements.category.replaceChildren(new Option('All categories', 'all'));
-  [...new Set(state.items.filter((item) => (item.delivery_type === 'event' ? 'event' : 'manual') === state.mode).map((item) => item.category))]
+  [...new Set(catalogueModeItems().map((item) => item.category || 'Uncategorised'))]
     .sort((a, b) => String(a).localeCompare(String(b)))
     .forEach((category) => elements.category.append(new Option(category, category)));
   elements.category.value = [...elements.category.options].some((option) => option.value === selected) ? selected : 'all';
+  renderCategoryList();
 };
-const renderCatalogue = () => {
-  const query = elements.search.value.trim().toLowerCase();
-  const category = elements.category.value || 'all';
-  const visible = state.items.filter((item) => {
-    const mode = item.delivery_type === 'event' ? 'event' : 'manual';
-    const haystack = `${item.name} ${item.category} ${item.sku} ${item.description} ${(item.types || []).join(' ')} ${(item.required_roles || []).map((role) => role.name).join(' ')}`.toLowerCase();
-    return mode === state.mode && (category === 'all' || item.category === category) && (!query || haystack.includes(query));
+
+const openItemDetails = (item) => {
+  if (!item || !elements.detailDialog) return;
+  state.detailItem = item;
+  elements.detailPreview?.replaceChildren(previewImage(item));
+  if (elements.detailCategory) elements.detailCategory.textContent = `${item.category || 'Catalogue'} · ${item.delivery_type === 'event' ? 'Rental' : 'Item'}`;
+  if (elements.detailTitle) elements.detailTitle.textContent = item.name || 'DayZ Item';
+  if (elements.detailSku) elements.detailSku.textContent = item.sku || 'No SKU';
+  if (elements.detailPrice) elements.detailPrice.textContent = item.delivery_type === 'event' ? `${money(item.price)}/restart` : money(item.price);
+  if (elements.detailDescription) elements.detailDescription.textContent = item.description || 'No description is available for this catalogue item.';
+  if (elements.detailMeta) {
+    elements.detailMeta.replaceChildren();
+    const values = [stockText(item), `Max ${Number(item.max_per_order || 1).toLocaleString()}/order`, limitText(item)];
+    if (item.delivery_type === 'event') values.unshift(`${Number(item.delivery?.minimum_restarts || 1).toLocaleString()}–${Number(item.delivery?.maximum_restarts || 30000).toLocaleString()} restarts`);
+    if (item.discount) values.push(`${item.discount.role_name}: ${item.discount.is_percentage ? `${item.discount.amount}% off` : `${money(item.discount.amount)} off`}`);
+    values.forEach((value) => { const chip = document.createElement('span'); chip.textContent = value; elements.detailMeta.append(chip); });
+  }
+  const classnames = Array.isArray(item.types) ? item.types.filter(Boolean) : [];
+  if (elements.detailTypes) elements.detailTypes.hidden = classnames.length === 0;
+  if (elements.detailClassname) elements.detailClassname.textContent = classnames.slice(0, 8).join(', ');
+  if (elements.detailBuy) {
+    elements.detailBuy.textContent = purchaseButtonLabel(item);
+    elements.detailBuy.disabled = Boolean(state.user && !canPurchase(item));
+  }
+  elements.detailDialog.showModal();
+};
+
+const renderPagination = (totalItems) => {
+  if (!elements.pagination) return;
+  const pageSize = Math.max(1, Number(state.cataloguePageSize) || 24);
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  state.cataloguePage = Math.min(Math.max(1, state.cataloguePage), totalPages);
+  elements.pagination.replaceChildren();
+  elements.pagination.hidden = totalPages <= 1;
+  if (totalPages <= 1) return;
+  const go = (page) => {
+    state.cataloguePage = Math.min(Math.max(1, page), totalPages);
+    renderCatalogue();
+    document.querySelector('.member-results-head')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+  const button = (label, page, { current = false, disabled = false, aria = '' } = {}) => {
+    const control = document.createElement('button'); control.type = 'button'; control.textContent = label; control.disabled = disabled;
+    if (current) { control.classList.add('active'); control.setAttribute('aria-current', 'page'); }
+    if (aria) control.setAttribute('aria-label', aria);
+    if (!disabled && !current) control.addEventListener('click', () => go(page));
+    return control;
+  };
+  elements.pagination.append(button('‹', state.cataloguePage - 1, { disabled: state.cataloguePage === 1, aria: 'Previous catalogue page' }));
+  const pages = [];
+  if (totalPages <= 7) {
+    for (let page = 1; page <= totalPages; page += 1) pages.push(page);
+  } else {
+    pages.push(1);
+    if (state.cataloguePage > 4) pages.push('…');
+    const start = Math.max(2, state.cataloguePage - 1), end = Math.min(totalPages - 1, state.cataloguePage + 1);
+    for (let page = start; page <= end; page += 1) pages.push(page);
+    if (state.cataloguePage < totalPages - 3) pages.push('…');
+    pages.push(totalPages);
+  }
+  pages.forEach((page) => {
+    if (page === '…') { const spacer = document.createElement('span'); spacer.textContent = '…'; spacer.className = 'member-pagination-ellipsis'; elements.pagination.append(spacer); }
+    else elements.pagination.append(button(String(page), page, { current: page === state.cataloguePage, aria: `Catalogue page ${page}` }));
   });
+  elements.pagination.append(button('›', state.cataloguePage + 1, { disabled: state.cataloguePage === totalPages, aria: 'Next catalogue page' }));
+};
+
+const renderCatalogue = () => {
+  state.catalogueSort = elements.sort?.value || state.catalogueSort || 'recommended';
+  state.cataloguePageSize = Math.max(1, Number(elements.pageSize?.value || state.cataloguePageSize || 24));
+  const visible = sortCatalogueItems(filteredModeItems());
+  const total = visible.length;
+  const totalPages = Math.max(1, Math.ceil(total / state.cataloguePageSize));
+  state.cataloguePage = Math.min(Math.max(1, state.cataloguePage), totalPages);
+  const startIndex = total ? (state.cataloguePage - 1) * state.cataloguePageSize : 0;
+  const endIndex = Math.min(total, startIndex + state.cataloguePageSize);
+  const pageItems = visible.slice(startIndex, endIndex);
   elements.catalogue.replaceChildren();
-  visible.forEach((item) => {
+  pageItems.forEach((item) => {
     const card = document.createElement('article'); card.className = `member-shop-card${item.available ? '' : ' unavailable'}`;
-    const preview = document.createElement('div'); preview.className = 'member-shop-preview'; preview.append(previewImage(item));
+    const preview = document.createElement('button'); preview.type = 'button'; preview.className = 'member-shop-preview member-shop-preview-button'; preview.setAttribute('aria-label', `View ${item.name} details`); preview.append(previewImage(item)); preview.addEventListener('click', () => openItemDetails(item));
     const head = document.createElement('div'); head.className = 'member-shop-card-head';
-    const copy = document.createElement('div');
+    const copy = document.createElement('div'); copy.className = 'member-shop-card-title';
     const kicker = document.createElement('p'); kicker.className = 'panel-kicker'; kicker.textContent = `${item.category} · ${item.sku}`;
-    const title = document.createElement('h3'); title.textContent = item.name; copy.append(kicker, title);
+    const title = document.createElement('button'); title.type = 'button'; title.className = 'member-shop-title-button'; title.textContent = item.name; title.addEventListener('click', () => openItemDetails(item)); copy.append(kicker, title);
     const price = document.createElement('strong'); price.className = 'member-shop-price';
     if (item.discount && Number(item.base_price) > Number(item.price)) {
       const old = document.createElement('del'); old.textContent = item.delivery_type === 'event' ? `${money(item.base_price)}/restart` : money(item.base_price);
       price.append(old, document.createTextNode(item.delivery_type === 'event' ? `${money(item.price)}/restart` : money(item.price)));
     } else price.textContent = item.delivery_type === 'event' ? `${money(item.price)}/restart` : money(item.price);
     head.append(copy, price);
-    const description = document.createElement('p'); description.textContent = item.description;
+    const description = document.createElement('p'); description.className = 'member-shop-description'; description.textContent = item.description;
     card.append(preview, head);
     if (item.discount) {
       const discount = document.createElement('span'); discount.className = 'member-discount-badge';
@@ -223,31 +371,26 @@ const renderCatalogue = () => {
       card.append(discount);
     }
     card.append(description);
-    const meta = document.createElement('div'); meta.className = 'member-shop-meta';
-    const values = [
-      item.delivery_type === 'event'
-        ? `${Number(item.delivery?.minimum_restarts || 1).toLocaleString()}–${Number(item.delivery?.maximum_restarts || 30000).toLocaleString()} restarts`
-        : `${Array.isArray(item.types) && item.types.length ? item.types.length : 0} DayZ type${Array.isArray(item.types) && item.types.length === 1 ? '' : 's'}`,
-      stockText(item), `Max ${item.max_per_order}/order`, limitText(item)
-    ];
-    if (Array.isArray(item.required_roles) && item.required_roles.length) {
-      values.push(`${item.require_all_roles ? 'All' : 'Any'} roles: ${item.required_roles.map((role) => role.name).join(', ')}`);
-    }
-    if (item.purchase_limit) values.push(`${item.purchase_limit.max_purchases} per ${item.purchase_limit.per_seconds}s${item.purchase_limit.shared_across_players ? ' shared' : ''}`);
+    const meta = document.createElement('div'); meta.className = 'member-shop-meta member-shop-meta-compact';
+    const values = item.delivery_type === 'event'
+      ? [`${Number(item.delivery?.minimum_restarts || 1).toLocaleString()}–${Number(item.delivery?.maximum_restarts || 30000).toLocaleString()} restarts`, stockText(item)]
+      : [stockText(item), `Max ${item.max_per_order}/order`];
     values.forEach((value) => { const chip = document.createElement('span'); chip.textContent = value; meta.append(chip); });
-    const button = document.createElement('button'); button.type = 'button'; button.className = 'primary-action';
-    if (!state.user) button.textContent = 'Sign in to buy';
-    else if (!state.access.website_enabled) button.textContent = 'Member shop disabled';
-    else if (!state.access.has_required_role) button.textContent = 'Required role missing';
-    else if (!state.access.can_purchase && !state.access.linked) button.textContent = 'Link PSN to buy';
-    else if (!state.settings.enabled) button.textContent = 'Purchases paused';
-    else if (item.has_required_roles === false) button.textContent = 'Required item role missing';
-    else button.textContent = item.available ? (item.delivery_type === 'event' ? 'Order event delivery' : 'Buy item') : 'Unavailable';
-    button.disabled = Boolean(state.user && !canPurchase(item));
-    button.addEventListener('click', () => state.user ? openPurchase(item) : openLogin());
-    card.append(meta, button); elements.catalogue.append(card);
+    const actions = document.createElement('div'); actions.className = 'member-shop-card-actions';
+    const details = document.createElement('button'); details.type = 'button'; details.className = 'secondary-action'; details.textContent = 'View Details'; details.addEventListener('click', () => openItemDetails(item));
+    const buy = document.createElement('button'); buy.type = 'button'; buy.className = 'primary-action'; buy.textContent = purchaseButtonLabel(item);
+    buy.disabled = Boolean(state.user && !canPurchase(item));
+    buy.addEventListener('click', () => state.user ? openPurchase(item) : openLogin());
+    actions.append(details, buy);
+    card.append(meta, actions); elements.catalogue.append(card);
   });
-  elements.empty.hidden = visible.length > 0;
+  if (elements.resultsCount) elements.resultsCount.textContent = `${total.toLocaleString()} ${state.mode === 'event' ? 'rental' : 'item'}${total === 1 ? '' : 's'}`;
+  if (elements.resultsSummary) elements.resultsSummary.textContent = total
+    ? `Showing ${Number(startIndex + 1).toLocaleString()}–${Number(endIndex).toLocaleString()} of ${total.toLocaleString()} · Page ${state.cataloguePage.toLocaleString()} of ${totalPages.toLocaleString()}`
+    : 'Try another search or category.';
+  elements.empty.hidden = total > 0;
+  renderCategoryList();
+  renderPagination(total);
 };
 
 const renderOrders = () => {
@@ -292,6 +435,7 @@ const applyPayload = (payload, member = false) => {
   };
   state.items = Array.isArray(payload.items) ? payload.items : [];
   state.orders = member && Array.isArray(payload.orders) ? payload.orders : [];
+  state.cataloguePage = 1;
   elements.title.textContent = state.settings.title || 'Survivor Shop';
   elements.description.textContent = state.settings.description || 'Spend your verified community balance on approved DayZ goods and services.';
   elements.instructions.textContent = state.settings.purchase_instructions || 'Railway prepares paid orders automatically for the next server restart.';
@@ -455,6 +599,7 @@ const updateTotal = () => {
 };
 const openPurchase = (item) => {
   if (!canPurchase(item)) return;
+  if (elements.detailDialog?.open) elements.detailDialog.close();
   state.selectedItem = item; elements.purchaseForm.reset(); elements.y.value = '0'; elements.rotation.value = '0';
   const eventItem = item.delivery_type === 'event';
   const minimum = eventItem ? Math.max(1, Number(item.delivery?.minimum_restarts || state.settings.event_restart_min || 1)) : 1;
@@ -508,10 +653,23 @@ const submitPurchase = async (event) => {
 $$('[data-member-shop-mode]').forEach((button) => button.addEventListener('click', () => {
   state.mode = button.dataset.memberShopMode === 'event' ? 'event' : 'manual';
   $$('[data-member-shop-mode]').forEach((entry) => { const active = entry === button; entry.classList.toggle('active', active); entry.setAttribute('aria-selected', String(active)); });
-  elements.modeLabel.textContent = state.mode === 'event' ? 'Event items' : 'Items'; elements.search.value = ''; populateCategories(); renderCatalogue();
+  elements.modeLabel.textContent = state.mode === 'event' ? 'Event items' : 'Items'; elements.search.value = ''; resetCataloguePage(); populateCategories(); renderCatalogue();
 }));
-elements.search.addEventListener('input', renderCatalogue);
-elements.category.addEventListener('change', renderCatalogue);
+let catalogueSearchTimer = null;
+elements.search.addEventListener('input', () => { window.clearTimeout(catalogueSearchTimer); catalogueSearchTimer = window.setTimeout(() => { resetCataloguePage(); renderCatalogue(); }, 140); });
+elements.category.addEventListener('change', () => { resetCataloguePage(); renderCatalogue(); });
+elements.sort?.addEventListener('change', () => { state.catalogueSort = elements.sort.value; resetCataloguePage(); renderCatalogue(); });
+elements.pageSize?.addEventListener('change', () => { state.cataloguePageSize = Number(elements.pageSize.value || 24); resetCataloguePage(); renderCatalogue(); });
+elements.resetFilters?.addEventListener('click', () => {
+  elements.search.value = ''; elements.category.value = 'all'; if (elements.sort) elements.sort.value = 'recommended'; if (elements.pageSize) elements.pageSize.value = '24';
+  state.catalogueSort = 'recommended'; state.cataloguePageSize = 24; resetCataloguePage(); renderCatalogue(); elements.search.focus();
+});
+$$('[data-member-item-detail-close]').forEach((button) => button.addEventListener('click', () => elements.detailDialog?.close()));
+elements.detailBuy?.addEventListener('click', () => {
+  const item = state.detailItem; if (!item) return;
+  if (!state.user) { elements.detailDialog?.close(); openLogin(); return; }
+  if (canPurchase(item)) openPurchase(item);
+});
 elements.refresh.addEventListener('click', loadShop);
 elements.ordersRefresh.addEventListener('click', loadShop);
 elements.authButton.addEventListener('click', () => state.user ? location.assign('dashboard.html#players/account') : openLogin());

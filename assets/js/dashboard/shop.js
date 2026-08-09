@@ -112,6 +112,10 @@ const ownerShopSearch = document.querySelector('[data-owner-shop-search]');
 const ownerShopCategory = document.querySelector('[data-owner-shop-category]');
 const ownerEventSearch = document.querySelector('[data-owner-event-search]');
 const ownerEventCategory = document.querySelector('[data-owner-event-category]');
+const ownerShopPageSummary = document.querySelector('[data-owner-shop-page-summary]');
+const ownerShopPagination = document.querySelector('[data-owner-shop-pagination]');
+const ownerEventPageSummary = document.querySelector('[data-owner-event-page-summary]');
+const ownerEventPagination = document.querySelector('[data-owner-event-pagination]');
 
 let shopItems = [];
 let memberShopOrders = [];
@@ -132,6 +136,9 @@ let ownerShopRequestInProgress = false;
 let savedDeliveryLocations = [];
 let shopCatalogueMode = 'manual';
 let shopCoordinateMapInstance = null;
+let ownerShopPage = 1;
+let ownerEventPage = 1;
+const OWNER_SHOP_PAGE_SIZE = 50;
 
 const DEFAULT_EVENT_XML = `<event name="Vehicle">
     <nominal>1</nominal>
@@ -767,6 +774,22 @@ const populateOwnerShopCategories = () => {
   });
 };
 
+const renderOwnerPager = (container, summary, total, page, setPage, label) => {
+  if (!container) return;
+  const pages = Math.max(1, Math.ceil(total / OWNER_SHOP_PAGE_SIZE));
+  const current = Math.min(Math.max(1, page), pages);
+  const start = total ? (current - 1) * OWNER_SHOP_PAGE_SIZE + 1 : 0;
+  const end = Math.min(total, current * OWNER_SHOP_PAGE_SIZE);
+  if (summary) summary.textContent = total ? `${start.toLocaleString()}–${end.toLocaleString()} of ${total.toLocaleString()} ${label}` : `0 ${label}`;
+  container.replaceChildren();
+  if (pages <= 1) return current;
+  const make = (text, target, disabled = false) => { const button=document.createElement('button'); button.type='button'; button.textContent=text; button.disabled=disabled; button.addEventListener('click',()=>{ if(disabled)return; setPage(target); renderOwnerShopItems(); }); return button; };
+  container.append(make('Previous', current-1, current===1));
+  const marker=document.createElement('span'); marker.textContent=`Page ${current.toLocaleString()} / ${pages.toLocaleString()}`; container.append(marker);
+  container.append(make('Next', current+1, current===pages));
+  return current;
+};
+
 const renderOwnerShopItems = () => {
   if (!ownerShopItemList) return;
   ownerShopItemList.replaceChildren(); if (ownerEventItemList) ownerEventItemList.replaceChildren();
@@ -775,8 +798,12 @@ const renderOwnerShopItems = () => {
   const manualCategory = ownerShopCategory?.value || 'all'; const eventCategory = ownerEventCategory?.value || 'all';
   const manualItems = ownerShopItems.filter((item) => item.fulfilment_type !== 'event' && (manualCategory === 'all' || item.category === manualCategory) && (!manualQuery || `${item.item_id} ${item.name} ${item.sku} ${item.category}`.toLowerCase().includes(manualQuery)));
   const eventItems = ownerShopItems.filter((item) => item.fulfilment_type === 'event' && (eventCategory === 'all' || item.category === eventCategory) && (!eventQuery || `${item.item_id} ${item.name} ${item.sku} ${item.category} ${item.delivery_profile?.child_type || ''}`.toLowerCase().includes(eventQuery)));
-  manualItems.forEach((item) => { const row=document.createElement('tr'); const itemCell=document.createElement('td'); const strong=document.createElement('strong'); strong.textContent=`#${item.item_id} · ${item.name}`; const small=document.createElement('small'); small.textContent=item.sku; itemCell.append(strong,document.createElement('br'),small); const category=document.createElement('td'); category.textContent=item.category; const scope=document.createElement('td'); scope.textContent=String(item.catalogue_scope||'local').toLowerCase()==='global'?'Global':'Local'; const price=document.createElement('td'); price.textContent=formatMoney(item.price); const stock=document.createElement('td'); stock.textContent=item.stock_quantity==null?'Unlimited':String(item.stock_quantity); const limits=document.createElement('td'); limits.textContent=`${item.max_per_order}/order · ${item.max_per_player==null?'No player limit':`${item.max_per_player}/player`}`; const state=document.createElement('td'); const pill=document.createElement('span'); pill.className=`table-status ${item.active?'online':'offline'}`; pill.textContent=item.active?'Active':'Inactive'; state.append(pill); const action=document.createElement('td'); action.append(ownerShopEditButton(item)); row.append(itemCell,category,scope,price,stock,limits,state,action); ownerShopItemList.append(row); });
-  eventItems.forEach((item) => { const profile=item.delivery_profile||{}; const row=document.createElement('tr'); const name=document.createElement('td'); const strong=document.createElement('strong'); strong.textContent=`#${item.item_id} · ${item.name}`; const small=document.createElement('small'); small.textContent=item.sku; name.append(strong,document.createElement('br'),small); const category=document.createElement('td'); category.textContent=item.category; const child=document.createElement('td'); child.textContent=profile.child_type||'Missing profile'; const price=document.createElement('td'); price.textContent=`${formatMoney(item.price)} / restart`; const restarts=document.createElement('td'); restarts.textContent=`${Number(profile.minimum_restarts||1).toLocaleString()}–${Number(profile.maximum_restarts||30000).toLocaleString()}`; const approval=document.createElement('td'); approval.textContent='Automatic queue'; const state=document.createElement('td'); const pill=document.createElement('span'); pill.className=`table-status ${item.active?'online':'offline'}`; pill.textContent=item.active?'Active':'Inactive'; state.append(pill); const action=document.createElement('td'); action.append(ownerShopEditButton(item)); row.append(name,category,child,price,restarts,approval,state,action); ownerEventItemList.append(row); });
+  ownerShopPage = renderOwnerPager(ownerShopPagination, ownerShopPageSummary, manualItems.length, ownerShopPage, (value)=>{ownerShopPage=value;}, 'items');
+  ownerEventPage = renderOwnerPager(ownerEventPagination, ownerEventPageSummary, eventItems.length, ownerEventPage, (value)=>{ownerEventPage=value;}, 'rentals');
+  const manualPageItems = manualItems.slice((ownerShopPage-1)*OWNER_SHOP_PAGE_SIZE, ownerShopPage*OWNER_SHOP_PAGE_SIZE);
+  const eventPageItems = eventItems.slice((ownerEventPage-1)*OWNER_SHOP_PAGE_SIZE, ownerEventPage*OWNER_SHOP_PAGE_SIZE);
+  manualPageItems.forEach((item) => { const row=document.createElement('tr'); const itemCell=document.createElement('td'); const strong=document.createElement('strong'); strong.textContent=`#${item.item_id} · ${item.name}`; const small=document.createElement('small'); small.textContent=item.sku; itemCell.append(strong,document.createElement('br'),small); const category=document.createElement('td'); category.textContent=item.category; const scope=document.createElement('td'); scope.textContent=String(item.catalogue_scope||'local').toLowerCase()==='global'?'Global':'Local'; const price=document.createElement('td'); price.textContent=formatMoney(item.price); const stock=document.createElement('td'); stock.textContent=item.stock_quantity==null?'Unlimited':String(item.stock_quantity); const limits=document.createElement('td'); limits.textContent=`${item.max_per_order}/order · ${item.max_per_player==null?'No player limit':`${item.max_per_player}/player`}`; const state=document.createElement('td'); const pill=document.createElement('span'); pill.className=`table-status ${item.active?'online':'offline'}`; pill.textContent=item.active?'Active':'Inactive'; state.append(pill); const action=document.createElement('td'); action.append(ownerShopEditButton(item)); row.append(itemCell,category,scope,price,stock,limits,state,action); ownerShopItemList.append(row); });
+  eventPageItems.forEach((item) => { const profile=item.delivery_profile||{}; const row=document.createElement('tr'); const name=document.createElement('td'); const strong=document.createElement('strong'); strong.textContent=`#${item.item_id} · ${item.name}`; const small=document.createElement('small'); small.textContent=item.sku; name.append(strong,document.createElement('br'),small); const category=document.createElement('td'); category.textContent=item.category; const child=document.createElement('td'); child.textContent=profile.child_type||'Missing profile'; const price=document.createElement('td'); price.textContent=`${formatMoney(item.price)} / restart`; const restarts=document.createElement('td'); restarts.textContent=`${Number(profile.minimum_restarts||1).toLocaleString()}–${Number(profile.maximum_restarts||30000).toLocaleString()}`; const approval=document.createElement('td'); approval.textContent='Automatic queue'; const state=document.createElement('td'); const pill=document.createElement('span'); pill.className=`table-status ${item.active?'online':'offline'}`; pill.textContent=item.active?'Active':'Inactive'; state.append(pill); const action=document.createElement('td'); action.append(ownerShopEditButton(item)); row.append(name,category,child,price,restarts,approval,state,action); ownerEventItemList.append(row); });
   if (ownerShopEmpty) ownerShopEmpty.hidden = manualItems.length !== 0;
   if (ownerEventItemEmpty) ownerEventItemEmpty.hidden = eventItems.length !== 0;
 };
@@ -1365,8 +1392,10 @@ const loadOwnerShopConfig = async (sessionToken = storageGet(AUTH_SESSION_KEY)) 
     refreshShopSettingsButton?.removeAttribute('disabled');
   }
 };
-[ownerShopSearch, ownerEventSearch].forEach((input) => input?.addEventListener('input', renderOwnerShopItems));
-[ownerShopCategory, ownerEventCategory].forEach((select) => select?.addEventListener('change', renderOwnerShopItems));
+ownerShopSearch?.addEventListener('input', () => { ownerShopPage = 1; renderOwnerShopItems(); });
+ownerEventSearch?.addEventListener('input', () => { ownerEventPage = 1; renderOwnerShopItems(); });
+ownerShopCategory?.addEventListener('change', () => { ownerShopPage = 1; renderOwnerShopItems(); });
+ownerEventCategory?.addEventListener('change', () => { ownerEventPage = 1; renderOwnerShopItems(); });
 refreshShopConfigButton?.addEventListener('click', () => loadOwnerShopConfig());
 refreshShopSettingsButton?.addEventListener('click', () => loadOwnerShopConfig());
 saveShopSettingsButton?.addEventListener('click', async () => {

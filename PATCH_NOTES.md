@@ -1,17 +1,15 @@
-# World War Z Website v1.22.46
+# World War Z Website v1.22.47
 
-## Fixed
+## Survivor Shop catalogue navigation
 
-- Tightened DayZ Wiki preview matching for vehicle rentals.
-- Vehicle colour variants now resolve through the canonical vehicle article (for example `Hatchback_02_Blue` -> `Gunter 2`) instead of trusting similarly named Wiki image files.
-- Disabled raw Wiki file-search fallback for restart-bound vehicle rentals, preventing textures, parts, wrecks, or gallery assets from being selected as the vehicle preview.
-- Bumped the browser preview cache key so incorrect v1.22.45 matches are discarded automatically after deployment.
-- Normal item preview resolution, manual preview overrides, pricing, checkout, delivery, rentals, and the $1/restart rate are unchanged.
+- Paginates the member catalogue at 24 items by default with 48/96 options.
+- Adds desktop category sidebar / mobile category rail with live counts.
+- Adds sorting, reset filters, result ranges and compact pagination controls.
+- Adds an item-detail modal using the existing real DayZ Wiki preview resolver.
+- Compacts catalogue cards so the 1,900+ item shop is substantially easier to scan.
+- Paginates Owner Shop Administration regular-item and rental tables at 50 rows per page.
+- Existing shop prices and manual edits are untouched.
+- Vehicle rentals remain exactly $1 per restart and retain the existing 1–30,000 restart behaviour.
+- No Bot, Railway database, Nitrado delivery, map geometry or progression changes.
 
-## Deployment
-
-Website-only patch. Bot remains v1.18.44.
-
-## Files to delete
-
-NONE.
+Pairs with Bot v1.18.44.

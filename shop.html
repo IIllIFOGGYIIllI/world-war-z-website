@@ -11,9 +11,9 @@
 <meta content="https://iillifoggyiilli.github.io/world-war-z-website/assets/world-war-z-social-preview.png" property="og:image"/>
 <title>Survivor Shop | World War Z</title>
 <link href="assets/favicon.png" rel="icon"/>
-<link crossorigin="" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" rel="stylesheet"/><link href="assets/css/dashboard/core.css?v=1.22.46" rel="stylesheet"/><link href="assets/css/dashboard/moderation.css?v=1.22.46" rel="stylesheet"/><link href="assets/css/dashboard/workspace.css?v=1.22.46" rel="stylesheet"/><link href="assets/css/dashboard/catalogue.css?v=1.22.46" rel="stylesheet"/>
-<link href="assets/css/pages/shop.css?v=1.22.46" rel="stylesheet"/><link href="assets/css/components/chernarus-map.css?v=1.22.46" rel="stylesheet"/>
-<link href="https://iillifoggyiilli.github.io/world-war-z-website/shop.html" rel="canonical"/><meta content="https://iillifoggyiilli.github.io/world-war-z-website/shop.html" property="og:url"/><link href="assets/css/site-polish.css?v=1.22.46" rel="stylesheet"/></head>
+<link crossorigin="" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" rel="stylesheet"/><link href="assets/css/dashboard/core.css?v=1.22.47" rel="stylesheet"/><link href="assets/css/dashboard/moderation.css?v=1.22.47" rel="stylesheet"/><link href="assets/css/dashboard/workspace.css?v=1.22.47" rel="stylesheet"/><link href="assets/css/dashboard/catalogue.css?v=1.22.47" rel="stylesheet"/>
+<link href="assets/css/pages/shop.css?v=1.22.47" rel="stylesheet"/><link href="assets/css/components/chernarus-map.css?v=1.22.47" rel="stylesheet"/>
+<link href="https://iillifoggyiilli.github.io/world-war-z-website/shop.html" rel="canonical"/><meta content="https://iillifoggyiilli.github.io/world-war-z-website/shop.html" property="og:url"/><link href="assets/css/site-polish.css?v=1.22.47" rel="stylesheet"/></head>
 <body class="member-shop-page">
 <a class="skip-link" href="#shop-main">Skip to shop</a>
 <header class="shop-topbar">
@@ -72,13 +72,26 @@
 <button aria-selected="true" class="active" data-member-shop-mode="manual" role="tab" type="button"><span>▣</span><strong>Items</strong><small>Automatic item deliveries</small><b data-member-manual-count="">0</b></button>
 <button aria-selected="false" data-member-shop-mode="event" role="tab" type="button"><span>↻</span><strong>Event Items</strong><small>Restart-Bound Deliveries</small><b data-member-event-count="">0</b></button>
 </div>
-<div class="shop-toolbar command-bar">
-<label class="command-search"><span aria-hidden="true">⌕</span><span class="sr-only">Search shop</span><input autocomplete="off" data-member-shop-search="" placeholder="Search name, category or SKU…" type="search"/></label>
-<label class="dialog-field compact-select"><span>Category</span><select data-member-shop-category=""><option value="all">All categories</option></select></label>
+<div class="shop-toolbar command-bar member-catalogue-toolbar">
+<label class="command-search member-catalogue-search"><span aria-hidden="true">⌕</span><span class="sr-only">Search shop</span><input autocomplete="off" data-member-shop-search="" placeholder="Search item, classname, category or SKU…" type="search"/></label>
+<label class="dialog-field compact-select member-category-select"><span>Category</span><select data-member-shop-category=""><option value="all">All categories</option></select></label>
+<label class="dialog-field compact-select"><span>Sort</span><select data-member-shop-sort=""><option value="recommended">Recommended</option><option value="name-asc">Name A–Z</option><option value="name-desc">Name Z–A</option><option value="price-asc">Price low to high</option><option value="price-desc">Price high to low</option><option value="category">Category</option></select></label>
+<label class="dialog-field compact-select"><span>Per page</span><select data-member-shop-page-size=""><option value="24">24</option><option value="48">48</option><option value="96">96</option></select></label>
+<button class="secondary-action compact-action member-reset-filters" data-member-shop-reset-filters="" type="button">Reset Filters</button>
 <div class="toolbar-view-note"><span>LIVE</span><strong data-member-shop-mode-label="">Items</strong><small>Connected to Railway</small></div>
 </div>
+<div class="member-catalogue-browser">
+<aside aria-label="Catalogue categories" class="member-category-panel">
+<div class="member-category-panel-head"><div><span>Browse</span><strong>Categories</strong></div><small data-member-category-summary="">All catalogue items</small></div>
+<div class="member-category-list" data-member-shop-category-list=""></div>
+</aside>
+<div class="member-catalogue-results">
+<div class="member-results-head"><div><strong data-member-shop-results-count="">0 items</strong><small data-member-shop-results-summary="">Loading catalogue…</small></div></div>
 <div aria-live="polite" class="member-shop-grid" data-member-shop-catalogue=""></div>
 <p class="empty-state" data-member-shop-empty="" hidden="">No active shop items match your filters.</p>
+<nav aria-label="Catalogue pages" class="member-shop-pagination" data-member-shop-pagination="" hidden=""></nav>
+</div>
+</div>
 <p class="table-note history-error" data-member-shop-error="" hidden="">The member shop is temporarily unavailable.</p>
 </section>
 <section aria-labelledby="orders-title" class="member-shop-section member-orders-section" id="orders">
@@ -108,6 +121,26 @@
 <div class="dialog-notice"><strong>Browser session</strong><span>Your session stays in this browser tab and expires automatically.</span></div>
 <button class="discord-button wide" data-member-start-login="" disabled="" type="button">Checking Discord Sign-in…</button>
 <button class="dialog-cancel" value="close">Return To Shop</button>
+</form>
+</dialog>
+<dialog aria-labelledby="member-item-detail-title" class="login-dialog member-item-detail-dialog" data-member-item-detail-dialog="">
+<form method="dialog">
+<button aria-label="Close item details" class="dialog-close" data-member-item-detail-close="" type="button">×</button>
+<div class="member-item-detail-layout">
+<div class="member-item-detail-preview" data-member-item-detail-preview=""></div>
+<div class="member-item-detail-copy">
+<p class="panel-kicker" data-member-item-detail-category="">Catalogue item</p>
+<h2 data-member-item-detail-title="" id="member-item-detail-title">Item Details</h2>
+<div class="member-item-detail-heading"><strong data-member-item-detail-price="">—</strong><span data-member-item-detail-sku="">—</span></div>
+<p class="member-item-detail-description" data-member-item-detail-description="">—</p>
+<div class="member-item-detail-meta" data-member-item-detail-meta=""></div>
+<div class="member-item-detail-types" data-member-item-detail-types="" hidden=""><span>DayZ classname</span><code data-member-item-detail-classname=""></code></div>
+<div class="member-item-detail-actions">
+<button class="secondary-action" data-member-item-detail-close="" type="button">Continue Browsing</button>
+<button class="primary-action" data-member-item-detail-buy="" type="button">Buy Item</button>
+</div>
+</div>
+</div>
 </form>
 </dialog>
 <dialog aria-labelledby="member-purchase-title" class="login-dialog shop-purchase-dialog member-purchase-dialog" data-member-purchase-dialog="">
@@ -145,6 +178,6 @@
 <button class="dialog-cancel" data-member-purchase-cancel="" type="button">Cancel</button>
 </form>
 </dialog>
-<script crossorigin="" defer="" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script defer="" src="assets/js/map/chernarus-map.js?v=1.22.46"></script><script defer="" src="assets/js/core/http.js?v=1.22.46"></script><script defer="" src="assets/js/shop-wiki-previews.js?v=1.22.46"></script><script defer="" src="assets/js/pages/shop.js?v=1.22.46"></script>
+<script crossorigin="" defer="" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script defer="" src="assets/js/map/chernarus-map.js?v=1.22.47"></script><script defer="" src="assets/js/core/http.js?v=1.22.47"></script><script defer="" src="assets/js/shop-wiki-previews.js?v=1.22.47"></script><script defer="" src="assets/js/pages/shop.js?v=1.22.47"></script>
 </body>
 </html>

@@ -1,3 +1,14 @@
+## Version 1.22.47 — Survivor Shop Catalogue Navigation
+
+### v1.22.47 large-catalogue UX
+
+- Paginates the standalone Survivor Shop at 24 items by default, with 48/96 item options.
+- Adds category browsing with live counts, search, sorting, reset controls and result/page summaries.
+- Adds an item-detail modal while preserving direct Buy/Order actions.
+- Keeps DayZ Wiki previews lazy so only the visible page resolves images.
+- Paginates Owner Shop Administration tables at 50 rows per page for the imported 1,900+ item catalogue.
+- No Bot, Railway database, pricing, rental or delivery changes. Pairs with Bot v1.18.44.
+
 ## Version 1.22.46 — DayZ Wiki Item Previews
 
 ### v1.22.46 preview resolver
