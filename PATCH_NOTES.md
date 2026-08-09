@@ -1,19 +1,24 @@
-# world-war-z-website v1.22.44
+# world-war-z-website v1.22.45
 
 ## Added
-- Adds an Owner-only **Sync DayZ Catalogue** action to Shop Administration.
-- Adds preview-image surfaces to member and dashboard shop cards.
-- Adds automatic category preview artwork for items without a custom image.
-- Adds an optional HTTPS preview-image URL field to the catalogue item editor.
+- Adds a shared **DayZ Wiki preview resolver** for the member Survivor Shop and Dashboard Shop.
+- Visible catalogue cards progressively resolve real DayZ Wiki article/file thumbnails when no manual HTTPS preview is configured.
+- Adds common DayZ classname/display-name aliases for weapons, medical items, vehicle parts and the live rental vehicles.
+- Adds browser-side preview caching for approximately 30 days.
+- Adds source/attribution notes for third-party Wiki previews.
 
-## Changed
-- The shop UI is ready for the larger live `types.xml` catalogue returned by Bot v1.18.44.
-- Rental cards continue displaying price per restart and imported vehicle rentals remain `$1 / restart`.
+## Performance & Safety
+- Wiki lookups are lazy: only cards near the viewport attempt resolution.
+- Third-party lookups are concurrency-limited to four requests at a time.
+- Existing manual `preview_image_url` values always take priority.
+- Existing category SVG artwork remains the fallback for missing, incorrect or unavailable Wiki previews.
+- A DayZ Wiki/Fandom outage cannot block catalogue rendering, checkout, delivery or Railway actions.
 
 ## Compatibility
-- Pairs with Bot v1.18.44.
-- Chernarus map geometry, delivery coordinates and map assets are unchanged.
-- No existing shop/rental records are replaced by the website patch.
+- **Website-only patch. Bot remains v1.18.44.**
+- No shop prices are changed.
+- Vehicle rentals remain exactly `$1 / restart`.
+- No catalogue records, orders, delivery logic, map geometry or Railway database records are changed.
 
 ## Files To Delete
 - NONE

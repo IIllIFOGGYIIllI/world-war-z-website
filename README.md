@@ -1,4 +1,13 @@
-## Version 1.22.44 — Live DayZ Catalogue Sync & Shop Previews
+## Version 1.22.45 — DayZ Wiki Item Previews
+
+### v1.22.45 preview resolver
+- Member Shop and Dashboard Shop now progressively resolve real DayZ Wiki previews for visible catalogue cards when an explicit HTTPS preview is not configured.
+- Manual preview URLs always win; category SVG artwork remains the fail-safe fallback.
+- Lookups are lazy, concurrency-limited and cached in the browser for 30 days so the 1,900+ item catalogue does not fire thousands of requests at once.
+- Resolver understands common DayZ classname-to-display-name changes (for example M4A1 → M4-A1, AKM → KA-M, OffroadHatchback → Ada 4x4) and can fall back from article thumbnails to image-file search.
+- Third-party Wiki/API failures never block catalogue rendering, checkout or Railway shop actions.
+- Preview source attribution is displayed on the Shop/Dashboard surfaces.
+
 
 Pairs with Bot v1.18.44. Owner Shop Administration can now synchronise the live Chernarus `types.xml` and vehicle events into the Survivor Shop. Missing normal items receive economy-scaled default prices, live vehicle event children are added as restart-bound rentals at exactly `$1` per restart, and existing manually configured catalogue data is preserved. Member and dashboard shop cards now support preview images with automatic category artwork fallbacks and optional item-specific HTTPS image URLs.
 

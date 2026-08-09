@@ -1,4 +1,4 @@
-world-war-z-website v1.22.44 patch files
+world-war-z-website v1.22.45 patch files
 
 404.html
 changelog.html
@@ -15,21 +15,8 @@ PATCH_NOTES.md
 PATCH_FILE_LIST.txt
 DELETE_THESE_FILES.txt
 scripts/validate_site.py
-assets/js/dashboard/core.js
+assets/js/shop-wiki-previews.js
 assets/js/dashboard/shop.js
 assets/js/pages/shop.js
-assets/css/dashboard/catalogue.css
 assets/css/pages/shop.css
-assets/shop-previews/default.svg
-assets/shop-previews/weapons.svg
-assets/shop-previews/ammunition.svg
-assets/shop-previews/magazines.svg
-assets/shop-previews/medical.svg
-assets/shop-previews/food-drink.svg
-assets/shop-previews/clothing.svg
-assets/shop-previews/tools.svg
-assets/shop-previews/base-building-storage.svg
-assets/shop-previews/vehicle-parts.svg
-assets/shop-previews/containers.svg
-assets/shop-previews/explosives.svg
-assets/shop-previews/vehicles.svg
+assets/shop-previews/DAYZ_WIKI_PREVIEWS.md

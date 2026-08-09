@@ -126,3 +126,12 @@
 .member-shop-preview { position:relative; overflow:hidden; border:1px solid rgba(255,255,255,.08); border-radius:18px; aspect-ratio:16/7; background:#100e0e; }
 .member-shop-preview-image { width:100%; height:100%; display:block; object-fit:cover; transition:transform .22s ease, filter .22s ease; }
 .member-shop-card:hover .member-shop-preview-image { transform:scale(1.025); filter:brightness(1.05); }
+
+/* v1.22.45 — DayZ Wiki preview attribution */
+.member-shop-footer a {
+  color: #aaa29c;
+  text-decoration: underline;
+  text-decoration-color: rgba(243, 58, 40, .45);
+  text-underline-offset: 3px;
+}
+.member-shop-footer a:hover { color: #fff; }

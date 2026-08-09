@@ -22,7 +22,7 @@ RETIRED_MAP_PATHS = (
     MAP_ROOT / "tiles",
     ROOT / "assets/images/maps/chernarus-vector.svg",
 )
-EXPECTED_ASSET_VERSION = "1.22.44"
+EXPECTED_ASSET_VERSION = "1.22.45"
 
 EXPECTED_ROAD_GROUPS = {
     "paved_primary",
@@ -307,6 +307,23 @@ def validate_checkout_compatibility(errors: list[str]) -> None:
 
     standalone_shop = (ROOT / "assets/js/pages/shop.js").read_text(encoding="utf-8")
     dashboard_shop = (ROOT / "assets/js/dashboard/shop.js").read_text(encoding="utf-8")
+    wiki_previews_path = ROOT / "assets/js/shop-wiki-previews.js"
+    if not wiki_previews_path.is_file():
+        errors.append("Missing shared DayZ Wiki shop preview resolver.")
+    else:
+        wiki_previews = wiki_previews_path.read_text(encoding="utf-8")
+        for token in ("dayz.fandom.com", "IntersectionObserver", "MAX_CONCURRENT", "localStorage", "preview_image_url"):
+            if token not in wiki_previews:
+                errors.append(f"DayZ Wiki preview resolver is missing required behaviour: {token}")
+    for html_name in ("dashboard.html", "shop.html"):
+        html_text = (ROOT / html_name).read_text(encoding="utf-8")
+        expected_preview_script = f'assets/js/shop-wiki-previews.js?v={EXPECTED_ASSET_VERSION}'
+        if expected_preview_script not in html_text:
+            errors.append(f"{html_name}: missing shared DayZ Wiki preview resolver reference.")
+    if "WWZShopWikiPreviews?.createImage" not in standalone_shop:
+        errors.append("Standalone shop must use the shared DayZ Wiki preview resolver.")
+    if "WWZShopWikiPreviews?.createImage" not in dashboard_shop:
+        errors.append("Dashboard shop must use the shared DayZ Wiki preview resolver.")
     if "input.disabled = saved;" not in standalone_shop:
         errors.append(
             "Standalone shop must disable hidden manual coordinate inputs when a saved location is selected."
@@ -348,6 +365,7 @@ def validate_required_files(errors: list[str]) -> None:
         "assets/css/pages/shop.css",
         "assets/css/pages/policies.css",
         "assets/js/core/http.js",
+        "assets/js/shop-wiki-previews.js",
         "assets/js/pages/home.js",
         "assets/js/dashboard/shell.js",
         "assets/js/dashboard/core.js",

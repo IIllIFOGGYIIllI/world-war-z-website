@@ -175,8 +175,12 @@ const previewFallback = (item) => {
   return `assets/shop-previews/${supported.has(key) ? key : 'default'}.svg`;
 };
 const previewImage = (item) => {
+  const fallback = previewFallback(item);
+  if (window.WWZShopWikiPreviews?.createImage) {
+    return window.WWZShopWikiPreviews.createImage(item, fallback, 'member-shop-preview-image');
+  }
   const image = document.createElement('img'); image.className = 'member-shop-preview-image'; image.loading = 'lazy'; image.decoding = 'async'; image.alt = `${item?.name || 'DayZ item'} preview`;
-  const fallback = previewFallback(item); image.src = String(item?.preview_image_url || '').startsWith('https://') ? item.preview_image_url : fallback;
+  image.src = String(item?.preview_image_url || '').startsWith('https://') ? item.preview_image_url : fallback;
   image.addEventListener('error', () => { image.src = fallback; }, { once: true });
   return image;
 };

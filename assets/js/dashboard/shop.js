@@ -352,12 +352,15 @@ const shopPreviewFallback = (item) => {
   return `assets/shop-previews/${supported.has(key) ? key : 'default'}.svg`;
 };
 const shopPreviewImage = (item, className = 'shop-item-preview-image') => {
+  const fallback = shopPreviewFallback(item);
+  if (window.WWZShopWikiPreviews?.createImage) {
+    return window.WWZShopWikiPreviews.createImage(item, fallback, className);
+  }
   const image = document.createElement('img');
   image.className = className;
   image.loading = 'lazy';
   image.decoding = 'async';
   image.alt = `${item?.name || 'DayZ item'} preview`;
-  const fallback = shopPreviewFallback(item);
   image.src = String(item?.preview_image_url || '').startsWith('https://') ? item.preview_image_url : fallback;
   image.addEventListener('error', () => { if (image.src.endsWith(fallback)) return; image.src = fallback; }, { once: true });
   return image;
