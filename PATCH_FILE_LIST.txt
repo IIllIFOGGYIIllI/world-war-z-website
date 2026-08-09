@@ -1,4 +1,4 @@
-World War Z Website v1.22.57 patch files
+World War Z Website v1.22.58 patch files
 
 404.html
 changelog.html
@@ -10,7 +10,8 @@ moderation-policy.html
 privacy.html
 shop.html
 terms.html
-assets/js/dashboard/objectives.js
+assets/js/dashboard/core.js
+assets/js/dashboard/delivery.js
 scripts/validate_site.py
 README.md
 PATCH_NOTES.md

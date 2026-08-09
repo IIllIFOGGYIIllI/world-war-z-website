@@ -1,11 +1,13 @@
-## Website v1.22.57 — Objectives Authentication Hotfix
+## Website v1.22.58 — Configuration Backup Parity
 
-This hotfix completes the Bot v1.18.55 quest fix on the GitHub Pages frontend.
+This patch turns the existing example-only Configuration Backup History surface into a live Owner workflow backed by Bot v1.18.56.
 
-- Uses the same authenticated Discord dashboard session for the Objectives member API as the rest of the account dashboard.
-- Uses the authenticated Admin/Owner session for Objective Administration.
-- Prevents an already signed-in member from being shown the Objectives sign-in gate simply because the Objectives request omitted its Bearer token.
-- Reports expired-session and temporary-service failures separately.
-- Updates the Daily and Weekly rotation wording to match Bot v1.18.55: 24 hours and 7 days, independent of DayZ restarts.
+- Lists the real validated Configuration Control backups stored by Railway.
+- Filters backup history by managed DayZ file.
+- Creates manual live backups with an attributable reason.
+- Compares any stored backup against the current live Nitrado file.
+- Restores a selected backup only after explicit confirmation and server-side Owner verification.
+- Shows the exact diff in the existing dashboard styling.
+- Fixes the post-apply refresh path so the editor reloads its live state after a successful deployment.
 
-Requires Bot v1.18.55. Persistent Railway data is unchanged.
+Requires Bot v1.18.56. No persistent Railway data or Chernarus map assets are replaced.

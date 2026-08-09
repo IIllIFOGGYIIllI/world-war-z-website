@@ -1,20 +1,22 @@
-# World War Z Website v1.22.57
+# World War Z Website v1.22.58
 
-## Objectives authentication hotfix
+## Configuration Control parity
 
-- Fixes Daily & Weekly Objectives incorrectly showing the Discord sign-in panel while the dashboard header is already authenticated.
-- Member Objectives GET requests now send the current dashboard Bearer session to Railway, matching Account Centre and XP & Prestige.
-- Admin/Owner Objective Administration GET requests now use the same authenticated session.
-- Preserves HTTP status codes in the Objectives client so expired sessions can be distinguished from temporary API failures.
-- Keeps a valid signed-in session visually signed in while a temporary Objectives API error is reported.
+- Replaces the placeholder/example Backup History panel with live Configuration Control backups from Railway.
+- Adds managed-file filtering and real backup metadata including validation state, actor, timestamp and checksum.
+- Adds Owner-only manual backup creation.
+- Adds backup-to-live diff with the existing exact diff output surface.
+- Adds confirmed restore actions using the Bot v1.18.56 recovery-backup and checksum-verification workflow.
+- Restore actions deliberately do not force a DayZ restart.
 
-## Rotation wording
+## Fixed
 
-- Removes the obsolete `UTC day` and `Monday 00:00 UTC` labels from the Objectives page.
-- The dashboard now describes Daily quests as a true 24-hour rotation and Weekly quests as a true 7-day rotation, independent of DayZ restarts.
-- The actual persisted 24-hour / 7-day rotation timing remains supplied by Bot v1.18.55.
+- Fixes the mission-file editor post-apply refresh path so its own in-progress guard no longer prevents the live file and service state from reloading.
+- Successful mission-file applies now also refresh the backup list.
 
-## Compatibility
+## Security & compatibility
 
-- Requires Bot v1.18.55 for the corrected persisted quest rotation anchors and legacy verified-link repair.
-- No database migration, Chernarus map geometry, shop/rental, ticket, progression or moderation behaviour changed.
+- Requires Bot v1.18.56 for the protected backup APIs.
+- Owner authorization remains enforced by Railway for every read/write action.
+- Backup metadata responses omit Railway-local backup filesystem paths.
+- No Chernarus map, shop/rental, ticket, progression, Objectives or persistent database content is replaced.

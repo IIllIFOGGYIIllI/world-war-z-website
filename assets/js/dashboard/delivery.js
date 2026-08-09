@@ -384,12 +384,24 @@ const configFileContent = document.querySelector('[data-config-file-content]');
 const configFileReason = document.querySelector('[data-config-file-reason]');
 const configFileMessage = document.querySelector('[data-config-file-message]');
 const configFileDiff = document.querySelector('[data-config-file-diff]');
+const configBackupFilter = document.querySelector('[data-config-backup-filter]');
+const configBackupCreateFile = document.querySelector('[data-config-backup-create-file]');
+const configBackupReason = document.querySelector('[data-config-backup-reason]');
+const refreshConfigBackupsButton = document.querySelector('[data-refresh-config-backups]');
+const createConfigBackupButton = document.querySelector('[data-create-config-backup]');
+const configBackupMessage = document.querySelector('[data-config-backup-message]');
+const configBackupList = document.querySelector('[data-config-backup-list]');
+const configBackupEmpty = document.querySelector('[data-config-backup-empty]');
+const configBackupError = document.querySelector('[data-config-backup-error]');
+const configBackupDiff = document.querySelector('[data-config-backup-diff]');
 const refreshServerEventsButton = document.querySelector('[data-refresh-server-events]');
 const serverEventSearch = document.querySelector('[data-server-event-search]');
 const serverEventList = document.querySelector('[data-server-event-list]');
 const serverEventEmpty = document.querySelector('[data-server-event-empty]');
 const serverEventError = document.querySelector('[data-server-event-error]');
 let ownerServerConfigRequestInProgress = false;
+let ownerConfigBackupRequestInProgress = false;
+let ownerConfigBackups = [];
 let ownerServerEvents = [];
 
 const readableBytes = (bytes) => {
@@ -425,6 +437,23 @@ const applyServerConfigOverview = (payload) => {
     });
     if ([...configFileSelect.options].some((option) => option.value === selected)) configFileSelect.value = selected;
   }
+  const managedFiles = Array.isArray(payload.files) ? payload.files : [];
+  [[configBackupFilter, 'All managed files'], [configBackupCreateFile, 'Select managed file…']].forEach(([select, placeholderText]) => {
+    if (!select) return;
+    const selected = select.value;
+    select.replaceChildren();
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = placeholderText;
+    select.append(placeholder);
+    managedFiles.forEach((file) => {
+      const option = document.createElement('option');
+      option.value = file.key;
+      option.textContent = file.label;
+      select.append(option);
+    });
+    if ([...select.options].some((option) => option.value === selected)) select.value = selected;
+  });
 };
 
 const loadServerConfigOverview = async (token = storageGet(AUTH_SESSION_KEY)) => {
@@ -485,6 +514,7 @@ const submitConfigFileAction = async (action) => {
     }
     if (!window.confirm('Create a live backup and upload this exact file to Nitrado?')) return;
   }
+  let refreshAfterApply = false;
   ownerServerConfigRequestInProgress = true;
   validateConfigFileButton?.setAttribute('disabled', '');
   applyConfigFileButton?.setAttribute('disabled', '');
@@ -500,7 +530,7 @@ const submitConfigFileAction = async (action) => {
     if (!response.ok) throw new Error(payload.message || 'The configuration operation failed.');
     if (configFileDiff && 'diff' in payload) configFileDiff.textContent = payload.diff || 'No changes detected.';
     showInlineMessage(configFileMessage, payload.message || 'Configuration operation completed.', 'success');
-    if (action === 'apply') await Promise.all([loadServerConfigOverview(token), loadSelectedConfigFile(), loadServerEvents(token)]);
+    refreshAfterApply = action === 'apply';
   } catch (error) {
     showInlineMessage(configFileMessage, error.message || 'The configuration operation failed.');
   } finally {
@@ -508,11 +538,143 @@ const submitConfigFileAction = async (action) => {
     validateConfigFileButton?.removeAttribute('disabled');
     applyConfigFileButton?.removeAttribute('disabled');
   }
+  if (refreshAfterApply) {
+    await loadServerConfigOverview(token);
+    await loadSelectedConfigFile();
+    await Promise.all([loadServerEvents(token), loadConfigBackups(token)]);
+  }
 };
 refreshServerConfigButton?.addEventListener('click', () => Promise.all([loadServerConfigOverview(), loadServerEvents()]));
 loadConfigFileButton?.addEventListener('click', loadSelectedConfigFile);
 validateConfigFileButton?.addEventListener('click', () => submitConfigFileAction('validate'));
 applyConfigFileButton?.addEventListener('click', () => submitConfigFileAction('apply'));
+
+const renderConfigBackups = () => {
+  if (!configBackupList) return;
+  configBackupList.replaceChildren();
+  ownerConfigBackups.forEach((backup) => {
+    const row = document.createElement('tr');
+    const id = document.createElement('td');
+    const strong = document.createElement('strong');
+    strong.textContent = `#${backup.id}`;
+    const sha = document.createElement('small');
+    sha.textContent = String(backup.sha256 || '').slice(0, 12) || '—';
+    id.append(strong, document.createElement('br'), sha);
+
+    const file = document.createElement('td');
+    const fileStrong = document.createElement('strong');
+    fileStrong.textContent = backup.file_label || backup.file_key || 'Managed file';
+    const path = document.createElement('small');
+    path.textContent = backup.remote_path || '';
+    file.append(fileStrong, document.createElement('br'), path);
+
+    const created = document.createElement('td');
+    created.textContent = formatAccountDate(backup.created_at);
+    const actor = document.createElement('td');
+    actor.textContent = backup.created_by_name || 'Unknown';
+
+    const validation = document.createElement('td');
+    const pill = document.createElement('span');
+    const valid = !String(backup.validation_status || '').toLowerCase().includes('invalid');
+    pill.className = valid ? 'validation-pass' : 'table-status offline';
+    pill.textContent = String(backup.validation_status || 'unknown').replaceAll('_', ' ');
+    validation.append(pill);
+
+    const actions = document.createElement('td');
+    const actionWrap = document.createElement('div');
+    actionWrap.className = 'heading-actions';
+    const compare = document.createElement('button');
+    compare.type = 'button';
+    compare.className = 'table-button';
+    compare.textContent = 'Compare';
+    compare.addEventListener('click', () => submitConfigBackupAction('diff', backup));
+    const restore = document.createElement('button');
+    restore.type = 'button';
+    restore.className = 'table-button danger-action';
+    restore.textContent = 'Restore';
+    restore.addEventListener('click', () => submitConfigBackupAction('restore', backup));
+    actionWrap.append(compare, restore);
+    actions.append(actionWrap);
+    row.append(id, file, created, actor, validation, actions);
+    configBackupList.append(row);
+  });
+  if (configBackupEmpty) configBackupEmpty.hidden = ownerConfigBackups.length !== 0;
+};
+
+const loadConfigBackups = async (token = storageGet(AUTH_SESSION_KEY)) => {
+  if (!token || dashboardAccessLevel !== 'owner' || ownerConfigBackupRequestInProgress) return false;
+  ownerConfigBackupRequestInProgress = true;
+  refreshConfigBackupsButton?.setAttribute('disabled', '');
+  try {
+    const fileKey = String(configBackupFilter?.value || '').trim();
+    const url = `${OWNER_SERVER_CONFIG_BACKUPS_URL}?limit=25${fileKey ? `&file=${encodeURIComponent(fileKey)}` : ''}`;
+    const response = await authFetch(url, { headers: { Accept: 'application/json', Authorization: `Bearer ${token}` } });
+    const payload = await response.json().catch(() => ({}));
+    if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: false })) return false;
+    if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Configuration backups are unavailable.');
+    ownerConfigBackups = Array.isArray(payload.backups) ? payload.backups : [];
+    renderConfigBackups();
+    if (configBackupError) configBackupError.hidden = true;
+    return true;
+  } catch (error) {
+    if (configBackupError) configBackupError.hidden = false;
+    showInlineMessage(configBackupMessage, error.message || 'Configuration backups are unavailable.');
+    return false;
+  } finally {
+    ownerConfigBackupRequestInProgress = false;
+    refreshConfigBackupsButton?.removeAttribute('disabled');
+  }
+};
+
+const submitConfigBackupAction = async (action, backup = null) => {
+  const token = storageGet(AUTH_SESSION_KEY);
+  if (!token || dashboardAccessLevel !== 'owner' || ownerConfigBackupRequestInProgress) return;
+  const reason = String(configBackupReason?.value || '').trim();
+  if (action === 'create' && !configBackupCreateFile?.value) {
+    showInlineMessage(configBackupMessage, 'Select a managed file to back up.');
+    return;
+  }
+  if (['create', 'restore'].includes(action) && reason.length < 5) {
+    showInlineMessage(configBackupMessage, 'Enter a backup or restore reason of at least five characters.');
+    return;
+  }
+  if (action === 'restore' && !window.confirm(`Restore backup #${backup?.id} to the live Nitrado file? A recovery backup will be created first when the live file differs.`)) return;
+  let refreshAfterWrite = false;
+  ownerConfigBackupRequestInProgress = true;
+  createConfigBackupButton?.setAttribute('disabled', '');
+  refreshConfigBackupsButton?.setAttribute('disabled', '');
+  showInlineMessage(configBackupMessage, action === 'diff' ? 'Comparing the backup with the live file…' : action === 'restore' ? 'Restoring and verifying the selected backup…' : 'Creating and validating the live backup…', 'info');
+  try {
+    const body = { action, reason };
+    if (action === 'create') body.file_key = configBackupCreateFile?.value || '';
+    else body.backup_id = Number(backup?.id || 0);
+    const response = await protectedActionFetch(OWNER_SERVER_CONFIG_BACKUP_ACTION_URL, {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(body)
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: action !== 'diff' })) return;
+    if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'The configuration backup operation failed.');
+    if (action === 'diff' && configBackupDiff) {
+      const header = payload.different ? `Backup #${backup.id} differs from the live file.` : `Backup #${backup.id} matches the live file.`;
+      configBackupDiff.textContent = `${header}\n\n${payload.diff || 'No changes detected.'}`;
+    }
+    showInlineMessage(configBackupMessage, payload.message || 'Configuration backup operation completed.', 'success');
+    refreshAfterWrite = action !== 'diff';
+  } catch (error) {
+    showInlineMessage(configBackupMessage, error.message || 'The configuration backup operation failed.');
+  } finally {
+    ownerConfigBackupRequestInProgress = false;
+    createConfigBackupButton?.removeAttribute('disabled');
+    refreshConfigBackupsButton?.removeAttribute('disabled');
+  }
+  if (refreshAfterWrite) await Promise.all([loadServerConfigOverview(token), loadConfigBackups(token)]);
+};
+
+refreshConfigBackupsButton?.addEventListener('click', () => loadConfigBackups());
+configBackupFilter?.addEventListener('change', () => loadConfigBackups());
+createConfigBackupButton?.addEventListener('click', () => submitConfigBackupAction('create'));
 
 const renderServerEvents = () => {
   if (!serverEventList) return;
@@ -579,7 +741,10 @@ window.addEventListener('wwz:viewchange', (event) => {
     else if (section === 'events') loadServerEvents(token);
     else Promise.all([loadServerConfigOverview(token), loadServerEvents(token)]);
   }
-  if (view === 'configuration' && section === 'event-items') loadOwnerShopConfig(token);
+  if (view === 'configuration') {
+    if (section === 'event-items') loadOwnerShopConfig(token);
+    else Promise.all([loadServerConfigOverview(token), loadConfigBackups(token)]);
+  }
 });
 
 configureDiscordAuth();
