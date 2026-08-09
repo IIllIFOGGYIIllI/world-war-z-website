@@ -1,3 +1,12 @@
+
+## Website v1.22.50 — Progression & Survivor Profile Analytics
+
+- Adds recent XP history, rolling 24-hour/7-day XP analytics and Prestige history.
+- Adds computed achievement badges/titles and clearer next reward presentation.
+- Adds selectable overall/weekly/lifetime/combat/Prestige leaderboards.
+- Adds a progression summary directly to the verified Survivor Profile page.
+- Preserves existing XP, roles, economy rewards and Railway database records.
+
 ## Version 1.22.49 — Restart Rollover Reliability
 
 - Prevents an expired next-restart timestamp from remaining on screen as `0m remaining`.

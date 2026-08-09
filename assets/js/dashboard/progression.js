@@ -8,6 +8,12 @@
   const adminMessage = panel.querySelector('[data-progression-admin-message]');
   const leaderboard = panel.querySelector('[data-progression-leaderboard]');
   const leaderboardEmpty = panel.querySelector('[data-progression-leaderboard-empty]');
+  const leaderboardMetric = panel.querySelector('[data-progression-leaderboard-metric]');
+  const historyList = panel.querySelector('[data-progression-history]');
+  const historyEmpty = panel.querySelector('[data-progression-history-empty]');
+  const badgeGrid = panel.querySelector('[data-progression-badges]');
+  const prestigeHistory = panel.querySelector('[data-progression-prestige-history]');
+  const prestigeEmpty = panel.querySelector('[data-progression-prestige-empty]');
   const refreshButton = panel.querySelector('[data-refresh-progression]');
   const saveAllButton = panel.querySelector('[data-save-progression-all]');
   const saveSettingsButton = panel.querySelector('[data-save-progression-settings]');
@@ -27,6 +33,7 @@
   let adminLoaded = false;
   let adminData = null;
   let requestInProgress = false;
+  let memberPayload = null;
 
   const token = () => storageGet(AUTH_SESSION_KEY);
   const setTextLocal = (selector, value) => {
@@ -55,11 +62,32 @@
     return payload;
   };
 
-  const renderLeaderboard = (rows) => {
+  const sourceMeta = (source) => ({
+    text: ['💬', 'Text'], voice: ['🎙️', 'Voice'], combat: ['☠️', 'Combat'],
+    event: ['🏆', 'Event'], event_win: ['🏆', 'Event'], bounty: ['🎯', 'Bounty'],
+    contract: ['📜', 'Contract'], prestige: ['☣️', 'Prestige'], bonus: ['⭐', 'Bonus']
+  }[String(source || '').toLowerCase()] || ['⭐', String(source || 'Bonus').replaceAll('_', ' ')]);
+
+  const relativeDate = (value) => {
+    if (!value) return 'Recently';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return 'Recently';
+    const seconds = Math.round((date.getTime() - Date.now()) / 1000);
+    const absolute = Math.abs(seconds);
+    const rtf = new Intl.RelativeTimeFormat('en-AU', { numeric: 'auto' });
+    if (absolute < 60) return rtf.format(seconds, 'second');
+    if (absolute < 3600) return rtf.format(Math.round(seconds / 60), 'minute');
+    if (absolute < 86400) return rtf.format(Math.round(seconds / 3600), 'hour');
+    return rtf.format(Math.round(seconds / 86400), 'day');
+  };
+
+  const renderLeaderboard = (rows, metric = 'overall') => {
     if (!leaderboard) return;
     leaderboard.replaceChildren();
     const safeRows = Array.isArray(rows) ? rows : [];
     if (leaderboardEmpty) leaderboardEmpty.hidden = safeRows.length !== 0;
+    const titleMap = { overall: 'Overall Progression Leaderboard', daily: 'Last 24 Hours XP Leaderboard', weekly: 'Last 7 Days XP Leaderboard', lifetime: 'Lifetime XP Leaderboard', combat: 'Combat XP Leaderboard', prestige: 'Prestige Leaderboard' };
+    setTextLocal('[data-progression-leaderboard-title]', titleMap[metric] || titleMap.overall);
     safeRows.forEach((row) => {
       const item = document.createElement('li');
       const place = document.createElement('span');
@@ -67,19 +95,105 @@
       const name = document.createElement('strong');
       const detail = document.createElement('small');
       const xp = document.createElement('strong');
+      const position = Number(row.position) || 0;
       place.className = 'place';
-      place.textContent = `#${Number(row.position) || '—'}`;
+      place.textContent = ({ 1: '🥇', 2: '🥈', 3: '🥉' })[position] || `#${position || '—'}`;
       name.textContent = `${String(row.prestige_icon || '🩸')} ${String(row.display_name || 'Unknown Member')}`;
       detail.textContent = `Prestige ${Number(row.prestige) || 0} · Level ${Number(row.level) || 1}`;
-      xp.textContent = `${formatNumber(row.lifetime_xp)} XP`;
+      if (metric === 'weekly' || metric === 'daily') xp.textContent = `+${formatNumber(row.period_xp)} XP`;
+      else if (metric === 'combat') xp.textContent = `${formatNumber(row.combat_xp)} XP`;
+      else if (metric === 'prestige') xp.textContent = `P${Number(row.prestige) || 0} · L${Number(row.level) || 1}`;
+      else xp.textContent = `${formatNumber(row.lifetime_xp)} XP`;
       copy.append(name, detail);
       item.append(place, copy, xp);
       leaderboard.append(item);
     });
   };
 
-  const renderMember = (payload) => {
+  const renderHistory = (rows) => {
+    if (!historyList) return;
+    historyList.replaceChildren();
+    const events = (Array.isArray(rows) ? rows : []).filter((row) => Number(row.amount) !== 0).slice(0, 10);
+    if (historyEmpty) historyEmpty.hidden = events.length !== 0;
+    events.forEach((row) => {
+      const [icon, label] = sourceMeta(row.source_type);
+      const item = document.createElement('li');
+      const amount = Number(row.amount) || 0;
+      item.innerHTML = `<span class="progression-history-icon">${icon}</span><div><strong>${amount > 0 ? '+' : ''}${amount.toLocaleString()} XP · ${label}</strong><small></small></div><time></time>`;
+      item.querySelector('small').textContent = String(row.details || 'Progression activity');
+      item.querySelector('time').textContent = relativeDate(row.created_at);
+      historyList.append(item);
+    });
+  };
+
+  const renderBadges = (badges) => {
+    if (!badgeGrid) return;
+    badgeGrid.replaceChildren();
+    const rows = Array.isArray(badges) ? badges : [];
+    const achieved = rows.filter((badge) => badge.achieved);
+    setTextLocal('[data-progression-badge-count]', formatNumber(achieved.length));
+    rows.forEach((badge) => {
+      const card = document.createElement('div');
+      card.className = `progression-badge${badge.achieved ? ' earned' : ' locked'}`;
+      card.innerHTML = `<span>${badge.icon || '🎖️'}</span><div><strong></strong><small></small><i><b></b></i></div>`;
+      card.querySelector('strong').textContent = badge.name || 'Achievement';
+      card.querySelector('small').textContent = badge.achieved ? badge.description : `${formatNumber(badge.current)} / ${formatNumber(badge.target)} · ${badge.description}`;
+      card.querySelector('i').style.setProperty('--badge-progress', `${Math.max(0, Math.min(100, Number(badge.progress_percent) || 0))}%`);
+      badgeGrid.append(card);
+    });
+  };
+
+  const renderPrestigeHistory = (rows) => {
+    if (!prestigeHistory) return;
+    prestigeHistory.replaceChildren();
+    const safeRows = Array.isArray(rows) ? rows : [];
+    if (prestigeEmpty) prestigeEmpty.hidden = safeRows.length !== 0;
+    safeRows.forEach((row) => {
+      const item = document.createElement('div');
+      item.className = 'prestige-history-item';
+      item.innerHTML = `<span>☣️</span><div><strong></strong><small></small></div>`;
+      item.querySelector('strong').textContent = `Prestige ${Number(row.prestige) || 0}`;
+      item.querySelector('small').textContent = relativeDate(row.created_at);
+      prestigeHistory.append(item);
+    });
+  };
+
+  const renderProfileProgression = (payload) => {
     const member = payload?.member || {};
+    const analytics = payload?.analytics || {};
+    const title = member.survivor_title || {};
+    const set = (selector, value) => document.querySelectorAll(selector).forEach((node) => { node.textContent = value; });
+    set('[data-profile-progression-title]', `${title.icon || '🩸'} ${title.name || 'Survivor'}`);
+    set('[data-profile-progression-rank]', payload?.rank_position ? `#${Number(payload.rank_position).toLocaleString()}` : 'Unranked');
+    set('[data-profile-progression-level]', `Level ${Number(member.level) || 1}`);
+    set('[data-profile-progression-prestige]', `${member.prestige_icon || '🩸'} Prestige ${Number(member.prestige) || 0} — ${member.prestige_title || 'Survivor'}`);
+    set('[data-profile-progression-24h]', `+${formatNumber(analytics.xp_24h)} XP`);
+    set('[data-profile-progression-7d]', `+${formatNumber(analytics.xp_7d)} XP`);
+    set('[data-profile-progression-lifetime]', `${formatNumber(member.lifetime_xp)} XP`);
+    set('[data-profile-progression-progress]', Number(member.level) >= 100 ? (Number(member.prestige) >= 10 ? 'Maximum progression reached' : 'Level 100 complete — prestige ready') : `${formatNumber(member.current_level_xp)} / ${formatNumber(member.next_level_xp)} XP to Level ${(Number(member.level) || 1) + 1}`);
+    document.querySelectorAll('[data-profile-progression-track]').forEach((node) => node.style.setProperty('--xp-progress', `${Math.max(0, Math.min(100, Number(member.progress_percent) || 0))}%`));
+    document.querySelectorAll('[data-profile-progression-badges]').forEach((strip) => {
+      strip.replaceChildren();
+      (member.badges || []).filter((badge) => badge.achieved).slice(-5).forEach((badge) => {
+        const pill = document.createElement('span');
+        pill.textContent = `${badge.icon || '🎖️'} ${badge.name}`;
+        strip.append(pill);
+      });
+      if (!strip.children.length) {
+        const pill = document.createElement('span');
+        pill.className = 'muted';
+        pill.textContent = 'First achievement in progress';
+        strip.append(pill);
+      }
+    });
+  };
+
+
+  const renderMember = (payload) => {
+    memberPayload = payload;
+    const member = payload?.member || {};
+    const analytics = payload?.analytics || {};
+    const rewards = payload?.rewards || {};
     const currentTier = member.current_tier || { icon: '🩸', name: 'Fresh Survivor', level: 1 };
     const nextTier = member.next_tier;
     const nextPrestige = member.next_prestige;
@@ -100,6 +214,14 @@
     setTextLocal('[data-progression-messages]', formatNumber(member.messages_credited));
     setTextLocal('[data-progression-voice-minutes]', `${formatNumber(member.voice_minutes_credited)} min`);
     setTextLocal('[data-progression-kills]', formatNumber(member.combat_kills_credited));
+    setTextLocal('[data-progression-xp-24h]', formatNumber(analytics.xp_24h));
+    setTextLocal('[data-progression-xp-7d]', formatNumber(analytics.xp_7d));
+    setTextLocal('[data-progression-events-24h]', `${formatNumber(analytics.events_24h)} XP event${Number(analytics.events_24h) === 1 ? '' : 's'}`);
+    setTextLocal('[data-progression-events-7d]', `${formatNumber(analytics.events_7d)} XP event${Number(analytics.events_7d) === 1 ? '' : 's'}`);
+    const survivorTitle = member.survivor_title || {};
+    setTextLocal('[data-progression-survivor-title]', `${survivorTitle.icon || '🩸'} ${survivorTitle.name || 'Survivor'}`);
+    const nextReward = rewards.next || null;
+    setTextLocal('[data-progression-next-reward]', nextReward && Number(nextReward.amount) > 0 ? `$${Number(nextReward.amount).toLocaleString()}` : '—');
 
     const track = panel.querySelector('[data-progression-xp-track]');
     if (track) track.style.setProperty('--xp-progress', `${Math.max(0, Math.min(100, Number(member.progress_percent) || 0))}%`);
@@ -117,7 +239,12 @@
           : 'Level 100 complete — prestige ready')
         : `${formatNumber(member.current_level_xp)} / ${formatNumber(member.next_level_xp)} XP to Level ${(Number(member.level) || 1) + 1}`;
     }
-    renderLeaderboard(payload?.leaderboard);
+    const metric = leaderboardMetric?.value || 'overall';
+    renderLeaderboard(payload?.leaderboards?.[metric] || payload?.leaderboard, metric);
+    renderHistory(payload?.recent_xp);
+    renderBadges(member.badges);
+    renderPrestigeHistory(payload?.prestige_history);
+    renderProfileProgression(payload);
     guest?.setAttribute('hidden', '');
     content?.removeAttribute('hidden');
   };
@@ -504,6 +631,11 @@
     saveRole({ type: 'level', milestone: level, roleKey: customLevelRole?.value || '' });
   });
 
+  leaderboardMetric?.addEventListener('change', () => {
+    const metric = leaderboardMetric.value || 'overall';
+    renderLeaderboard(memberPayload?.leaderboards?.[metric] || memberPayload?.leaderboard || [], metric);
+  });
+
   refreshButton?.addEventListener('click', () => {
     memberLoaded = false;
     adminLoaded = false;
@@ -511,18 +643,20 @@
     loadAdmin({ force: true });
   });
 
-  const activate = () => {
+  const activate = ({ admin = true } = {}) => {
     loadMember();
-    loadAdmin();
+    if (admin) loadAdmin();
   };
 
   window.addEventListener('wwz:viewchange', (event) => {
-    if (event.detail?.view === 'progression') activate();
+    if (event.detail?.view === 'progression') activate({ admin: true });
+    if (event.detail?.view === 'players') activate({ admin: false });
   });
   window.addEventListener('wwz:authchange', () => {
     memberLoaded = false;
     adminLoaded = false;
-    if (document.querySelector('[data-view-panel="progression"].active')) activate();
+    if (document.querySelector('[data-view-panel="progression"].active')) activate({ admin: true });
+    else if (document.querySelector('[data-view-panel="players"].active')) activate({ admin: false });
   });
 
   if (panel.classList.contains('active')) activate();
