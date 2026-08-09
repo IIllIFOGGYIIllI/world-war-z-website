@@ -663,3 +663,8 @@ body:has(.catalogue-builder-dialog[open]) {
   font-size: 0.9rem;
   line-height: 1.45;
 }
+
+/* v1.22.44 catalogue previews */
+.shop-item-preview { position:relative; overflow:hidden; border:1px solid rgba(255,255,255,.08); border-radius:18px; aspect-ratio:16/7; background:#100e0e; }
+.shop-item-preview-image { width:100%; height:100%; display:block; object-fit:cover; transition:transform .22s ease, filter .22s ease; }
+.shop-item-card:hover .shop-item-preview-image { transform:scale(1.025); filter:brightness(1.05); }

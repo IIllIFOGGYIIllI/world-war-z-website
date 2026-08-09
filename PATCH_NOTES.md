@@ -1,14 +1,19 @@
-# world-war-z-website v1.22.43
+# world-war-z-website v1.22.44
+
+## Added
+- Adds an Owner-only **Sync DayZ Catalogue** action to Shop Administration.
+- Adds preview-image surfaces to member and dashboard shop cards.
+- Adds automatic category preview artwork for items without a custom image.
+- Adds an optional HTTPS preview-image URL field to the catalogue item editor.
 
 ## Changed
-- The main Dashboard Overview Restart Cycle card now displays the live restart countdown instead of a static `EVERY 3H` value.
-- The main server overview panel shows the same live countdown and its restart progress bar advances through the current configured restart cycle.
-- Unsynchronised schedules display `Sync pending` instead of inventing a restart time.
-- Detailed Operational Health, Survivor Shop and delivery-monitor restart timing remain connected to the same Bot v1.18.43 API data.
+- The shop UI is ready for the larger live `types.xml` catalogue returned by Bot v1.18.44.
+- Rental cards continue displaying price per restart and imported vehicle rentals remain `$1 / restart`.
 
 ## Compatibility
-- Pairs with Bot v1.18.43.
-- No map geometry, shop/rental delivery logic, XP behaviour, permissions or persistent records changed.
+- Pairs with Bot v1.18.44.
+- Chernarus map geometry, delivery coordinates and map assets are unchanged.
+- No existing shop/rental records are replaced by the website patch.
 
 ## Files To Delete
 - NONE

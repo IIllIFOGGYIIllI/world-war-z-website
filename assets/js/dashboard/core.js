@@ -15,6 +15,7 @@ const ADMIN_SHOP_ORDERS_URL = `${DASHBOARD_API_BASE}/api/admin/shop/orders`;
 const ADMIN_SHOP_ORDER_ACTION_URL = `${DASHBOARD_API_BASE}/api/admin/shop/orders/action`;
 const OWNER_SHOP_CONFIG_URL = `${DASHBOARD_API_BASE}/api/owner/shop/config`;
 const OWNER_SHOP_ITEM_URL = `${DASHBOARD_API_BASE}/api/owner/shop/item`;
+const OWNER_SHOP_SYNC_URL = `${DASHBOARD_API_BASE}/api/owner/shop/sync`;
 const OWNER_SHOP_SETTINGS_URL = `${DASHBOARD_API_BASE}/api/owner/shop/settings`;
 const ACCOUNT_DELIVERY_LOCATIONS_URL = `${DASHBOARD_API_BASE}/api/account/delivery/locations`;
 const ACCOUNT_DELIVERY_LOCATION_ACTION_URL = `${DASHBOARD_API_BASE}/api/account/delivery/locations/action`;

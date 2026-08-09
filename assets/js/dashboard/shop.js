@@ -60,6 +60,8 @@ const ownerShopItemList = document.querySelector('[data-owner-shop-item-list]');
 const ownerShopEmpty = document.querySelector('[data-owner-shop-empty]');
 const ownerShopError = document.querySelector('[data-owner-shop-error]');
 const refreshShopConfigButton = document.querySelector('[data-refresh-shop-config]');
+const syncDayzCatalogueButton = document.querySelector('[data-sync-dayz-catalogue]');
+const ownerShopSyncMessage = document.querySelector('[data-owner-shop-sync-message]');
 const refreshShopSettingsButton = document.querySelector('[data-refresh-shop-settings]');
 const saveShopSettingsButton = document.querySelector('[data-save-shop-settings]');
 const newShopItemButton = document.querySelector('[data-new-shop-item]');
@@ -342,6 +344,25 @@ shopDeliveryLocation?.addEventListener('change', syncShopDeliveryForm);
 shopSaveLocation?.addEventListener('change', syncShopDeliveryForm);
 [shopDeliveryX, shopDeliveryZ].forEach((input) => input?.addEventListener('input', updateCoordinateMarker));
 
+
+const shopPreviewFallback = (item) => {
+  if (item?.delivery_type === 'event' || item?.fulfilment_type === 'event') return 'assets/shop-previews/vehicles.svg';
+  const key = String(item?.category || 'default').trim().toLowerCase().replace(/&/g, ' ').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const supported = new Set(['weapons','ammunition','magazines','medical','food-drink','clothing','tools','base-building-storage','vehicle-parts','containers','explosives','vehicles']);
+  return `assets/shop-previews/${supported.has(key) ? key : 'default'}.svg`;
+};
+const shopPreviewImage = (item, className = 'shop-item-preview-image') => {
+  const image = document.createElement('img');
+  image.className = className;
+  image.loading = 'lazy';
+  image.decoding = 'async';
+  image.alt = `${item?.name || 'DayZ item'} preview`;
+  const fallback = shopPreviewFallback(item);
+  image.src = String(item?.preview_image_url || '').startsWith('https://') ? item.preview_image_url : fallback;
+  image.addEventListener('error', () => { if (image.src.endsWith(fallback)) return; image.src = fallback; }, { once: true });
+  return image;
+};
+
 const renderShopCatalogue = () => {
   if (!shopCatalogue) return;
   const query = String(shopSearch?.value || '').trim().toLowerCase();
@@ -357,6 +378,9 @@ const renderShopCatalogue = () => {
   visible.forEach((item) => {
     const card = document.createElement('article');
     card.className = `shop-item-card${item.available ? '' : ' unavailable'}`;
+    const preview = document.createElement('div');
+    preview.className = 'shop-item-preview';
+    preview.append(shopPreviewImage(item));
     const heading = document.createElement('div');
     heading.className = 'shop-item-heading';
     const copy = document.createElement('div');
@@ -392,7 +416,7 @@ const renderShopCatalogue = () => {
     button.textContent = !shopPurchasesEnabled ? 'Purchases paused' : !authenticatedUser ? 'Sign in to buy' : !linked ? 'Link PSN to buy' : item.available ? (item.delivery_type === 'event' ? 'Order event delivery' : 'Buy item') : 'Unavailable';
     button.disabled = !shopPurchasesEnabled || Boolean(authenticatedUser && !canBuy);
     button.addEventListener('click', () => openShopPurchase(item));
-    card.append(heading, description, meta, button);
+    card.append(preview, heading, description, meta, button);
     shopCatalogue.append(card);
   });
   if (shopEmpty) shopEmpty.hidden = visible.length !== 0;
@@ -1065,7 +1089,7 @@ const openShopItemEditor = (item = null, { forceEvent = false } = {}) => {
     '[data-shop-item-types]': Array.isArray(item?.types) ? item.types.join('\n') : '',
     '[data-shop-item-stock]': item?.stock_quantity ?? '', '[data-shop-item-max-order]': item?.max_per_order || 1,
     '[data-shop-item-max-player]': item?.max_per_player ?? '', '[data-shop-item-sort]': item?.sort_order || 0,
-    '[data-shop-item-description]': item?.description || '', '[data-shop-item-fulfilment]': item?.fulfilment_instructions || '',
+    '[data-shop-item-description]': item?.description || '', '[data-shop-item-preview-url]': item?.preview_image_url || '', '[data-shop-item-fulfilment]': item?.fulfilment_instructions || '',
     '[data-shop-profile-name]': profile.profile_name || '', '[data-shop-profile-child]': profile.child_type || '',
     '[data-shop-profile-secondary]': profile.secondary_event || '', '[data-shop-profile-lifetime]': profile.lifetime ?? 3888000,
     '[data-shop-profile-restock]': profile.restock ?? 0, '[data-shop-profile-min-restarts]': profile.minimum_restarts ?? 1, '[data-shop-profile-max-restarts]': profile.maximum_restarts ?? 30000, '[data-shop-profile-limit]': profile.event_limit || 'custom',
@@ -1385,6 +1409,34 @@ saveShopSettingsButton?.addEventListener('click', async () => {
     saveShopSettingsButton.removeAttribute('disabled');
   }
 });
+
+syncDayzCatalogueButton?.addEventListener('click', async () => {
+  const sessionToken = storageGet(AUTH_SESSION_KEY);
+  if (!sessionToken || dashboardAccessLevel !== 'owner' || ownerShopRequestInProgress) return;
+  if (!window.confirm('Sync the live DayZ types.xml and vehicle events into the Survivor Shop? Existing catalogue edits will be preserved. Rental vehicle prices will be enforced at $1 per restart.')) return;
+  ownerShopRequestInProgress = true;
+  syncDayzCatalogueButton.setAttribute('disabled', '');
+  showInlineMessage(ownerShopSyncMessage, 'Reading live DayZ Central Economy files and synchronising the catalogue…', 'info');
+  try {
+    const response = await protectedActionFetch(OWNER_SHOP_SYNC_URL, {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken}` },
+      body: '{}'
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: true })) return;
+    if (!response.ok) throw new Error(payload.message || 'Catalogue sync failed.');
+    const summary = payload.summary || {};
+    showInlineMessage(ownerShopSyncMessage, `${payload.message || 'DayZ catalogue synced.'} ${Number(summary.items_existing || 0).toLocaleString()} existing item(s) preserved; ${Number(summary.rentals_existing || 0).toLocaleString()} existing rental(s) preserved.`, 'success');
+    await Promise.all([loadOwnerShopConfig(sessionToken), loadMemberShop(sessionToken)]);
+  } catch (error) {
+    showInlineMessage(ownerShopSyncMessage, error.message || 'Catalogue sync failed.');
+  } finally {
+    ownerShopRequestInProgress = false;
+    syncDayzCatalogueButton.removeAttribute('disabled');
+  }
+});
+
 shopItemForm?.addEventListener('submit', async (event) => {
   event.preventDefault();
   const sessionToken = storageGet(AUTH_SESSION_KEY);
@@ -1424,7 +1476,7 @@ shopItemForm?.addEventListener('submit', async (event) => {
         })),
         stock_quantity: value('[data-shop-item-stock]'), max_per_order: isEvent ? 1 : value('[data-shop-item-max-order]'),
         max_per_player: isEvent ? '' : value('[data-shop-item-max-player]'), sort_order: value('[data-shop-item-sort]'),
-        description, fulfilment_instructions: value('[data-shop-item-fulfilment]'),
+        description, preview_image_url: value('[data-shop-item-preview-url]'), fulfilment_instructions: value('[data-shop-item-fulfilment]'),
         fulfilment_type: isEvent ? 'event' : 'manual',
         delivery_profile: isEvent ? {
           profile_name: eventGroup, child_type: value('[data-shop-profile-child]'),

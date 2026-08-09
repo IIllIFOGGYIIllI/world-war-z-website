@@ -167,6 +167,20 @@ const limitText = (item) => item.max_per_player == null
 const canPurchase = (item) => Boolean(
   state.user && state.settings.enabled && state.settings.website_enabled !== false && state.access.can_purchase && item.available
 );
+
+const previewFallback = (item) => {
+  if (item?.delivery_type === 'event') return 'assets/shop-previews/vehicles.svg';
+  const key = String(item?.category || 'default').trim().toLowerCase().replace(/&/g, ' ').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const supported = new Set(['weapons','ammunition','magazines','medical','food-drink','clothing','tools','base-building-storage','vehicle-parts','containers','explosives','vehicles']);
+  return `assets/shop-previews/${supported.has(key) ? key : 'default'}.svg`;
+};
+const previewImage = (item) => {
+  const image = document.createElement('img'); image.className = 'member-shop-preview-image'; image.loading = 'lazy'; image.decoding = 'async'; image.alt = `${item?.name || 'DayZ item'} preview`;
+  const fallback = previewFallback(item); image.src = String(item?.preview_image_url || '').startsWith('https://') ? item.preview_image_url : fallback;
+  image.addEventListener('error', () => { image.src = fallback; }, { once: true });
+  return image;
+};
+
 const populateCategories = () => {
   const selected = elements.category.value || 'all';
   elements.category.replaceChildren(new Option('All categories', 'all'));
@@ -186,6 +200,7 @@ const renderCatalogue = () => {
   elements.catalogue.replaceChildren();
   visible.forEach((item) => {
     const card = document.createElement('article'); card.className = `member-shop-card${item.available ? '' : ' unavailable'}`;
+    const preview = document.createElement('div'); preview.className = 'member-shop-preview'; preview.append(previewImage(item));
     const head = document.createElement('div'); head.className = 'member-shop-card-head';
     const copy = document.createElement('div');
     const kicker = document.createElement('p'); kicker.className = 'panel-kicker'; kicker.textContent = `${item.category} · ${item.sku}`;
@@ -197,7 +212,7 @@ const renderCatalogue = () => {
     } else price.textContent = item.delivery_type === 'event' ? `${money(item.price)}/restart` : money(item.price);
     head.append(copy, price);
     const description = document.createElement('p'); description.textContent = item.description;
-    card.append(head);
+    card.append(preview, head);
     if (item.discount) {
       const discount = document.createElement('span'); discount.className = 'member-discount-badge';
       discount.textContent = `${item.discount.role_name} · ${item.discount.is_percentage ? `${item.discount.amount}% off` : `${money(item.discount.amount)} off`}`;

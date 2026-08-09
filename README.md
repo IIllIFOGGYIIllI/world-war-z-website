@@ -1,3 +1,7 @@
+## Version 1.22.44 — Live DayZ Catalogue Sync & Shop Previews
+
+Pairs with Bot v1.18.44. Owner Shop Administration can now synchronise the live Chernarus `types.xml` and vehicle events into the Survivor Shop. Missing normal items receive economy-scaled default prices, live vehicle event children are added as restart-bound rentals at exactly `$1` per restart, and existing manually configured catalogue data is preserved. Member and dashboard shop cards now support preview images with automatic category artwork fallbacks and optional item-specific HTTPS image URLs.
+
 ## Version 1.22.43 — Live Restart Countdown Surfaces
 
 Pairs with Bot v1.18.43. The Dashboard Overview restart-cycle metric now shows the live remaining countdown, the main server card uses the same value and its restart progress bar tracks the current cycle. The existing detailed restart information, Survivor Shop and delivery monitor continue using the same Railway API source.
