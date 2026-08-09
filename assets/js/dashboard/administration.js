@@ -16,50 +16,98 @@ const titleCaseState = (value) => String(value || 'unknown')
   .replace(/_/g, ' ')
   .replace(/\b\w/g, (letter) => letter.toUpperCase());
 
-const renderServerActionHistory = (actions) => {
+const auditSubsystemLabel = (value) => ({
+  moderation: 'Moderation',
+  players: 'Player Admin',
+  server: 'Nitrado / Server',
+  configuration: 'Configuration',
+  shop: 'Shop Catalogue',
+  tickets: 'Tickets',
+  notifications: 'Notifications'
+}[String(value || '')] || titleCaseState(value));
+
+const auditSymbol = (subsystem, result) => {
+  if (result === 'failure') return { text: '!', tone: 'red' };
+  if (result === 'pending') return { text: '…', tone: 'warning' };
+  return {
+    moderation: { text: '⚿', tone: '' },
+    players: { text: '⌕', tone: '' },
+    server: { text: '↻', tone: '' },
+    configuration: { text: '≡', tone: '' },
+    shop: { text: '$', tone: '' },
+    tickets: { text: '🎟', tone: '' },
+    notifications: { text: '↗', tone: '' }
+  }[subsystem] || { text: '✓', tone: 'green' };
+};
+
+const renderServerActionHistory = (payload) => {
   if (!serverActionHistory) return;
   serverActionHistory.replaceChildren();
-  const safeActions = Array.isArray(actions) ? actions : [];
+  const actions = Array.isArray(payload?.events) ? payload.events : [];
+  const summary = payload?.summary || {};
+  const total = Math.max(0, Number(payload?.total) || 0);
 
-  safeActions.forEach((record) => {
+  setText('[data-audit-total]', String(total));
+  setText('[data-audit-success]', String(Math.max(0, Number(summary.success) || 0)));
+  setText('[data-audit-failure]', String(Math.max(0, Number(summary.failure) || 0)));
+  setText('[data-audit-pending]', String(Math.max(0, Number(summary.pending) || 0)));
+
+  actions.forEach((record) => {
     const item = document.createElement('li');
+    item.className = 'unified-audit-item';
     const symbol = document.createElement('span');
     const details = document.createElement('div');
     const title = document.createElement('strong');
     const meta = document.createElement('small');
     const outcome = document.createElement('span');
-    const action = ['start', 'stop', 'restart'].includes(record?.action)
-      ? record.action
-      : 'server action';
-    const result = ['accepted', 'rejected', 'pending'].includes(record?.outcome)
-      ? record.outcome
-      : 'rejected';
-    const reason = record?.reason ? ` · ${String(record.reason)}` : '';
+    const result = ['success', 'failure', 'pending'].includes(record?.result)
+      ? record.result
+      : 'success';
+    const subsystem = String(record?.subsystem || 'audit');
+    const mark = auditSymbol(subsystem, result);
 
-    symbol.className = `activity-symbol ${result === 'accepted' ? 'green' : result === 'rejected' ? 'red' : ''}`;
-    symbol.textContent = action === 'start' ? '▶' : action === 'stop' ? '■' : '↻';
-    title.textContent = `${titleCaseState(action)} requested by ${String(record?.requested_by || 'Administrator')}`;
-    meta.textContent = `${formatUpdatedAt(record?.requested_at)} · ${titleCaseState(record?.state_before)} → ${titleCaseState(record?.state_after)}${reason}`;
-    outcome.className = `audit-outcome ${result}`;
+    symbol.className = `activity-symbol ${mark.tone}`.trim();
+    symbol.textContent = mark.text;
+    title.textContent = `${auditSubsystemLabel(subsystem)} · ${titleCaseState(record?.action)} · ${String(record?.target || '—')}`;
+    meta.textContent = `${String(record?.actor_name || 'System')} · ${formatUpdatedAt(record?.created_at)} · ${String(record?.detail || 'No detail recorded.')}`;
+    outcome.className = `audit-outcome ${result === 'success' ? 'accepted' : result === 'failure' ? 'rejected' : 'pending'}`;
     outcome.textContent = result;
     details.append(title, meta);
     item.append(symbol, details, outcome);
     serverActionHistory.append(item);
   });
 
-  serverActionHistory.hidden = safeActions.length === 0;
-  if (serverActionHistoryEmpty) serverActionHistoryEmpty.hidden = safeActions.length !== 0;
+  serverActionHistory.hidden = actions.length === 0;
+  if (serverActionHistoryEmpty) serverActionHistoryEmpty.hidden = actions.length !== 0;
   if (serverActionHistoryError) serverActionHistoryError.hidden = true;
+  const pageNumber = Math.floor((Number(payload?.offset) || 0) / AUDIT_PAGE_SIZE) + 1;
+  setText('[data-audit-page-label]', `Page ${pageNumber} · ${total} matching event${total === 1 ? '' : 's'}`);
+  if (auditPrevious) auditPrevious.disabled = auditOffset <= 0;
+  if (auditNext) auditNext.disabled = !Boolean(payload?.has_more);
 };
 
-const loadServerActionHistory = async (sessionToken = storageGet(AUTH_SESSION_KEY)) => {
+const auditQueryString = () => {
+  const params = new URLSearchParams({
+    subsystem: String(auditSubsystem?.value || 'all'),
+    result: String(auditResult?.value || 'all'),
+    days: String(auditDays?.value || '30'),
+    limit: String(AUDIT_PAGE_SIZE),
+    offset: String(auditOffset)
+  });
+  const query = String(auditSearch?.value || '').trim();
+  if (query) params.set('query', query);
+  return params.toString();
+};
+
+const loadServerActionHistory = async (sessionToken = storageGet(AUTH_SESSION_KEY), { resetPage = false } = {}) => {
   if (!hasServerActionAccess() || !sessionToken || serverActionHistoryRequestInProgress) return;
+  if (resetPage) auditOffset = 0;
   serverActionHistoryRequestInProgress = true;
   refreshServerActionsButton?.setAttribute('disabled', '');
   refreshServerActionsButton?.setAttribute('aria-busy', 'true');
 
   try {
-    const response = await authFetch(SERVER_ACTION_HISTORY_URL, {
+    const response = await authFetch(`${ADMIN_AUDIT_URL}?${auditQueryString()}`, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -73,12 +121,16 @@ const loadServerActionHistory = async (sessionToken = storageGet(AUTH_SESSION_KE
       applySignedOutState();
       return;
     }
-    if (!response.ok || payload.status !== 'ok') throw new Error('History unavailable');
-    renderServerActionHistory(payload.actions);
+    if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Audit unavailable');
+    renderServerActionHistory(payload);
   } catch (error) {
     if (serverActionHistory) serverActionHistory.hidden = true;
     if (serverActionHistoryEmpty) serverActionHistoryEmpty.hidden = true;
     if (serverActionHistoryError) serverActionHistoryError.hidden = false;
+    setText('[data-audit-total]', '—');
+    setText('[data-audit-success]', '—');
+    setText('[data-audit-failure]', '—');
+    setText('[data-audit-pending]', '—');
   } finally {
     serverActionHistoryRequestInProgress = false;
     refreshServerActionsButton?.removeAttribute('disabled');
@@ -86,7 +138,20 @@ const loadServerActionHistory = async (sessionToken = storageGet(AUTH_SESSION_KE
   }
 };
 
-refreshServerActionsButton?.addEventListener('click', () => loadServerActionHistory());
+refreshServerActionsButton?.addEventListener('click', () => loadServerActionHistory(undefined, { resetPage: true }));
+[auditSubsystem, auditResult, auditDays].forEach((control) => control?.addEventListener('change', () => loadServerActionHistory(undefined, { resetPage: true })));
+auditSearch?.addEventListener('input', () => {
+  window.clearTimeout(auditSearchTimer);
+  auditSearchTimer = window.setTimeout(() => loadServerActionHistory(undefined, { resetPage: true }), 300);
+});
+auditPrevious?.addEventListener('click', () => {
+  auditOffset = Math.max(0, auditOffset - AUDIT_PAGE_SIZE);
+  loadServerActionHistory();
+});
+auditNext?.addEventListener('click', () => {
+  auditOffset += AUDIT_PAGE_SIZE;
+  loadServerActionHistory();
+});
 
 const formatAccountDate = (value, fallback = 'Not recorded') => {
   if (!value) return fallback;
@@ -356,12 +421,21 @@ const renderModerationCases = (payload) => {
   });
 
   moderationCaseList.hidden = cases.length === 0;
-  setText('[data-moderation-case-heading]', scope === 'recent' ? 'Recent Moderation Cases' : 'Active Moderation Cases');
+  const filteredView = String(moderationCaseAction?.value || 'all') !== 'all'
+    || String(moderationCaseStatus?.value || 'all') !== 'all'
+    || String(moderationCaseReview?.value || 'all') !== 'all'
+    || Boolean(String(moderationCaseSearch?.value || '').trim());
+  setText(
+    '[data-moderation-case-heading]',
+    filteredView ? 'Filtered Moderation Cases' : scope === 'recent' ? 'Recent Moderation Cases' : 'Active Moderation Cases'
+  );
   if (moderationCaseEmpty) {
     moderationCaseEmpty.hidden = cases.length !== 0;
-    moderationCaseEmpty.textContent = scope === 'recent'
-      ? 'No moderation cases have been recorded.'
-      : 'No active moderation cases are recorded.';
+    moderationCaseEmpty.textContent = filteredView
+      ? 'No moderation cases match the selected filters.'
+      : scope === 'recent'
+        ? 'No moderation cases have been recorded.'
+        : 'No active moderation cases are recorded.';
   }
   if (moderationCaseError) moderationCaseError.hidden = true;
 };
@@ -374,7 +448,16 @@ const loadModerationCases = async (sessionToken = storageGet(AUTH_SESSION_KEY)) 
 
   try {
     const scope = moderationCaseScope?.value === 'recent' ? 'recent' : 'active';
-    const response = await authFetch(`${ADMIN_MODERATION_CASES_URL}?scope=${scope}&limit=25`, {
+    const params = new URLSearchParams({
+      scope,
+      limit: '50',
+      action: String(moderationCaseAction?.value || 'all'),
+      status: String(moderationCaseStatus?.value || 'all'),
+      review: String(moderationCaseReview?.value || 'all')
+    });
+    const caseQuery = String(moderationCaseSearch?.value || '').trim();
+    if (caseQuery) params.set('query', caseQuery);
+    const response = await authFetch(`${ADMIN_MODERATION_CASES_URL}?${params.toString()}`, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -406,7 +489,19 @@ const loadModerationCases = async (sessionToken = storageGet(AUTH_SESSION_KEY)) 
 };
 
 refreshModerationCasesButton?.addEventListener('click', () => loadModerationCases());
-moderationCaseScope?.addEventListener('change', () => loadModerationCases());
+[moderationCaseScope, moderationCaseAction, moderationCaseReview].forEach((control) => control?.addEventListener('change', () => loadModerationCases()));
+moderationCaseStatus?.addEventListener('change', () => {
+  const status = String(moderationCaseStatus.value || 'all');
+  if (moderationCaseScope) {
+    if (status === 'active') moderationCaseScope.value = 'active';
+    else if (status !== 'all') moderationCaseScope.value = 'recent';
+  }
+  loadModerationCases();
+});
+moderationCaseSearch?.addEventListener('input', () => {
+  window.clearTimeout(moderationCaseSearchTimer);
+  moderationCaseSearchTimer = window.setTimeout(() => loadModerationCases(), 300);
+});
 
 const setSidebarBadge = (element, value) => {
   if (!element) return;
@@ -1199,6 +1294,20 @@ const renderModerationCaseDetail = (payload) => {
   setText('[data-case-dialog-created]', formatAccountDate(record.created_at));
   setText('[data-case-dialog-expiry]', record.expires_at ? formatAccountDate(record.expires_at) : ['ban', 'dayz_ban'].includes(String(record.action)) ? 'Permanent' : 'Not scheduled');
   setText('[data-case-dialog-reason]', String(record.reason || 'No reason recorded'));
+  const linkedAppeal = payload?.linked_appeal || null;
+  if (caseLinkedAppeal) {
+    caseLinkedAppeal.hidden = !linkedAppeal;
+    if (linkedAppeal) {
+      setText('[data-case-linked-appeal-title]', `Appeal #${Number(linkedAppeal.appeal_id) || '—'}${linkedAppeal.ticket_id ? ` · Ticket #${Number(linkedAppeal.ticket_id)}` : ''}`);
+      const outcome = linkedAppeal.outcome ? ` · Outcome: ${titleCaseState(linkedAppeal.outcome)}` : '';
+      setText('[data-case-linked-appeal-meta]', `Status: ${titleCaseState(linkedAppeal.status)} · Ticket: ${titleCaseState(linkedAppeal.ticket_status || 'not created')}${outcome}`);
+      const status = caseLinkedAppeal.querySelector('[data-case-linked-appeal-status]');
+      if (status) {
+        status.textContent = linkedAppeal.outcome ? titleCaseState(linkedAppeal.outcome) : titleCaseState(linkedAppeal.status);
+        status.className = `appeal-status ${String(linkedAppeal.outcome || linkedAppeal.status || '').toLowerCase()}`.trim();
+      }
+    }
+  }
   renderCaseEvidence(selectedModerationCase.evidence);
   renderCaseReviews(selectedModerationCase.reviews, selectedModerationCase.capabilities);
   setCaseEvidenceMode('add');

@@ -1,16 +1,14 @@
-# World War Z Website v1.22.53
+# World War Z Website v1.22.54
 
-## Private synchronized ticket lifecycle
+## Moderation & Audit Centre parity
 
-- Updates Support Tickets to the strict creator + Admin role + bot permission model.
-- Removes participant-management controls from the ticket administration UI.
-- Clarifies that the configured ticket role must be an admin/moderation-capable Discord role.
-- Adds an authenticated **Open Saved Website Transcript** action for ticket creators.
-- Adds an authenticated **Open Website Transcript** action for Admin/Owner staff alongside the Discord transcript archive link.
-- After the creator reviews a closed ticket, the dashboard immediately reflects the permanent archived/deleted ticket state after the Discord channel is removed.
-- Ban appeals remain linked into the same synchronized ticket system.
+- Upgrades Moderation Cases with server-backed search by case/player/reason/admin, action filters, status filters and appeal/staff-review filters.
+- Adds linked appeal/ticket context to the protected moderation-case dialog.
+- Replaces the old Start/Stop/Restart-only Server Audit panel with a unified Audit Centre covering moderation, player administration, Nitrado/server controls, configuration, shop catalogue administration, synchronized tickets and notifications.
+- Adds audit search, subsystem/outcome/time filters, result counters and pagination.
+- Keeps raw IDs, secrets and internal metadata on Railway.
 
 ## Compatibility
 
-- Requires Bot v1.18.49.
-- No map, shop, rental, progression or economy behavior is changed.
+- Requires Bot v1.18.52.
+- No shop delivery, rental duration, XP, ticket lifecycle or Chernarus map behaviour is changed.

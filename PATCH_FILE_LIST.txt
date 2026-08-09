@@ -1,18 +1,20 @@
-world-war-z-website v1.22.53 — Updated / Added Files
+world-war-z-bot-website v1.22.54 — Updated Files
 
-- 404.html
-- DELETE_THESE_FILES.txt
-- PATCH_FILE_LIST.txt
-- PATCH_NOTES.md
-- README.md
-- assets/js/dashboard/tickets.js
-- changelog.html
-- community-guidelines.html
-- dashboard.html
-- index.html
-- legal.html
-- moderation-policy.html
-- privacy.html
-- scripts/validate_site.py
-- shop.html
-- terms.html
+dashboard.html
+assets/js/dashboard/core.js
+assets/js/dashboard/administration.js
+assets/css/dashboard/moderation.css
+scripts/validate_site.py
+README.md
+PATCH_NOTES.md
+changelog.html
+PATCH_FILE_LIST.txt
+DELETE_THESE_FILES.txt
+terms.html
+index.html
+moderation-policy.html
+404.html
+shop.html
+privacy.html
+community-guidelines.html
+legal.html

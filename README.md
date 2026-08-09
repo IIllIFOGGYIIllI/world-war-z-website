@@ -1,3 +1,11 @@
+## Website v1.22.54 — Moderation & Audit Centre
+
+- Replaces the narrow Server Audit panel with a searchable cross-system Audit Centre.
+- Adds subsystem, outcome and time-range filters plus paged protected audit history.
+- Adds moderation case search and action/status/review filters.
+- Shows linked member appeal and synchronized ticket state directly inside moderation case detail.
+- Pairs with Bot v1.18.52 and does not create a second audit store.
+
 ## Website v1.22.53 — Private Ticket Lifecycle
 
 Support tickets now enforce creator + Admin role + bot privacy, expose the retained transcript through both Discord and authenticated website views, and automatically remove the closed Discord channel after the creator submits a review.
