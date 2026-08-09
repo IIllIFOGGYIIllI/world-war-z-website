@@ -1,3 +1,10 @@
+## Website v1.22.52 — Synchronized Ticket Centre
+
+- Adds a complete member/Admin/Owner ticket workspace backed by the same Railway ticket records and Discord ticket channels used by the bot.
+- Synchronizes ticket creation, conversation, state, claims, staff workflow, transcripts, ratings, blacklist and Owner configuration between Discord and the website.
+- Pairs with Bot v1.18.48 and does not create a second website-only ticket queue.
+
+
 ## Website v1.22.51 — Bulk Catalogue Administration
 
 - Adds safe multi-select and filtered bulk editing for the 1,900+ item Owner catalogue.

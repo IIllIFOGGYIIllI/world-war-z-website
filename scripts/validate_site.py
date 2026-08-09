@@ -22,7 +22,7 @@ RETIRED_MAP_PATHS = (
     MAP_ROOT / "tiles",
     ROOT / "assets/images/maps/chernarus-vector.svg",
 )
-EXPECTED_ASSET_VERSION = "1.22.51"
+EXPECTED_ASSET_VERSION = "1.22.52"
 
 EXPECTED_ROAD_GROUPS = {
     "paved_primary",
@@ -361,6 +361,7 @@ def validate_required_files(errors: list[str]) -> None:
         "assets/css/dashboard/workspace.css",
         "assets/css/dashboard/catalogue.css",
         "assets/css/dashboard/progression.css",
+        "assets/css/dashboard/tickets.css",
         "assets/css/components/chernarus-map.css",
         "assets/css/pages/shop.css",
         "assets/css/pages/policies.css",
@@ -371,6 +372,7 @@ def validate_required_files(errors: list[str]) -> None:
         "assets/js/dashboard/core.js",
         "assets/js/dashboard/administration.js",
         "assets/js/dashboard/account.js",
+        "assets/js/dashboard/tickets.js",
         "assets/js/dashboard/shop.js",
         "assets/js/dashboard/progression.js",
         "assets/js/dashboard/delivery.js",

@@ -1,4 +1,4 @@
-world-war-z-website v1.22.51 — Updated / Added Files
+world-war-z-website v1.22.52 — Updated / Added Files
 
 UPDATED
 - 404.html
@@ -12,10 +12,11 @@ UPDATED
 - shop.html
 - terms.html
 - README.md
-- assets/css/dashboard/catalogue.css
-- assets/js/dashboard/core.js
-- assets/js/dashboard/shop.js
 - scripts/validate_site.py
+
+ADDED
+- assets/css/dashboard/tickets.css
+- assets/js/dashboard/tickets.js
 
 RELEASE METADATA
 - PATCH_NOTES.md
