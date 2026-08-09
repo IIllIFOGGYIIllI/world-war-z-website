@@ -1,13 +1,15 @@
-## Website v1.22.58 — Configuration Backup Parity
+## Website v1.22.59 — Structured Configuration Studio
 
-This patch turns the existing example-only Configuration Backup History surface into a live Owner workflow backed by Bot v1.18.56.
+This patch adds purpose-built Owner controls for the DayZ configuration systems already present in Bot v1.18.57.
 
-- Lists the real validated Configuration Control backups stored by Railway.
-- Filters backup history by managed DayZ file.
-- Creates manual live backups with an attributable reason.
-- Compares any stored backup against the current live Nitrado file.
-- Restores a selected backup only after explicit confirmation and server-side Owner verification.
-- Shows the exact diff in the existing dashboard styling.
-- Fixes the post-apply refresh path so the editor reloads its live state after a successful deployment.
+- Adds a new **Structured Controls** workspace alongside the existing raw Mission File Editor.
+- Adds gameplay and monthly temperature controls for common `cfggameplay.json` values.
+- Adds weather controls and existing weather presets while deliberately preserving Chernarus snowfall values.
+- Adds live `messages.xml` management including restart/shutdown deadline fields used by the existing restart intelligence.
+- Adds targeted `types.xml` search/edit controls so thousands of loot records are not rendered at once.
+- Adds event settings, child entries, event positions and optional Event Zone controls.
+- Adds ordinary server-event creation using Event XML plus an optional Event Zone.
+- Every structured change can be previewed as an exact diff before applying.
+- The existing raw editor remains available for advanced/rare fields.
 
-Requires Bot v1.18.56. No persistent Railway data or Chernarus map assets are replaced.
+Requires Bot v1.18.57. No persistent Railway data or Chernarus map assets are replaced.
