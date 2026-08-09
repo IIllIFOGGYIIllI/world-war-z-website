@@ -1,13 +1,13 @@
-## Website v1.22.55 — Player Administration Parity
+## Website v1.22.56 — Objectives & Bounty Centre
 
-Player Administration now acts as the Admin/Owner survivor dossier instead of only a moderation/control screen.
+The dashboard now exposes the new rotating survivor quest system and completes practical Bounties & Contracts parity.
 
-- Adds Level, Prestige and event-win metrics.
-- Adds XP/Prestige snapshot and recent XP ledger.
-- Adds profile reputation, faction and flag captures.
-- Adds recent confirmed PvP encounter history.
-- Adds economy activity, synchronized ticket history, shop orders/rentals and bounty/contract participation.
-- All views continue to use the existing protected exact-player endpoint and bounded histories.
-- No public/member data exposure or duplicate player store is introduced.
+- Adds a dedicated Daily & Weekly Objectives workspace with live progress bars, rewards and reset countdowns.
+- Shows named Chernarus locations selected for exploration/dwell objectives.
+- Adds member bounty creation, active bounty board, personal bounty history, cancellations/refunds and contract acceptance/progress/claims.
+- Adds Admin Objective Administration for public contracts, active-bounty cancellation, recent objective activity and recent quest rotations.
+- Adds Owner quest rotation controls for enable/disable and Daily/Weekly counts.
+- Adds `/quests` commands to the website command library and Quest as a progression source label.
+- Adds Objectives to the unified Audit Centre subsystem filter.
 
-Requires Bot v1.18.53.
+Requires Bot v1.18.54. Existing Chernarus map assets, shop/rental workflows, ticket system and persistent Railway data remain unchanged.

@@ -1,17 +1,26 @@
-# World War Z Website v1.22.55
+# World War Z Website v1.22.56
 
-## Player Administration parity
+## Objectives centre
 
-- Expands the protected player record into a consolidated survivor dossier.
-- Adds Level, Prestige, Event Wins, progression source totals and recent XP activity.
-- Adds reputation, faction, flag captures and recent confirmed PvP encounters.
-- Adds wallet/economy transaction history.
-- Adds synchronized support-ticket history with review/transcript state.
-- Adds shop order, automatic delivery and restart-bound rental state.
-- Adds bounty and contract participation history.
+- Adds a member Daily & Weekly Objectives page backed by Bot v1.18.54.
+- Displays live objective progress, selected Chernarus locations, rewards, current/completed/claimed state and Daily/Weekly reset countdowns.
+- Adds quest history and protected claim actions.
+- Adds the new `/quests` command group to the command library.
 
-## Security and compatibility
+## Bounties & contracts parity
 
-- Requires Bot v1.18.53.
-- Raw Discord IDs, internal player IDs, ADM paths, channel IDs and transcript filesystem paths remain on Railway.
-- Existing player action controls, moderation, tickets, shop/rentals, XP and Chernarus map behaviour are unchanged.
+- Adds member bounty creation using exact verified PSN targets.
+- Adds the active bounty board plus My Bounty Records for placed, targeted, claimed, cancelled and expired records.
+- Adds member contract availability, acceptance, live progress and reward claiming.
+- Adds Admin creation/cancellation of contracts, Admin cancellation/refund of active bounties, and recent objective activity.
+
+## Owner controls and audit
+
+- Owners can enable/disable rotating quests and choose 1–5 Daily plus 1–7 Weekly quests.
+- Adds Objectives as a selectable subsystem in the unified Audit Centre.
+- Uses sanitized API payloads; raw Discord IDs and internal telemetry identifiers remain on Railway.
+
+## Compatibility
+
+- Requires Bot v1.18.54.
+- No Chernarus satellite tile, road geometry, shop delivery, rental, ticket or progression-role behaviour changed.

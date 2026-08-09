@@ -65,7 +65,7 @@
   const sourceMeta = (source) => ({
     text: ['💬', 'Text'], voice: ['🎙️', 'Voice'], combat: ['☠️', 'Combat'],
     event: ['🏆', 'Event'], event_win: ['🏆', 'Event'], bounty: ['🎯', 'Bounty'],
-    contract: ['📜', 'Contract'], prestige: ['☣️', 'Prestige'], bonus: ['⭐', 'Bonus']
+    contract: ['📜', 'Contract'], quest: ['◎', 'Quest'], prestige: ['☣️', 'Prestige'], bonus: ['⭐', 'Bonus']
   }[String(source || '').toLowerCase()] || ['⭐', String(source || 'Bonus').replaceAll('_', ' ')]);
 
   const relativeDate = (value) => {
