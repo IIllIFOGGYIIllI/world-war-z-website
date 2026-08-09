@@ -1,4 +1,6 @@
-[![Deploy World War Z Website](https://github.com/IIllIFOGGYIIllI/world-war-z-website/actions/workflows/pages.yml/badge.svg?event=push)](https://github.com/IIllIFOGGYIIllI/world-war-z-website/actions/workflows/pages.yml)
+## Version 1.22.43 — Live Restart Countdown Surfaces
+
+Pairs with Bot v1.18.43. The Dashboard Overview restart-cycle metric now shows the live remaining countdown, the main server card uses the same value and its restart progress bar tracks the current cycle. The existing detailed restart information, Survivor Shop and delivery monitor continue using the same Railway API source.
 
 ## Version 1.22.40 — Header Logo Clarity Fix
 

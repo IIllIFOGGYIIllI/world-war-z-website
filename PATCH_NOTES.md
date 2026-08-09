@@ -1,33 +1,14 @@
-# world-war-z-website v1.22.42
+# world-war-z-website v1.22.43
 
-## Summary
-- Corrected the WWZ compact logo treatment after the v1.22.41 frame-only change remained visually too similar.
-- Removed the separate dark square/rounded-card wrapper around compact WWZ branding.
-- The circular logo artwork now defines the visible shape directly.
-- Added an alpha-following red drop shadow so the glow follows the round artwork rather than the CSS box.
-- Applied consistently to homepage, dashboard, shop, and policy/legal headers.
+## Changed
+- The main Dashboard Overview Restart Cycle card now displays the live restart countdown instead of a static `EVERY 3H` value.
+- The main server overview panel shows the same live countdown and its restart progress bar advances through the current configured restart cycle.
+- Unsynchronised schedules display `Sync pending` instead of inventing a restart time.
+- Detailed Operational Health, Survivor Shop and delivery-monitor restart timing remain connected to the same Bot v1.18.43 API data.
 
-## Updated Files
-- index.html
-- dashboard.html
-- shop.html
-- 404.html
-- privacy.html
-- terms.html
-- legal.html
-- community-guidelines.html
-- moderation-policy.html
-- changelog.html
-- assets/css/pages/home.css
-- assets/css/dashboard/core.css
-- assets/css/dashboard/workspace.css
-- assets/css/pages/policies.css
-- assets/css/pages/shop.css
-- assets/css/site-polish.css
-- scripts/validate_site.py
-- PATCH_NOTES.md
-- PATCH_FILE_LIST.txt
-- DELETE_THESE_FILES.txt
+## Compatibility
+- Pairs with Bot v1.18.43.
+- No map geometry, shop/rental delivery logic, XP behaviour, permissions or persistent records changed.
 
 ## Files To Delete
 - NONE

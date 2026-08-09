@@ -1,5 +1,7 @@
-index.html
+world-war-z-website v1.22.43 patch files
+
 dashboard.html
+index.html
 shop.html
 404.html
 privacy.html
@@ -8,13 +10,9 @@ legal.html
 community-guidelines.html
 moderation-policy.html
 changelog.html
-assets/css/pages/home.css
-assets/css/dashboard/core.css
-assets/css/dashboard/workspace.css
-assets/css/pages/policies.css
-assets/css/pages/shop.css
-assets/css/site-polish.css
+assets/js/dashboard/account.js
 scripts/validate_site.py
+README.md
 PATCH_NOTES.md
 PATCH_FILE_LIST.txt
 DELETE_THESE_FILES.txt

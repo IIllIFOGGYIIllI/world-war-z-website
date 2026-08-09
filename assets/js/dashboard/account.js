@@ -836,6 +836,29 @@ const applyLiveStatus = (payload) => {
   setText('[data-operations-restart-interval]', restartInterval);
   setText('[data-operations-restart-source]', restartSource);
   setText('[data-operations-restart-warning]', restartWarning);
+
+  const overviewRestartValue = restartSynchronised
+    ? restartCountdown
+    : restartConfigured
+      ? 'Sync pending'
+      : 'Unavailable';
+  const overviewRestartNote = restartSynchronised
+    ? `Configured schedule · ${restartInterval}`
+    : restartConfigured
+      ? restartInterval
+      : 'No automatic restart configured';
+  setText('[data-overview-restart-countdown]', overviewRestartValue);
+  setText('[data-overview-restart-note]', overviewRestartNote);
+
+  const restartCycleSeconds = restartIntervalMinutes * 60;
+  const restartRemainingSeconds = Math.max(0, Number(operations.restart_countdown_seconds) || 0);
+  const restartProgress = restartSynchronised && restartCycleSeconds > 0
+    ? Math.max(0, Math.min(100, ((restartCycleSeconds - restartRemainingSeconds) / restartCycleSeconds) * 100))
+    : 0;
+  document.querySelectorAll('[data-restart-progress]').forEach((element) => {
+    element.style.setProperty('--progress', `${restartProgress.toFixed(1)}%`);
+  });
+
   setText('[data-map-name]', serverMap.toUpperCase());
   setText('[data-map-server-name]', serverName);
   setText('[data-map-platform]', platform);
@@ -884,6 +907,11 @@ const showStatusUnavailable = () => {
   setText('[data-operations-restart-interval]', 'Unavailable');
   setText('[data-operations-restart-source]', 'Unavailable');
   setText('[data-operations-restart-warning]', 'Unavailable');
+  setText('[data-overview-restart-countdown]', 'Unavailable');
+  setText('[data-overview-restart-note]', 'Unable to reach the Railway API');
+  document.querySelectorAll('[data-restart-progress]').forEach((element) => {
+    element.style.setProperty('--progress', '0%');
+  });
   document.querySelectorAll('[data-server-status-badge], [data-live-status-class]').forEach((element) => {
     setStatusClass(element, 'unavailable');
   });
