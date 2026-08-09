@@ -253,6 +253,13 @@ const resetAdminPlayerAdministration = () => {
   adminPlayerModerationHistory?.replaceChildren();
   adminPlayerDayzBans?.replaceChildren();
   adminPlayerActionHistory?.replaceChildren();
+  adminPlayerProgressionHistory?.replaceChildren();
+  adminPlayerEventHistory?.replaceChildren();
+  adminPlayerPvpHistory?.replaceChildren();
+  adminPlayerEconomyHistory?.replaceChildren();
+  adminPlayerTicketHistory?.replaceChildren();
+  adminPlayerShopHistory?.replaceChildren();
+  adminPlayerObjectiveHistory?.replaceChildren();
   discordBanlist?.replaceChildren();
   dayzBanlist?.replaceChildren();
   if (discordBanlistEmpty) discordBanlistEmpty.hidden = true;
@@ -274,6 +281,13 @@ const resetAdminPlayerAdministration = () => {
   if (adminPlayerModerationEmpty) adminPlayerModerationEmpty.hidden = true;
   if (adminPlayerDayzBansEmpty) adminPlayerDayzBansEmpty.hidden = true;
   if (adminPlayerActionHistoryEmpty) adminPlayerActionHistoryEmpty.hidden = true;
+  if (adminPlayerProgressionEmpty) adminPlayerProgressionEmpty.hidden = true;
+  if (adminPlayerEventEmpty) adminPlayerEventEmpty.hidden = true;
+  if (adminPlayerPvpEmpty) adminPlayerPvpEmpty.hidden = true;
+  if (adminPlayerEconomyEmpty) adminPlayerEconomyEmpty.hidden = true;
+  if (adminPlayerTicketEmpty) adminPlayerTicketEmpty.hidden = true;
+  if (adminPlayerShopEmpty) adminPlayerShopEmpty.hidden = true;
+  if (adminPlayerObjectiveEmpty) adminPlayerObjectiveEmpty.hidden = true;
   resetPlayerActionDialog({ clearSelection: true });
   closePlayerActionDialog();
   syncPlayerActionControls();
@@ -1726,10 +1740,180 @@ const renderAdminActionHistory = (history) => {
   });
 };
 
+const signedMoney = (value) => {
+  const amount = Math.trunc(Number(value) || 0);
+  const formatted = formatMoney(Math.abs(amount));
+  return amount > 0 ? `+${formatted}` : amount < 0 ? `-${formatted}` : formatted;
+};
+
+const renderAdminProgression = (progression) => {
+  const member = progression?.member || null;
+  const history = Array.isArray(progression?.recent_xp) ? progression.recent_xp : [];
+  const available = Boolean(progression?.available && member);
+  setText('[data-admin-player-progression-state]', available ? 'Progression active' : 'Unavailable');
+  setText('[data-admin-player-level]', available ? String(Math.max(1, Number(member.level) || 1)) : '—');
+  setText('[data-admin-player-prestige]', available ? `P${Math.max(0, Number(member.prestige) || 0)}` : '—');
+  setText('[data-admin-player-current-xp]', available ? new Intl.NumberFormat('en-AU').format(Number(member.current_xp) || 0) : 'Unavailable');
+  setText('[data-admin-player-lifetime-xp]', available ? new Intl.NumberFormat('en-AU').format(Number(member.lifetime_xp) || 0) : 'Unavailable');
+  setText('[data-admin-player-xp-sources]', available
+    ? `Text ${new Intl.NumberFormat('en-AU').format(Number(member.text_xp) || 0)} · Voice ${new Intl.NumberFormat('en-AU').format(Number(member.voice_xp) || 0)} · Combat ${new Intl.NumberFormat('en-AU').format(Number(member.combat_xp) || 0)} · Event ${new Intl.NumberFormat('en-AU').format(Number(member.event_xp) || 0)} · Bonus ${new Intl.NumberFormat('en-AU').format(Number(member.bonus_xp) || 0)}`
+    : 'Unavailable');
+  setText('[data-admin-player-last-prestige]', available ? formatAccountDate(member.last_prestige_at, 'Not recorded') : 'Unavailable');
+
+  if (!adminPlayerProgressionHistory) return;
+  adminPlayerProgressionHistory.replaceChildren();
+  if (adminPlayerProgressionEmpty) adminPlayerProgressionEmpty.hidden = history.length !== 0;
+  history.forEach((record) => {
+    const amount = Math.trunc(Number(record?.amount) || 0);
+    appendAdminActivity(adminPlayerProgressionHistory, {
+      symbolText: amount >= 0 ? '+' : '−',
+      symbolClass: amount >= 0 ? 'green' : 'red',
+      titleText: `${amount >= 0 ? '+' : ''}${new Intl.NumberFormat('en-AU').format(amount)} XP · ${titleCaseState(record?.source_type || 'activity')}`,
+      detailText: `${String(record?.details || 'XP awarded')} · ${formatAccountDate(record?.created_at)}`
+    });
+  });
+};
+
+const renderAdminEventWins = (eventWins) => {
+  const history = Array.isArray(eventWins?.history) ? eventWins.history : [];
+  setText('[data-admin-player-event-wins]', new Intl.NumberFormat('en-AU').format(Number(eventWins?.total) || 0));
+  if (!adminPlayerEventHistory) return;
+  adminPlayerEventHistory.replaceChildren();
+  if (adminPlayerEventEmpty) adminPlayerEventEmpty.hidden = history.length !== 0;
+  history.forEach((record) => {
+    const change = Math.trunc(Number(record?.change_amount) || 0);
+    appendAdminActivity(adminPlayerEventHistory, {
+      symbolText: '🏆',
+      symbolClass: change < 0 ? 'red' : 'green',
+      titleText: `${String(record?.event_name || 'Event')} · ${change > 0 ? '+' : ''}${change} win${Math.abs(change) === 1 ? '' : 's'}`,
+      detailText: `${String(record?.reason || 'No reason recorded')} · ${String(record?.administrator_name || 'Administrator')} · ${formatAccountDate(record?.created_at)}`
+    });
+  });
+};
+
+const renderAdminPvpHistory = (history) => {
+  const safeHistory = Array.isArray(history) ? history : [];
+  if (!adminPlayerPvpHistory) return;
+  adminPlayerPvpHistory.replaceChildren();
+  if (adminPlayerPvpEmpty) adminPlayerPvpEmpty.hidden = safeHistory.length !== 0;
+  safeHistory.forEach((record) => {
+    const kill = String(record?.result) === 'kill';
+    const distance = record?.distance_metres == null ? '' : ` · ${Number(record.distance_metres).toFixed(1)} m`;
+    const location = record?.hit_location && String(record.hit_location) !== 'Unknown' ? ` · ${String(record.hit_location)}` : '';
+    appendAdminActivity(adminPlayerPvpHistory, {
+      symbolText: kill ? '☠' : '×',
+      symbolClass: kill ? 'green' : 'red',
+      titleText: `${kill ? 'Kill' : 'Death'} · ${String(record?.opponent_psn || 'Unknown opponent')}`,
+      detailText: `${String(record?.weapon || 'Unknown weapon')}${distance}${location} · ${formatAccountDate(record?.recorded_at || record?.event_time)}`
+    });
+  });
+};
+
+const renderAdminEconomyHistory = (economy) => {
+  const history = Array.isArray(economy?.transactions) ? economy.transactions : [];
+  const account = economy?.account || null;
+  if (account) {
+    setText('[data-admin-player-economy-summary]', `Earned ${formatMoney(account.total_earned)} · Spent ${formatMoney(account.total_spent)} · Gambling ${Number(account.gambling_wins) || 0}W/${Number(account.gambling_losses) || 0}L`);
+  } else {
+    setText('[data-admin-player-economy-summary]', economy?.available ? 'No extended economy stats' : 'Unavailable');
+  }
+  if (!adminPlayerEconomyHistory) return;
+  adminPlayerEconomyHistory.replaceChildren();
+  if (adminPlayerEconomyEmpty) adminPlayerEconomyEmpty.hidden = history.length !== 0;
+  history.forEach((record) => {
+    const change = Math.trunc(Number(record?.change_amount) || 0);
+    const counterparty = record?.counterparty_psn ? ` · With ${String(record.counterparty_psn)}` : '';
+    appendAdminActivity(adminPlayerEconomyHistory, {
+      symbolText: change >= 0 ? '$' : '−',
+      symbolClass: change >= 0 ? 'green' : 'red',
+      titleText: `${signedMoney(change)} · ${titleCaseState(record?.transaction_type || 'transaction')}`,
+      detailText: `${String(record?.details || 'No details recorded')}${counterparty} · Balance ${formatMoney(record?.total_after)} · ${formatAccountDate(record?.created_at)}`
+    });
+  });
+};
+
+const renderAdminTicketHistory = (tickets) => {
+  const history = Array.isArray(tickets?.history) ? tickets.history : [];
+  const total = Math.max(0, Number(tickets?.total) || 0);
+  const open = Math.max(0, Number(tickets?.open) || 0);
+  setText('[data-admin-player-ticket-count]', `${total} total · ${open} active`);
+  setText('[data-admin-player-ticket-summary]', `${total} total · ${open} active`);
+  if (!adminPlayerTicketHistory) return;
+  adminPlayerTicketHistory.replaceChildren();
+  if (adminPlayerTicketEmpty) adminPlayerTicketEmpty.hidden = history.length !== 0;
+  history.forEach((record) => {
+    const rating = record?.rating ? ` · ${Number(record.rating)}★ review` : '';
+    const transcript = record?.transcript_available ? ' · Transcript archived' : '';
+    appendAdminActivity(adminPlayerTicketHistory, {
+      symbolText: '🎟',
+      symbolClass: String(record?.status) === 'open' ? 'green' : '',
+      titleText: `Ticket #${Number(record?.ticket_id) || '—'} · ${String(record?.category || 'Support')} · ${titleCaseState(record?.status)}`,
+      detailText: `${String(record?.subject || 'No subject')} · ${titleCaseState(record?.priority || 'normal')} priority${record?.claimed_by ? ` · Claimed by ${String(record.claimed_by)}` : ''}${rating}${transcript} · ${formatAccountDate(record?.created_at)}`
+    });
+  });
+};
+
+const renderAdminShopHistory = (shop) => {
+  const history = Array.isArray(shop?.history) ? shop.history : [];
+  const total = Math.max(0, Number(shop?.total_orders) || 0);
+  const activeRentals = Math.max(0, Number(shop?.active_rentals) || 0);
+  setText('[data-admin-player-shop-summary]', `${total} order${total === 1 ? '' : 's'} · ${activeRentals} active rental${activeRentals === 1 ? '' : 's'}`);
+  if (!adminPlayerShopHistory) return;
+  adminPlayerShopHistory.replaceChildren();
+  if (adminPlayerShopEmpty) adminPlayerShopEmpty.hidden = history.length !== 0;
+  history.forEach((record) => {
+    const delivery = record?.delivery || null;
+    const rental = delivery?.kind === 'rental';
+    const deliveryDetail = delivery
+      ? rental
+        ? ` · Rental ${titleCaseState(delivery.status)} · ${Number(delivery.remaining_restarts) || 0}/${Number(delivery.purchased_restarts) || 0} restart(s) remaining · ${String(delivery.location_name || 'Saved location')}`
+        : ` · Delivery ${titleCaseState(delivery.status)} · ${String(delivery.location_name || 'Saved location')}`
+      : '';
+    appendAdminActivity(adminPlayerShopHistory, {
+      symbolText: rental ? '↻' : '🛒',
+      symbolClass: ['failed', 'cancelled', 'rolled_back'].includes(String(delivery?.status || record?.status)) ? 'red' : '',
+      titleText: `Order #${Number(record?.order_id) || '—'} · ${String(record?.item_name || 'Unknown item')} · ${titleCaseState(record?.status)}`,
+      detailText: `${Number(record?.quantity) || 1} × ${formatMoney(record?.unit_price)} · ${formatMoney(record?.total_price)} total${deliveryDetail} · ${formatAccountDate(record?.created_at)}`
+    });
+  });
+};
+
+const renderAdminObjectiveHistory = (payload) => {
+  const bounties = Array.isArray(payload?.bounties) ? payload.bounties : [];
+  const contracts = Array.isArray(payload?.contracts) ? payload.contracts : [];
+  if (!adminPlayerObjectiveHistory) return;
+  adminPlayerObjectiveHistory.replaceChildren();
+  const rows = [
+    ...bounties.map((record) => ({ kind: 'bounty', record, date: record?.created_at })),
+    ...contracts.map((record) => ({ kind: 'contract', record, date: record?.accepted_at }))
+  ].sort((a, b) => String(b.date || '').localeCompare(String(a.date || ''))).slice(0, 10);
+  if (adminPlayerObjectiveEmpty) adminPlayerObjectiveEmpty.hidden = rows.length !== 0;
+  rows.forEach(({ kind, record }) => {
+    if (kind === 'bounty') {
+      const relation = titleCaseState(record?.relationship || 'participant');
+      appendAdminActivity(adminPlayerObjectiveHistory, {
+        symbolText: '⌖',
+        symbolClass: String(record?.status) === 'active' ? 'warning' : '',
+        titleText: `Bounty #${Number(record?.bounty_id) || '—'} · ${relation} · ${titleCaseState(record?.status)}`,
+        detailText: `${formatMoney(record?.amount)} · ${String(record?.creator_psn || 'Unknown')} → ${String(record?.target_psn || 'Unknown')}${record?.claimed_by_psn ? ` · Claimed by ${String(record.claimed_by_psn)}` : ''} · ${formatAccountDate(record?.created_at)}`
+      });
+      return;
+    }
+    appendAdminActivity(adminPlayerObjectiveHistory, {
+      symbolText: '✓',
+      symbolClass: String(record?.status) === 'claimed' ? 'green' : '',
+      titleText: `Contract #${Number(record?.contract_id) || '—'} · ${String(record?.title || 'Contract')} · ${titleCaseState(record?.status)}`,
+      detailText: `${Math.max(0, Number(record?.progress) || 0)}/${Math.max(1, Number(record?.target_count) || 1)} progress · ${formatMoney(record?.reward)} reward · ${formatAccountDate(record?.accepted_at)}`
+    });
+  });
+};
+
 const renderAdminPlayerDetails = (payload) => {
   const player = payload?.player;
   const identity = player?.identity;
   const activity = player?.activity;
+  const profile = player?.profile || {};
+  const progression = player?.progression || {};
   const pvp = player?.pvp;
   const moderation = player?.moderation;
   const administration = player?.administration;
@@ -1766,6 +1950,9 @@ const renderAdminPlayerDetails = (payload) => {
   setText('[data-admin-player-deaths]', new Intl.NumberFormat('en-AU').format(Number(pvp.deaths) || 0));
   setText('[data-admin-player-warnings]', new Intl.NumberFormat('en-AU').format(Number(moderation.warning_count) || 0));
   setText('[data-admin-player-balance]', administration?.economy?.available ? formatMoney(administration.economy.balance) : 'Unavailable');
+  setText('[data-admin-player-faction]', identity.linked ? String(profile?.faction || 'None') : 'Unavailable');
+  setText('[data-admin-player-reputation]', identity.linked ? new Intl.NumberFormat('en-AU').format(Number(profile?.reputation) || 0) : 'Unavailable');
+  setText('[data-admin-player-flags]', new Intl.NumberFormat('en-AU').format(Number(profile?.flags_captured) || 0));
   setText('[data-admin-player-first-seen]', formatAccountDate(activity.first_seen));
   setText('[data-admin-player-last-seen]', activity.online ? 'Currently online' : formatAccountDate(activity.last_seen));
   setText('[data-admin-player-linked-at]', identity.linked ? formatAccountDate(activity.linked_at) : 'Not linked');
@@ -1773,6 +1960,13 @@ const renderAdminPlayerDetails = (payload) => {
   setText('[data-admin-player-streak]', pvp.available ? new Intl.NumberFormat('en-AU').format(Number(pvp.current_streak) || 0) : 'Unavailable');
   setText('[data-admin-player-longest]', pvp.longest_kill_metres == null ? 'Not recorded' : `${Number(pvp.longest_kill_metres).toFixed(1)} m`);
   setText('[data-admin-player-weapon]', String(pvp.favourite_weapon || 'Not recorded'));
+  renderAdminProgression(progression);
+  renderAdminEventWins(profile?.event_wins || {});
+  renderAdminPvpHistory(pvp?.history);
+  renderAdminEconomyHistory(administration?.economy || {});
+  renderAdminTicketHistory(administration?.tickets || {});
+  renderAdminShopHistory(administration?.shop || {});
+  renderAdminObjectiveHistory(administration?.bounties_contracts || {});
   renderAdminNotes(administration.notes);
   renderAdminActiveWarnings(administration.active_warnings);
   renderAdminModerationHistory(moderation.history);

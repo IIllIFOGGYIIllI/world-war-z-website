@@ -1,9 +1,8 @@
-world-war-z-bot-website v1.22.54 — Updated Files
+world-war-z-bot-website v1.22.55 — Updated Files
 
 dashboard.html
 assets/js/dashboard/core.js
 assets/js/dashboard/administration.js
-assets/css/dashboard/moderation.css
 scripts/validate_site.py
 README.md
 PATCH_NOTES.md

@@ -1,14 +1,17 @@
-# World War Z Website v1.22.54
+# World War Z Website v1.22.55
 
-## Moderation & Audit Centre parity
+## Player Administration parity
 
-- Upgrades Moderation Cases with server-backed search by case/player/reason/admin, action filters, status filters and appeal/staff-review filters.
-- Adds linked appeal/ticket context to the protected moderation-case dialog.
-- Replaces the old Start/Stop/Restart-only Server Audit panel with a unified Audit Centre covering moderation, player administration, Nitrado/server controls, configuration, shop catalogue administration, synchronized tickets and notifications.
-- Adds audit search, subsystem/outcome/time filters, result counters and pagination.
-- Keeps raw IDs, secrets and internal metadata on Railway.
+- Expands the protected player record into a consolidated survivor dossier.
+- Adds Level, Prestige, Event Wins, progression source totals and recent XP activity.
+- Adds reputation, faction, flag captures and recent confirmed PvP encounters.
+- Adds wallet/economy transaction history.
+- Adds synchronized support-ticket history with review/transcript state.
+- Adds shop order, automatic delivery and restart-bound rental state.
+- Adds bounty and contract participation history.
 
-## Compatibility
+## Security and compatibility
 
-- Requires Bot v1.18.52.
-- No shop delivery, rental duration, XP, ticket lifecycle or Chernarus map behaviour is changed.
+- Requires Bot v1.18.53.
+- Raw Discord IDs, internal player IDs, ADM paths, channel IDs and transcript filesystem paths remain on Railway.
+- Existing player action controls, moderation, tickets, shop/rentals, XP and Chernarus map behaviour are unchanged.
