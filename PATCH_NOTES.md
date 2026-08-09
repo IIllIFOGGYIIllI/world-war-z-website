@@ -1,24 +1,17 @@
-# world-war-z-website v1.22.45
+# World War Z Website v1.22.46
 
-## Added
-- Adds a shared **DayZ Wiki preview resolver** for the member Survivor Shop and Dashboard Shop.
-- Visible catalogue cards progressively resolve real DayZ Wiki article/file thumbnails when no manual HTTPS preview is configured.
-- Adds common DayZ classname/display-name aliases for weapons, medical items, vehicle parts and the live rental vehicles.
-- Adds browser-side preview caching for approximately 30 days.
-- Adds source/attribution notes for third-party Wiki previews.
+## Fixed
 
-## Performance & Safety
-- Wiki lookups are lazy: only cards near the viewport attempt resolution.
-- Third-party lookups are concurrency-limited to four requests at a time.
-- Existing manual `preview_image_url` values always take priority.
-- Existing category SVG artwork remains the fallback for missing, incorrect or unavailable Wiki previews.
-- A DayZ Wiki/Fandom outage cannot block catalogue rendering, checkout, delivery or Railway actions.
+- Tightened DayZ Wiki preview matching for vehicle rentals.
+- Vehicle colour variants now resolve through the canonical vehicle article (for example `Hatchback_02_Blue` -> `Gunter 2`) instead of trusting similarly named Wiki image files.
+- Disabled raw Wiki file-search fallback for restart-bound vehicle rentals, preventing textures, parts, wrecks, or gallery assets from being selected as the vehicle preview.
+- Bumped the browser preview cache key so incorrect v1.22.45 matches are discarded automatically after deployment.
+- Normal item preview resolution, manual preview overrides, pricing, checkout, delivery, rentals, and the $1/restart rate are unchanged.
 
-## Compatibility
-- **Website-only patch. Bot remains v1.18.44.**
-- No shop prices are changed.
-- Vehicle rentals remain exactly `$1 / restart`.
-- No catalogue records, orders, delivery logic, map geometry or Railway database records are changed.
+## Deployment
 
-## Files To Delete
-- NONE
+Website-only patch. Bot remains v1.18.44.
+
+## Files to delete
+
+NONE.

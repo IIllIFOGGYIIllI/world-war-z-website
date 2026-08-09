@@ -1,6 +1,6 @@
-## Version 1.22.45 — DayZ Wiki Item Previews
+## Version 1.22.46 — DayZ Wiki Item Previews
 
-### v1.22.45 preview resolver
+### v1.22.46 preview resolver
 - Member Shop and Dashboard Shop now progressively resolve real DayZ Wiki previews for visible catalogue cards when an explicit HTTPS preview is not configured.
 - Manual preview URLs always win; category SVG artwork remains the fail-safe fallback.
 - Lookups are lazy, concurrency-limited and cached in the browser for 30 days so the 1,900+ item catalogue does not fire thousands of requests at once.

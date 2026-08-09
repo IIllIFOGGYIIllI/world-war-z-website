@@ -1,6 +1,6 @@
 # DayZ Wiki catalogue previews
 
-Website v1.22.45 does not bundle or redistribute a copied DayZ Wiki image archive.
+Website v1.22.46 does not bundle or redistribute a copied DayZ Wiki image archive.
 Instead, catalogue cards progressively resolve remote article/file thumbnails from
 DayZ Wiki when an item has no manually configured HTTPS preview URL.
 

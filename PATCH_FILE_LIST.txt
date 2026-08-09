@@ -1,22 +1,26 @@
-world-war-z-website v1.22.45 patch files
+World War Z Website v1.22.46
 
-404.html
-changelog.html
-community-guidelines.html
-dashboard.html
-index.html
-legal.html
-moderation-policy.html
-privacy.html
-shop.html
-terms.html
-README.md
-PATCH_NOTES.md
-PATCH_FILE_LIST.txt
-DELETE_THESE_FILES.txt
-scripts/validate_site.py
-assets/js/shop-wiki-previews.js
-assets/js/dashboard/shop.js
-assets/js/pages/shop.js
-assets/css/pages/shop.css
-assets/shop-previews/DAYZ_WIKI_PREVIEWS.md
+UPDATED
+- assets/js/shop-wiki-previews.js
+- README.md
+- changelog.html
+- privacy.html
+- dashboard.html
+- 404.html
+- index.html
+- community-guidelines.html
+- legal.html
+- scripts/validate_site.py
+- assets/css/pages/shop.css
+- assets/shop-previews/DAYZ_WIKI_PREVIEWS.md
+- shop.html
+- terms.html
+- moderation-policy.html
+
+RELEASE METADATA
+- PATCH_NOTES.md
+- PATCH_FILE_LIST.txt
+- DELETE_THESE_FILES.txt
+
+FILES TO DELETE
+- NONE

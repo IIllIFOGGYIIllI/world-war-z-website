@@ -3,7 +3,7 @@
 
   const WIKI_BASE = 'https://dayz.fandom.com';
   const API_URL = `${WIKI_BASE}/api.php`;
-  const CACHE_KEY = 'wwz_dayz_wiki_previews_v1';
+  const CACHE_KEY = 'wwz_dayz_wiki_previews_v2';
   const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
   const NEGATIVE_TTL_MS = 24 * 60 * 60 * 1000;
   const MAX_CACHE_ENTRIES = 2500;
@@ -116,17 +116,40 @@
     .trim();
 
   const stripVariant = (value) => String(value || '')
-    .replace(/_(Black|Green|Blue|White|Red|Orange|Yellow|Grey|Gray|Camo|Pink|Brown|Olive|Tan)$/i, '')
+    .replace(/_(Black|Green|Blue|White|Red|Orange|Yellow|Grey|Gray|Camo|Pink|Brown|Olive|Tan|Wine|Lime)$/i, '')
     .trim();
 
   const itemClassname = (item) => {
     const type = Array.isArray(item?.types) ? item.types.find(Boolean) : '';
-    return String(type || '').trim();
+    if (type) return String(type).trim();
+    // Restart-bound rentals deliberately have no normal item types. Their live
+    // DayZ vehicle classname is included in the generated public description,
+    // e.g. "Restart-bound Gunter 2 rental (Hatchback_02_Blue)."
+    const description = String(item?.description || '');
+    const match = description.match(/\(([A-Za-z0-9_]+)\)(?:\.|\s|$)/);
+    return String(match?.[1] || '').trim();
   };
 
   const itemKey = (item) => {
     const cls = itemClassname(item);
     return normalize(cls || item?.sku || item?.name || item?.item_id || 'unknown');
+  };
+
+  const isVehicleRental = (item) => {
+    const category = normalize(item?.category || '');
+    const sku = String(item?.sku || '').toLowerCase();
+    return item?.delivery_type === 'event'
+      || item?.fulfilment_type === 'event'
+      || category === 'vehicles'
+      || sku.startsWith('rent-');
+  };
+
+  const canonicalArticleTitle = (item) => {
+    const cls = itemClassname(item);
+    const stripped = stripVariant(cls);
+    return CLASS_ALIASES.get(normalize(stripped))
+      || CLASS_ALIASES.get(normalize(cls))
+      || '';
   };
 
   const loadCache = () => {
@@ -256,6 +279,30 @@
     }
   };
 
+  const exactArticleLookup = async (item) => {
+    const title = canonicalArticleTitle(item);
+    if (!title) return null;
+    try {
+      const payload = await wikiFetch({
+        titles: title,
+        prop: 'pageimages|info',
+        pithumbsize: '720',
+        inprop: 'url'
+      });
+      const pages = Array.isArray(payload?.query?.pages) ? payload.query.pages : [];
+      const page = pages.find((entry) => entry?.thumbnail?.source);
+      if (!page) return null;
+      return {
+        url: String(page.thumbnail.source),
+        page: String(page.fullurl || `${WIKI_BASE}/wiki/${encodeURIComponent(String(page.title || title).replace(/ /g, '_'))}`),
+        title: String(page.title || title),
+        score: 2000
+      };
+    } catch {
+      return null;
+    }
+  };
+
   const articleSearch = async (item, candidates) => {
     for (const query of candidates.slice(0, 1)) {
       try {
@@ -278,7 +325,7 @@
             score: scoreTitle(page.title, candidates, item)
           }))
           .sort((a, b) => b.score - a.score);
-        if (ranked[0] && ranked[0].score >= 200) return ranked[0];
+        if (ranked[0] && ranked[0].score >= (isVehicleRental(item) ? 650 : 200)) return ranked[0];
       } catch {
         // Try the next title and ultimately the static fallback.
       }
@@ -325,8 +372,13 @@
 
     const promise = (async () => {
       const candidates = candidateTitles(item);
-      let result = await articleSearch(item, candidates);
-      if (!result) result = await fileSearch(item, candidates);
+      let result = await exactArticleLookup(item);
+      if (!result) result = await articleSearch(item, candidates);
+      // Vehicle variant filenames on the Wiki can refer to textures, parts or gallery
+      // assets rather than a useful whole-vehicle preview. Never fall back to raw
+      // File: search for restart-bound rentals; keep the clean vehicle placeholder
+      // instead if the canonical vehicle article cannot provide a thumbnail.
+      if (!result && !isVehicleRental(item)) result = await fileSearch(item, candidates);
       setCachedResult(key, result || {});
       return result;
     })().finally(() => inflight.delete(key));
@@ -423,12 +475,17 @@
       return;
     }
 
-    const direct = await tryDirectCandidates(image, item, fallback);
-    if (direct?.url) {
-      setCachedResult(key, direct);
-      image.dataset.previewSource = 'dayz-wiki';
-      image.title = 'Preview sourced from DayZ Wiki';
-      return;
+    // Raw File: redirects are useful for normal inventory items, but vehicle
+    // colour-variant filenames are frequently textures/parts rather than the car.
+    // Rentals therefore resolve only through the canonical vehicle article.
+    if (!isVehicleRental(item)) {
+      const direct = await tryDirectCandidates(image, item, fallback);
+      if (direct?.url) {
+        setCachedResult(key, direct);
+        image.dataset.previewSource = 'dayz-wiki';
+        image.title = 'Preview sourced from DayZ Wiki';
+        return;
+      }
     }
 
     const result = await enqueue(() => resolveFromWiki(item));
