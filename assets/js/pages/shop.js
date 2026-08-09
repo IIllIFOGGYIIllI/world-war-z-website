@@ -31,7 +31,8 @@ const state = {
   cataloguePage: 1,
   cataloguePageSize: 24,
   catalogueSort: 'recommended',
-  detailItem: null
+  detailItem: null,
+  orderScope: 'all'
 };
 
 const elements = {
@@ -56,6 +57,10 @@ const elements = {
   eventCount: $('[data-member-event-count]'), ordersRefresh: $('[data-member-orders-refresh]'),
   ordersGuest: $('[data-member-orders-guest]'), ordersUnlinked: $('[data-member-orders-unlinked]'),
   orderList: $('[data-member-order-list]'), ordersEmpty: $('[data-member-orders-empty]'),
+  ordersOverview: $('[data-member-orders-overview]'), ordersScope: $('[data-member-orders-scope]'),
+  ordersOpen: $('[data-member-orders-open]'), ordersWaiting: $('[data-member-orders-waiting]'),
+  ordersActiveRentals: $('[data-member-orders-active-rentals]'), ordersCompleted: $('[data-member-orders-completed]'),
+  ordersResultSummary: $('[data-member-orders-result-summary]'),
   purchaseDialog: $('[data-member-purchase-dialog]'), purchaseForm: $('[data-member-purchase-form]'),
   purchaseTitle: $('[data-member-purchase-title]'), purchaseItem: $('[data-member-purchase-item]'),
   purchasePrice: $('[data-member-purchase-price]'), quantity: $('[data-member-purchase-quantity]'),
@@ -134,6 +139,7 @@ const setSignedOut = () => {
   elements.ordersUnlinked.hidden = true;
   elements.orderList.hidden = true;
   elements.ordersEmpty.hidden = true;
+  if (elements.ordersOverview) elements.ordersOverview.hidden = true;
 };
 const setSignedIn = (payload) => {
   state.user = payload;
@@ -393,39 +399,167 @@ const renderCatalogue = () => {
   renderPagination(total);
 };
 
+const orderDeliveryState = (order) => String(order?.delivery?.status || '').trim().toLowerCase();
+const orderClosed = (order) => ['fulfilled', 'cancelled', 'refunded'].includes(String(order?.status || '').toLowerCase());
+const orderDisplayStatus = (order) => {
+  const orderState = String(order?.status || '').toLowerCase();
+  if (orderState === 'refunded') return 'Refunded';
+  if (orderState === 'cancelled') return 'Cancelled';
+  const deliveryState = orderDeliveryState(order);
+  const labels = {
+    queued: 'Preparing Delivery', awaiting_approval: 'Preparing Delivery', ready: 'Preparing Delivery', previewed: 'Prepared',
+    restart_pending: 'Waiting for Restart', verification: 'Spawn Verification', active: 'Rental Active',
+    cleanup_due: order?.delivery_type === 'event' ? 'Rental Ending' : 'Delivered · Finalising',
+    failed: 'Delivery Retry', rolled_back: 'Rolled Back', cancelled: 'Cancelled', cancelled_cleaned: 'Cancelled', fulfilled: 'Fulfilled'
+  };
+  if (labels[deliveryState]) return labels[deliveryState];
+  return orderState === 'fulfilled' ? 'Fulfilled' : titleCase(orderState || 'pending');
+};
+const orderStatusClass = (order) => {
+  const orderState = String(order?.status || '').toLowerCase();
+  if (['refunded', 'cancelled', 'fulfilled'].includes(orderState)) return orderState;
+  return orderDeliveryState(order) || orderState || 'pending';
+};
+const orderLocationText = (order) => {
+  const point = order?.delivery?.location || {};
+  if (point.x == null || point.y == null || point.z == null) return '';
+  return `X ${Number(point.x).toFixed(1)}, Y ${Number(point.y).toFixed(1)}, Z ${Number(point.z).toFixed(1)}, A ${Number(point.rotation || 0).toFixed(1)}°`;
+};
+const copyOrderCoordinates = async (order, button) => {
+  const text = orderLocationText(order); if (!text) return;
+  try { await navigator.clipboard.writeText(text); button.textContent = 'Copied'; }
+  catch { button.textContent = 'Copy failed'; }
+  window.setTimeout(() => { button.textContent = 'Copy coordinates'; }, 1200);
+};
+const orderProgress = (order) => {
+  const stateValue = orderDeliveryState(order);
+  const event = order?.delivery_type === 'event';
+  if (['cancelled', 'refunded'].includes(String(order?.status || '').toLowerCase()) || ['cancelled', 'cancelled_cleaned', 'rolled_back'].includes(stateValue)) return null;
+  if (event) {
+    const stages = ['Paid', 'Prepared', 'Restart spawn', 'Rental active', 'Complete'];
+    const map = { awaiting_approval: 1, ready: 1, previewed: 1, restart_pending: 2, verification: 2, active: 3, cleanup_due: 4, fulfilled: 5 };
+    return { stages, current: String(order?.status || '').toLowerCase() === 'fulfilled' ? stages.length : (map[stateValue] ?? 1) };
+  }
+  const stages = ['Paid', 'Prepared', 'Restart', 'Complete'];
+  const map = { queued: 1, restart_pending: 2, cleanup_due: 3, fulfilled: 4 };
+  return { stages, current: String(order?.status || '').toLowerCase() === 'fulfilled' ? stages.length : (map[stateValue] ?? 1) };
+};
+const appendOrderProgress = (card, order) => {
+  const progress = orderProgress(order); if (!progress) return;
+  const track = document.createElement('div'); track.className = 'member-order-track'; track.style.setProperty('--steps', String(progress.stages.length));
+  progress.stages.forEach((label, index) => {
+    const step = document.createElement('div');
+    step.className = index < progress.current ? 'complete' : index === progress.current ? 'active' : '';
+    const dot = document.createElement('i'); const text = document.createElement('span'); text.textContent = label;
+    step.append(dot, text); track.append(step);
+  });
+  card.append(track);
+};
+const appendRestartBanner = (card, order) => {
+  if (orderDeliveryState(order) !== 'restart_pending') return;
+  const banner = document.createElement('div'); banner.className = 'member-order-restart-banner';
+  const icon = document.createElement('span'); icon.textContent = '↻';
+  const copy = document.createElement('div'); const label = document.createElement('small'); label.textContent = 'Waiting for next DayZ restart';
+  const strong = document.createElement('strong');
+  const detail = document.createElement('em');
+  if (state.restart?.next_scheduled_restart) {
+    strong.textContent = `${durationText(state.restart.restart_countdown_seconds)} remaining`;
+    detail.textContent = `Next restart ${dateText(state.restart.next_scheduled_restart)} · ${state.restart.restart_source || 'messages.xml + ADM'}`;
+  } else if (state.restart?.restart_schedule_configured) {
+    strong.textContent = 'Restart sync pending'; detail.textContent = 'The countdown will anchor on the next observed DayZ restart.';
+  } else {
+    strong.textContent = 'Restart schedule unavailable'; detail.textContent = 'Railway will continue tracking the delivery automatically.';
+  }
+  copy.append(label, strong, detail); banner.append(icon, copy); card.append(banner);
+};
+const appendRentalProgress = (card, order) => {
+  if (order?.delivery_type !== 'event') return;
+  const purchased = Math.max(1, Number(order?.delivery?.purchased_restarts ?? order.event_restarts ?? 1));
+  const remaining = Math.max(0, Number(order?.delivery?.remaining_restarts ?? (String(order?.status).toLowerCase() === 'fulfilled' ? 0 : purchased)));
+  const used = Math.min(purchased, Math.max(0, purchased - remaining));
+  const percentage = purchased ? Math.min(100, Math.max(0, (used / purchased) * 100)) : 0;
+  const block = document.createElement('div'); block.className = 'member-rental-progress';
+  const head = document.createElement('div');
+  const title = document.createElement('strong'); title.textContent = `${remaining.toLocaleString()} restart${remaining === 1 ? '' : 's'} remaining`;
+  const stats = document.createElement('span'); stats.textContent = `${used.toLocaleString()} used · ${purchased.toLocaleString()} purchased`;
+  head.append(title, stats);
+  const meter = document.createElement('div'); meter.className = 'member-rental-meter'; const fill = document.createElement('i'); fill.style.width = `${percentage}%`; meter.append(fill);
+  block.append(head, meter); card.append(block);
+};
+const orderMatchesScope = (order) => {
+  const scope = state.orderScope;
+  if (scope === 'all') return true;
+  if (scope === 'open') return ['pending', 'processing'].includes(String(order?.status || '').toLowerCase());
+  if (scope === 'waiting') return orderDeliveryState(order) === 'restart_pending';
+  if (scope === 'active') return order?.delivery_type === 'event' && orderDeliveryState(order) === 'active';
+  if (scope === 'history') return orderClosed(order);
+  return true;
+};
 const renderOrders = () => {
   elements.orderList.replaceChildren();
   if (!state.user) return;
   if (!state.access.linked) {
-    elements.ordersUnlinked.hidden = false; elements.orderList.hidden = true; elements.ordersEmpty.hidden = true; return;
+    elements.ordersUnlinked.hidden = false; elements.orderList.hidden = true; elements.ordersEmpty.hidden = true;
+    if (elements.ordersOverview) elements.ordersOverview.hidden = true; return;
   }
   elements.ordersUnlinked.hidden = true; elements.orderList.hidden = false;
-  state.orders.forEach((order) => {
-    const card = document.createElement('article'); card.className = 'member-order-card';
-    const head = document.createElement('div');
-    const title = document.createElement('strong');
-    title.textContent = order.delivery_type === 'event'
-      ? `Order #${order.order_id} · ${Number(order.event_restarts || 1).toLocaleString()} restart(s) · ${order.item.name}`
-      : `Order #${order.order_id} · ${order.quantity} × ${order.item.name}`;
-    const status = document.createElement('span'); status.className = `shop-order-status ${order.status}`; status.textContent = titleCase(order.status);
-    head.append(title, status);
-    const meta = document.createElement('p'); meta.textContent = `${money(order.total_price)} · ${dateText(order.created_at)}`;
-    card.append(head, meta);
-    if (order.discount) { const line = document.createElement('small'); line.textContent = `Discount applied: ${order.discount.label}`; card.append(line); }
-    if (order.delivery) { const line = document.createElement('small'); const point = order.delivery.location || {}; line.textContent = `Delivery: ${titleCase(order.delivery.status)} · X ${point.x}, Y ${point.y}, Z ${point.z}, A ${point.rotation}°`; card.append(line); }
-    if (order.delivery?.status === 'restart_pending' && state.restart) {
-      const restartLine = document.createElement('small');
-      restartLine.textContent = state.restart.next_scheduled_restart
-        ? `Next server restart: ${dateText(state.restart.next_scheduled_restart)} · ${durationText(state.restart.restart_countdown_seconds)} remaining`
-        : state.restart.restart_schedule_configured
-          ? 'Next server restart: waiting for restart synchronization'
-          : 'Next server restart: schedule unavailable';
-      card.append(restartLine);
+  if (elements.ordersOverview) elements.ordersOverview.hidden = false;
+  const allOrders = Array.isArray(state.orders) ? state.orders : [];
+  const openCount = allOrders.filter((order) => ['pending', 'processing'].includes(String(order.status || '').toLowerCase())).length;
+  const waitingCount = allOrders.filter((order) => orderDeliveryState(order) === 'restart_pending').length;
+  const activeRentals = allOrders.filter((order) => order.delivery_type === 'event' && orderDeliveryState(order) === 'active').length;
+  const completed = allOrders.filter((order) => String(order.status || '').toLowerCase() === 'fulfilled').length;
+  if (elements.ordersOpen) elements.ordersOpen.textContent = String(openCount);
+  if (elements.ordersWaiting) elements.ordersWaiting.textContent = String(waitingCount);
+  if (elements.ordersActiveRentals) elements.ordersActiveRentals.textContent = String(activeRentals);
+  if (elements.ordersCompleted) elements.ordersCompleted.textContent = String(completed);
+  const visibleOrders = allOrders.filter(orderMatchesScope);
+  if (elements.ordersResultSummary) elements.ordersResultSummary.textContent = `${visibleOrders.length.toLocaleString()} order${visibleOrders.length === 1 ? '' : 's'}`;
+  visibleOrders.forEach((order) => {
+    const eventOrder = order.delivery_type === 'event';
+    const card = document.createElement('article'); card.className = `member-order-card ${eventOrder ? 'rental-order' : 'item-order'}`;
+    const head = document.createElement('div'); head.className = 'member-order-card-head';
+    const copy = document.createElement('div');
+    const kicker = document.createElement('p'); kicker.className = 'member-order-kicker'; kicker.textContent = `${eventOrder ? 'Vehicle / event rental' : 'Automatic item delivery'} · Order #${order.order_id}`;
+    const title = document.createElement('h3'); title.textContent = order.item?.name || 'Shop order';
+    const subtitle = document.createElement('small'); subtitle.textContent = eventOrder
+      ? `${Number(order.event_restarts || 1).toLocaleString()} restart${Number(order.event_restarts || 1) === 1 ? '' : 's'} purchased at ${money(order.unit_price || 1)}/restart`
+      : `${Number(order.quantity || 1).toLocaleString()} × ${order.item?.name || 'item'} · ${money(order.unit_price)} each`;
+    copy.append(kicker, title, subtitle);
+    const status = document.createElement('span'); status.className = `shop-order-status ${orderStatusClass(order)}`; status.textContent = orderDisplayStatus(order);
+    head.append(copy, status); card.append(head);
+
+    const facts = document.createElement('div'); facts.className = 'member-order-facts';
+    const factValues = [
+      ['Total paid', money(order.total_price)],
+      ['Ordered', dateText(order.created_at)],
+      [eventOrder ? 'Rental term' : 'Quantity', eventOrder ? `${Number(order.event_restarts || 1).toLocaleString()} restarts` : Number(order.quantity || 1).toLocaleString()],
+      ['Delivery state', order.delivery ? orderDisplayStatus(order) : titleCase(order.status)]
+    ];
+    factValues.forEach(([label, value]) => { const block = document.createElement('div'); const small = document.createElement('span'); small.textContent = label; const strong = document.createElement('strong'); strong.textContent = value; block.append(small, strong); facts.append(block); });
+    card.append(facts);
+    appendOrderProgress(card, order);
+    appendRestartBanner(card, order);
+    appendRentalProgress(card, order);
+
+    const locationText = orderLocationText(order);
+    if (locationText) {
+      const location = document.createElement('div'); location.className = 'member-order-location';
+      const locationCopy = document.createElement('div'); const label = document.createElement('span'); label.textContent = order.delivery?.location?.name || 'Delivery coordinates'; const coords = document.createElement('strong'); coords.textContent = locationText; locationCopy.append(label, coords);
+      const button = document.createElement('button'); button.type = 'button'; button.className = 'secondary-action compact-action'; button.textContent = 'Copy coordinates'; button.addEventListener('click', () => copyOrderCoordinates(order, button));
+      location.append(locationCopy, button); card.append(location);
     }
-    if (order.fulfilment_note) { const line = document.createElement('small'); line.textContent = `Order update: ${order.fulfilment_note}`; card.append(line); }
+    if (order.discount) { const line = document.createElement('div'); line.className = 'member-order-note discount'; line.textContent = `Discount applied · ${order.discount.label}`; card.append(line); }
+    if (order.buyer_note) { const line = document.createElement('div'); line.className = 'member-order-note'; line.textContent = `Your note · ${order.buyer_note}`; card.append(line); }
+    if (order.fulfilment_note) { const line = document.createElement('div'); line.className = 'member-order-note update'; line.textContent = `Order update · ${order.fulfilment_note}`; card.append(line); }
+    const latestEvent = Array.isArray(order.delivery?.events) && order.delivery.events.length ? order.delivery.events[0] : (Array.isArray(order.events) ? order.events[0] : null);
+    if (latestEvent?.note) { const line = document.createElement('div'); line.className = 'member-order-note automation'; line.textContent = `Latest automation · ${latestEvent.note}`; card.append(line); }
+    const footer = document.createElement('div'); footer.className = 'member-order-footer'; footer.innerHTML = `<span>Last updated</span><strong>${dateText(order.updated_at || order.created_at)}</strong>`; card.append(footer);
     elements.orderList.append(card);
   });
-  elements.ordersEmpty.hidden = state.orders.length > 0;
+  elements.ordersEmpty.hidden = visibleOrders.length > 0;
+  if (!visibleOrders.length && allOrders.length && elements.ordersEmpty) elements.ordersEmpty.textContent = 'No orders match this view.';
+  else if (elements.ordersEmpty) elements.ordersEmpty.textContent = 'You have not placed a shop order yet.';
 };
 
 const applyPayload = (payload, member = false) => {
@@ -672,6 +806,7 @@ elements.detailBuy?.addEventListener('click', () => {
 });
 elements.refresh.addEventListener('click', loadShop);
 elements.ordersRefresh.addEventListener('click', loadShop);
+elements.ordersScope?.addEventListener('change', () => { state.orderScope = elements.ordersScope.value || 'all'; renderOrders(); });
 elements.authButton.addEventListener('click', () => state.user ? location.assign('dashboard.html#players/account') : openLogin());
 $$('[data-shop-login]').forEach((button) => button.addEventListener('click', openLogin));
 elements.startLogin.addEventListener('click', startLogin);

@@ -11,9 +11,9 @@
 <meta content="https://iillifoggyiilli.github.io/world-war-z-website/assets/world-war-z-social-preview.png" property="og:image"/>
 <title>Survivor Shop | World War Z</title>
 <link href="assets/favicon.png" rel="icon"/>
-<link crossorigin="" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" rel="stylesheet"/><link href="assets/css/dashboard/core.css?v=1.22.47" rel="stylesheet"/><link href="assets/css/dashboard/moderation.css?v=1.22.47" rel="stylesheet"/><link href="assets/css/dashboard/workspace.css?v=1.22.47" rel="stylesheet"/><link href="assets/css/dashboard/catalogue.css?v=1.22.47" rel="stylesheet"/>
-<link href="assets/css/pages/shop.css?v=1.22.47" rel="stylesheet"/><link href="assets/css/components/chernarus-map.css?v=1.22.47" rel="stylesheet"/>
-<link href="https://iillifoggyiilli.github.io/world-war-z-website/shop.html" rel="canonical"/><meta content="https://iillifoggyiilli.github.io/world-war-z-website/shop.html" property="og:url"/><link href="assets/css/site-polish.css?v=1.22.47" rel="stylesheet"/></head>
+<link crossorigin="" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" rel="stylesheet"/><link href="assets/css/dashboard/core.css?v=1.22.48" rel="stylesheet"/><link href="assets/css/dashboard/moderation.css?v=1.22.48" rel="stylesheet"/><link href="assets/css/dashboard/workspace.css?v=1.22.48" rel="stylesheet"/><link href="assets/css/dashboard/catalogue.css?v=1.22.48" rel="stylesheet"/>
+<link href="assets/css/pages/shop.css?v=1.22.48" rel="stylesheet"/><link href="assets/css/components/chernarus-map.css?v=1.22.48" rel="stylesheet"/>
+<link href="https://iillifoggyiilli.github.io/world-war-z-website/shop.html" rel="canonical"/><meta content="https://iillifoggyiilli.github.io/world-war-z-website/shop.html" property="og:url"/><link href="assets/css/site-polish.css?v=1.22.48" rel="stylesheet"/></head>
 <body class="member-shop-page">
 <a class="skip-link" href="#shop-main">Skip to shop</a>
 <header class="shop-topbar">
@@ -96,8 +96,20 @@
 </section>
 <section aria-labelledby="orders-title" class="member-shop-section member-orders-section" id="orders">
 <div class="view-heading shop-section-heading">
-<div><p class="breadcrumb">Member Shop / Private history</p><h2 id="orders-title">My Orders</h2><p>Only orders attached to your verified Discord and PlayStation identity are shown.</p></div>
+<div><p class="breadcrumb">Member Shop / Private history</p><h2 id="orders-title">My Orders</h2><p>Track each purchase from payment through restart delivery, rental activity and final cleanup.</p></div>
 <button class="secondary-action compact-action" data-member-orders-refresh="" type="button">Refresh Orders</button>
+</div>
+<div class="member-order-overview" data-member-orders-overview="" hidden="">
+<div class="member-order-summary-grid">
+<div><span>Open orders</span><strong data-member-orders-open="">0</strong><small>Pending or processing</small></div>
+<div><span>Waiting restart</span><strong data-member-orders-waiting="">0</strong><small>Prepared for next restart</small></div>
+<div><span>Active rentals</span><strong data-member-orders-active-rentals="">0</strong><small>Restart tracking in progress</small></div>
+<div><span>Completed</span><strong data-member-orders-completed="">0</strong><small>Fulfilled orders</small></div>
+</div>
+<div class="member-orders-toolbar">
+<label class="dialog-field compact-select"><span>Show</span><select data-member-orders-scope=""><option value="all">All recent orders</option><option value="open">Open orders</option><option value="waiting">Waiting for restart</option><option value="active">Active rentals</option><option value="history">Completed / closed</option></select></label>
+<div class="toolbar-view-note"><span>LIVE</span><strong data-member-orders-result-summary="">0 orders</strong><small>Newest first</small></div>
+</div>
 </div>
 <div class="locked-copy" data-member-orders-guest="">
 <span aria-hidden="true" class="large-lock">📦</span><h3>Sign In To Track Your Orders</h3><p>Your order history, balance and delivery status are private.</p><button class="primary-action" data-shop-login="" type="button">Sign In With Discord</button>
@@ -178,6 +190,6 @@
 <button class="dialog-cancel" data-member-purchase-cancel="" type="button">Cancel</button>
 </form>
 </dialog>
-<script crossorigin="" defer="" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script defer="" src="assets/js/map/chernarus-map.js?v=1.22.47"></script><script defer="" src="assets/js/core/http.js?v=1.22.47"></script><script defer="" src="assets/js/shop-wiki-previews.js?v=1.22.47"></script><script defer="" src="assets/js/pages/shop.js?v=1.22.47"></script>
+<script crossorigin="" defer="" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script defer="" src="assets/js/map/chernarus-map.js?v=1.22.48"></script><script defer="" src="assets/js/core/http.js?v=1.22.48"></script><script defer="" src="assets/js/shop-wiki-previews.js?v=1.22.48"></script><script defer="" src="assets/js/pages/shop.js?v=1.22.48"></script>
 </body>
 </html>

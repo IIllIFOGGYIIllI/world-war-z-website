@@ -138,6 +138,7 @@ let shopCatalogueMode = 'manual';
 let shopCoordinateMapInstance = null;
 let ownerShopPage = 1;
 let ownerEventPage = 1;
+let shopRestartOperations = null;
 const OWNER_SHOP_PAGE_SIZE = 50;
 
 const DEFAULT_EVENT_XML = `<event name="Vehicle">
@@ -432,44 +433,89 @@ const renderShopCatalogue = () => {
   if (shopEmpty) shopEmpty.hidden = visible.length !== 0;
 };
 
+const dashboardShopDuration = (seconds) => {
+  const totalMinutes = Math.max(0, Math.trunc((Number(seconds) || 0) / 60));
+  const hours = Math.trunc(totalMinutes / 60); const minutes = totalMinutes % 60;
+  return hours ? `${hours}h ${minutes}m` : `${minutes}m`;
+};
+const dashboardOrderDeliveryState = (order) => String(order?.delivery?.status || '').toLowerCase();
+const dashboardOrderDisplayStatus = (order) => {
+  const orderState = String(order?.status || '').toLowerCase();
+  if (['cancelled', 'refunded'].includes(orderState)) return shopStatusLabel(orderState);
+  const deliveryState = dashboardOrderDeliveryState(order);
+  const labels = { queued:'Preparing Delivery', awaiting_approval:'Preparing Delivery', ready:'Preparing Delivery', previewed:'Prepared', restart_pending:'Waiting for Restart', verification:'Spawn Verification', active:'Rental Active', cleanup_due: order?.delivery_type === 'event' ? 'Rental Ending' : 'Delivered · Finalising', failed:'Delivery Retry', fulfilled:'Fulfilled' };
+  return labels[deliveryState] || shopStatusLabel(orderState);
+};
+const dashboardOrderClass = (order) => {
+  const orderState = String(order?.status || '').toLowerCase();
+  return ['cancelled','refunded','fulfilled'].includes(orderState) ? orderState : (dashboardOrderDeliveryState(order) || orderState || 'pending');
+};
+const dashboardOrderCoordinates = (order) => {
+  const point = order?.delivery?.location || {};
+  if (point.x == null || point.y == null || point.z == null) return '';
+  return `X ${Number(point.x).toFixed(1)}, Y ${Number(point.y).toFixed(1)}, Z ${Number(point.z).toFixed(1)}, A ${Number(point.rotation || 0).toFixed(1)}°`;
+};
+const dashboardOrderProgress = (order) => {
+  const deliveryState = dashboardOrderDeliveryState(order); const isEvent = order?.delivery_type === 'event';
+  if (['cancelled','refunded'].includes(String(order?.status || '').toLowerCase())) return null;
+  if (isEvent) {
+    const stages=['Paid','Prepared','Restart spawn','Rental active','Complete']; const map={awaiting_approval:1,ready:1,previewed:1,restart_pending:2,verification:2,active:3,cleanup_due:4,fulfilled:5};
+    return { stages, current:String(order?.status || '').toLowerCase()==='fulfilled'?5:(map[deliveryState]??1) };
+  }
+  const stages=['Paid','Prepared','Restart','Complete']; const map={queued:1,restart_pending:2,cleanup_due:3,fulfilled:4};
+  return { stages, current:String(order?.status || '').toLowerCase()==='fulfilled'?4:(map[deliveryState]??1) };
+};
+const appendDashboardOrderProgress = (card, order) => {
+  const progress=dashboardOrderProgress(order); if(!progress) return;
+  const track=document.createElement('div'); track.className='shop-order-track';
+  progress.stages.forEach((label,index)=>{ const step=document.createElement('div'); step.className=index<progress.current?'complete':index===progress.current?'active':''; const dot=document.createElement('i'); const span=document.createElement('span'); span.textContent=label; step.append(dot,span); track.append(step); });
+  card.append(track);
+};
+const appendDashboardRestartBanner = (card, order) => {
+  if (dashboardOrderDeliveryState(order)!=='restart_pending') return;
+  const banner=document.createElement('div'); banner.className='shop-order-restart-banner'; const icon=document.createElement('span'); icon.textContent='↻'; const copy=document.createElement('div'); const small=document.createElement('small'); small.textContent='Waiting for next DayZ restart'; const strong=document.createElement('strong'); const em=document.createElement('em');
+  if(shopRestartOperations?.next_scheduled_restart){ strong.textContent=`${dashboardShopDuration(shopRestartOperations.restart_countdown_seconds)} remaining`; em.textContent=`Next restart ${formatAccountDate(shopRestartOperations.next_scheduled_restart)} · ${shopRestartOperations.restart_source || 'messages.xml + ADM'}`; }
+  else if(shopRestartOperations?.restart_schedule_configured){ strong.textContent='Restart sync pending'; em.textContent='Countdown anchors on the next observed DayZ restart.'; }
+  else { strong.textContent='Automatic restart tracking'; em.textContent='Railway will continue monitoring the order.'; }
+  copy.append(small,strong,em); banner.append(icon,copy); card.append(banner);
+};
+const appendDashboardRentalProgress = (card, order) => {
+  if(order?.delivery_type!=='event') return;
+  const purchased=Math.max(1,Number(order?.delivery?.purchased_restarts??order.event_restarts??1)); const remaining=Math.max(0,Number(order?.delivery?.remaining_restarts??(String(order?.status).toLowerCase()==='fulfilled'?0:purchased))); const used=Math.min(purchased,Math.max(0,purchased-remaining));
+  const block=document.createElement('div'); block.className='shop-rental-progress'; const head=document.createElement('div'); const strong=document.createElement('strong'); strong.textContent=`${remaining.toLocaleString()} restart${remaining===1?'':'s'} remaining`; const span=document.createElement('span'); span.textContent=`${used.toLocaleString()} used · ${purchased.toLocaleString()} purchased`; head.append(strong,span); const meter=document.createElement('div'); const fill=document.createElement('i'); fill.style.width=`${purchased?Math.min(100,(used/purchased)*100):0}%`; meter.append(fill); block.append(head,meter); card.append(block);
+};
 const renderMemberShopOrders = (orders) => {
   if (!shopOrderList) return;
   shopOrderList.replaceChildren();
   const safeOrders = Array.isArray(orders) ? orders : [];
+  setText('[data-shop-orders-open-summary]', String(safeOrders.filter((order)=>['pending','processing'].includes(String(order.status||'').toLowerCase())).length));
+  setText('[data-shop-orders-waiting-summary]', String(safeOrders.filter((order)=>dashboardOrderDeliveryState(order)==='restart_pending').length));
+  setText('[data-shop-orders-rental-summary]', String(safeOrders.filter((order)=>order.delivery_type==='event'&&dashboardOrderDeliveryState(order)==='active').length));
+  setText('[data-shop-orders-complete-summary]', String(safeOrders.filter((order)=>String(order.status||'').toLowerCase()==='fulfilled').length));
   safeOrders.forEach((order) => {
-    const card = document.createElement('article');
-    card.className = 'shop-order-card';
-    const heading = document.createElement('div');
-    const title = document.createElement('strong');
-    title.textContent = order.delivery_type === 'event' ? `Order #${order.order_id} · ${Number(order.event_restarts || 1).toLocaleString()} restart(s) · ${order.item.name}` : `Order #${order.order_id} · ${order.quantity} × ${order.item.name}`;
-    const status = document.createElement('span');
-    status.className = `shop-order-status ${String(order.status)}`;
-    status.textContent = shopStatusLabel(order.status);
-    heading.append(title, status);
-    const meta = document.createElement('p');
-    meta.textContent = `${formatMoney(order.total_price)} · Ordered ${formatAccountDate(order.created_at)}${order.handled_by_name ? ` · ${order.handled_by_name}` : ''}`;
-    card.append(heading, meta);
-    if (order.delivery) {
-      const delivery = document.createElement('small');
-      const point = order.delivery.location || {};
-      delivery.textContent = order.delivery_type === 'event'
-        ? `Automatic Event Delivery: ${shopStatusLabel(order.delivery.status)} · ${Number(order.delivery.remaining_restarts ?? order.event_restarts ?? 1).toLocaleString()} restart(s) remaining · ${point.name || 'Coordinates'} · X ${point.x}, Y ${point.y}, Z ${point.z}, A ${point.rotation}°`
-        : `Automatic item delivery: ${shopStatusLabel(order.delivery.status)} · ${point.name || 'Coordinates'} · X ${point.x}, Y ${point.y}, Z ${point.z}, A ${point.rotation}°`;
-      card.append(delivery);
-    }
-    if (order.buyer_note) {
-      const note = document.createElement('small');
-      note.textContent = `Your note: ${order.buyer_note}`;
-      card.append(note);
-    }
-    if (order.fulfilment_note) {
-      const note = document.createElement('small');
-      note.textContent = `Order update: ${order.fulfilment_note}`;
-      card.append(note);
-    }
+    const isEvent=order.delivery_type==='event'; const card=document.createElement('article'); card.className=`shop-order-card tracked-order ${isEvent?'rental-order':'item-order'}`;
+    const heading=document.createElement('div'); heading.className='shop-order-card-heading'; const copy=document.createElement('div'); const kicker=document.createElement('small'); kicker.className='shop-order-kicker'; kicker.textContent=`${isEvent?'Vehicle / event rental':'Automatic item delivery'} · Order #${order.order_id}`; const title=document.createElement('strong'); title.textContent=order.item?.name||'Shop order'; const sub=document.createElement('span'); sub.textContent=isEvent?`${Number(order.event_restarts||1).toLocaleString()} restart(s) purchased`:`${Number(order.quantity||1).toLocaleString()} × ${order.item?.name||'item'}`; copy.append(kicker,title,sub); const status=document.createElement('span'); status.className=`shop-order-status ${dashboardOrderClass(order)}`; status.textContent=dashboardOrderDisplayStatus(order); heading.append(copy,status); card.append(heading);
+    const facts=document.createElement('div'); facts.className='shop-order-facts'; [[isEvent?'Rental term':'Quantity',isEvent?`${Number(order.event_restarts||1).toLocaleString()} restarts`:Number(order.quantity||1).toLocaleString()],['Total paid',formatMoney(order.total_price)],['Ordered',formatAccountDate(order.created_at)],['Delivery',dashboardOrderDisplayStatus(order)]].forEach(([label,value])=>{ const block=document.createElement('div'); const small=document.createElement('span'); small.textContent=label; const strong=document.createElement('strong'); strong.textContent=value; block.append(small,strong); facts.append(block); }); card.append(facts);
+    appendDashboardOrderProgress(card,order); appendDashboardRestartBanner(card,order); appendDashboardRentalProgress(card,order);
+    const coords=dashboardOrderCoordinates(order); if(coords){ const location=document.createElement('div'); location.className='shop-order-location'; const div=document.createElement('div'); const label=document.createElement('span'); label.textContent=order.delivery?.location?.name||'Delivery coordinates'; const strong=document.createElement('strong'); strong.textContent=coords; div.append(label,strong); const button=document.createElement('button'); button.type='button'; button.className='secondary-action compact-action'; button.textContent='Copy coordinates'; button.addEventListener('click',async()=>{ try{await navigator.clipboard.writeText(coords);button.textContent='Copied';}catch{button.textContent='Copy failed';}window.setTimeout(()=>button.textContent='Copy coordinates',1200);}); location.append(div,button); card.append(location); }
+    if(order.buyer_note){ const note=document.createElement('div'); note.className='shop-order-note'; note.textContent=`Your note · ${order.buyer_note}`; card.append(note); }
+    if(order.fulfilment_note){ const note=document.createElement('div'); note.className='shop-order-note update'; note.textContent=`Order update · ${order.fulfilment_note}`; card.append(note); }
+    const footer=document.createElement('div'); footer.className='shop-order-footer'; const updated=document.createElement('span'); updated.textContent=`Updated ${formatAccountDate(order.updated_at||order.created_at)}`; const total=document.createElement('strong'); total.textContent=formatMoney(order.total_price); footer.append(updated,total); card.append(footer);
     shopOrderList.append(card);
   });
   if (shopOrderEmpty) shopOrderEmpty.hidden = safeOrders.length !== 0;
+};
+
+const loadShopRestartStatus = async () => {
+  try {
+    const response = await authFetch(SERVER_STATUS_URL, { headers: { Accept: 'application/json' } });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error('Restart status unavailable');
+    shopRestartOperations = payload?.operations || null;
+    window.WWZShopRestartOperations = shopRestartOperations;
+    window.dispatchEvent(new CustomEvent('wwz:restartstatus', { detail: shopRestartOperations }));
+    if (memberShopOrders.length) renderMemberShopOrders(memberShopOrders);
+  } catch { shopRestartOperations = null; window.WWZShopRestartOperations = null; window.dispatchEvent(new CustomEvent('wwz:restartstatus', { detail: null })); }
 };
 
 const applyShopPayload = (payload, { member = false } = {}) => {
@@ -542,6 +588,7 @@ const loadMemberShop = async (sessionToken = storageGet(AUTH_SESSION_KEY)) => {
     if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Shop unavailable');
     applyShopPayload(payload, { member: true });
     loadDeliveryLocations(sessionToken, { quiet: true });
+    loadShopRestartStatus();
     if (shopError) shopError.hidden = true;
     return true;
   } catch (error) {
@@ -1545,8 +1592,12 @@ window.addEventListener('wwz:viewchange', (event) => {
   const { view, section } = event.detail || {};
   const token = storageGet(AUTH_SESSION_KEY);
   if (view === 'shop') token ? loadMemberShop(token) : loadPublicShop();
+loadShopRestartStatus();
+window.setInterval(loadShopRestartStatus, 30_000);
   if (view === 'staff' && section === 'shop-orders') loadAdminShopOrders(token);
   if (view === 'shopadmin') loadOwnerShopConfig(token);
 });
 loadPublicShop();
+loadShopRestartStatus();
+window.setInterval(loadShopRestartStatus, 30_000);
 

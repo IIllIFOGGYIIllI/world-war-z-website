@@ -1,3 +1,20 @@
+## Version 1.22.48 — Order & Delivery Tracking
+
+### v1.22.48 order tracking UX
+- Rebuilds member order cards around the real Railway delivery state instead of showing only the broad shop-order status.
+- Adds order summary counters and filters for open orders, restart-pending deliveries, active rentals and completed history.
+- Shows the live messages.xml + ADM restart countdown directly on orders that are staged for the next DayZ restart.
+- Adds visual delivery pipelines for normal item orders and restart-bound Event Item rentals.
+- Rental orders show purchased, used and remaining restart counts with progress.
+- Delivery coordinates are surfaced clearly with one-click copy controls.
+- The dashboard My Orders panel and Admin Automatic Delivery Monitor now use the same clearer state presentation.
+- No purchase, economy, delivery-engine, Nitrado, database or rental-duration logic changes.
+
+### Compatibility
+- Pairs with Bot v1.18.44.
+- Bot/Railway deployment is not required for this website-only patch.
+- The existing normal-item cfgEffectArea workflow and Event Item rental workflow remain unchanged.
+
 ## Version 1.22.47 — Survivor Shop Catalogue Navigation
 
 ### v1.22.47 large-catalogue UX

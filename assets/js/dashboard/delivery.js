@@ -224,6 +224,7 @@ const refreshDeliveryQueueButton = document.querySelector('[data-refresh-deliver
 const deliveryNavBadge = document.querySelector('[data-delivery-nav-badge]');
 let deliveryQueueRequestInProgress = false;
 let deliveryActionInProgress = false;
+let lastDeliveryQueuePayload = null;
 
 const deliveryStatusHelp = {
   awaiting_approval: 'Railway is releasing this legacy approval state automatically.',
@@ -304,8 +305,22 @@ const deliveryActionButton = (order, label, action) => {
   return button;
 };
 
+const deliveryFriendlyStatus = (deliveryState, order) => {
+  const labels = { awaiting_approval:'Preparing', ready:'Ready', previewed:'Prepared', restart_pending:'Waiting for Restart', verification:'Spawn Verification', active:'Rental Active', cleanup_due: order?.delivery_type==='event'?'Rental Ending':'Delivered · Finalising', failed:'Retrying Delivery', fulfilled:'Fulfilled', cancelled:'Cancelled', cancelled_cleaned:'Cancelled & Cleaned', rolled_back:'Rolled Back', queued:'Preparing' };
+  return labels[deliveryState] || shopStatusLabel(deliveryState || order?.status || 'unknown');
+};
+const deliveryQueueDuration = (seconds) => { const mins=Math.max(0,Math.trunc((Number(seconds)||0)/60)); const h=Math.trunc(mins/60); return h?`${h}h ${mins%60}m`:`${mins}m`; };
+const deliveryQueueProgress = (delivery, order) => {
+  const stateValue=String(delivery?.status||'queued'); const event=delivery?.delivery_kind==='event';
+  if(event){ const stages=['Paid','Prepared','Spawned','Rental active','Complete']; const map={awaiting_approval:1,ready:1,previewed:1,restart_pending:2,verification:2,active:3,cleanup_due:4,fulfilled:5}; return {stages,current:map[stateValue]??1}; }
+  const stages=['Paid','Prepared','Restart','Complete']; const map={queued:1,restart_pending:2,cleanup_due:3,fulfilled:4}; return {stages,current:map[stateValue]??1};
+};
+const appendDeliveryQueueTrack = (card, delivery, order) => { const progress=deliveryQueueProgress(delivery,order); const track=document.createElement('div'); track.className='delivery-progress-track'; progress.stages.forEach((label,index)=>{ const step=document.createElement('div'); step.className=index<progress.current?'complete':index===progress.current?'active':''; const i=document.createElement('i'); const span=document.createElement('span'); span.textContent=label; step.append(i,span); track.append(step); }); card.append(track); };
+const appendDeliveryRestartBanner = (card, delivery) => { if(String(delivery?.status)!=='restart_pending') return; const operations=window.WWZShopRestartOperations||{}; const banner=document.createElement('div'); banner.className='delivery-restart-banner'; const icon=document.createElement('span'); icon.textContent='↻'; const copy=document.createElement('div'); const small=document.createElement('small'); small.textContent='Prepared and waiting for restart'; const strong=document.createElement('strong'); const em=document.createElement('em'); if(operations.next_scheduled_restart){ strong.textContent=`${deliveryQueueDuration(operations.restart_countdown_seconds)} remaining`; em.textContent=`Next restart ${formatAccountDate(operations.next_scheduled_restart)} · ${operations.restart_source||'messages.xml + ADM'}`; } else if(operations.restart_schedule_configured){ strong.textContent='Restart sync pending'; em.textContent='Countdown anchors on the next observed restart.'; } else { strong.textContent='Waiting for DayZ restart'; em.textContent='Railway continues monitoring automatically.'; } copy.append(small,strong,em); banner.append(icon,copy); card.append(banner); };
+const appendDeliveryRentalProgress = (card, delivery, order) => { if(delivery?.delivery_kind!=='event') return; const purchased=Math.max(1,Number(delivery.purchased_restarts??order.event_restarts??1)); const remaining=Math.max(0,Number(delivery.remaining_restarts??purchased)); const used=Math.min(purchased,Math.max(0,purchased-remaining)); const block=document.createElement('div'); block.className='delivery-rental-progress'; const head=document.createElement('div'); const strong=document.createElement('strong'); strong.textContent=`${remaining.toLocaleString()} restart${remaining===1?'':'s'} remaining`; const span=document.createElement('span'); span.textContent=`${used.toLocaleString()} used · ${purchased.toLocaleString()} purchased`; head.append(strong,span); const meter=document.createElement('div'); const fill=document.createElement('i'); fill.style.width=`${Math.min(100,(used/purchased)*100)}%`; meter.append(fill); block.append(head,meter); card.append(block); };
 const renderDeliveryQueue = (payload) => {
   if (!deliveryOrderList) return;
+  lastDeliveryQueuePayload = payload;
   deliveryOrderList.replaceChildren();
   const summary = payload?.summary || {};
   setText('[data-delivery-open]', String(Number(summary.open || 0)));
@@ -314,73 +329,20 @@ const renderDeliveryQueue = (payload) => {
   setText('[data-delivery-verification]', String(Number(summary.fulfilled || 0)));
   setText('[data-delivery-failed]', String(Number(summary.refunded || 0) + Number(summary.cancelled || 0)));
   const openCount = Number(summary.open || 0);
-  if (deliveryNavBadge) {
-    deliveryNavBadge.textContent = String(openCount);
-    deliveryNavBadge.hidden = openCount === 0;
-  }
+  if (deliveryNavBadge) { deliveryNavBadge.textContent = String(openCount); deliveryNavBadge.hidden = openCount === 0; }
   const orders = Array.isArray(payload?.orders) ? payload.orders : [];
   orders.forEach((order) => {
-    const delivery = order.delivery || {};
-    const location = delivery.location || {};
-    const deliveryKind = delivery.delivery_kind === 'event' ? 'Event Item' : 'Item';
-    const card = document.createElement('article');
-    card.className = `delivery-order-card delivery-${delivery.status || order.status}`;
-
-    const heading = document.createElement('div');
-    heading.className = 'delivery-order-heading';
-    const copy = document.createElement('div');
-    const kicker = document.createElement('p');
-    kicker.className = 'panel-kicker';
-    kicker.textContent = `Order #${order.order_id} · ${deliveryKind}`;
-    const title = document.createElement('h2');
-    title.textContent = `${order.item.name} → ${order.buyer.psn_id}`;
-    copy.append(kicker, title);
-    const status = document.createElement('span');
-    status.className = `shop-order-status ${order.status}`;
-    status.textContent = shopStatusLabel(order.status);
-    heading.append(copy, status);
-
-    const details = document.createElement('div');
-    details.className = 'delivery-detail-grid';
-    const deliveryState = delivery.status || 'queued';
-    const itemDetail = delivery.delivery_kind === 'event'
-      ? `${Number(order.event_restarts || 1).toLocaleString()} purchased restart(s)`
-      : `${Number(order.quantity || 1).toLocaleString()} × ${(order.item.types || []).join(', ') || order.item.sku}`;
-    [
-      ['Automation', shopStatusLabel(deliveryState)],
-      ['Delivery', itemDetail],
-      ['Location', location.x == null ? 'Coordinates unavailable' : `${location.name || 'Selected point'} · X ${location.x}, Y ${location.y}, Z ${location.z}`],
-      ['Rotation', `${Number(location.rotation || 0).toLocaleString()}°`],
-      ['Value', formatMoney(order.total_price)],
-      ['Created', formatAccountDate(order.created_at)],
-    ].forEach(([label, value]) => {
-      const block = document.createElement('div');
-      const small = document.createElement('span'); small.textContent = label;
-      const strong = document.createElement('strong'); strong.textContent = value;
-      block.append(small, strong); details.append(block);
-    });
-    card.append(heading, details);
-
-    if (delivery.last_error) {
-      const error = document.createElement('p');
-      error.className = 'delivery-error-copy';
-      error.textContent = `Last deployment error: ${delivery.last_error}`;
-      card.append(error);
-    }
-    const automationNote = document.createElement('p');
-    automationNote.className = 'delivery-automation-note';
-    automationNote.textContent = deliveryStatusHelp[deliveryState]
-      || 'Railway is managing this delivery automatically.';
-    card.append(automationNote);
-
-    const actions = document.createElement('div');
-    actions.className = 'heading-actions delivery-actions';
-    if (['pending', 'processing'].includes(order.status)) {
-      actions.append(adminShopActionButton('Cancel & refund', 'cancel', order, true));
-    } else if (order.status === 'fulfilled') {
-      actions.append(adminShopActionButton('Refund order', 'refund', order, true));
-    }
-    if (actions.childElementCount) card.append(actions);
+    const delivery = order.delivery || {}; const location = delivery.location || {}; const deliveryKind = delivery.delivery_kind === 'event' ? 'Vehicle / Event Rental' : 'Automatic Item Delivery'; const deliveryState = delivery.status || 'queued';
+    const card = document.createElement('article'); card.className = `delivery-order-card delivery-${deliveryState}`;
+    const heading=document.createElement('div'); heading.className='delivery-order-heading'; const copy=document.createElement('div'); const kicker=document.createElement('p'); kicker.className='panel-kicker'; kicker.textContent=`${deliveryKind} · Order #${order.order_id}`; const title=document.createElement('h2'); title.textContent=`${order.item.name} → ${order.buyer.psn_id}`; const sub=document.createElement('small'); sub.textContent=`${order.buyer.discord_name} · ${formatMoney(order.total_price)} · ${formatAccountDate(order.created_at)}`; copy.append(kicker,title,sub); const status=document.createElement('span'); status.className=`shop-order-status ${deliveryState}`; status.textContent=deliveryFriendlyStatus(deliveryState,order); heading.append(copy,status); card.append(heading);
+    const details=document.createElement('div'); details.className='delivery-detail-grid'; const itemDetail=delivery.delivery_kind==='event'?`${Number(delivery.purchased_restarts??order.event_restarts??1).toLocaleString()} purchased restart(s)`:`${Number(order.quantity||1).toLocaleString()} × ${(order.item.types||[]).join(', ')||order.item.sku}`;
+    [['Automation',deliveryFriendlyStatus(deliveryState,order)],['Delivery',itemDetail],['Location',location.x==null?'Coordinates unavailable':`${location.name||'Selected point'} · X ${Number(location.x).toFixed(1)}, Y ${Number(location.y).toFixed(1)}, Z ${Number(location.z).toFixed(1)}`],['Rotation',`${Number(location.rotation||0).toFixed(1)}°`],['Value',formatMoney(order.total_price)],['Updated',formatAccountDate(delivery.updated_at||order.updated_at||order.created_at)]].forEach(([label,value])=>{ const block=document.createElement('div'); const small=document.createElement('span'); small.textContent=label; const strong=document.createElement('strong'); strong.textContent=value; block.append(small,strong); details.append(block); }); card.append(details);
+    appendDeliveryQueueTrack(card,delivery,order); appendDeliveryRestartBanner(card,delivery); appendDeliveryRentalProgress(card,delivery,order);
+    if(location.x!=null){ const locationBar=document.createElement('div'); locationBar.className='delivery-location-bar'; const div=document.createElement('div'); const label=document.createElement('span'); label.textContent=location.name||'Delivery coordinates'; const coords=document.createElement('strong'); const coordinateText=`X ${Number(location.x).toFixed(1)}, Y ${Number(location.y).toFixed(1)}, Z ${Number(location.z).toFixed(1)}, A ${Number(location.rotation||0).toFixed(1)}°`; coords.textContent=coordinateText; div.append(label,coords); const button=document.createElement('button'); button.type='button'; button.className='secondary-action compact-action'; button.textContent='Copy coordinates'; button.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(coordinateText);button.textContent='Copied';}catch{button.textContent='Copy failed';}window.setTimeout(()=>button.textContent='Copy coordinates',1200);}); locationBar.append(div,button); card.append(locationBar); }
+    if (delivery.last_error) { const error=document.createElement('p'); error.className='delivery-error-copy'; error.textContent=`Last deployment error: ${delivery.last_error}`; card.append(error); }
+    const automationNote=document.createElement('p'); automationNote.className='delivery-automation-note'; automationNote.textContent=deliveryStatusHelp[deliveryState]||'Railway is managing this delivery automatically.'; card.append(automationNote);
+    const latestEvent=Array.isArray(delivery.events)?delivery.events[0]:null; if(latestEvent?.note){ const eventLine=document.createElement('div'); eventLine.className='delivery-latest-event'; const label=document.createElement('span'); label.textContent='Latest automation event'; const copyText=document.createElement('strong'); copyText.textContent=latestEvent.note; eventLine.append(label,copyText); card.append(eventLine); }
+    const actions=document.createElement('div'); actions.className='heading-actions delivery-actions'; if(['pending','processing'].includes(order.status)) actions.append(adminShopActionButton('Cancel & refund','cancel',order,true)); else if(order.status==='fulfilled') actions.append(adminShopActionButton('Refund order','refund',order,true)); if(actions.childElementCount) card.append(actions);
     deliveryOrderList.append(card);
   });
   if (deliveryEmpty) deliveryEmpty.hidden = orders.length !== 0;
@@ -411,6 +373,7 @@ const loadDeliveryQueue = async (token = storageGet(AUTH_SESSION_KEY)) => {
 };
 deliveryScope?.addEventListener('change', () => loadDeliveryQueue());
 refreshDeliveryQueueButton?.addEventListener('click', () => loadDeliveryQueue());
+window.addEventListener('wwz:restartstatus', () => { if (lastDeliveryQueuePayload && !deliveryOrderList?.closest('[data-view-panel]')?.hidden) renderDeliveryQueue(lastDeliveryQueuePayload); });
 
 const refreshServerConfigButton = document.querySelector('[data-refresh-server-config]');
 const configFileSelect = document.querySelector('[data-config-file-select]');

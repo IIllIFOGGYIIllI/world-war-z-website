@@ -22,7 +22,7 @@ RETIRED_MAP_PATHS = (
     MAP_ROOT / "tiles",
     ROOT / "assets/images/maps/chernarus-vector.svg",
 )
-EXPECTED_ASSET_VERSION = "1.22.47"
+EXPECTED_ASSET_VERSION = "1.22.48"
 
 EXPECTED_ROAD_GROUPS = {
     "paved_primary",

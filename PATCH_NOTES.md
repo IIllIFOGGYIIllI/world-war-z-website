@@ -1,15 +1,19 @@
-# World War Z Website v1.22.47
+# World War Z Website v1.22.48
 
-## Survivor Shop catalogue navigation
+## Changed
+- Reworked standalone Survivor Shop **My Orders** into a full delivery tracker.
+- Added order summary counters and filters for open, restart-pending, active-rental and completed orders.
+- Added normal-item and rental lifecycle progress tracks.
+- Orders waiting for restart show the live server restart countdown and next restart time.
+- Event rentals show purchased, used and remaining restart counts with a progress bar.
+- Delivery coordinates are clearly displayed and can be copied with one click.
+- Updated the dashboard My Orders cards with the same delivery-state presentation.
+- Updated the Admin Automatic Delivery Monitor with restart countdowns, progress tracks, rental remaining-restarter visibility, coordinate copy and latest automation notes.
 
-- Paginates the member catalogue at 24 items by default with 48/96 options.
-- Adds desktop category sidebar / mobile category rail with live counts.
-- Adds sorting, reset filters, result ranges and compact pagination controls.
-- Adds an item-detail modal using the existing real DayZ Wiki preview resolver.
-- Compacts catalogue cards so the 1,900+ item shop is substantially easier to scan.
-- Paginates Owner Shop Administration regular-item and rental tables at 50 rows per page.
-- Existing shop prices and manual edits are untouched.
-- Vehicle rentals remain exactly $1 per restart and retain the existing 1–30,000 restart behaviour.
-- No Bot, Railway database, Nitrado delivery, map geometry or progression changes.
+## Compatibility
+- Website only; Bot remains v1.18.44.
+- No database schema, Railway persistence, Nitrado file workflow, economy or delivery-engine changes.
+- Chernarus map assets/geometry are unchanged.
 
-Pairs with Bot v1.18.44.
+## Files to delete
+NONE
