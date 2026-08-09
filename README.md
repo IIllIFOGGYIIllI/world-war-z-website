@@ -1,13 +1,11 @@
-## Website v1.22.56 — Objectives & Bounty Centre
+## Website v1.22.57 — Objectives Authentication Hotfix
 
-The dashboard now exposes the new rotating survivor quest system and completes practical Bounties & Contracts parity.
+This hotfix completes the Bot v1.18.55 quest fix on the GitHub Pages frontend.
 
-- Adds a dedicated Daily & Weekly Objectives workspace with live progress bars, rewards and reset countdowns.
-- Shows named Chernarus locations selected for exploration/dwell objectives.
-- Adds member bounty creation, active bounty board, personal bounty history, cancellations/refunds and contract acceptance/progress/claims.
-- Adds Admin Objective Administration for public contracts, active-bounty cancellation, recent objective activity and recent quest rotations.
-- Adds Owner quest rotation controls for enable/disable and Daily/Weekly counts.
-- Adds `/quests` commands to the website command library and Quest as a progression source label.
-- Adds Objectives to the unified Audit Centre subsystem filter.
+- Uses the same authenticated Discord dashboard session for the Objectives member API as the rest of the account dashboard.
+- Uses the authenticated Admin/Owner session for Objective Administration.
+- Prevents an already signed-in member from being shown the Objectives sign-in gate simply because the Objectives request omitted its Bearer token.
+- Reports expired-session and temporary-service failures separately.
+- Updates the Daily and Weekly rotation wording to match Bot v1.18.55: 24 hours and 7 days, independent of DayZ restarts.
 
-Requires Bot v1.18.54. Existing Chernarus map assets, shop/rental workflows, ticket system and persistent Railway data remain unchanged.
+Requires Bot v1.18.55. Persistent Railway data is unchanged.

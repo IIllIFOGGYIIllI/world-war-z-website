@@ -1,26 +1,20 @@
-# World War Z Website v1.22.56
+# World War Z Website v1.22.57
 
-## Objectives centre
+## Objectives authentication hotfix
 
-- Adds a member Daily & Weekly Objectives page backed by Bot v1.18.54.
-- Displays live objective progress, selected Chernarus locations, rewards, current/completed/claimed state and Daily/Weekly reset countdowns.
-- Adds quest history and protected claim actions.
-- Adds the new `/quests` command group to the command library.
+- Fixes Daily & Weekly Objectives incorrectly showing the Discord sign-in panel while the dashboard header is already authenticated.
+- Member Objectives GET requests now send the current dashboard Bearer session to Railway, matching Account Centre and XP & Prestige.
+- Admin/Owner Objective Administration GET requests now use the same authenticated session.
+- Preserves HTTP status codes in the Objectives client so expired sessions can be distinguished from temporary API failures.
+- Keeps a valid signed-in session visually signed in while a temporary Objectives API error is reported.
 
-## Bounties & contracts parity
+## Rotation wording
 
-- Adds member bounty creation using exact verified PSN targets.
-- Adds the active bounty board plus My Bounty Records for placed, targeted, claimed, cancelled and expired records.
-- Adds member contract availability, acceptance, live progress and reward claiming.
-- Adds Admin creation/cancellation of contracts, Admin cancellation/refund of active bounties, and recent objective activity.
-
-## Owner controls and audit
-
-- Owners can enable/disable rotating quests and choose 1–5 Daily plus 1–7 Weekly quests.
-- Adds Objectives as a selectable subsystem in the unified Audit Centre.
-- Uses sanitized API payloads; raw Discord IDs and internal telemetry identifiers remain on Railway.
+- Removes the obsolete `UTC day` and `Monday 00:00 UTC` labels from the Objectives page.
+- The dashboard now describes Daily quests as a true 24-hour rotation and Weekly quests as a true 7-day rotation, independent of DayZ restarts.
+- The actual persisted 24-hour / 7-day rotation timing remains supplied by Bot v1.18.55.
 
 ## Compatibility
 
-- Requires Bot v1.18.54.
-- No Chernarus satellite tile, road geometry, shop delivery, rental, ticket or progression-role behaviour changed.
+- Requires Bot v1.18.55 for the corrected persisted quest rotation anchors and legacy verified-link repair.
+- No database migration, Chernarus map geometry, shop/rental, ticket, progression or moderation behaviour changed.

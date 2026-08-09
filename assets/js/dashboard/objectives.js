@@ -43,7 +43,11 @@
     const response = await (protectedRequest ? protectedActionFetch : authFetch)(url, options);
     let payload = {};
     try { payload = await response.json(); } catch (_) { payload = {}; }
-    if (!response.ok) throw new Error(payload?.message || `Request failed (${response.status})`);
+    if (!response.ok) {
+      const error = new Error(payload?.message || `Request failed (${response.status})`);
+      error.status = response.status;
+      throw error;
+    }
     return payload;
   };
 
@@ -302,19 +306,51 @@
 
   const loadMember = async ({ force = false } = {}) => {
     if (loaded && !force) return;
-    if (!token()) { renderMember({ status: 'guest' }); loaded = false; return; }
+    const sessionToken = token();
+    if (!sessionToken) {
+      renderMember({ status: 'guest' });
+      loaded = false;
+      return;
+    }
+
+    // The dashboard header and Objectives workspace must use the same authenticated
+    // session. Always pass the bearer token to Railway for private member data.
+    if (guest) guest.hidden = true;
     try {
-      const payload = await requestJson(ACCOUNT_OBJECTIVES_URL);
-      renderMember(payload); loaded = true;
-    } catch (error) { setMessage(error.message || 'Objectives could not be loaded.', 'error'); }
+      const payload = await requestJson(ACCOUNT_OBJECTIVES_URL, {
+        method: 'GET',
+        headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` }
+      });
+      renderMember(payload);
+      loaded = true;
+      setMessage('');
+    } catch (error) {
+      loaded = false;
+      if (error?.status === 401 || error?.status === 403) {
+        renderMember({ status: 'guest' });
+        setMessage('Your dashboard session expired. Sign in again to view Objectives.', 'error');
+      } else {
+        if (guest) guest.hidden = true;
+        setMessage(error.message || 'Objectives could not be loaded.', 'error');
+      }
+    }
   };
 
   const loadAdmin = async ({ force = false } = {}) => {
     if (!hasAdmin() || (adminLoaded && !force)) return;
+    const sessionToken = token();
+    if (!sessionToken) return;
     try {
-      const payload = await requestJson(ADMIN_OBJECTIVES_URL);
-      renderAdmin(payload); adminLoaded = true;
-    } catch (error) { setMessage(error.message || 'Objective administration could not be loaded.', 'error'); }
+      const payload = await requestJson(ADMIN_OBJECTIVES_URL, {
+        method: 'GET',
+        headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` }
+      });
+      renderAdmin(payload);
+      adminLoaded = true;
+    } catch (error) {
+      adminLoaded = false;
+      setMessage(error.message || 'Objective administration could not be loaded.', 'error');
+    }
   };
 
   const postMember = async (body) => requestJson(ACCOUNT_OBJECTIVES_ACTION_URL, {
