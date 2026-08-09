@@ -3,8 +3,10 @@
 
   const ACCOUNT_TICKETS_URL = `${DASHBOARD_API_BASE}/api/account/tickets`;
   const ACCOUNT_TICKET_ACTION_URL = `${DASHBOARD_API_BASE}/api/account/tickets/action`;
+  const accountTicketTranscriptUrl = (ticketNumber) => `${DASHBOARD_API_BASE}/api/account/tickets/${Number(ticketNumber)}/transcript`;
   const ADMIN_TICKETS_URL = `${DASHBOARD_API_BASE}/api/admin/tickets`;
   const ADMIN_TICKET_ACTION_URL = `${DASHBOARD_API_BASE}/api/admin/tickets/action`;
+  const adminTicketTranscriptUrl = (ticketNumber) => `${DASHBOARD_API_BASE}/api/admin/tickets/${Number(ticketNumber)}/transcript`;
   const ADMIN_TICKET_MEMBER_SEARCH_URL = `${DASHBOARD_API_BASE}/api/admin/tickets/members`;
   const ADMIN_TICKET_BLACKLIST_ACTION_URL = `${DASHBOARD_API_BASE}/api/admin/tickets/blacklist/action`;
   const OWNER_TICKET_CONFIG_URL = `${DASHBOARD_API_BASE}/api/owner/tickets/config`;
@@ -44,6 +46,7 @@
   const memberCloseReason = qs('[data-ticket-close-reason]');
   const ratingPanel = qs('[data-ticket-rating-panel]');
   const ratingButtons = qsa('[data-ticket-rate]');
+  const memberTranscriptButton = qs('[data-ticket-member-transcript]');
 
   const adminShell = qs('[data-ticket-admin-shell]');
   const adminList = qs('[data-admin-ticket-list]');
@@ -65,6 +68,7 @@
   const adminReply = qs('[data-admin-ticket-reply]');
   const adminReplySend = qs('[data-admin-ticket-reply-send]');
   const adminTranscriptLink = qs('[data-admin-ticket-transcript-link]');
+  const adminWebsiteTranscript = qs('[data-admin-ticket-website-transcript]');
   const adminMessage = qs('[data-admin-ticket-message]');
   const adminPriority = qs('[data-admin-ticket-priority]');
   const adminTag = qs('[data-admin-ticket-tag]');
@@ -172,6 +176,31 @@
       throw error;
     }
     return payload;
+  };
+
+  const openWebsiteTranscript = async (url, messageTarget) => {
+    const sessionToken = token();
+    if (!sessionToken) return showMessage(messageTarget, 'Sign in with Discord to continue.', 'error');
+    const popup = window.open('', '_blank');
+    if (!popup) return showMessage(messageTarget, 'Allow pop-ups for this site to open archived transcripts.', 'error');
+    try {
+      popup.document.write('<title>Loading transcript…</title><p style="font-family:sans-serif;padding:2rem">Loading archived ticket transcript…</p>');
+      const response = await authFetch(url, {
+        headers: { Accept: 'text/html', Authorization: `Bearer ${sessionToken}` }
+      });
+      const body = await response.text();
+      if (!response.ok) {
+        let message = 'The archived website transcript could not be opened.';
+        try { message = JSON.parse(body).message || message; } catch {}
+        throw new Error(message);
+      }
+      const blobUrl = URL.createObjectURL(new Blob([body], { type: 'text/html;charset=utf-8' }));
+      popup.location.replace(blobUrl);
+      window.setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+    } catch (error) {
+      popup.close();
+      showMessage(messageTarget, error.message, 'error');
+    }
   };
 
   const statusPill = (status) => {
@@ -403,6 +432,7 @@
       if (memberCloseButton) memberCloseButton.hidden = !open;
       if (ratingPanel) ratingPanel.hidden = selectedMemberTicket.status !== 'closed' || selectedMemberTicket.rating != null;
       ratingButtons.forEach((button) => { button.disabled = selectedMemberTicket.rating != null; });
+      if (memberTranscriptButton) memberTranscriptButton.hidden = !selectedMemberTicket.website_transcript_available;
       if (!quiet) openDialog(detailDialog);
     } catch (error) {
       showMessage(memberError, error.message, 'error');
@@ -597,6 +627,7 @@
       if (safeTranscriptUrl) adminTranscriptLink.href = transcriptUrl;
       else adminTranscriptLink.removeAttribute('href');
     }
+    if (adminWebsiteTranscript) adminWebsiteTranscript.hidden = !ticket.website_transcript_available;
 
     adminActionButtons.forEach((button) => {
       const action = button.dataset.adminTicketAction;
@@ -839,6 +870,12 @@
     if (sent && memberReply) memberReply.value = '';
   });
   ratingButtons.forEach((button) => button.addEventListener('click', () => memberAction('rate', { rating: Number(button.dataset.ticketRate) })));
+  memberTranscriptButton?.addEventListener('click', () => {
+    if (selectedMemberTicket) openWebsiteTranscript(accountTicketTranscriptUrl(selectedMemberTicket.ticket_number), detailMessage);
+  });
+  adminWebsiteTranscript?.addEventListener('click', () => {
+    if (selectedAdminTicket) openWebsiteTranscript(adminTicketTranscriptUrl(selectedAdminTicket.ticket_number), adminMessage);
+  });
 
   refreshAdmin?.addEventListener('click', () => loadAdminTickets());
   adminScope?.addEventListener('change', () => loadAdminTickets());
@@ -865,15 +902,6 @@
     await submitAdminAction('note', { note });
     if (adminNote) adminNote.value = '';
   });
-  participantSearch?.addEventListener('input', () => {
-    window.clearTimeout(participantSearchTimer);
-    participantSearchTimer = window.setTimeout(() => searchTicketMembers(participantSearch.value, participantResults), 250);
-  });
-  addParticipant?.addEventListener('click', () => {
-    if (!participantResults?.value) return showMessage(adminMessage, 'Select a Discord member to add.', 'error');
-    submitAdminAction('participant_add', { participant_key: participantResults.value });
-  });
-
   blacklistSearch?.addEventListener('input', () => {
     window.clearTimeout(blacklistSearchTimer);
     blacklistSearchTimer = window.setTimeout(() => searchTicketMembers(blacklistSearch.value, blacklistResults), 250);

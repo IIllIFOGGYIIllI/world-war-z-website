@@ -1,3 +1,7 @@
+## Website v1.22.53 — Private Ticket Lifecycle
+
+Support tickets now enforce creator + Admin role + bot privacy, expose the retained transcript through both Discord and authenticated website views, and automatically remove the closed Discord channel after the creator submits a review.
+
 ## Website v1.22.52 — Synchronized Ticket Centre
 
 - Adds a complete member/Admin/Owner ticket workspace backed by the same Railway ticket records and Discord ticket channels used by the bot.

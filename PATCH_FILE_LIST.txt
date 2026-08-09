@@ -1,7 +1,11 @@
-world-war-z-website v1.22.52 — Updated / Added Files
+world-war-z-website v1.22.53 — Updated / Added Files
 
-UPDATED
 - 404.html
+- DELETE_THESE_FILES.txt
+- PATCH_FILE_LIST.txt
+- PATCH_NOTES.md
+- README.md
+- assets/js/dashboard/tickets.js
 - changelog.html
 - community-guidelines.html
 - dashboard.html
@@ -9,19 +13,6 @@ UPDATED
 - legal.html
 - moderation-policy.html
 - privacy.html
+- scripts/validate_site.py
 - shop.html
 - terms.html
-- README.md
-- scripts/validate_site.py
-
-ADDED
-- assets/css/dashboard/tickets.css
-- assets/js/dashboard/tickets.js
-
-RELEASE METADATA
-- PATCH_NOTES.md
-- PATCH_FILE_LIST.txt
-- DELETE_THESE_FILES.txt
-
-FILES TO DELETE
-NONE
