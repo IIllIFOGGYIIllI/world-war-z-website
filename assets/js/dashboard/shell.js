@@ -30,6 +30,13 @@ sidebarScrim?.addEventListener('click', closeSidebar);
 
 const availableViews = new Set(viewPanels.map((panel) => panel.dataset.viewPanel));
 
+const canAccessElement = (element) => {
+  if (!element) return false;
+  if (element.dataset.staffOnly !== undefined && !['staff', 'owner'].includes(dashboardAccessLevel)) return false;
+  if (element.dataset.ownerOnly !== undefined && dashboardAccessLevel !== 'owner') return false;
+  return true;
+};
+
 const canOpenView = (view) => {
   if (['staff', 'delivery'].includes(view)) return ['staff', 'owner'].includes(dashboardAccessLevel);
   if (['configuration', 'serverconfig', 'shopadmin'].includes(view)) return dashboardAccessLevel === 'owner';
@@ -46,13 +53,17 @@ const parseNavigationKey = (value, explicitSection = '') => {
 };
 
 const defaultSectionForView = (view) =>
-  viewButtons.find((button) => button.dataset.view === view && button.dataset.section)?.dataset.section || '';
+  viewButtons.find((button) =>
+    button.dataset.view === view &&
+    button.dataset.section &&
+    canAccessElement(button)
+  )?.dataset.section || '';
 
 const sectionTargetFor = (view, section) => {
   const panel = viewPanels.find((item) => item.dataset.viewPanel === view);
   if (!panel || !section) return null;
   return [...panel.querySelectorAll('[data-dashboard-section]')]
-    .find((item) => item.dataset.dashboardSection === section) || null;
+    .find((item) => item.dataset.dashboardSection === section && canAccessElement(item)) || null;
 };
 
 const navigationKey = (view, section = '') => section ? `${view}/${section}` : view;
@@ -113,9 +124,7 @@ let commandPaletteMatches = [];
 
 const isDashboardDestinationVisible = (button) => {
   if (!button || button.hidden || button.closest('[hidden]')) return false;
-  if (button.dataset.staffOnly !== undefined && !['staff', 'owner'].includes(dashboardAccessLevel)) return false;
-  if (button.dataset.ownerOnly !== undefined && dashboardAccessLevel !== 'owner') return false;
-  return true;
+  return canAccessElement(button);
 };
 
 const dashboardDestinationText = (button) => [

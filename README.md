@@ -1,3 +1,17 @@
+## Website v1.22.64 — Final Chernarus Parity Polish
+
+This website-only patch closes the genuine frontend polish gaps found by the final Chernarus backend ↔ frontend parity audit.
+
+- Replaces fake demonstration activity on the Overview with the existing live public server-status/restart/health data.
+- Prevents direct URL hashes from selecting protected nested Admin/Owner sections for sessions that do not have access.
+- Updates the dashboard and public roadmaps to the current Chernarus completion state.
+- Corrects the Shop & Trader navigation count and clarifies automatic delivery versus manual trader-ticket fulfilment labels.
+- Corrects the historical Objectives authentication hotfix changelog version to v1.22.57.
+- Removes stale ticket-participant and already-implemented shop-bulk roadmap claims.
+- Keeps the existing APIs, Railway persistence, locked Chernarus map, ticket system, Factions and all other production workflows unchanged.
+
+Keep Bot v1.18.61 deployed. Full production smoke/regression QA remains the final step before declaring Chernarus feature-complete.
+
 ## Website v1.22.63 — Faction Editor Modal Hotfix
 
 This website-only hotfix fixes the Faction Administration create/edit modal layout introduced with v1.22.62.

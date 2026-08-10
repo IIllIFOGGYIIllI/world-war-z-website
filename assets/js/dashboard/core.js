@@ -433,7 +433,11 @@ const applyAccessVisibility = (level) => {
   window.dispatchEvent(new CustomEvent('wwz:accesschange', { detail: { level } }));
 
   const activeView = document.querySelector('[data-view-panel].active')?.dataset.viewPanel;
-  if (activeView && !canOpenView(activeView)) showView('overview', false);
+  if (activeView && !canOpenView(activeView)) {
+    showView('overview', false);
+  } else if (activeView && activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)) {
+    showView(activeView, false);
+  }
 };
 
 const resetMemberPanels = () => {

@@ -1,15 +1,16 @@
-# World War Z Website v1.22.63
+# World War Z Website v1.22.64
 
-## Faction editor modal hotfix
+## Final Chernarus parity polish
 
-- Fixes the Faction Administration create/edit modal overflowing its generic 540px dialog shell.
-- Expands the desktop faction editor to a responsive 920px maximum width.
-- Keeps all form controls inside the modal and removes horizontal scrolling/clipping.
-- Retains the existing two-column desktop form and collapses cleanly to one column on mobile.
-- Caps the modal height and scrolls only the form body vertically when required.
-- Adds a sticky Save Faction / Cancel action area so controls remain reachable on long forms.
-- Improves wrapping for long labels and linked-map helper text.
-- No faction API, bot, database, permission, map, or membership behaviour changes.
+- Replaces the Overview demonstration-only Recent Activity feed with live Railway-backed server, restart and connected-service intelligence.
+- Hardens nested protected dashboard navigation so direct URL hashes cannot select Admin/Owner-only subsections without the required current access.
+- Refreshes the public and dashboard roadmaps to the current Chernarus completion state.
+- Corrects Shop & Trader navigation counts and aligns the automatic-delivery vs manual trader-ticket labels with the real workflows.
+- Corrects the historical Objectives authentication hotfix changelog entry to Website v1.22.57.
+- Removes stale roadmap references to additional ticket participants, the old v1.22.52/v1.18.48 release pair, and shop bulk controls that are already implemented.
+- Keeps Bot v1.18.61 unchanged.
+- No Railway database, API contract, Chernarus map, ticket engine, shop/rental lifecycle, progression, Objective or Faction data changes.
+- No Livonia implementation.
 
 ## Deployment
 

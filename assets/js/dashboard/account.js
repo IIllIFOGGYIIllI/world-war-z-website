@@ -849,6 +849,12 @@ const applyLiveStatus = (payload) => {
       : 'No automatic restart configured';
   setText('[data-overview-restart-countdown]', overviewRestartValue);
   setText('[data-overview-restart-note]', overviewRestartNote);
+  setText('[data-overview-activity-server]', `${statusLabel} · ${currentPlayers} / ${maximumPlayers} survivors`);
+  setText('[data-overview-activity-server-note]', `Nitrado ${nitradoState} · updated ${updatedAt}`);
+  setText('[data-overview-activity-restart]', restartSynchronised ? `Next restart in ${restartCountdown}` : nextRestart);
+  setText('[data-overview-activity-restart-note]', `${restartInterval} · source ${restartSource}`);
+  setText('[data-overview-activity-health]', discordHealthy ? 'Discord gateway ready · Railway API online' : 'Connected-service health degraded');
+  setText('[data-overview-activity-health-note]', `API uptime ${formatDuration(operations.api_uptime_seconds)} · last success ${operationUpdatedAt}`);
 
   const restartCycleSeconds = restartIntervalMinutes * 60;
   const restartRemainingSeconds = Math.max(0, Number(operations.restart_countdown_seconds) || 0);
@@ -909,6 +915,12 @@ const showStatusUnavailable = () => {
   setText('[data-operations-restart-warning]', 'Unavailable');
   setText('[data-overview-restart-countdown]', 'Unavailable');
   setText('[data-overview-restart-note]', 'Unable to reach the Railway API');
+  setText('[data-overview-activity-server]', 'DayZ server status unavailable');
+  setText('[data-overview-activity-server-note]', 'Railway could not refresh the public server state');
+  setText('[data-overview-activity-restart]', 'Restart intelligence unavailable');
+  setText('[data-overview-activity-restart-note]', 'Retry after the Railway API connection recovers');
+  setText('[data-overview-activity-health]', 'Connected-service health unavailable');
+  setText('[data-overview-activity-health-note]', 'Discord, Nitrado and API state could not be refreshed');
   document.querySelectorAll('[data-restart-progress]').forEach((element) => {
     element.style.setProperty('--progress', '0%');
   });

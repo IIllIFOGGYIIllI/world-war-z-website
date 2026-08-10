@@ -10,8 +10,8 @@
 <link href="site.webmanifest" rel="manifest"/>
 <link href="assets/favicon.png" rel="icon" type="image/png"/>
 <link href="assets/world-war-z-icon.png" rel="apple-touch-icon"/>
-<link href="assets/css/pages/home.css?v=1.22.63" rel="stylesheet"/>
-<link href="https://iillifoggyiilli.github.io/world-war-z-website/" rel="canonical"/><meta content="World War Z Community" property="og:site_name"/><meta content="World War Z — DayZ PS4/PS5 Command Centre" property="og:title"/><meta content="Live server status, survivor economy, trader shop, moderation workflows and protected Nitrado controls for the World War Z PlayStation community." property="og:description"/><meta content="website" property="og:type"/><meta content="https://iillifoggyiilli.github.io/world-war-z-website/" property="og:url"/><meta content="https://iillifoggyiilli.github.io/world-war-z-website/assets/world-war-z-social-preview.png" property="og:image"/><meta content="https://iillifoggyiilli.github.io/world-war-z-website/assets/world-war-z-social-preview.png" property="og:image:secure_url"/><meta content="image/png" property="og:image:type"/><meta content="1200" property="og:image:width"/><meta content="630" property="og:image:height"/><meta content="World War Z DayZ PS4 and PS5 Command Centre" property="og:image:alt"/><meta content="summary_large_image" name="twitter:card"/><meta content="World War Z — DayZ PS4/PS5 Command Centre" name="twitter:title"/><meta content="Live server status, survivor economy, trader shop, moderation workflows and protected Nitrado controls for the World War Z PlayStation community." name="twitter:description"/><meta content="https://iillifoggyiilli.github.io/world-war-z-website/assets/world-war-z-social-preview.png" name="twitter:image"/><link href="assets/css/site-polish.css?v=1.22.63" rel="stylesheet"/></head>
+<link href="assets/css/pages/home.css?v=1.22.64" rel="stylesheet"/>
+<link href="https://iillifoggyiilli.github.io/world-war-z-website/" rel="canonical"/><meta content="World War Z Community" property="og:site_name"/><meta content="World War Z — DayZ PS4/PS5 Command Centre" property="og:title"/><meta content="Live server status, survivor economy, trader shop, moderation workflows and protected Nitrado controls for the World War Z PlayStation community." property="og:description"/><meta content="website" property="og:type"/><meta content="https://iillifoggyiilli.github.io/world-war-z-website/" property="og:url"/><meta content="https://iillifoggyiilli.github.io/world-war-z-website/assets/world-war-z-social-preview.png" property="og:image"/><meta content="https://iillifoggyiilli.github.io/world-war-z-website/assets/world-war-z-social-preview.png" property="og:image:secure_url"/><meta content="image/png" property="og:image:type"/><meta content="1200" property="og:image:width"/><meta content="630" property="og:image:height"/><meta content="World War Z DayZ PS4 and PS5 Command Centre" property="og:image:alt"/><meta content="summary_large_image" name="twitter:card"/><meta content="World War Z — DayZ PS4/PS5 Command Centre" name="twitter:title"/><meta content="Live server status, survivor economy, trader shop, moderation workflows and protected Nitrado controls for the World War Z PlayStation community." name="twitter:description"/><meta content="https://iillifoggyiilli.github.io/world-war-z-website/assets/world-war-z-social-preview.png" name="twitter:image"/><link href="assets/css/site-polish.css?v=1.22.64" rel="stylesheet"/></head>
 <body>
 <a class="skip-link" href="#main-content">Skip to content</a>
 <header class="site-header" data-header="">
@@ -151,97 +151,92 @@
 <div class="section-heading reveal roadmap-heading">
 <div>
 <p class="eyebrow">Development roadmap</p>
-<h2 id="roadmap-title">What Is Live, What Is Deferred And What Comes Next</h2>
-<p>This roadmap reflects the current production bot, website and Railway-backed systems. Completed systems stay visible, deferred verification is not treated as a blocker, and planned expansions are kept separate from features that are already live.</p>
+<h2 id="roadmap-title">Finish Chernarus First—Then Expand</h2>
+<p>This roadmap reflects the current production bot, website and Railway-backed systems. Chernarus remains the active production world until its final regression and smoke QA is complete; Livonia stays planned but deliberately separate.</p>
 </div>
 <div aria-label="Current roadmap release" class="roadmap-release">
 <small>Roadmap updated</small>
-<strong>9 August 2026</strong>
-<span>Website v1.22.52 · Bot v1.18.48</span>
+<strong>11 August 2026</strong>
+<span>Website v1.22.64 · Bot v1.18.61</span>
 </div>
 </div>
 <div aria-label="Roadmap status key" class="roadmap-status-key reveal">
 <span class="complete">Available now</span>
-<span class="active">Current release</span>
+<span class="active">Current work</span>
 <span class="verification">Deferred verification</span>
 <span class="next">Planned expansion</span>
 <span class="future">Later improvements</span>
 </div>
 <div class="roadmap-grid">
 <article class="roadmap-card roadmap-card-complete reveal">
-<div class="roadmap-card-heading"><span>01</span><div><small>Available now</small><h3>Production Community Platform</h3></div></div>
-<p>The core World War Z bot, dashboard, Survivor Shop and protected Railway services are established and operating as one connected platform.</p>
+<div class="roadmap-card-heading"><span>01</span><div><small>Available now</small><h3>Chernarus Community Platform</h3></div></div>
+<p>The World War Z bot, dashboard, Survivor Shop and Railway services now operate as one connected Chernarus platform.</p>
 <ul>
-<li>Discord ↔ PlayStation account linking, profiles, economy, gambling, PvP statistics, playtime, bounties, contracts and tickets.</li>
-<li>Moderation, Discord logging, Nitrado integration, server status and protected Start, Stop and Restart controls.</li>
-<li>Configuration control, loot, events, positions, validation, backups, comparisons, restores and ban-list management.</li>
-<li>High-detail local Chernarus map with corrected satellite tiles, production road geometry, settlement names, private pins, shared public markers and accurate DayZ X/Z selection.</li>
-<li>Member Survivor Shop and Owner catalogue management with stock, role rules, discounts, purchase limits and order history.</li>
-<li>Normal Item delivery through temporary <code>cfgEffectArea.json</code> entries, with no purchase-triggered restart and automatic cleanup after the next independent restart.</li>
-<li>Vehicle/Event Item rentals kept separate on the Central Economy event workflow with restart duration, persistence, expiry, cancellation, refund and cleanup handling.</li>
-<li>XP, Levels 1–100, Prestige 0–10, Discord/DayZ XP sources, economy rewards, existing-role synchronization and protected website configuration.</li>
-<li>Public/member/Admin/Owner permission separation with server-side access enforcement and Railway-owned persistent records.</li>
+<li>Discord ↔ PlayStation linking, survivor profiles, economy, gambling, PvP, sessions/playtime, XP/Prestige, Daily/Weekly quests, bounties and contracts.</li>
+<li>Synchronized Discord + website tickets, Advanced Ticket Settings, moderation, appeals, independent reviews, live ban lists and unified audit history.</li>
+<li>Owner Configuration Control with structured gameplay/weather/messages/loot/events editors, raw mission-file access, validation, backup, diff and restore workflows.</li>
+<li>Live Command Centre, Nitrado controls, restart intelligence, automatic item delivery, restart-bound rentals, failure recovery and high-signal notification routing.</li>
+<li>High-detail locked Chernarus map with corrected satellite tiles, production roads/trails, settlement names, accurate X/Z selection, public markers and private browser-local pins.</li>
+<li>Member and Admin Faction surfaces with verified-survivor membership, leadership, member limits, safe existing Discord-role binding, Zone ID and existing public-map-marker linkage.</li>
+<li>Public/member/Admin/Owner permission separation with server-side Railway authorization for every protected API operation.</li>
 </ul>
 </article>
 <article class="roadmap-card roadmap-card-active reveal">
-<div class="roadmap-card-heading"><span>02</span><div><small>Current release</small><h3>Synchronized Support Centre</h3></div></div>
-<p>Website v1.22.52 and Bot v1.18.48 make Discord and the dashboard two synchronized interfaces to the same ticket records and private Discord ticket channels.</p>
+<div class="roadmap-card-heading"><span>02</span><div><small>Current work</small><h3>Final Chernarus Production QA</h3></div></div>
+<p>The backend ↔ frontend parity audit is complete. The remaining pre-Livonia work is production smoke/regression verification rather than another large feature build.</p>
 <ul>
-<li>Members can open and manage support tickets from either Discord or the website without creating duplicate queues.</li>
-<li>Website-created tickets create the real private Discord channel; Discord-created tickets appear in the website history and staff queue.</li>
-<li>Recent Discord conversation is visible on the website, while website replies are posted back into the linked Discord channel with the acting Discord identity attached.</li>
-<li>Admins can manage claims, priorities, tags, participants, private notes, transcripts, ratings, search/statistics and blacklist state from the dashboard.</li>
-<li>Owners can configure the actual Discord ticket panel, categories, transcript archive, support role and enabled state from the website.</li>
-<li>Existing ticket records are reused; no second ticket database or destructive Railway migration is introduced.</li>
+<li>Re-run the complete API-independent regression suite and repository/site validators against the exact release tree.</li>
+<li>Live-check authentication, Member/Admin/Owner gating and protected-write confirmations on Railway.</li>
+<li>Smoke-test tickets, moderation, Player Administration, Objectives, Factions, shop/delivery/rentals, Configuration Control and server actions.</li>
+<li>Confirm no meaningful backend-only UI gaps, dead controls, stale placeholders or permission leaks remain.</li>
+<li>Declare Chernarus feature-complete only after those production checks pass.</li>
 </ul>
 </article>
 <article class="roadmap-card roadmap-card-verification reveal">
 <div class="roadmap-card-heading"><span>03</span><div><small>Deferred verification</small><h3>Natural XP &amp; Prestige QA</h3></div></div>
-<p>The progression system is operational. Natural production verification can be confirmed later as real members cross the relevant milestones; it is not blocking other development.</p>
+<p>The progression system is operational. Natural production verification can be confirmed later as real members cross the relevant milestones; it is not blocking other Chernarus completion work.</p>
 <ul>
-<li>Confirm a genuine level crossing updates the correct Discord role, economy reward, announcement, <code>/rank</code> and <code>/profile</code> exactly once.</li>
-<li>Confirm a natural Level 100 → Prestige transition preserves Lifetime XP, resets current progression correctly and assigns the appropriate Prestige/Level roles.</li>
+<li>Confirm a genuine level crossing updates the correct existing Discord role, economy reward, announcement, <code>/rank</code> and <code>/profile</code> exactly once.</li>
+<li>Confirm a natural Level 100 → Prestige transition preserves Lifetime XP, resets current progression correctly and assigns the appropriate existing Prestige/Level roles.</li>
 <li>Confirm the Prestige economy reward remains duplicate-safe during the natural transition.</li>
 <li>No historical PvP XP backfill is planned.</li>
 </ul>
 </article>
 <article class="roadmap-card roadmap-card-next reveal">
-<div class="roadmap-card-heading"><span>04</span><div><small>Planned expansion</small><h3>Livonia &amp; Multi-Map Support</h3></div></div>
-<p>Livonia is a planned first-class map expansion rather than a reskin of the existing Chernarus page. It will receive its own validated map data and map-aware website workflows.</p>
+<div class="roadmap-card-heading"><span>04</span><div><small>Planned expansion</small><h3>Livonia &amp; Multi-Map Foundation</h3></div></div>
+<p>Livonia begins only after Chernarus is declared feature-complete. It will use its own authoritative imagery, bounds, coordinates, roads, settlements and map-aware data rather than reusing Chernarus assumptions.</p>
 <ul>
-<li>Build a Livonia satellite tile pyramid from an approved local source and establish its authoritative world dimensions, bounds and DayZ coordinate conversion.</li>
-<li>Extract/reconstruct and validate Livonia roads and trails independently from the closed Chernarus production dataset.</li>
-<li>Add Livonia settlement/place-name data, attribution, map validation and browser performance checks.</li>
-<li>Add map selection so Chernarus and Livonia can use the same shared map UI without mixing coordinates or assets.</li>
-<li>Make saved delivery locations, shop checkout, public markers and private pins map-aware.</li>
+<li>Build and validate a Livonia satellite tile pyramid from an approved local source.</li>
+<li>Establish Livonia world dimensions, bounds and DayZ coordinate conversion independently.</li>
+<li>Extract/reconstruct and validate Livonia roads, trails, settlements and named locations.</li>
+<li>Make saved locations, public markers, private pins, quests, event positions and Faction zones map-aware.</li>
 <li>Preserve the completed Chernarus map exactly unless a genuine Chernarus defect is demonstrated.</li>
 </ul>
 </article>
 <article class="roadmap-card roadmap-card-next reveal">
 <div class="roadmap-card-heading"><span>05</span><div><small>Planned expansion</small><h3>Multi-Server Architecture</h3></div></div>
-<p>After the map model is ready for more than one world, the larger server architecture can cleanly separate settings and operations across multiple DayZ services.</p>
+<p>After the multi-map model is ready, the larger server architecture can cleanly separate operational and configuration state across multiple DayZ services.</p>
 <ul>
-<li>Website server selector with separate live status, map identity and operational context.</li>
+<li>Website server selector with separate status, map identity and operational context.</li>
 <li>Per-server Nitrado service settings, mission roots, configuration files, backups and validation history.</li>
-<li>Per-server catalogue items alongside optional Global shop items.</li>
-<li>Per-server rentals, delivery queues, restart accounting, player activity, PvP statistics and leaderboards.</li>
-<li>Per-server Admin permissions, audit context and protected actions.</li>
-<li>Safe migration of the current Chernarus server into the multi-server model without replacing Railway data.</li>
+<li>Per-server catalogue/rental/delivery/restart context with optional Global catalogue entries where appropriate.</li>
+<li>Per-server activity, PvP, Objectives, Factions and Admin audit context.</li>
+<li>Safe migration of the current Chernarus production service without replacing Railway persistence.</li>
 </ul>
 </article>
 <article class="roadmap-card roadmap-card-future reveal">
-<div class="roadmap-card-heading"><span>06</span><div><small>Later improvements</small><h3>Product &amp; Progression Enhancements</h3></div></div>
-<p>These improvements remain useful follow-up work and can be selected individually after the current progression release.</p>
+<div class="roadmap-card-heading"><span>06</span><div><small>Later improvements</small><h3>Community &amp; Workflow Enhancements</h3></div></div>
+<p>These remain optional improvements after core Chernarus completion and the approved map/server expansion work.</p>
 <ul>
-<li>Owner bulk catalogue controls for category enable/disable, price adjustments, stock limits and large-scale shop maintenance.</li>
-<li>Longer-term progression charts and deeper survivor/economy analytics where the existing ledger supports them.</li>
-<li>Reusable event plans, event scheduling and additional operational workflow automation.</li>
+<li>Server-wide Community Challenges using existing playtime, PvP, objective and economy telemetry.</li>
+<li>Longer-term progression and economy analytics where the existing immutable ledgers support them.</li>
+<li>Reusable event plans, scheduling and additional operational workflow automation.</li>
 <li>Colour-specific vehicle preview polishing where the DayZ Wiki does not expose a reliable variant image.</li>
-<li>Further accessibility, performance and workflow refinements where real usage identifies a need.</li>
+<li>Further accessibility, performance and workflow refinements driven by real production use.</li>
 </ul>
 </article>
 </div>
-<div class="roadmap-note reveal"><span aria-hidden="true">✓</span><p><strong>Roadmap rule:</strong> stable production systems are preserved, natural XP/Prestige QA is deferred until convenient, Livonia is planned but not yet implemented, Website v1.22.52 pairs with Bot v1.18.48, and persistent Railway records must never be replaced by a website release.</p></div>
+<div class="roadmap-note reveal"><span aria-hidden="true">✓</span><p><strong>Roadmap rule:</strong> stable Chernarus systems are preserved, natural XP/Prestige QA stays deferred until convenient, Livonia does not begin until the final Chernarus production QA is complete, and Railway-owned persistent records are never replaced by a website release.</p></div>
 </div>
 </section>
 <section aria-labelledby="faq-title" class="faq section" id="faq">
@@ -310,6 +305,6 @@
 <p>© <span data-year=""></span> World War Z Community.</p>
 </div>
 </footer>
-<script defer="" src="assets/js/pages/home.js?v=1.22.63"></script>
+<script defer="" src="assets/js/pages/home.js?v=1.22.64"></script>
 </body>
 </html>
