@@ -1,3 +1,19 @@
+## Website v1.22.61 — Advanced Ticket Settings
+
+This patch adds the Owner-facing advanced controls for the synchronized support-ticket system backed by Bot v1.18.60.
+
+- Expands the existing Owner ticket configuration surface instead of introducing a second ticket engine.
+- Adds lifecycle settings for member closure, confirmation/reason requirements, claiming, feedback/reviews, inactivity, transcript handling and automatic archival.
+- Adds a configurable maximum active-ticket count per member.
+- Adds panel title, description, colour and new-ticket welcome copy.
+- Adds an optional overflow Discord category for open tickets.
+- Adds per-category enable/disable, initial priority, support-role override and notification-role routing.
+- Keeps all protected writes Owner-authorized by Railway and uses the same existing Discord ticket channels/records.
+- Keeps strict ticket privacy and the synchronized Discord + website support workflow intact.
+- No Chernarus map assets, shop/rental lifecycle, progression system or Railway production state is replaced.
+
+Requires Bot v1.18.60. No Livonia work is included.
+
 ## Website v1.22.60 — Live Command Centre
 
 This patch adds a protected Admin/Owner operational overview backed by Bot v1.18.58.

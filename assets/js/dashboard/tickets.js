@@ -94,9 +94,14 @@
   const configClosed = qs('[data-ticket-config-closed-category]');
   const configTranscript = qs('[data-ticket-config-transcript]');
   const configRole = qs('[data-ticket-config-role]');
+  const configOverflow = qs('[data-ticket-config-overflow]');
   const configSave = qs('[data-ticket-config-save]');
   const configEnable = qs('[data-ticket-config-enable]');
   const configDisable = qs('[data-ticket-config-disable]');
+  const configAdvancedSave = qs('[data-ticket-advanced-save]');
+  const configAdvancedReset = qs('[data-ticket-advanced-reset]');
+  const configCategorySettings = qs('[data-ticket-category-settings]');
+  const configSettingInputs = qsa('[data-ticket-setting]');
   const configMessage = qs('[data-ticket-config-message]');
 
   const confirmDialog = qs('[data-ticket-admin-confirm-dialog]');
@@ -119,6 +124,7 @@
   let participantSearchTimer = 0;
   let blacklistSearchTimer = 0;
   let pollTimer = 0;
+  let ownerConfigPayload = null;
 
   const openDialog = (dialog) => {
     if (typeof dialog?.showModal === 'function') dialog.showModal();
@@ -339,7 +345,7 @@
       view.textContent = 'View Ticket';
       view.addEventListener('click', () => openMemberTicket(ticket.ticket_number));
       actions.append(view);
-      if (ticket.status === 'open') {
+      if (ticket.status === 'open' && memberPayload?.system?.allow_member_close !== false) {
         const close = document.createElement('button');
         close.type = 'button';
         close.className = 'danger-action compact-action';
@@ -364,7 +370,7 @@
     set('[data-ticket-open-count]', String(system.open_count ?? 0));
     set('[data-ticket-open-limit]', `Maximum ${system.max_open_per_member ?? '—'}`);
     set('[data-ticket-total-count]', String(memberPayload.ticket_count ?? 0));
-    set('[data-ticket-inactivity]', `${system.auto_close_warning_hours ?? '—'}h → ${system.auto_close_hours ?? '—'}h`);
+    set('[data-ticket-inactivity]', system.auto_close_enabled === false ? 'Disabled' : `${system.auto_close_warning_hours ?? '—'}h → ${system.auto_close_hours ?? '—'}h`);
   };
 
   const populateCreateCategories = (categories = []) => {
@@ -428,11 +434,15 @@
       const open = selectedMemberTicket.status === 'open';
       if (memberReply) memberReply.disabled = !open || !selectedMemberTicket.discord_thread_available;
       if (memberReplySend) memberReplySend.disabled = !open || !selectedMemberTicket.discord_thread_available || requestBusy;
-      if (memberCloseField) memberCloseField.hidden = !open;
-      if (memberCloseButton) memberCloseButton.hidden = !open;
-      if (ratingPanel) ratingPanel.hidden = selectedMemberTicket.status !== 'closed' || selectedMemberTicket.rating != null;
-      ratingButtons.forEach((button) => { button.disabled = selectedMemberTicket.rating != null; });
-      if (memberTranscriptButton) memberTranscriptButton.hidden = !selectedMemberTicket.website_transcript_available;
+      const system = memberPayload?.system || {};
+      const canMemberClose = open && system.allow_member_close !== false;
+      if (memberCloseField) memberCloseField.hidden = !canMemberClose;
+      if (memberCloseButton) memberCloseButton.hidden = !canMemberClose;
+      if (memberCloseReason) memberCloseReason.required = Boolean(system.require_close_reason);
+      const canReview = selectedMemberTicket.status === 'closed' && selectedMemberTicket.rating == null && system.feedback_enabled !== false && system.reviews_enabled !== false;
+      if (ratingPanel) ratingPanel.hidden = !canReview;
+      ratingButtons.forEach((button) => { button.disabled = selectedMemberTicket.rating != null || system.reviews_enabled === false; });
+      if (memberTranscriptButton) memberTranscriptButton.hidden = !selectedMemberTicket.website_transcript_available || system.owner_transcript_access === false;
       if (!quiet) openDialog(detailDialog);
     } catch (error) {
       showMessage(memberError, error.message, 'error');
@@ -632,7 +642,7 @@
     adminActionButtons.forEach((button) => {
       const action = button.dataset.adminTicketAction;
       let disabled = false;
-      if (action === 'claim') disabled = ticket.status !== 'open' || Boolean(ticket.claimed_by);
+      if (action === 'claim') disabled = ticket.status !== 'open' || Boolean(ticket.claimed_by) || adminPayload?.policy?.claiming_enabled === false;
       if (action === 'unclaim') disabled = ticket.status !== 'open' || !ticket.claimed_by;
       if (action === 'close') disabled = ticket.status !== 'open';
       if (action === 'reopen') disabled = ticket.status !== 'closed';
@@ -786,10 +796,113 @@
     });
   };
 
+  const renderCategorySettings = (settings = {}, resources = {}) => {
+    if (!configCategorySettings) return;
+    configCategorySettings.replaceChildren();
+    const roleOptions = resources.support_roles || [];
+    (settings.categories || []).forEach((category) => {
+      const row = document.createElement('div');
+      row.className = 'ticket-category-setting-row';
+      row.dataset.ticketCategoryKey = category.key;
+
+      const identity = document.createElement('div');
+      identity.className = 'ticket-category-name';
+      const name = document.createElement('strong');
+      name.textContent = `${category.emoji || '🎟️'} ${category.label}`;
+      const copy = document.createElement('small');
+      copy.textContent = category.appeal_managed ? 'Linked through the moderation appeal workflow.' : (category.description || 'Support ticket category.');
+      identity.append(name, copy);
+
+      const enabledLabel = document.createElement('label');
+      enabledLabel.className = 'ticket-setting-toggle';
+      const enabled = document.createElement('input');
+      enabled.type = 'checkbox';
+      enabled.checked = category.enabled !== false;
+      enabled.dataset.ticketCategoryEnabled = '';
+      const enabledCopy = document.createElement('span');
+      const enabledStrong = document.createElement('strong');
+      enabledStrong.textContent = 'Enabled';
+      enabledCopy.append(enabledStrong);
+      enabledLabel.append(enabled, enabledCopy);
+
+      const makeRoleSelect = (labelText, selected, dataName, fallbackText) => {
+        const label = document.createElement('label');
+        label.className = 'dialog-field';
+        const span = document.createElement('span');
+        span.textContent = labelText;
+        const select = document.createElement('select');
+        select.dataset[dataName] = '';
+        const fallback = document.createElement('option');
+        fallback.value = '';
+        fallback.textContent = fallbackText;
+        select.append(fallback);
+        roleOptions.forEach((role) => {
+          const option = document.createElement('option');
+          option.value = role.key;
+          option.textContent = role.name;
+          option.selected = role.key === selected;
+          select.append(option);
+        });
+        label.append(span, select);
+        return label;
+      };
+
+      const support = makeRoleSelect('Support role', category.support_role_key || '', 'ticketCategorySupportRole', 'Use default Admin role');
+      const notification = makeRoleSelect('Notification role', category.notification_role_key || '', 'ticketCategoryNotificationRole', 'Use support role');
+
+      const priorityLabel = document.createElement('label');
+      priorityLabel.className = 'dialog-field';
+      const prioritySpan = document.createElement('span');
+      prioritySpan.textContent = 'Initial priority';
+      const priority = document.createElement('select');
+      priority.dataset.ticketCategoryPriority = '';
+      [['low','Low'],['normal','Normal'],['high','High'],['urgent','Urgent']].forEach(([value,label]) => {
+        const option = document.createElement('option');
+        option.value = value; option.textContent = label; option.selected = value === category.default_priority;
+        priority.append(option);
+      });
+      priorityLabel.append(prioritySpan, priority);
+      row.append(identity, enabledLabel, support, notification, priorityLabel);
+      configCategorySettings.append(row);
+    });
+  };
+
+  const applyAdvancedSettings = (settings = {}, resources = {}) => {
+    configSettingInputs.forEach((input) => {
+      const key = input.dataset.ticketSetting;
+      if (!key || !(key in settings)) return;
+      if (input.type === 'checkbox') input.checked = Boolean(settings[key]);
+      else input.value = settings[key] ?? '';
+    });
+    populateSelect(configOverflow, resources.overflow_categories, settings.overflow_category_key);
+    renderCategorySettings(settings, resources);
+    if (configAdvancedSave) configAdvancedSave.disabled = !settings.configured;
+  };
+
+  const collectAdvancedSettings = () => {
+    const body = { overflow_category_key: configOverflow?.value || '' };
+    configSettingInputs.forEach((input) => {
+      const key = input.dataset.ticketSetting;
+      if (!key) return;
+      if (input.type === 'checkbox') body[key] = Boolean(input.checked);
+      else if (input.type === 'number') body[key] = Number(input.value);
+      else body[key] = input.value;
+    });
+    body.categories = qsa('[data-ticket-category-key]').map((row) => ({
+      key: row.dataset.ticketCategoryKey,
+      enabled: Boolean(row.querySelector('[data-ticket-category-enabled]')?.checked),
+      support_role_key: row.querySelector('[data-ticket-category-support-role]')?.value || '',
+      notification_role_key: row.querySelector('[data-ticket-category-notification-role]')?.value || '',
+      default_priority: row.querySelector('[data-ticket-category-priority]')?.value || 'normal',
+    }));
+    return body;
+  };
+
   const loadOwnerConfig = async () => {
     if (!isOwner() || !token()) return;
     try {
       const payload = await apiJson(OWNER_TICKET_CONFIG_URL);
+      ownerConfigPayload = payload;
       const settings = payload.settings || {};
       const resources = payload.resources || {};
       populateSelect(configPanel, resources.panel_channels, settings.panel_channel_key);
@@ -797,9 +910,11 @@
       populateSelect(configClosed, resources.closed_categories, settings.closed_category_key);
       populateSelect(configTranscript, resources.transcript_channels, settings.transcript_channel_key);
       populateSelect(configRole, resources.support_roles, settings.support_role_key);
+      applyAdvancedSettings(settings, resources);
       if (configState) configState.textContent = settings.configured ? (settings.enabled ? 'Configured · Enabled' : 'Configured · Disabled') : 'Not configured';
       showMessage(configMessage, '');
     } catch (error) {
+      ownerConfigPayload = null;
       if (configState) configState.textContent = 'Unavailable';
       showMessage(configMessage, error.message, 'error');
     }
@@ -819,10 +934,13 @@
           transcript_channel_key: configTranscript?.value || '',
           support_role_key: configRole?.value || '',
         });
+      } else if (action === 'save_advanced') {
+        Object.assign(body, collectAdvancedSettings());
       }
       const payload = await apiJson(OWNER_TICKET_CONFIG_URL, { method: 'POST', body: JSON.stringify(body) });
+      ownerConfigPayload = payload;
       showMessage(configMessage, payload.message || 'Ticket configuration synchronized.', 'success');
-      await Promise.all([loadOwnerConfig(), loadMemberTickets({ quiet: true })]);
+      await Promise.all([loadOwnerConfig(), loadMemberTickets({ quiet: true }), isStaff() ? loadAdminTickets({ quiet: true }) : Promise.resolve()]);
     } catch (error) {
       showMessage(configMessage, error.message, 'error');
     } finally {
@@ -862,7 +980,13 @@
   createForm?.addEventListener('submit', (event) => { event.preventDefault(); createTicket(); });
   detailClose.forEach((button) => button.addEventListener('click', () => closeDialog(detailDialog)));
   detailDialog?.addEventListener('click', (event) => { if (event.target === detailDialog) closeDialog(detailDialog); });
-  memberCloseButton?.addEventListener('click', () => memberAction('close', { reason: memberCloseReason?.value.trim() || 'Issue resolved.' }));
+  memberCloseButton?.addEventListener('click', async () => {
+    const system = memberPayload?.system || {};
+    const reason = memberCloseReason?.value.trim() || '';
+    if (system.require_close_reason && !reason) return showMessage(detailMessage, 'Enter a closing reason before closing this ticket.', 'error');
+    if (system.require_close_confirmation && !window.confirm('Close this support ticket? You will no longer be able to reply unless staff reopen it.')) return;
+    await memberAction('close', { reason: reason || 'Issue resolved.', confirmed: true });
+  });
   memberReplySend?.addEventListener('click', async () => {
     const message = memberReply?.value.trim() || '';
     if (!message) return showMessage(detailMessage, 'Enter a reply before sending.', 'error');
@@ -922,12 +1046,14 @@
     const reason = confirmReason?.value.trim() || '';
     closeDialog(confirmDialog);
     pendingAdminAction = null;
-    await submitAdminAction(action, reason ? { reason } : {});
+    await submitAdminAction(action, { ...(reason ? { reason } : {}), confirmed: true });
   });
 
   configSave?.addEventListener('click', () => updateOwnerConfig('configure'));
   configEnable?.addEventListener('click', () => updateOwnerConfig('enable'));
   configDisable?.addEventListener('click', () => updateOwnerConfig('disable'));
+  configAdvancedSave?.addEventListener('click', () => updateOwnerConfig('save_advanced'));
+  configAdvancedReset?.addEventListener('click', () => loadOwnerConfig());
 
   window.addEventListener('wwz:viewchange', (event) => {
     if (event.detail?.view === 'tickets') activate();

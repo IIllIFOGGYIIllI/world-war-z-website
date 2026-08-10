@@ -356,3 +356,75 @@
   .ticket-staff-leaderboard li { grid-template-columns: 32px minmax(0, 1fr); }
   .ticket-staff-leaderboard li small { grid-column: 2; }
 }
+
+/* v1.22.61 — Advanced Ticket Settings */
+.ticket-settings-section {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.ticket-settings-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+.ticket-settings-heading h3 { margin: 0 0 4px; }
+.ticket-settings-heading p { margin: 0; color: var(--muted); max-width: 820px; }
+.ticket-policy-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 16px 0;
+}
+.ticket-setting-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 84px;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255,255,255,.018);
+  cursor: pointer;
+}
+.ticket-setting-toggle input { margin-top: 3px; accent-color: #d92a2a; }
+.ticket-setting-toggle span { display: grid; gap: 3px; }
+.ticket-setting-toggle strong { font-size: .9rem; }
+.ticket-setting-toggle small { color: var(--muted); line-height: 1.35; }
+.ticket-number-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.ticket-copy-grid { grid-template-columns: minmax(0, 1fr) 140px; }
+.ticket-copy-grid .ticket-wide-field { grid-column: 1 / -1; }
+.ticket-colour-field input[type="color"] { width: 100%; min-height: 42px; padding: 4px; }
+.ticket-category-settings { display: grid; gap: 10px; margin-top: 16px; }
+.ticket-category-setting-row {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.2fr) minmax(130px, .65fr) minmax(180px, 1fr) minmax(180px, 1fr) minmax(130px, .65fr);
+  gap: 10px;
+  align-items: end;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255,255,255,.018);
+}
+.ticket-category-name { display: grid; gap: 3px; align-self: center; }
+.ticket-category-name strong { font-size: .94rem; }
+.ticket-category-name small { color: var(--muted); line-height: 1.35; }
+.ticket-category-setting-row .ticket-setting-toggle { min-height: 42px; padding: 9px 10px; align-items: center; }
+.ticket-category-setting-row .ticket-setting-toggle input { margin-top: 0; }
+.ticket-category-setting-row .dialog-field { margin: 0; }
+.ticket-advanced-actions { margin-top: 18px; }
+
+@media (max-width: 1200px) {
+  .ticket-policy-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ticket-category-setting-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ticket-category-name { grid-column: 1 / -1; }
+}
+@media (max-width: 720px) {
+  .ticket-policy-grid,
+  .ticket-number-grid,
+  .ticket-copy-grid,
+  .ticket-category-setting-row { grid-template-columns: 1fr; }
+  .ticket-copy-grid .ticket-wide-field,
+  .ticket-category-name { grid-column: auto; }
+}

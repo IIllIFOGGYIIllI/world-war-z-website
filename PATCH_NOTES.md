@@ -1,40 +1,44 @@
-# World War Z Website v1.22.60
+# World War Z Website v1.22.61
 
-## Live Command Centre
+## Advanced Ticket Settings
 
-This focused parity patch adds a staff operational overview backed by Bot v1.18.58. It aggregates existing backend systems rather than introducing duplicate browser-side state.
+This focused Chernarus parity patch exposes advanced Owner ticket policy configuration through the existing Support workspace and Bot v1.18.60 API.
 
 ### Added
 
-- New Admin/Owner **Command Centre** workspace.
-- Live DayZ server, Nitrado, Railway API, Discord gateway, player population, tracked-online player, next-restart, and countdown status.
-- Summary cards for pending deliveries, rentals/near-expiration, open/unclaimed tickets, moderation review work, operational failures, notification routing, active bounties/contracts, refunded orders, and open manual shop orders.
-- Prioritized **Needs Attention** signals with direct navigation into the existing specialist workspaces.
-- Read-only tracked-player and recent claimed-objective activity.
-- Manual refresh plus a 30-second refresh interval only while the Command Centre is the active dashboard section.
-- Command Centre attention badge in the Admin navigation.
+- Expanded **Owner Configuration → Advanced Ticket Settings** interface.
+- Discord infrastructure controls remain available for panel channel, open/closed categories, transcript archive and default Admin role.
+- Adds optional overflow-category selection.
+- Adds lifecycle toggles for:
+  - member closure
+  - close confirmation
+  - required close reason
+  - claiming
+  - Claim/Close Discord button visibility
+  - feedback prompts
+  - 1–5 reviews
+  - automatic inactivity closure
+  - transcript-on-close
+  - transcript-before-delete
+  - member transcript access
+  - archive/delete closed channel after review
+- Adds maximum active-ticket count and inactivity warning/close-hour controls.
+- Adds ticket panel title, description, colour and new-ticket welcome text.
+- Adds per-category routing rows for enablement, support role, notification role and initial priority.
+- Adds Save Advanced Settings and Reload Current Settings actions.
 
-### Notification routing parity
+### Member/Admin parity
 
-Bot v1.18.58 exposes five additional high-signal route choices in the existing Owner **Notifications & Webhooks** configuration:
+- Member close controls follow the Owner's member-close policy.
+- Required close reasons and confirmation prompts are enforced in the dashboard workflow.
+- Member rating and transcript controls reflect the configured review/transcript policy.
+- Admin Claim is disabled in the UI when ticket claiming is disabled; the API/bot also enforces the policy.
 
-- New support tickets.
-- Delivery failures.
-- Rentals near expiration.
-- Claimed bounty/contract rewards.
-- Configuration failures.
+### Security and compatibility
 
-Routine player activity and ordinary quest-progress events are intentionally not routed to avoid Discord notification spam.
-
-### Fixed and polished
-
-- Corrects the stale dashboard sidebar version display to v1.22.60.
-- Admins can see notification-routing health but the Owner-only routing shortcut remains disabled for non-Owners.
-- Command Centre ticket attention links open the real synchronized Support workspace.
-- The cumulative shop metric is labelled **Refunded orders**.
-
-### Compatibility and safety
-
-- Requires Bot v1.18.58 for `/api/admin/command-centre` and the additional webhook event definitions.
-- No database, map geometry, shop/rental lifecycle, ticket engine, progression system, or Chernarus map asset is replaced.
+- Requires Bot v1.18.60.
+- Owner writes are re-authorized server-side; hidden browser controls are not authorization.
+- Role/category choices use server-generated opaque resource keys and are validated against the live Discord guild.
+- Existing synchronized tickets, private channels, transcripts, ratings and audit history are preserved.
+- No map assets, shop/rental lifecycle, progression data or Railway production persistence are replaced.
 - No Livonia work is included.
