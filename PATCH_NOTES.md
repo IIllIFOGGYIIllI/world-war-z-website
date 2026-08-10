@@ -1,44 +1,40 @@
-# World War Z Website v1.22.59
+# World War Z Website v1.22.60
 
-## Structured Configuration Studio
+## Live Command Centre
 
-- Adds a new Owner-only **Structured Controls** section inside the DayZ Configuration Control Centre.
-- Keeps the existing Mission File Editor as the advanced/raw fallback rather than replacing it.
+This focused parity patch adds a staff operational overview backed by Bot v1.18.58. It aggregates existing backend systems rather than introducing duplicate browser-side state.
 
-### Gameplay
-- Common base/container damage, respawn, personal-light, night-lighting, stamina, map/navigation and building-placement settings.
-- Full 12-month minimum/maximum environment temperature editor.
+### Added
 
-### Weather
-- Weather enable/reset controls.
-- Existing Rare Rain, Clear Event Weather, No Rain, Heavy Fog, Stormy and Bohemia Example presets.
-- Structured overcast, fog, rain, wind and storm values.
-- Chernarus snowfall is intentionally shown as protected/preserved rather than casually enabled.
+- New Admin/Owner **Command Centre** workspace.
+- Live DayZ server, Nitrado, Railway API, Discord gateway, player population, tracked-online player, next-restart, and countdown status.
+- Summary cards for pending deliveries, rentals/near-expiration, open/unclaimed tickets, moderation review work, operational failures, notification routing, active bounties/contracts, refunded orders, and open manual shop orders.
+- Prioritized **Needs Attention** signals with direct navigation into the existing specialist workspaces.
+- Read-only tracked-player and recent claimed-objective activity.
+- Manual refresh plus a 30-second refresh interval only while the Command Centre is the active dashboard section.
+- Command Centre attention badge in the Admin navigation.
 
-### Messages & Restarts
-- Live active/disabled message overview.
-- Add and edit message text, delay, repeat, on-connect, deadline and shutdown fields.
-- Prepare enable, disable and permanent removal operations.
-- Explicitly explains that the existing restart intelligence reads `messages.xml`; quest timers remain independent.
+### Notification routing parity
 
-### Loot
-- Targeted live `types.xml` classname search.
-- Edit nominal, minimum, lifetime, restock, quantity bounds, cost, category, usage, tier/value and tags.
-- Managed enable/disable controls.
-- Results are capped to avoid rendering thousands of entries in the browser.
+Bot v1.18.58 exposes five additional high-signal route choices in the existing Owner **Notifications & Webhooks** configuration:
 
-### Events & Positions
-- Edit event population/radius/state fields.
-- Add/edit/remove event children.
-- Add/edit/remove event positions.
-- Set/edit/remove optional Event Zones.
-- Remove events with position cleanup choice.
-- Create ordinary server events from one complete Event XML element plus an optional Event Zone.
+- New support tickets.
+- Delivery failures.
+- Rentals near expiration.
+- Claimed bounty/contract rewards.
+- Configuration failures.
 
-## Safety & UX
+Routine player activity and ordinary quest-progress events are intentionally not routed to avoid Discord notification spam.
 
-- Preview produces exact server-generated diffs without writing.
-- Apply requires a reason and explicit browser confirmation.
-- Railway still enforces Owner authorization and protected-write gating server-side.
-- Successful applies refresh service state, backup history and event data.
-- Responsive styling added for the new configuration workspace.
+### Fixed and polished
+
+- Corrects the stale dashboard sidebar version display to v1.22.60.
+- Admins can see notification-routing health but the Owner-only routing shortcut remains disabled for non-Owners.
+- Command Centre ticket attention links open the real synchronized Support workspace.
+- The cumulative shop metric is labelled **Refunded orders**.
+
+### Compatibility and safety
+
+- Requires Bot v1.18.58 for `/api/admin/command-centre` and the additional webhook event definitions.
+- No database, map geometry, shop/rental lifecycle, ticket engine, progression system, or Chernarus map asset is replaced.
+- No Livonia work is included.

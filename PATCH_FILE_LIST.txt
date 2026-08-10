@@ -1,3 +1,5 @@
+World War Z Website v1.22.60 - Updated files
+
 404.html
 changelog.html
 community-guidelines.html
@@ -9,7 +11,7 @@ privacy.html
 shop.html
 terms.html
 assets/css/dashboard/workspace.css
-assets/js/dashboard/configuration-studio.js
+assets/js/dashboard/command-centre.js
 scripts/validate_site.py
 README.md
 PATCH_NOTES.md
