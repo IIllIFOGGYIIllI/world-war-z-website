@@ -66,6 +66,18 @@ const sectionTargetFor = (view, section) => {
     .find((item) => item.dataset.dashboardSection === section && canAccessElement(item)) || null;
 };
 
+const syncProtectedSectionVisibility = (view, section = '') => {
+  const panel = viewPanels.find((item) => item.dataset.viewPanel === view);
+  if (!panel) return;
+
+  panel.querySelectorAll('[data-dashboard-section][data-staff-only], [data-dashboard-section][data-owner-only]')
+    .forEach((element) => {
+      const permitted = canAccessElement(element);
+      const selected = Boolean(section) && element.dataset.dashboardSection === section;
+      element.hidden = !(permitted && selected);
+    });
+};
+
 const navigationKey = (view, section = '') => section ? `${view}/${section}` : view;
 
 const showView = (viewOrKey, updateHistory = true, explicitSection = '') => {
@@ -96,6 +108,7 @@ const showView = (viewOrKey, updateHistory = true, explicitSection = '') => {
 
   activeDashboardSection = selectedSection;
   const activePanel = viewPanels.find((panel) => panel.dataset.viewPanel === selectedView);
+  syncProtectedSectionVisibility(selectedView, selectedSection);
   const breadcrumb = activePanel?.querySelector('.breadcrumb');
   const navLabel = activeButton?.dataset.navLabel || selectedView.replace(/[-_]/g, ' ');
   if (breadcrumb && navLabel) breadcrumb.textContent = `Dashboard / ${navLabel}`;

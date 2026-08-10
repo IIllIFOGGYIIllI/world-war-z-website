@@ -8,7 +8,6 @@ moderation-policy.html
 privacy.html
 shop.html
 terms.html
-assets/js/dashboard/account.js
 assets/js/dashboard/core.js
 assets/js/dashboard/shell.js
 scripts/validate_site.py

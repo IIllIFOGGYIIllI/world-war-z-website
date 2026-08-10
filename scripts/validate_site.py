@@ -22,7 +22,7 @@ RETIRED_MAP_PATHS = (
     MAP_ROOT / "tiles",
     ROOT / "assets/images/maps/chernarus-vector.svg",
 )
-EXPECTED_ASSET_VERSION = "1.22.64"
+EXPECTED_ASSET_VERSION = "1.22.65"
 
 EXPECTED_ROAD_GROUPS = {
     "paved_primary",
@@ -267,20 +267,20 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.22.64 · Bot v1.18.61" not in index:
+    if "Website v1.22.65 · Bot v1.18.62" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "participants", "Owner bulk catalogue controls"):
         if stale in index:
             errors.append(f"index.html: stale roadmap content remains: {stale}")
 
     required_shop_labels = (
-        "<strong>Shop &amp; Trader</strong><small>8</small>",
+        "<strong>Shop &amp; Trader</strong><small>3</small>",
         'data-nav-label="Automatic Delivery Queue"',
         "<h2>Trader Ticket Fulfilment</h2>",
     )
     for token in required_shop_labels:
         if token not in dashboard:
-            errors.append(f"dashboard.html: stale Shop/Trader workflow label remains: {token}")
+            errors.append(f"dashboard.html: required Shop/Trader workflow label missing: {token}")
 
     changelog = (ROOT / "changelog.html").read_text(encoding="utf-8")
     if '<h2>Version 1.22.57</h2></div><span>Objectives authentication hotfix</span>' not in changelog:

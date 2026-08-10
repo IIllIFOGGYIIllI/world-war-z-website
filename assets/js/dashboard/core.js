@@ -433,6 +433,7 @@ const applyAccessVisibility = (level) => {
   window.dispatchEvent(new CustomEvent('wwz:accesschange', { detail: { level } }));
 
   const activeView = document.querySelector('[data-view-panel].active')?.dataset.viewPanel;
+  if (activeView) syncProtectedSectionVisibility(activeView, activeDashboardSection);
   if (activeView && !canOpenView(activeView)) {
     showView('overview', false);
   } else if (activeView && activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)) {
