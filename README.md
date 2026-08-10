@@ -1,3 +1,18 @@
+## Website v1.22.62 — Chernarus Factions
+
+This patch adds member-facing and Admin/Owner faction management backed by Bot v1.18.61.
+
+- Adds a **Factions** member workspace with faction directory, leaders, members, armband/flag details, member capacity, optional Discord invite/icon links and Chernarus map-marker shortcuts.
+- Shows the signed-in survivor's current faction and leader/member status.
+- Adds protected **Faction Administration** for create/edit/delete, leader transfer and linked-survivor membership management.
+- Adds configuration for Name, Leader, Armband, Flag, Member Limit, Colour, existing safe Discord Role, Zone ID, existing public Chernarus map marker, Discord Invite Link and Icon URL.
+- Adds Factions to the unified Audit Centre filter/labels.
+- Keeps role and marker identifiers opaque in the browser and relies on Railway for every protected authorization/write.
+- Reuses the existing locked Chernarus map rather than adding or changing map geometry.
+- No Livonia work is included.
+
+Requires Bot v1.18.61.
+
 ## Website v1.22.61 — Advanced Ticket Settings
 
 This patch adds the Owner-facing advanced controls for the synchronized support-ticket system backed by Bot v1.18.60.

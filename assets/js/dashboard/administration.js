@@ -24,7 +24,8 @@ const auditSubsystemLabel = (value) => ({
   shop: 'Shop Catalogue',
   tickets: 'Tickets',
   notifications: 'Notifications',
-  objectives: 'Objectives'
+  objectives: 'Objectives',
+  factions: 'Factions'
 }[String(value || '')] || titleCaseState(value));
 
 const auditSymbol = (subsystem, result) => {
@@ -38,7 +39,8 @@ const auditSymbol = (subsystem, result) => {
     shop: { text: '$', tone: '' },
     tickets: { text: '🎟', tone: '' },
     notifications: { text: '↗', tone: '' },
-    objectives: { text: '◎', tone: '' }
+    objectives: { text: '◎', tone: '' },
+    factions: { text: '⚑', tone: '' }
   }[subsystem] || { text: '✓', tone: 'green' };
 };
 

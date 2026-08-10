@@ -1,4 +1,4 @@
-World War Z Website v1.22.61 - Updated files
+World War Z Website v1.22.62 - Updated files
 
 404.html
 changelog.html
@@ -10,8 +10,9 @@ moderation-policy.html
 privacy.html
 shop.html
 terms.html
-assets/css/dashboard/tickets.css
-assets/js/dashboard/tickets.js
+assets/css/dashboard/factions.css
+assets/js/dashboard/administration.js
+assets/js/dashboard/factions.js
 scripts/validate_site.py
 README.md
 PATCH_NOTES.md

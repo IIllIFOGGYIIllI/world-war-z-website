@@ -1,0 +1,247 @@
+.faction-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin: 1rem 0;
+}
+
+.faction-summary-grid > div {
+  padding: 1rem;
+  border: 1px solid var(--panel-border, rgba(255,255,255,.08));
+  border-radius: 14px;
+  background: rgba(255,255,255,.025);
+}
+
+.faction-summary-grid span,
+.faction-meta span,
+.faction-member-row small {
+  color: var(--muted, #aaa);
+  font-size: .78rem;
+}
+
+.faction-summary-grid strong {
+  display: block;
+  margin-top: .25rem;
+  font-size: 1.45rem;
+}
+
+.faction-directory,
+.faction-admin-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.faction-directory {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.faction-card,
+.faction-admin-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--panel-border, rgba(255,255,255,.08));
+  border-radius: 16px;
+  background: rgba(255,255,255,.025);
+  padding: 1rem;
+}
+
+.faction-card::before,
+.faction-admin-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--faction-colour, #8f1d1d);
+}
+
+.faction-card-header,
+.faction-admin-header,
+.faction-member-row,
+.faction-card-footer,
+.faction-admin-actions,
+.faction-inline-actions,
+.faction-member-search {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+}
+
+.faction-card-header,
+.faction-admin-header {
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.faction-card h3,
+.faction-admin-card h3 {
+  margin: 0;
+}
+
+.faction-card-subtitle {
+  margin: .2rem 0 0;
+  color: var(--muted, #aaa);
+}
+
+.faction-mark {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--faction-colour, #8f1d1d) 70%, white 10%);
+  background: color-mix(in srgb, var(--faction-colour, #8f1d1d) 18%, transparent);
+  font-weight: 800;
+}
+
+.faction-card-heading {
+  display: flex;
+  gap: .75rem;
+  min-width: 0;
+}
+
+.faction-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .65rem;
+  margin: .9rem 0;
+}
+
+.faction-meta > div {
+  padding: .7rem;
+  border-radius: 10px;
+  background: rgba(255,255,255,.025);
+}
+
+.faction-meta strong {
+  display: block;
+  margin-top: .18rem;
+  overflow-wrap: anywhere;
+}
+
+.faction-member-list,
+.faction-member-current,
+.faction-member-search-results {
+  display: grid;
+  gap: .55rem;
+}
+
+.faction-member-row {
+  justify-content: space-between;
+  padding: .65rem .75rem;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 10px;
+  background: rgba(0,0,0,.12);
+}
+
+.faction-member-identity {
+  min-width: 0;
+}
+
+.faction-member-identity strong,
+.faction-member-identity small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.faction-member-actions,
+.faction-admin-actions,
+.faction-card-footer,
+.faction-inline-actions {
+  flex-wrap: wrap;
+}
+
+.faction-member-actions button,
+.faction-card-footer button,
+.faction-card-footer a,
+.faction-admin-actions button {
+  white-space: nowrap;
+}
+
+.faction-admin-panel {
+  margin-top: 1rem;
+}
+
+.faction-admin-card {
+  padding-left: 1.2rem;
+}
+
+.faction-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .8rem;
+}
+
+.faction-span-two {
+  grid-column: 1 / -1;
+}
+
+.faction-member-search {
+  align-items: end;
+  margin: 1rem 0;
+}
+
+.faction-member-search .dialog-field {
+  flex: 1 1 260px;
+}
+
+.faction-editor-dialog form,
+.faction-members-dialog form {
+  width: min(760px, 94vw);
+}
+
+.faction-capacity {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255,255,255,.07);
+  margin-top: .6rem;
+}
+
+.faction-capacity > span {
+  display: block;
+  height: 100%;
+  width: var(--faction-capacity, 0%);
+  background: var(--faction-colour, #8f1d1d);
+}
+
+.faction-status-dot {
+  display: inline-block;
+  width: .55rem;
+  height: .55rem;
+  margin-right: .35rem;
+  border-radius: 50%;
+  background: #777;
+}
+
+.faction-status-dot.online {
+  background: #67c47a;
+}
+
+@media (max-width: 920px) {
+  .faction-directory,
+  .faction-summary-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .faction-directory,
+  .faction-summary-grid,
+  .faction-form-grid,
+  .faction-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .faction-span-two {
+    grid-column: auto;
+  }
+
+  .faction-card-header,
+  .faction-admin-header,
+  .faction-member-row,
+  .faction-member-search {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
