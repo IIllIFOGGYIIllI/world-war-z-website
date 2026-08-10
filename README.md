@@ -1,3 +1,17 @@
+## Website v1.22.63 — Faction Editor Modal Hotfix
+
+This website-only hotfix fixes the Faction Administration create/edit modal layout introduced with v1.22.62.
+
+- Expands the desktop faction editor to a responsive 920px maximum width instead of forcing a 760px form inside the generic 540px login-dialog shell.
+- Removes horizontal overflow and the clipped-left form state.
+- Keeps the existing two-column desktop layout and collapses to one column on mobile.
+- Caps modal height and uses vertical scrolling only when the viewport requires it.
+- Keeps Save Faction and Cancel grouped in a clean action row.
+- Improves wrapping for long labels and map-marker helper text.
+- No bot, API, Railway database, permission, membership, Discord-role, or Chernarus-map behaviour changes.
+
+Keep Bot v1.18.61 deployed.
+
 ## Website v1.22.62 — Chernarus Factions
 
 This patch adds member-facing and Admin/Owner faction management backed by Bot v1.18.61.

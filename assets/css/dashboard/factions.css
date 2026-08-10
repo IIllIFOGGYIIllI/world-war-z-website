@@ -185,9 +185,69 @@
   flex: 1 1 260px;
 }
 
-.faction-editor-dialog form,
+.faction-editor-dialog {
+  width: min(920px, calc(100vw - 40px));
+  max-width: none;
+  max-height: min(88vh, 820px);
+  overflow: hidden;
+}
+
+.faction-editor-dialog form {
+  width: 100%;
+  max-height: min(88vh, 820px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
 .faction-members-dialog form {
   width: min(760px, 94vw);
+}
+
+.faction-editor-dialog .faction-form-grid,
+.faction-editor-dialog .dialog-field,
+.faction-editor-dialog .dialog-field input,
+.faction-editor-dialog .dialog-field select {
+  min-width: 0;
+  width: 100%;
+}
+
+.faction-editor-dialog .dialog-field > span {
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.faction-editor-dialog .dialog-field > small {
+  display: block;
+  overflow-wrap: anywhere;
+  line-height: 1.45;
+}
+
+.faction-editor-actions {
+  display: flex;
+  gap: .75rem;
+  margin-top: 1.2rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+
+.faction-editor-actions .primary-action,
+.faction-editor-actions .dialog-cancel {
+  width: auto;
+  min-height: 44px;
+  margin-top: 0;
+}
+
+.faction-editor-actions .primary-action {
+  flex: 1 1 auto;
+}
+
+.faction-editor-actions .dialog-cancel {
+  flex: 0 0 140px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 10px;
+  background: rgba(255,255,255,.025);
 }
 
 .faction-capacity {
@@ -235,6 +295,25 @@
 
   .faction-span-two {
     grid-column: auto;
+  }
+
+  .faction-editor-dialog {
+    width: calc(100vw - 18px);
+    max-height: 92vh;
+  }
+
+  .faction-editor-dialog form {
+    max-height: 92vh;
+    padding: 31px 18px 20px;
+  }
+
+  .faction-editor-actions {
+    flex-direction: column;
+    gap: .55rem;
+  }
+
+  .faction-editor-actions .dialog-cancel {
+    flex-basis: auto;
   }
 
   .faction-card-header,
