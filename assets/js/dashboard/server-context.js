@@ -92,8 +92,8 @@
     const mapPreview = document.querySelector('.map-live-preview img');
     if (mapPreview) {
       mapPreview.src = server.map_key === 'livonia'
-        ? 'assets/maps/livonia/tiles/0/0/0.webp?v=1.22.67'
-        : 'assets/maps/chernarus/tiles/z0/0/0.webp?v=1.22.67';
+        ? 'assets/maps/livonia/tiles/0/0/0.webp?v=1.22.68'
+        : 'assets/maps/chernarus/tiles/z0/0/0.webp?v=1.22.68';
       mapPreview.alt = `${server.map_name} satellite map preview`;
     }
     document.querySelectorAll('[data-map-frame], [data-location-map], [data-shop-coordinate-map]').forEach((element) => {
@@ -107,8 +107,13 @@
   const selectServer = (server, { restored = false } = {}) => {
     const normalized = normalizeServer(server);
     if (!normalized || !normalized.available) return false;
+    const previousKey = selectedServer?.key || null;
     selectedServer = normalized;
     storeServer(normalized);
+    if (previousKey && previousKey !== normalized.key && !restored) {
+      location.reload();
+      return true;
+    }
     updateDashboardLabels(normalized);
     setGatewayView('dashboard');
     window.dispatchEvent(new CustomEvent('wwz:serverchange', {
@@ -136,7 +141,7 @@
     const icon = document.createElement('span');
     icon.className = 'wwz-server-icon';
     const iconImage = document.createElement('img');
-    iconImage.src = server.icon_url || 'assets/world-war-z-logo.webp?v=1.22.67';
+    iconImage.src = server.icon_url || 'assets/world-war-z-logo.webp?v=1.22.68';
     iconImage.alt = '';
     icon.append(iconImage);
     const headingCopy = document.createElement('div');

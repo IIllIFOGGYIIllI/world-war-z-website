@@ -2,6 +2,27 @@
   'use strict';
 
   const DEFAULT_TIMEOUT_MS = 10_000;
+  const SERVER_STORAGE_KEY = 'wwz_dashboard_server';
+
+  const selectedServerKey = () => {
+    try {
+      const value = JSON.parse(sessionStorage.getItem(SERVER_STORAGE_KEY) || 'null');
+      return String(value?.key || '').trim().toLowerCase();
+    } catch {
+      return '';
+    }
+  };
+
+  const routedHeaders = (url, source) => {
+    const headers = new Headers(source || {});
+    const key = selectedServerKey();
+    let target;
+    try { target = new URL(url, location.href); } catch { return headers; }
+    if (key && target.pathname.startsWith('/api/')) {
+      headers.set('X-WWZ-Server', key);
+    }
+    return headers;
+  };
 
   const request = async (url, options = {}, timeoutMs = DEFAULT_TIMEOUT_MS) => {
     const controller = new AbortController();
@@ -18,6 +39,7 @@
         cache: 'no-store',
         credentials: 'omit',
         ...options,
+        headers: routedHeaders(url, options.headers),
         signal: controller.signal
       });
     } finally {
