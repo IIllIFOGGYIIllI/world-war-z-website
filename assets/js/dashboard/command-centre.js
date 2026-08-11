@@ -149,7 +149,7 @@ const loadCommandCentre = async (sessionToken = storageGet(AUTH_SESSION_KEY)) =>
   commandCentreRefresh?.setAttribute('disabled', '');
   if (commandCentreError) commandCentreError.hidden = true;
   try {
-    const response = await fetch(`${DASHBOARD_API_BASE}/api/admin/command-centre`, {
+    const response = await window.WWZHttp.request(`${DASHBOARD_API_BASE}/api/admin/command-centre`, {
       headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` },
       cache: 'no-store'
     });
