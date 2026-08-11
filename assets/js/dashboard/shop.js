@@ -240,8 +240,9 @@ const populatePurchaseLocationSelect = () => {
 
 const ensureShopCoordinateMap = () => {
   if (shopCoordinateMapInstance || !shopCoordinateMap || !window.WWZMap) return shopCoordinateMapInstance;
-  const mapKey = window.WWZServerContext?.getMapKey?.() || 'chernarus';
-  const worldSize = window.WWZMap.getConfig(mapKey).mapMetres;
+  const mapKey = window.WWZServerContext?.getMapKey?.();
+  const worldSize = Number(window.WWZServerContext?.getWorldSize?.());
+  if (!mapKey || !worldSize) return null;
   [shopDeliveryX, shopDeliveryZ].forEach((input) => { if (input) input.max = String(worldSize); });
   shopCoordinateMapInstance = window.WWZMap.create(shopCoordinateMap, {
     mapKey,
@@ -278,7 +279,7 @@ const updateCoordinateMarker = () => {
   const rawZ = String(shopDeliveryZ?.value ?? '').trim();
   const x = Number(rawX);
   const z = Number(rawZ);
-  const worldSize = window.WWZMap?.getConfig(window.WWZServerContext?.getMapKey?.()).mapMetres || 15360;
+  const worldSize = Number(window.WWZServerContext?.getWorldSize?.());
   const valid = rawX !== '' && rawZ !== '' && Number.isFinite(x) && Number.isFinite(z) && x >= 0 && x <= worldSize && z >= 0 && z <= worldSize;
   if (shopMapSelected && !shopCoordinateMapInstance) {
     shopMapSelected.textContent = valid ? `X ${x.toFixed(1)} · Z ${z.toFixed(1)}` : 'No coordinates selected';

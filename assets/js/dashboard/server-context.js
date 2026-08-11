@@ -11,6 +11,7 @@
   let availableServers = [];
   let selectedServer = null;
   let publicServer = null;
+  const SERVER_KEY_PATTERN = /^[a-z0-9][a-z0-9-]{1,62}$/;
 
   const readStoredServer = () => {
     try {
@@ -40,16 +41,17 @@
 
   const normalizeServer = (value) => {
     const mapKey = String(value?.map_key || '').trim().toLowerCase();
-    if (!value?.key || !['chernarus', 'livonia'].includes(mapKey)) return null;
+    const key = String(value?.key || '').trim().toLowerCase();
+    if (!SERVER_KEY_PATTERN.test(key) || !['chernarus', 'livonia'].includes(mapKey)) return null;
     const mapName = mapKey === 'livonia' ? 'Livonia' : 'Chernarus';
     return {
-      key: String(value.key),
+      key,
       name: String(value.name || value.discord_name || 'World War Z'),
       discord_name: String(value.discord_name || value.name || 'World War Z'),
       icon_url: value.icon_url ? String(value.icon_url) : null,
       map_key: mapKey,
       map_name: String(value.map_name || mapName),
-      world_size: Number(value.world_size) || (mapKey === 'livonia' ? 12800 : 15360),
+      world_size: mapKey === 'livonia' ? 12800 : 15360,
       platform: String(value.platform || 'PlayStation 4 & 5'),
       access_level: String(value.access_level || 'member'),
       available: value.available !== false
@@ -99,6 +101,9 @@
     document.querySelectorAll('[data-map-frame], [data-location-map], [data-shop-coordinate-map]').forEach((element) => {
       element.setAttribute('aria-label', `${server.map_name} coordinate map. Drag to pan, scroll or pinch to zoom, and click to select X and Z.`);
     });
+    document.querySelectorAll('[data-map-custom-x], [data-map-custom-z], [data-location-x], [data-location-z], [data-shop-delivery-x], [data-shop-delivery-z]').forEach((input) => {
+      input.max = String(server.world_size);
+    });
     const mapNavigation = document.querySelector('[data-view="map"][data-section="explorer"]');
     if (mapNavigation) mapNavigation.dataset.navLabel = `${server.map_name} Map`;
     changeServerButton?.removeAttribute('hidden');
@@ -110,7 +115,7 @@
     const previousKey = selectedServer?.key || null;
     selectedServer = normalized;
     storeServer(normalized);
-    if (previousKey && previousKey !== normalized.key && !restored) {
+    if (previousKey !== normalized.key && !restored) {
       location.reload();
       return true;
     }
@@ -251,9 +256,9 @@
 
   window.WWZServerContext = Object.freeze({
     clearSelection,
-    getMapKey: () => selectedServer?.map_key || publicServer?.map_key || 'chernarus',
+    getMapKey: () => selectedServer?.map_key || null,
     getSelectedServer: () => selectedServer,
-    getWorldSize: () => selectedServer?.world_size || publicServer?.world_size || 15360,
+    getWorldSize: () => selectedServer?.world_size || null,
     handleAuthenticated,
     selectServer,
     showLogin,

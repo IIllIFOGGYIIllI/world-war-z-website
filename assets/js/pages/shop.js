@@ -42,8 +42,8 @@ const readSelectedServer = () => {
 const acceptServerContext = (payload) => {
   const servers = Array.isArray(payload?.servers) ? payload.servers : [];
   const stored = readSelectedServer();
-  const server = servers.find((entry) => entry?.key === stored?.key) || servers[0] || stored;
-  if (!server || !['chernarus', 'livonia'].includes(String(server.map_key || '').toLowerCase())) return;
+  const server = servers.find((entry) => entry?.key === stored?.key) || null;
+  if (!server || !['chernarus', 'livonia'].includes(String(server.map_key || '').toLowerCase())) { state.server = null; return; }
   state.server = server;
   try { sessionStorage.setItem(SERVER_KEY, JSON.stringify(server)); } catch {}
   const mapName = String(server.map_name || (server.map_key === 'livonia' ? 'Livonia' : 'Chernarus'));
@@ -55,9 +55,13 @@ const acceptServerContext = (payload) => {
   if (coordinateMap) {
     coordinateMap.setAttribute('aria-label', `${mapName} delivery coordinate selector. Click or tap to fill X and Z.`);
   }
+  const worldSize = server.map_key === 'livonia' ? 12800 : 15360;
+  [document.querySelector('[data-member-delivery-x]'), document.querySelector('[data-member-delivery-z]')].forEach((input) => {
+    if (input) input.max = String(worldSize);
+  });
 };
-const activeMapKey = () => String(state.server?.map_key || readSelectedServer()?.map_key || 'chernarus').toLowerCase();
-const activeWorldSize = () => window.WWZMap?.getConfig(activeMapKey()).mapMetres || 15360;
+const activeMapKey = () => String(state.server?.map_key || '').toLowerCase();
+const activeWorldSize = () => state.server?.map_key === 'livonia' ? 12800 : state.server?.map_key === 'chernarus' ? 15360 : null;
 
 const elements = {
   apiState: $('[data-shop-api-state]'), apiLabel: $('[data-shop-api-label]'),
@@ -862,6 +866,15 @@ const initialise = async () => {
     try { await completeLogin(fragment.ticket); } catch { clearCallback(); state.token = ''; sessionStorage.removeItem(SESSION_KEY); setSignedOut(); }
   } else {
     try { await loadIdentity(); } catch { setSignedOut(); }
+  }
+  const storedSelection = readSelectedServer();
+  if (!storedSelection?.key) {
+    setConnection('unavailable', 'Select a server first');
+    if (elements.error) {
+      elements.error.hidden = false;
+      elements.error.textContent = 'Select Chernarus or Livonia from the dashboard before opening the member shop.';
+    }
+    return;
   }
   await loadRestartStatus();
   await loadShop();

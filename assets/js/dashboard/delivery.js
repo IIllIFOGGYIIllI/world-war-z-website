@@ -19,7 +19,7 @@ const deliveryLocationMapReadout = document.querySelector('[data-location-map-re
 let deliveryLocationRequestInProgress = false;
 let deliveryLocationMapInstance = null;
 
-const deliveryMapWorldSize = () => window.WWZMap?.getConfig(window.WWZServerContext?.getMapKey?.()).mapMetres || 15360;
+const deliveryMapWorldSize = () => Number(window.WWZServerContext?.getWorldSize?.()) || null;
 
 const deliveryLocationCoordinates = () => {
   const rawX = String(deliveryLocationX?.value ?? '').trim();
@@ -43,8 +43,9 @@ const syncDeliveryLocationMap = ({ center = false } = {}) => {
 
 const ensureDeliveryLocationMap = () => {
   if (deliveryLocationMapInstance || !deliveryLocationMap || !window.WWZMap) return deliveryLocationMapInstance;
-  const mapKey = window.WWZServerContext?.getMapKey?.() || 'chernarus';
+  const mapKey = window.WWZServerContext?.getMapKey?.();
   const worldSize = deliveryMapWorldSize();
+  if (!mapKey || !worldSize) return null;
   [deliveryLocationX, deliveryLocationZ].forEach((input) => { if (input) input.max = String(worldSize); });
   deliveryLocationMapInstance = window.WWZMap.create(deliveryLocationMap, {
     mapKey,

@@ -17,7 +17,7 @@
 
   let mapInstance = null;
   let loadPromise = null;
-  let activeMapKey = 'chernarus';
+  let activeMapKey = null;
   let mapConfig = null;
   let publicPois = [];
   let customPois = [];
@@ -81,8 +81,17 @@
   };
 
   const refreshMapContext = () => {
-    activeMapKey = window.WWZServerContext?.getMapKey?.() || 'chernarus';
-    mapConfig = window.WWZMap?.getConfig(activeMapKey) || { key: 'chernarus', name: 'Chernarus', mapMetres: 15360 };
+    const selected = window.WWZServerContext?.getSelectedServer?.();
+    activeMapKey = selected?.map_key || null;
+    if (!activeMapKey || !['chernarus', 'livonia'].includes(activeMapKey)) {
+      mapConfig = null;
+      throw new Error('Select a World War Z server before opening the map.');
+    }
+    mapConfig = window.WWZMap?.getConfig(activeMapKey) || null;
+    if (!mapConfig || Number(mapConfig.mapMetres) !== Number(selected.world_size)) {
+      mapConfig = null;
+      throw new Error('The selected server map configuration is unavailable.');
+    }
     [customX, customZ].forEach((input) => {
       if (input) input.max = String(mapConfig.mapMetres);
     });
@@ -99,8 +108,8 @@
 
   const clampCoordinate = (value) => {
     const number = Number(value);
-    const maximum = mapConfig?.mapMetres || 15360;
-    return Number.isFinite(number) && number >= 0 && number <= maximum ? number : null;
+    const maximum = Number(mapConfig?.mapMetres);
+    return Number.isFinite(maximum) && Number.isFinite(number) && number >= 0 && number <= maximum ? number : null;
   };
 
   const makeId = () => {

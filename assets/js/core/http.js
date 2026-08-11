@@ -3,11 +3,23 @@
 
   const DEFAULT_TIMEOUT_MS = 10_000;
   const SERVER_STORAGE_KEY = 'wwz_dashboard_server';
+  const SERVER_KEY_PATTERN = /^[a-z0-9][a-z0-9-]{1,62}$/;
+  const GLOBAL_API_PATHS = new Set([
+    '/',
+    '/api/health',
+    '/api/auth/config',
+    '/api/auth/discord/login',
+    '/api/auth/discord/callback',
+    '/api/auth/discord/complete',
+    '/api/auth/me',
+    '/api/auth/logout'
+  ]);
 
   const selectedServerKey = () => {
     try {
       const value = JSON.parse(sessionStorage.getItem(SERVER_STORAGE_KEY) || 'null');
-      return String(value?.key || '').trim().toLowerCase();
+      const key = String(value?.key || '').trim().toLowerCase();
+      return SERVER_KEY_PATTERN.test(key) ? key : '';
     } catch {
       return '';
     }
@@ -18,6 +30,10 @@
     const key = selectedServerKey();
     let target;
     try { target = new URL(url, location.href); } catch { return headers; }
+    const operationalApi = target.pathname.startsWith('/api/') && !GLOBAL_API_PATHS.has(target.pathname);
+    if (operationalApi && !key) {
+      throw new Error('Select a World War Z server before using this feature.');
+    }
     if (key && target.pathname.startsWith('/api/')) {
       headers.set('X-WWZ-Server', key);
     }
