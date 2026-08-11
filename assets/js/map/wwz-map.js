@@ -3,7 +3,9 @@
 
   const MIN_ZOOM = 0;
   const MAX_NATIVE_ZOOM = 6;
-  const MAX_ZOOM = 14;
+  // Satellite imagery is native through zoom 6. Allow two additional levels
+  // for precise coordinate placement without excessively enlarging the tiles.
+  const MAX_ZOOM = 8;
   const PRODUCTION_WIDTH_MULTIPLIER = 1.80;
   const MAP_CONFIGS = Object.freeze({
     chernarus: Object.freeze({
