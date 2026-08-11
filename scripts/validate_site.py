@@ -22,7 +22,7 @@ RETIRED_MAP_PATHS = (
     MAP_ROOT / "tiles",
     ROOT / "assets/images/maps/chernarus-vector.svg",
 )
-EXPECTED_ASSET_VERSION = "1.22.65"
+EXPECTED_ASSET_VERSION = "1.22.66"
 
 EXPECTED_ROAD_GROUPS = {
     "paved_primary",
@@ -267,7 +267,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.22.65 · Bot v1.18.62" not in index:
+    if "Website v1.22.66 · Bot v1.18.63" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "participants", "Owner bulk catalogue controls"):
         if stale in index:
@@ -420,6 +420,7 @@ def validate_required_files(errors: list[str]) -> None:
         "assets/css/pages/home.css",
         "assets/css/site-polish.css",
         "assets/css/dashboard/core.css",
+        "assets/css/dashboard/gateway.css",
         "assets/css/dashboard/moderation.css",
         "assets/css/dashboard/workspace.css",
         "assets/css/dashboard/catalogue.css",
@@ -433,6 +434,7 @@ def validate_required_files(errors: list[str]) -> None:
         "assets/js/pages/home.js",
         "assets/js/dashboard/shell.js",
         "assets/js/dashboard/core.js",
+        "assets/js/dashboard/server-context.js",
         "assets/js/dashboard/administration.js",
         "assets/js/dashboard/account.js",
         "assets/js/dashboard/tickets.js",
@@ -442,6 +444,7 @@ def validate_required_files(errors: list[str]) -> None:
         "assets/js/pages/dashboard-map-loader.js",
         "assets/js/pages/shop.js",
         "assets/js/map/chernarus-map.js",
+        "assets/js/map/wwz-map.js",
         "assets/js/data/command-library.js",
         "assets/data/chernarus/place-names.json",
         "assets/chernarus-map/satellite-corrected/README.md",
@@ -716,6 +719,61 @@ def validate_satellite_assets(errors: list[str], info: list[str], *, required: b
     info.append(f"Corrected JPG satellite tiles: {tile_count:,} across native zooms 0–6")
 
 
+def validate_shared_map_assets(errors: list[str], info: list[str]) -> None:
+    expected = {
+        "chernarus": {"world_size": 15360, "road_parts": 51431, "labels": 201},
+        "livonia": {"world_size": 12800, "road_parts": 36263, "labels": 60},
+    }
+    for map_key, specification in expected.items():
+        map_root = ROOT / "assets/maps" / map_key
+        tile_root = map_root / "tiles"
+        road_path = map_root / "roads.geojson"
+        label_path = map_root / "labels.json"
+        missing = [path for path in (tile_root, road_path, label_path) if not path.exists()]
+        if missing:
+            errors.append(
+                f"{map_key.title()} shared map assets are incomplete: "
+                + ", ".join(str(path.relative_to(ROOT)) for path in missing)
+            )
+            continue
+
+        tile_count = len(list(tile_root.rglob("*.webp")))
+        if tile_count != 4810:
+            errors.append(
+                f"{map_key.title()} WebP pyramid contains {tile_count:,} tiles; expected 4,810."
+            )
+
+        try:
+            roads = json.loads(road_path.read_text(encoding="utf-8-sig"))
+            labels = json.loads(label_path.read_text(encoding="utf-8-sig"))
+        except (OSError, json.JSONDecodeError) as error:
+            errors.append(f"{map_key.title()} shared map data is invalid: {error}")
+            continue
+
+        metadata = roads.get("metadata") or {}
+        road_parts = int(metadata.get("preservedLinePartCount") or metadata.get("linePartCount") or 0)
+        world_size = int(metadata.get("worldSize") or 0)
+        label_count = len(labels.get("labels") or [])
+        if road_parts != specification["road_parts"]:
+            errors.append(
+                f"{map_key.title()} road dataset reports {road_parts:,} line parts; "
+                f"expected {specification['road_parts']:,}."
+            )
+        if world_size != specification["world_size"]:
+            errors.append(
+                f"{map_key.title()} road world size is {world_size}; expected {specification['world_size']}."
+            )
+        if label_count != specification["labels"]:
+            errors.append(
+                f"{map_key.title()} label dataset contains {label_count} labels; "
+                f"expected {specification['labels']}."
+            )
+        info.append(
+            f"{map_key.title()} shared map: {tile_count:,} tiles, "
+            f"{road_parts:,} road parts, {label_count} labels"
+        )
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Validate the World War Z static website.")
     parser.add_argument(
@@ -745,6 +803,7 @@ def main() -> int:
     validate_retired_map_assets(errors)
     validate_satellite_assets(errors, info, required=args.require_map_assets)
     validate_road_asset(errors, info, required=args.require_map_assets)
+    validate_shared_map_assets(errors, info)
 
     if errors:
         print("World War Z website validation failed:")

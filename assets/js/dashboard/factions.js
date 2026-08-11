@@ -8,6 +8,9 @@
   const ADMIN_URL = `${DASHBOARD_API_BASE}/api/admin/factions`;
   const ADMIN_ACTION_URL = `${DASHBOARD_API_BASE}/api/admin/factions/action`;
   const PLAYER_SEARCH_URL = `${DASHBOARD_API_BASE}/api/admin/players/search`;
+  const activeMapName = () => window.WWZServerContext?.getSelectedServer?.()?.map_name
+    || window.WWZMap?.getConfig(window.WWZServerContext?.getMapKey?.()).name
+    || 'Chernarus';
 
   const guest = panel.querySelector('[data-faction-guest]');
   const content = panel.querySelector('[data-faction-content]');
@@ -234,7 +237,7 @@
       footer.append(link);
     }
     if (faction.map_marker) {
-      const map = button('View on Chernarus Map', () => focusFactionMarker(faction));
+      const map = button(`View on ${activeMapName()} Map`, () => focusFactionMarker(faction));
       footer.append(map);
     }
     const iconUrl = safeUrl(faction.icon_url);

@@ -19,12 +19,15 @@ const deliveryLocationMapReadout = document.querySelector('[data-location-map-re
 let deliveryLocationRequestInProgress = false;
 let deliveryLocationMapInstance = null;
 
+const deliveryMapWorldSize = () => window.WWZMap?.getConfig(window.WWZServerContext?.getMapKey?.()).mapMetres || 15360;
+
 const deliveryLocationCoordinates = () => {
   const rawX = String(deliveryLocationX?.value ?? '').trim();
   const rawZ = String(deliveryLocationZ?.value ?? '').trim();
   const x = Number(rawX);
   const z = Number(rawZ);
-  const valid = rawX !== '' && rawZ !== '' && Number.isFinite(x) && Number.isFinite(z) && x >= 0 && x <= 15360 && z >= 0 && z <= 15360;
+  const worldSize = deliveryMapWorldSize();
+  const valid = rawX !== '' && rawZ !== '' && Number.isFinite(x) && Number.isFinite(z) && x >= 0 && x <= worldSize && z >= 0 && z <= worldSize;
   return { valid, x, z };
 };
 
@@ -39,8 +42,12 @@ const syncDeliveryLocationMap = ({ center = false } = {}) => {
 };
 
 const ensureDeliveryLocationMap = () => {
-  if (deliveryLocationMapInstance || !deliveryLocationMap || !window.WWZChernarusMap) return deliveryLocationMapInstance;
-  deliveryLocationMapInstance = window.WWZChernarusMap.create(deliveryLocationMap, {
+  if (deliveryLocationMapInstance || !deliveryLocationMap || !window.WWZMap) return deliveryLocationMapInstance;
+  const mapKey = window.WWZServerContext?.getMapKey?.() || 'chernarus';
+  const worldSize = deliveryMapWorldSize();
+  [deliveryLocationX, deliveryLocationZ].forEach((input) => { if (input) input.max = String(worldSize); });
+  deliveryLocationMapInstance = window.WWZMap.create(deliveryLocationMap, {
+    mapKey,
     mode: 'saved-location',
     selectable: true,
     copyOnSelect: false,
@@ -745,6 +752,14 @@ window.addEventListener('wwz:viewchange', (event) => {
     if (section === 'event-items') loadOwnerShopConfig(token);
     else Promise.all([loadServerConfigOverview(token), loadConfigBackups(token)]);
   }
+});
+
+window.addEventListener('wwz:serverchange', () => {
+  if (!deliveryLocationMapInstance) return;
+  deliveryLocationMapInstance.destroy();
+  deliveryLocationMapInstance = null;
+  ensureDeliveryLocationMap()?.invalidateSize();
+  syncDeliveryLocationMap();
 });
 
 configureDiscordAuth();

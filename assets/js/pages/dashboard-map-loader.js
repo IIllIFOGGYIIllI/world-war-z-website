@@ -6,8 +6,6 @@
 
   const PUBLIC_MARKERS_URL = `${DASHBOARD_API_BASE}/api/map/markers`;
   const ADMIN_MARKER_ACTION_URL = `${DASHBOARD_API_BASE}/api/admin/map/markers/action`;
-  const PLACE_NAMES_URL = 'assets/data/chernarus/place-names.json?v=1.22.31';
-  const STORAGE_KEY = 'wwz.chernarus.customLocations.v1';
   const MAX_CUSTOM_LOCATIONS = 250;
   const COLOURS = Object.freeze({
     amber: '#ffbd36',
@@ -19,6 +17,8 @@
 
   let mapInstance = null;
   let loadPromise = null;
+  let activeMapKey = 'chernarus';
+  let mapConfig = null;
   let publicPois = [];
   let customPois = [];
   let selectedCategory = 'All';
@@ -54,8 +54,42 @@
   const editorKicker = document.querySelector('[data-map-editor-kicker]');
   const editorNote = document.querySelector('[data-map-editor-note]');
   const editorSubmit = document.querySelector('[data-map-save-custom]');
+  const placeNameSuggestions = document.querySelector('[data-map-place-suggestions]');
+  const roadGroupToggles = [...document.querySelectorAll('[data-map-road-group]')];
+  const gridToggle = document.querySelector('[data-map-grid-toggle]');
+  const roadOpacity = document.querySelector('[data-map-road-opacity]');
+  const roadOpacityValue = document.querySelector('[data-map-road-opacity-value]');
+  const satelliteOpacity = document.querySelector('[data-map-satellite-opacity]');
+  const satelliteOpacityValue = document.querySelector('[data-map-satellite-opacity-value]');
 
-  const formatCoordinate = (value) => window.WWZChernarusMap?.formatCoordinate(value, 1) ?? Number(value).toFixed(1);
+  const rangeFraction = (input, fallback) => {
+    const value = Number(input?.value);
+    return Number.isFinite(value) ? Math.max(0, Math.min(1, value / 100)) : fallback;
+  };
+
+  const updateRangeOutput = (input, output) => {
+    if (output) output.textContent = `${Math.round(rangeFraction(input, 1) * 100)}%`;
+  };
+
+  const syncMapAppearance = () => {
+    if (!mapInstance) return;
+    roadGroupToggles.forEach((button) => {
+      mapInstance.setRoadGroupVisible(button.dataset.mapRoadGroup, button.getAttribute('aria-pressed') !== 'false');
+    });
+    mapInstance.setRoadOpacity(rangeFraction(roadOpacity, 0.9));
+    mapInstance.setSatelliteOpacity(rangeFraction(satelliteOpacity, 1));
+  };
+
+  const refreshMapContext = () => {
+    activeMapKey = window.WWZServerContext?.getMapKey?.() || 'chernarus';
+    mapConfig = window.WWZMap?.getConfig(activeMapKey) || { key: 'chernarus', name: 'Chernarus', mapMetres: 15360 };
+    [customX, customZ].forEach((input) => {
+      if (input) input.max = String(mapConfig.mapMetres);
+    });
+  };
+
+  const storageKey = () => `wwz.${activeMapKey}.customLocations.v1`;
+  const formatCoordinate = (value) => window.WWZMap?.formatCoordinate(value, 1) ?? Number(value).toFixed(1);
 
   const validText = (value, maximumLength, fallback = null) => {
     const text = String(value || '').trim();
@@ -65,7 +99,8 @@
 
   const clampCoordinate = (value) => {
     const number = Number(value);
-    return Number.isFinite(number) && number >= 0 && number <= 15360 ? number : null;
+    const maximum = mapConfig?.mapMetres || 15360;
+    return Number.isFinite(number) && number >= 0 && number <= maximum ? number : null;
   };
 
   const makeId = () => {
@@ -144,20 +179,21 @@
     const id = validText(rawPlace?.id, 100);
     const name = validText(rawPlace?.name, 100);
     const nativeName = validText(rawPlace?.nativeName, 140, name);
-    const type = validText(rawPlace?.type, 30, 'village')?.toLowerCase();
+    const type = validText(rawPlace?.type, 30, 'village')?.toLowerCase().replace(/\d+$/, '');
     const sourceClass = validText(rawPlace?.sourceClass, 120, '');
     const sourceType = validText(rawPlace?.sourceType, 30, type);
     const x = clampCoordinate(rawPlace?.x);
     const z = clampCoordinate(rawPlace?.z);
     const rawMinZoom = Number(rawPlace?.minZoom);
-    const minZoom = Number.isFinite(rawMinZoom) ? Math.max(0, Math.min(14, rawMinZoom)) : 4;
-    if (!id || !name || !nativeName || !['capital', 'city', 'village'].includes(type) || x === null || z === null) return null;
+    const defaultMinZoom = { capital: 0, city: 2, village: 3, local: 4, marine: 4, hill: 5, camp: 5, ruin: 5 }[type] ?? 5;
+    const minZoom = Number.isFinite(rawMinZoom) ? Math.max(0, Math.min(14, rawMinZoom)) : defaultMinZoom;
+    if (!id || !name || !nativeName || !['capital', 'city', 'village', 'local', 'marine', 'hill', 'camp', 'ruin'].includes(type) || x === null || z === null) return null;
     return { id, name, nativeName, type, sourceClass, sourceType, x, z, minZoom };
   };
 
   const loadCustomPois = () => {
     try {
-      const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      const parsed = JSON.parse(localStorage.getItem(storageKey()) || '[]');
       customPois = (Array.isArray(parsed) ? parsed : []).map(validateCustom).filter(Boolean).slice(0, MAX_CUSTOM_LOCATIONS);
     } catch {
       customPois = [];
@@ -166,7 +202,7 @@
 
   const persistCustomPois = () => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(customPois));
+      localStorage.setItem(storageKey(), JSON.stringify(customPois));
     } catch (error) {
       console.warn('Could not save custom map locations.', error);
     }
@@ -414,11 +450,16 @@
     const visibleMarkerNames = new Set();
     filteredLocations().forEach((poi) => visibleMarkerNames.add(poi.name.toLowerCase()));
 
-    const priority = { capital: 0, city: 1, village: 2 };
+    const priority = { capital: 0, city: 1, village: 2, local: 3, marine: 4, hill: 5, camp: 6, ruin: 7 };
     const sizeProfile = {
       capital: { native: 13, latin: 9.5, height: 28 },
       city: { native: 11, latin: 8.5, height: 25 },
-      village: { native: 9, latin: 7.5, height: 22 }
+      village: { native: 9, latin: 7.5, height: 22 },
+      local: { native: 8.5, latin: 7.2, height: 21 },
+      marine: { native: 8.5, latin: 7.2, height: 21 },
+      hill: { native: 8, latin: 7, height: 20 },
+      camp: { native: 8, latin: 7, height: 20 },
+      ruin: { native: 8, latin: 7, height: 20 }
     };
     const occupied = [];
 
@@ -437,7 +478,7 @@
         const nativeKey = place.nativeName.toLowerCase();
         if (visibleMarkerNames.has(latinKey) || visibleMarkerNames.has(nativeKey)) return;
 
-        const latlng = window.WWZChernarusMap.worldToLeaflet([place.x, place.z]);
+        const latlng = window.WWZMap.worldToLeaflet([place.x, place.z], activeMapKey);
         if (!latlng) return;
 
         const profile = sizeProfile[place.type] || sizeProfile.village;
@@ -478,6 +519,38 @@
       });
   };
 
+  const renderPlaceNameSuggestions = () => {
+    if (!placeNameSuggestions) return;
+    placeNameSuggestions.replaceChildren();
+    placeNames.forEach((place) => {
+      const option = document.createElement('option');
+      option.value = place.name;
+      option.label = place.nativeName !== place.name ? `${place.nativeName} · ${place.type}` : place.type;
+      placeNameSuggestions.append(option);
+    });
+  };
+
+  const focusMatchingPlaceName = () => {
+    const query = currentQuery();
+    if (!query || !mapInstance) return false;
+    const place = placeNames.find((entry) => entry.name.toLowerCase() === query || entry.nativeName.toLowerCase() === query)
+      || placeNames.find((entry) => entry.name.toLowerCase().startsWith(query) || entry.nativeName.toLowerCase().startsWith(query));
+    if (!place) return false;
+    mapInstance.focus(place.x, place.z, Math.max(place.minZoom + 2, 6));
+    mapInstance.setSelection(place.x, place.z, { notify: false, marker: false });
+    selectedLocation = {
+      id: `label-${place.id}`,
+      name: place.name,
+      category: `${place.type[0].toUpperCase()}${place.type.slice(1)} label`,
+      description: place.nativeName !== place.name ? `Approved map label · ${place.nativeName}` : 'Approved map label.',
+      x: place.x,
+      z: place.z,
+      scope: 'selection'
+    };
+    updateDetails(selectedLocation);
+    return true;
+  };
+
 
   const renderResults = () => {
     const visible = filteredLocations();
@@ -511,7 +584,7 @@
 
   const exportCustomLocations = () => {
     const payload = {
-      type: 'wwz-chernarus-custom-locations',
+      type: `wwz-${activeMapKey}-custom-locations`,
       version: 1,
       exportedAt: new Date().toISOString(),
       locations: customPois
@@ -520,7 +593,7 @@
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
     anchor.href = url;
-    anchor.download = 'wwz-chernarus-custom-locations.json';
+    anchor.download = `wwz-${activeMapKey}-custom-locations.json`;
     document.body.append(anchor);
     anchor.click();
     anchor.remove();
@@ -534,7 +607,7 @@
       const source = Array.isArray(parsed) ? parsed : parsed?.locations;
       if (!Array.isArray(source)) throw new Error('No locations array found.');
       const incoming = source.map(validateCustom).filter(Boolean);
-      if (!incoming.length) throw new Error('No valid Chernarus locations found.');
+      if (!incoming.length) throw new Error(`No valid ${mapConfig.name} locations found.`);
       const merged = new Map(customPois.map((poi) => [poi.id, poi]));
       incoming.forEach((poi) => merged.set(poi.id, poi));
       customPois = [...merged.values()].slice(0, MAX_CUSTOM_LOCATIONS);
@@ -618,26 +691,33 @@
     if (loadPromise) return loadPromise;
 
     loadPromise = (async () => {
-      if (!window.WWZChernarusMap || !window.L) throw new Error('The production Chernarus map runtime is unavailable.');
+      if (!window.WWZMap || !window.L) throw new Error('The production DayZ map runtime is unavailable.');
+      refreshMapContext();
 
       const [, placeResponse] = await Promise.all([
         loadPublicMarkers(),
-        fetch(PLACE_NAMES_URL, { headers: { Accept: 'application/json' }, cache: 'force-cache' }).catch(() => null)
+        fetch(mapConfig.labelUrl, { headers: { Accept: 'application/json' }, cache: 'force-cache' }).catch(() => null)
       ]);
       if (placeResponse?.ok) {
         const placePayload = await placeResponse.json();
-        placeNames = (Array.isArray(placePayload?.places) ? placePayload.places : []).map(validatePlaceName).filter(Boolean);
+        const rawPlaces = Array.isArray(placePayload?.labels) ? placePayload.labels : placePayload?.places;
+        placeNames = (Array.isArray(rawPlaces) ? rawPlaces : []).map(validatePlaceName).filter(Boolean);
       } else {
         placeNames = [];
       }
+      renderPlaceNameSuggestions();
       loadCustomPois();
 
-      mapInstance = window.WWZChernarusMap.create(frame, {
+      mapInstance = window.WWZMap.create(frame, {
+        mapKey: activeMapKey,
         mode: 'full',
         selectable: true,
         copyOnSelect: true,
         roadsVisible: true,
         trailsVisible: true,
+        gridVisible: gridToggle?.getAttribute('aria-pressed') === 'true',
+        roadOpacity: rangeFraction(roadOpacity, 0.9),
+        satelliteOpacity: rangeFraction(satelliteOpacity, 1),
         pointerElement: document.querySelector('[data-map-coordinates]'),
         selectedElement: document.querySelector('[data-map-selected-coordinates]'),
         copyButton: document.querySelector('[data-map-copy-coordinates]'),
@@ -649,6 +729,7 @@
         fullscreenTarget: frame,
         roadToggle: document.querySelector('[data-map-road-toggle]'),
         trailToggle: document.querySelector('[data-map-trail-toggle]'),
+        gridToggle,
         onSelect: (position) => {
           selectedLocation = {
             id: null,
@@ -664,6 +745,7 @@
           renderResults();
         }
       });
+      syncMapAppearance();
 
       if (!mapInstance.map.getPane('wwzPlaceNames')) {
         const placeNamePane = mapInstance.map.createPane('wwzPlaceNames');
@@ -684,7 +766,7 @@
         loading.hidden = false;
         loading.classList.add('error');
         const label = loading.querySelector('strong');
-        if (label) label.textContent = error.message || 'The Chernarus map could not be loaded.';
+        if (label) label.textContent = error.message || `The ${mapConfig?.name || 'DayZ'} map could not be loaded.`;
       }
       loadPromise = null;
       throw error;
@@ -694,6 +776,10 @@
   };
 
   search?.addEventListener('input', renderResults);
+  search?.addEventListener('change', focusMatchingPlaceName);
+  search?.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' && focusMatchingPlaceName()) event.preventDefault();
+  });
   document.querySelectorAll('[data-map-scope]').forEach((button) => button.addEventListener('click', () => setScope(button.dataset.mapScope)));
   document.querySelector('[data-map-name-toggle]')?.addEventListener('click', () => {
     placeNamesVisible = !placeNamesVisible;
@@ -749,7 +835,7 @@
       visibility: publicMode ? 'public' : undefined
     });
     if (!poi) {
-      window.alert('Enter a name and valid Chernarus X/Z coordinates between 0 and 15360.');
+      window.alert(`Enter a name and valid ${mapConfig.name} X/Z coordinates between 0 and ${mapConfig.mapMetres}.`);
       return;
     }
 
@@ -833,6 +919,43 @@
   window.addEventListener('wwz:viewchange', (event) => {
     if (event.detail?.view !== 'map') return;
     initialise().then((instance) => window.setTimeout(() => instance.invalidateSize(), 50)).catch(() => {});
+  });
+
+  roadGroupToggles.forEach((button) => {
+    button.addEventListener('click', () => {
+      const active = button.getAttribute('aria-pressed') === 'false';
+      button.setAttribute('aria-pressed', String(active));
+      button.classList.toggle('active', active);
+      mapInstance?.setRoadGroupVisible(button.dataset.mapRoadGroup, active);
+    });
+  });
+
+  roadOpacity?.addEventListener('input', () => {
+    updateRangeOutput(roadOpacity, roadOpacityValue);
+    mapInstance?.setRoadOpacity(rangeFraction(roadOpacity, 0.9));
+  });
+  satelliteOpacity?.addEventListener('input', () => {
+    updateRangeOutput(satelliteOpacity, satelliteOpacityValue);
+    mapInstance?.setSatelliteOpacity(rangeFraction(satelliteOpacity, 1));
+  });
+  updateRangeOutput(roadOpacity, roadOpacityValue);
+  updateRangeOutput(satelliteOpacity, satelliteOpacityValue);
+
+  window.addEventListener('wwz:serverchange', (event) => {
+    const nextMapKey = event.detail?.server?.map_key;
+    if (!nextMapKey || nextMapKey === activeMapKey) return;
+    mapInstance?.destroy?.();
+    mapInstance = null;
+    loadPromise = null;
+    poiLayer = null;
+    customLayer = null;
+    placeNameLayer = null;
+    placeNames = [];
+    publicPois = [];
+    customPois = [];
+    selectedLocation = null;
+    refreshMapContext();
+    if (requestedView() === 'map') initialise().catch(() => {});
   });
 
   if (requestedView() === 'map') initialise().catch(() => {});

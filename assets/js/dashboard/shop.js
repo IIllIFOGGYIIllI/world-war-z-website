@@ -239,8 +239,12 @@ const populatePurchaseLocationSelect = () => {
 };
 
 const ensureShopCoordinateMap = () => {
-  if (shopCoordinateMapInstance || !shopCoordinateMap || !window.WWZChernarusMap) return shopCoordinateMapInstance;
-  shopCoordinateMapInstance = window.WWZChernarusMap.create(shopCoordinateMap, {
+  if (shopCoordinateMapInstance || !shopCoordinateMap || !window.WWZMap) return shopCoordinateMapInstance;
+  const mapKey = window.WWZServerContext?.getMapKey?.() || 'chernarus';
+  const worldSize = window.WWZMap.getConfig(mapKey).mapMetres;
+  [shopDeliveryX, shopDeliveryZ].forEach((input) => { if (input) input.max = String(worldSize); });
+  shopCoordinateMapInstance = window.WWZMap.create(shopCoordinateMap, {
+    mapKey,
     mode: 'picker',
     selectable: true,
     copyOnSelect: false,
@@ -274,7 +278,8 @@ const updateCoordinateMarker = () => {
   const rawZ = String(shopDeliveryZ?.value ?? '').trim();
   const x = Number(rawX);
   const z = Number(rawZ);
-  const valid = rawX !== '' && rawZ !== '' && Number.isFinite(x) && Number.isFinite(z) && x >= 0 && x <= 15360 && z >= 0 && z <= 15360;
+  const worldSize = window.WWZMap?.getConfig(window.WWZServerContext?.getMapKey?.()).mapMetres || 15360;
+  const valid = rawX !== '' && rawZ !== '' && Number.isFinite(x) && Number.isFinite(z) && x >= 0 && x <= worldSize && z >= 0 && z <= worldSize;
   if (shopMapSelected && !shopCoordinateMapInstance) {
     shopMapSelected.textContent = valid ? `X ${x.toFixed(1)} · Z ${z.toFixed(1)}` : 'No coordinates selected';
   }
@@ -1845,6 +1850,13 @@ loadShopRestartStatus();
 window.setInterval(loadShopRestartStatus, 30_000);
   if (view === 'staff' && section === 'shop-orders') loadAdminShopOrders(token);
   if (view === 'shopadmin') loadOwnerShopConfig(token);
+});
+window.addEventListener('wwz:serverchange', () => {
+  if (!shopCoordinateMapInstance) return;
+  shopCoordinateMapInstance.destroy();
+  shopCoordinateMapInstance = null;
+  ensureShopCoordinateMap()?.invalidateSize();
+  updateCoordinateMarker();
 });
 loadPublicShop();
 loadShopRestartStatus();

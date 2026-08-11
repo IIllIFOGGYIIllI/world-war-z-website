@@ -1,0 +1,617 @@
+{
+  "map": "livonia",
+  "terrain": "enoch",
+  "worldSize": 12800,
+  "labelCount": 60,
+  "typeCounts": {
+    "Camp": 5,
+    "City": 5,
+    "Hill": 8,
+    "Local": 11,
+    "Marine": 4,
+    "Ruin": 2,
+    "Village": 25
+  },
+  "labels": [
+    {
+      "id": "Bielawa",
+      "name": "Bielawa",
+      "sourceName": "Bielawa",
+      "localizationKey": null,
+      "x": 1573.45,
+      "z": 9677.4502,
+      "type": "Village",
+      "priority": 2
+    },
+    {
+      "id": "Lukow",
+      "name": "Lukow",
+      "sourceName": "Lukow",
+      "localizationKey": null,
+      "x": 3529.6499,
+      "z": 11966.53,
+      "type": "Village",
+      "priority": 2
+    },
+    {
+      "id": "Gliniska",
+      "name": "Gliniska",
+      "sourceName": "Gliniska",
+      "localizationKey": null,
+      "x": 4992.6201,
+      "z": 9921.7402,
+      "type": "Village",
+      "priority": 2
+    },
+    {
+      "id": "Brena",
+      "name": "Brena",
+      "sourceName": "Brena",
+      "localizationKey": null,
+      "x": 6617.6299,
+      "z": 11211.03,
+      "type": "City",
+      "priority": 1
+    },
+    {
+      "id": "Tarnow",
+      "name": "Tarnow",
+      "sourceName": "Tarnow",
+      "localizationKey": null,
+      "x": 9328.3096,
+      "z": 10904.8,
+      "type": "City",
+      "priority": 1
+    },
+    {
+      "id": "Sitnik",
+      "name": "Sitnik",
+      "sourceName": "Sitnik",
+      "localizationKey": null,
+      "x": 11502.31,
+      "z": 9573.0098,
+      "type": "Village",
+      "priority": 2
+    },
+    {
+      "id": "Borek",
+      "name": "Borek",
+      "sourceName": "Borek",
+      "localizationKey": null,
+      "x": 9807.4902,
+      "z": 8495.0703,
+      "type": "Village",
+      "priority": 2
+    },
+    {
+      "id": "Zapadlisko",
+      "name": "Zapadlisko",
+      "sourceName": "Zapadlisko",
+      "localizationKey": null,
+      "x": 8058.25,
+      "z": 8711.7598,
+      "type": "Village",
+      "priority": 2
+    },
+    {
+      "id": "Nidek",
+      "name": "Nidek",
+      "sourceName": "Nidek",
+      "localizationKey": null,
+      "x": 6128.8901,
+      "z": 8013.3398,
+      "type": "Village",
+      "priority": 2
+    },
+    {
+      "id": "Topolin",
+      "name": "Topolin",
+      "sourceName": "Topolin",
+      "localizationKey": null,
+      "x": 1858.8199,
+      "z": 7330.8701,
+      "type": "City",
+      "priority": 1
+    },
+    {
+      "id": "Adamow",
+      "name": "Adamów",
+      "sourceName": "Adamów",
+      "localizationKey": null,
+      "x": 3076.3101,
+      "z": 6851.2598,
+      "type": "Village",
+      "priority": 2
+    },
+    {
+      "id": "Muratyn",
+      "name": "Muratyn",
+      "sourceName": "Muratyn",
+      "localizationKey": null,
+      "x": 4567.5,
+      "z": 6384.3999,
+      "type": "Village",
+      "priority": 2
+    },
+    {
+      "id": "Radunin",
+      "name": "Radunin",
+      "sourceName": "Radunin",
+      "localizationKey": null,
+      "x": 7298.3799,
+      "z": 6491.8999,
+      "type": "City",
+      "priority": 1
+    },
+    {
+      "id": "Lembork",
+      "name": "Lembork",
+      "sourceName": "Lembork",
+      "localizationKey": null,
+      "x": 8680.4697,
+      "z": 6635.7002,
+      "type": "Village",
+      "priority": 2
+    },
+    {
+      "id": "Gieraltow",
+      "name": "Gieraltów",
+      "sourceName": "Gieraltów",
+      "localizationKey": null,
+      "x": 11240.02,
+      "z": 4380.3701,
+      "type": "Village",
+      "priority": 2
+    },
+    {
+      "id": "Nadbor",
+      "name": "Nadbór",
+      "sourceName": "Nadbór",
+      "localizationKey": null,
+      "x": 6109.5,
+      "z": 3983.1699,
+      "type": "City",
+      "priority": 1
+    },
+    {
+      "id": "Zalesie",
+      "name": "Zalesie",
+      "sourceName": "Zalesie",
+      "localizationKey": null,
+      "x": 896.08,
+      "z": 5536.1201,
+      "type": "Village",
+      "priority": 2
+    },
+    {
+      "id": "Huta",
+      "name": "Huta",
+      "sourceName": "Huta",
+      "localizationKey": null,
+      "x": 5141.4702,
+      "z": 5472.7798,
+      "type": "Village",
+      "priority": 2
+    },
+    {
+      "id": "Radacz",
+      "name": "Radacz",
+      "sourceName": "Radacz",
+      "localizationKey": null,
+      "x": 4007.78,
+      "z": 7939.9102,
+      "type": "Village",
+      "priority": 2
+    },
+    {
+      "id": "Olszanka",
+      "name": "Olszanka",
+      "sourceName": "Olszanka",
+      "localizationKey": null,
+      "x": 4819.0298,
+      "z": 7674.1299,
+      "type": "Village",
+      "priority": 2
+    },
+    {
+      "id": "Lipina",
+      "name": "Lipina",
+      "sourceName": "Lipina",
+      "localizationKey": null,
+      "x": 5941.8701,
+      "z": 6820.0098,
+      "type": "Village",
+      "priority": 2
+    },
+    {
+      "id": "Kolembrody",
+      "name": "Kolembrody",
+      "sourceName": "Kolembrody",
+      "localizationKey": null,
+      "x": 8416.9502,
+      "z": 11981.93,
+      "type": "Village",
+      "priority": 2
+    },
+    {
+      "id": "Karlin",
+      "name": "Karlin",
+      "sourceName": "Karlin",
+      "localizationKey": null,
+      "x": 10072.74,
+      "z": 6956.96,
+      "type": "Village",
+      "priority": 2
+    },
+    {
+      "id": "Sobotka",
+      "name": "Sobotka",
+      "sourceName": "Sobotka",
+      "localizationKey": null,
+      "x": 6256.9399,
+      "z": 10252.92,
+      "type": "Village",
+      "priority": 2
+    },
+    {
+      "id": "Roztoka",
+      "name": "Roztoka",
+      "sourceName": "Roztoka",
+      "localizationKey": null,
+      "x": 7695.2798,
+      "z": 5317.4702,
+      "type": "Village",
+      "priority": 2
+    },
+    {
+      "id": "Polana",
+      "name": "Polana",
+      "sourceName": "Polana",
+      "localizationKey": null,
+      "x": 3279.6101,
+      "z": 2132.1499,
+      "type": "Village",
+      "priority": 2
+    },
+    {
+      "id": "Dolnik",
+      "name": "Dolnik",
+      "sourceName": "Dolnik",
+      "localizationKey": null,
+      "x": 11312.39,
+      "z": 655.73,
+      "type": "Village",
+      "priority": 2
+    },
+    {
+      "id": "Sowa",
+      "name": "Sowa",
+      "sourceName": "Sowa",
+      "localizationKey": null,
+      "x": 11662.77,
+      "z": 12064.33,
+      "type": "Hill",
+      "priority": 4
+    },
+    {
+      "id": "Krsnik",
+      "name": "Krsnik",
+      "sourceName": "Krsnik",
+      "localizationKey": null,
+      "x": 7874.9302,
+      "z": 10081.25,
+      "type": "Hill",
+      "priority": 4
+    },
+    {
+      "id": "Dambog",
+      "name": "Dambog",
+      "sourceName": "Dambog",
+      "localizationKey": null,
+      "x": 577.26,
+      "z": 1124.6899,
+      "type": "Hill",
+      "priority": 4
+    },
+    {
+      "id": "Skala",
+      "name": "Skala",
+      "sourceName": "Skala",
+      "localizationKey": null,
+      "x": 2999.25,
+      "z": 1956.0699,
+      "type": "Hill",
+      "priority": 4
+    },
+    {
+      "id": "Swarog",
+      "name": "Swarog",
+      "sourceName": "Swarog",
+      "localizationKey": null,
+      "x": 4854.98,
+      "z": 2224.27,
+      "type": "Hill",
+      "priority": 4
+    },
+    {
+      "id": "Rodzanica",
+      "name": "Rodzanica",
+      "sourceName": "Rodzanica",
+      "localizationKey": null,
+      "x": 8881.54,
+      "z": 2041.96,
+      "type": "Hill",
+      "priority": 4
+    },
+    {
+      "id": "Bagno",
+      "name": "Bagno",
+      "sourceName": "Bagno",
+      "localizationKey": null,
+      "x": 11822.81,
+      "z": 11134.51,
+      "type": "Local",
+      "priority": 3
+    },
+    {
+      "id": "Wrzeszcz",
+      "name": "Wrzeszcz",
+      "sourceName": "Wrzeszcz",
+      "localizationKey": null,
+      "x": 9043.25,
+      "z": 4438.48,
+      "type": "Local",
+      "priority": 3
+    },
+    {
+      "id": "drewniki",
+      "name": "Drewniki",
+      "sourceName": "Drewniki",
+      "localizationKey": null,
+      "x": 5834.7202,
+      "z": 5092.8901,
+      "type": "Local",
+      "priority": 3
+    },
+    {
+      "id": "kulno",
+      "name": "Kulno",
+      "sourceName": "Kulno",
+      "localizationKey": null,
+      "x": 11150.02,
+      "z": 2391.5,
+      "type": "Local",
+      "priority": 3
+    },
+    {
+      "id": "Hrud",
+      "name": "Hrud",
+      "sourceName": "Hrud",
+      "localizationKey": null,
+      "x": 6452.5,
+      "z": 9371.1299,
+      "type": "Local",
+      "priority": 3
+    },
+    {
+      "id": "Jantar",
+      "name": "Jantar",
+      "sourceName": "Jantar",
+      "localizationKey": null,
+      "x": 3532.3501,
+      "z": 8955.1396,
+      "type": "Marine",
+      "priority": 4
+    },
+    {
+      "id": "Grabinskie",
+      "name": "Grabinskie",
+      "sourceName": "Grabinskie",
+      "localizationKey": null,
+      "x": 11249.24,
+      "z": 10993.21,
+      "type": "Marine",
+      "priority": 4
+    },
+    {
+      "id": "Wolisko",
+      "name": "Wolisko",
+      "sourceName": "Wolisko",
+      "localizationKey": null,
+      "x": 12368.47,
+      "z": 10883.96,
+      "type": "Marine",
+      "priority": 4
+    },
+    {
+      "id": "Sitnickie",
+      "name": "Sitnickie",
+      "sourceName": "Sitnickie",
+      "localizationKey": null,
+      "x": 11411.91,
+      "z": 10439.6,
+      "type": "Marine",
+      "priority": 4
+    },
+    {
+      "id": "Grabin",
+      "name": "Grabin",
+      "sourceName": "Grabin",
+      "localizationKey": null,
+      "x": 10666.22,
+      "z": 11025.57,
+      "type": "Village",
+      "priority": 2
+    },
+    {
+      "id": "Branzow_castle",
+      "name": "Branzów Castle",
+      "sourceName": "$STR_CfgWorlds_Enoch_BranzowCastle",
+      "localizationKey": "$STR_CfgWorlds_Enoch_BranzowCastle",
+      "x": 1072.54,
+      "z": 11418.78,
+      "type": "Ruin",
+      "priority": 3
+    },
+    {
+      "id": "Piorun",
+      "name": "Piorun",
+      "sourceName": "Piorun",
+      "localizationKey": null,
+      "x": 645.61,
+      "z": 12158.6,
+      "type": "Hill",
+      "priority": 4
+    },
+    {
+      "id": "Jezurow",
+      "name": "Jezurów",
+      "sourceName": "Jezurów",
+      "localizationKey": null,
+      "x": 2097.76,
+      "z": 2355.8701,
+      "type": "Local",
+      "priority": 3
+    },
+    {
+      "id": "Tymbark",
+      "name": "Tymbark",
+      "sourceName": "Tymbark",
+      "localizationKey": null,
+      "x": 2902.45,
+      "z": 1221.25,
+      "type": "Local",
+      "priority": 3
+    },
+    {
+      "id": "Hedrykow",
+      "name": "Hedryków",
+      "sourceName": "Hedryków",
+      "localizationKey": null,
+      "x": 4512.98,
+      "z": 4795.5098,
+      "type": "Local",
+      "priority": 3
+    },
+    {
+      "id": "Widok",
+      "name": "Widok",
+      "sourceName": "Widok",
+      "localizationKey": null,
+      "x": 10238.53,
+      "z": 2143.5801,
+      "type": "Local",
+      "priority": 3
+    },
+    {
+      "id": "Kopa",
+      "name": "Kopa",
+      "sourceName": "Kopa",
+      "localizationKey": null,
+      "x": 5518.8101,
+      "z": 8767.6104,
+      "type": "Hill",
+      "priority": 4
+    },
+    {
+      "id": "Quarry_Max",
+      "name": "Kamieniołom Maksymilian",
+      "sourceName": "Kamieniołom Maksymilian",
+      "localizationKey": null,
+      "x": 6512.25,
+      "z": 4847.8599,
+      "type": "Local",
+      "priority": 3
+    },
+    {
+      "id": "Peklo",
+      "name": "Piekło",
+      "sourceName": "Piekło",
+      "localizationKey": null,
+      "x": 3323.8601,
+      "z": 3717.3,
+      "type": "Local",
+      "priority": 3
+    },
+    {
+      "id": "Sarnowek",
+      "name": "Sarnówek",
+      "sourceName": "Sarnówek",
+      "localizationKey": null,
+      "x": 3308.0601,
+      "z": 4970.25,
+      "type": "Village",
+      "priority": 2
+    },
+    {
+      "id": "Konopki",
+      "name": "Konopki",
+      "sourceName": "Konopki",
+      "localizationKey": null,
+      "x": 11489.57,
+      "z": 2897.9299,
+      "type": "Village",
+      "priority": 2
+    },
+    {
+      "id": "Pionier",
+      "name": "Pionier",
+      "sourceName": "Pionier",
+      "localizationKey": null,
+      "x": 1341.45,
+      "z": 4867.1602,
+      "type": "Camp",
+      "priority": 3
+    },
+    {
+      "id": "Potoki",
+      "name": "Potoki",
+      "sourceName": "Potoki",
+      "localizationKey": null,
+      "x": 11633.87,
+      "z": 1947.2,
+      "type": "Camp",
+      "priority": 3
+    },
+    {
+      "id": "Rumianek",
+      "name": "Rumianek",
+      "sourceName": "Rumianek",
+      "localizationKey": null,
+      "x": 11775.6,
+      "z": 5487.0601,
+      "type": "Camp",
+      "priority": 3
+    },
+    {
+      "id": "Lawenda",
+      "name": "Lawenda",
+      "sourceName": "Lawenda",
+      "localizationKey": null,
+      "x": 813.65,
+      "z": 8606.3398,
+      "type": "Camp",
+      "priority": 3
+    },
+    {
+      "id": "Tymianka",
+      "name": "Tymianka",
+      "sourceName": "Tymianka",
+      "localizationKey": null,
+      "x": 11351.73,
+      "z": 10062.73,
+      "type": "Camp",
+      "priority": 3
+    },
+    {
+      "id": "Pulkrabiec",
+      "name": "Półkrabiec",
+      "sourceName": "Półkrabiec",
+      "localizationKey": null,
+      "x": 11871.31,
+      "z": 6580.2202,
+      "type": "Ruin",
+      "priority": 3
+    }
+  ]
+}

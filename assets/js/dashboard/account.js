@@ -591,7 +591,9 @@ const loadCurrentAccount = async (sessionToken) => {
       return;
     }
 
-    applyAuthenticatedState(await response.json());
+    const payload = await response.json();
+    applyAuthenticatedState(payload);
+    window.WWZServerContext?.handleAuthenticated(payload, { requireSelection: false });
     await loadAccountSummary(sessionToken);
     await loadMemberAppeals(sessionToken);
     await loadMemberShop(sessionToken);
@@ -633,6 +635,7 @@ const completeDiscordLogin = async (loginTicket) => {
     }
 
     applyAuthenticatedState(payload);
+    window.WWZServerContext?.handleAuthenticated(payload, { requireSelection: true });
     await loadAccountSummary(payload.session_token);
     await loadMemberAppeals(payload.session_token);
     if (dashboardAccessLevel === 'owner') await loadOwnerAppealSettings(payload.session_token);
@@ -666,13 +669,20 @@ const configureDiscordAuth = async () => {
   }
 
   if (discordAuthEnabled) {
-    startDiscordLoginButton?.removeAttribute('disabled');
-    if (startDiscordLoginLabel) startDiscordLoginLabel.textContent = 'Continue Securely With Discord';
+    startDiscordLoginButtons.forEach((button) => button.removeAttribute('disabled'));
+    startDiscordLoginLabels.forEach((label) => { label.textContent = 'Continue Securely With Discord'; });
     if (authDialogNotice) authDialogNotice.querySelector('span').textContent = 'Your dashboard session lasts for this browser tab and expires automatically.';
+    const gatewayNotice = document.querySelector('[data-gateway-notice]');
+    if (gatewayNotice) gatewayNotice.textContent = 'Discord securely verifies your World War Z membership and access level.';
   } else {
-    startDiscordLoginButton?.setAttribute('disabled', '');
-    if (startDiscordLoginLabel) startDiscordLoginLabel.textContent = 'Discord Sign-In Is Being Configured';
+    startDiscordLoginButtons.forEach((button) => button.setAttribute('disabled', ''));
+    startDiscordLoginLabels.forEach((label) => { label.textContent = 'Discord Sign-In Is Being Configured'; });
     if (authDialogNotice) authDialogNotice.querySelector('span').textContent = 'The live server status remains available while Discord sign-in is being configured.';
+    const gatewayNotice = document.querySelector('[data-gateway-notice]');
+    if (gatewayNotice) {
+      gatewayNotice.textContent = 'Discord sign-in is being configured. Please check back shortly.';
+      gatewayNotice.dataset.tone = 'error';
+    }
   }
 
   const fragment = callbackFragment();
@@ -699,11 +709,13 @@ const configureDiscordAuth = async () => {
   }
 };
 
-startDiscordLoginButton?.addEventListener('click', () => {
-  if (!discordAuthEnabled || authRequestInProgress) return;
-  const activeView = document.querySelector('[data-view-panel].active')?.dataset.viewPanel || 'overview';
-  storageSet(AUTH_RETURN_VIEW_KEY, navigationKey(activeView, activeDashboardSection || defaultSectionForView(activeView)));
-  window.location.assign(AUTH_LOGIN_URL);
+startDiscordLoginButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    if (!discordAuthEnabled || authRequestInProgress) return;
+    const activeView = document.querySelector('[data-view-panel].active')?.dataset.viewPanel || 'overview';
+    storageSet(AUTH_RETURN_VIEW_KEY, navigationKey(activeView, activeDashboardSection || defaultSectionForView(activeView)));
+    window.location.assign(AUTH_LOGIN_URL);
+  });
 });
 
 signOutButton?.addEventListener('click', async () => {
@@ -768,6 +780,7 @@ const formatUpdatedAt = (value) => {
 };
 
 const applyLiveStatus = (payload) => {
+  window.WWZServerContext?.updatePublicStatus(payload);
   if (!STATUS_LABELS[payload?.status] || !payload.server || !payload.players) {
     throw new Error('Unexpected server-status response');
   }

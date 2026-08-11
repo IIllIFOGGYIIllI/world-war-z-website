@@ -1,0 +1,361 @@
+.dashboard-gated > .dashboard-topbar,
+.dashboard-gated > .dashboard-shell,
+.dashboard-gated > .skip-link {
+  display: none;
+}
+
+.dashboard-ready > .wwz-gateway {
+  display: none;
+}
+
+.wwz-gateway {
+  position: fixed;
+  inset: 0;
+  z-index: 2400;
+  min-width: 320px;
+  min-height: 100dvh;
+  overflow: auto;
+  background:
+    linear-gradient(90deg, rgba(3, 3, 3, 0.98) 0%, rgba(3, 3, 3, 0.87) 42%, rgba(3, 3, 3, 0.36) 72%, rgba(3, 3, 3, 0.7) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.12), #050404 115%),
+    url("../../world-war-z-dashboard-bg.webp") center / cover fixed no-repeat;
+}
+
+.wwz-gateway::before,
+.wwz-gateway::after,
+.wwz-gateway-vignette {
+  content: "";
+  position: fixed;
+  pointer-events: none;
+}
+
+.wwz-gateway::before {
+  inset: 0;
+  opacity: 0.2;
+  background-image: repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 4px);
+}
+
+.wwz-gateway::after {
+  inset: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(212, 36, 24, 0.08);
+}
+
+.wwz-gateway-vignette {
+  inset: 0;
+  background: radial-gradient(circle at 74% 45%, transparent 5%, rgba(0,0,0,0.18) 42%, rgba(0,0,0,0.74) 100%);
+}
+
+.wwz-gateway-login {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 1500px);
+  min-height: 100dvh;
+  display: grid;
+  align-items: center;
+  padding: clamp(48px, 7vw, 110px);
+  margin: 0 auto;
+}
+
+.wwz-gateway-card {
+  width: min(600px, 100%);
+  padding: clamp(28px, 4vw, 56px);
+  border-left: 3px solid var(--red-bright);
+  background: linear-gradient(135deg, rgba(13, 11, 11, 0.96), rgba(13, 11, 11, 0.74));
+  box-shadow: 0 34px 90px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(255,255,255,0.07);
+  backdrop-filter: blur(16px);
+}
+
+.wwz-gateway-brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: clamp(42px, 7vh, 78px);
+}
+
+.wwz-gateway-brand img {
+  width: 66px;
+  aspect-ratio: 1;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 24px rgba(0,0,0,0.52));
+}
+
+.wwz-gateway-brand div {
+  display: grid;
+  line-height: 1;
+}
+
+.wwz-gateway-brand span {
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  font-size: 25px;
+  letter-spacing: 0.11em;
+}
+
+.wwz-gateway-brand small {
+  margin-top: 7px;
+  color: #9a918b;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.32em;
+}
+
+.wwz-gateway-kicker {
+  margin: 0 0 12px;
+  color: var(--red-bright);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+.wwz-gateway h1 {
+  margin: 0;
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  font-size: clamp(52px, 7vw, 94px);
+  font-weight: 400;
+  line-height: 0.88;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+  text-shadow: 0 8px 32px rgba(0,0,0,0.65);
+}
+
+.wwz-gateway h1 span { color: var(--red-bright); }
+
+.wwz-gateway-copy {
+  max-width: 520px;
+  margin: 27px 0 0;
+  color: #bbb2ab;
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.wwz-gateway-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 27px 0;
+}
+
+.wwz-gateway-features span {
+  padding: 7px 10px;
+  border: 1px solid rgba(255,255,255,0.11);
+  background: rgba(255,255,255,0.035);
+  color: #c9c1ba;
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.wwz-gateway-discord {
+  width: 100%;
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 14px 22px;
+  border: 1px solid rgba(255,125,112,0.35);
+  background: linear-gradient(135deg, #e12d20, #8e120c);
+  box-shadow: 0 14px 36px rgba(148, 18, 12, 0.3);
+  color: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: transform 160ms ease, filter 160ms ease;
+}
+
+.wwz-gateway-discord img { width: 23px; filter: brightness(0) invert(1); }
+.wwz-gateway-discord:not(:disabled):hover { transform: translateY(-2px); filter: brightness(1.08); }
+.wwz-gateway-discord:disabled { cursor: wait; opacity: 0.58; }
+
+.wwz-gateway-notice {
+  min-height: 18px;
+  margin: 14px 0 0;
+  color: #8e8781;
+  font-size: 10px;
+}
+
+.wwz-gateway-notice[data-tone="error"] { color: #ff7668; }
+
+.wwz-gateway-legal {
+  margin: 25px 0 0;
+  color: #706964;
+  font-size: 9px;
+}
+
+.wwz-gateway-legal a { color: #bfb6ae; text-underline-offset: 3px; }
+
+.wwz-gateway-servers {
+  position: relative;
+  z-index: 1;
+  min-height: 100dvh;
+  background: linear-gradient(180deg, rgba(5,4,4,0.72), rgba(5,4,4,0.95));
+}
+
+.wwz-gateway-server-header {
+  min-height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 14px clamp(26px, 5vw, 80px);
+  border-bottom: 1px solid rgba(255,255,255,0.09);
+  background: rgba(5,4,4,0.86);
+  backdrop-filter: blur(16px);
+}
+
+.wwz-gateway-brand.compact { margin: 0; }
+.wwz-gateway-brand.compact img { width: 52px; }
+.wwz-gateway-brand.compact span { font-size: 19px; }
+
+.wwz-gateway-server-header > button,
+.server-switcher {
+  min-height: 38px;
+  padding: 9px 13px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.035);
+  color: #bbb2ac;
+  cursor: pointer;
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.server-switcher { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.server-switcher:hover { border-color: rgba(255,69,52,0.48); color: #fff; }
+
+.wwz-server-select {
+  width: min(1220px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: clamp(68px, 9vh, 120px) 0;
+}
+
+.wwz-server-select h1 { font-size: clamp(43px, 6vw, 72px); }
+.wwz-server-select > p:not(.wwz-gateway-kicker):not(.wwz-gateway-notice) { max-width: 720px; margin: 18px 0 0; color: #a69e98; }
+
+.wwz-server-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 22px;
+  margin-top: 44px;
+}
+
+.wwz-server-card {
+  position: relative;
+  min-height: 310px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.11);
+  background: linear-gradient(145deg, rgba(27,23,22,0.96), rgba(12,10,10,0.96));
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.wwz-server-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--red-bright);
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.wwz-server-card:hover,
+.wwz-server-card:focus-visible {
+  transform: translateY(-4px);
+  border-color: rgba(255,69,52,0.5);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.42);
+  outline: 0;
+}
+
+.wwz-server-card:hover::before,
+.wwz-server-card:focus-visible::before { opacity: 1; }
+
+.wwz-server-card-heading {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 22px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.wwz-server-icon {
+  width: 58px;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(255,69,52,0.26);
+  border-radius: 50%;
+  background: #080707;
+  color: var(--red-bright);
+  font: 22px Impact, sans-serif;
+}
+
+.wwz-server-icon img { width: 100%; height: 100%; object-fit: cover; }
+.wwz-server-card-heading div:last-child { display: grid; gap: 4px; }
+.wwz-server-card-heading strong { color: #f2ece5; font-size: 17px; }
+.wwz-server-card-heading small { color: #7e7772; font-size: 9px; letter-spacing: 0.09em; text-transform: uppercase; }
+
+.wwz-server-card-body { display: grid; align-content: center; gap: 13px; padding: 25px 22px; }
+.wwz-server-meta { display: flex; justify-content: space-between; gap: 16px; color: #867f79; font-size: 10px; }
+.wwz-server-meta strong { color: #d7d0c9; font-size: 11px; }
+
+.wwz-server-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 22px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.025);
+}
+
+.wwz-server-live { color: #68c97d; font-size: 9px; font-weight: 850; letter-spacing: 0.12em; text-transform: uppercase; }
+.wwz-server-enter { color: #ff7668; font-size: 10px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; }
+
+@media (max-width: 740px) {
+  .wwz-gateway {
+    background:
+      linear-gradient(180deg, rgba(3,3,3,0.52), rgba(3,3,3,0.95) 70%),
+      url("../../world-war-z-dashboard-bg-mobile.webp") center / cover fixed no-repeat;
+  }
+  .wwz-gateway::after { inset: 8px; }
+  .wwz-gateway-login { align-items: end; padding: 72px 20px 24px; }
+  .wwz-gateway-card { padding: 28px 24px; background: rgba(10,8,8,0.92); }
+  .wwz-gateway-brand { margin-bottom: 38px; }
+  .wwz-gateway-brand img { width: 55px; }
+  .wwz-gateway h1 { font-size: clamp(46px, 16vw, 68px); }
+  .wwz-gateway-features { display: grid; grid-template-columns: 1fr; }
+  .wwz-gateway-server-header { min-height: 76px; padding: 12px 20px; }
+  .wwz-gateway-brand.compact small { display: none; }
+  .wwz-gateway-brand.compact img { width: 44px; }
+  .wwz-gateway-brand.compact span { font-size: 15px; }
+  .wwz-server-select { width: min(100% - 32px, 1220px); padding-top: 54px; }
+}
+
+@media (max-height: 800px) and (min-width: 741px) {
+  .wwz-gateway-login { padding-block: 30px; }
+  .wwz-gateway-card { padding: 30px 46px; }
+  .wwz-gateway-brand { margin-bottom: 28px; }
+  .wwz-gateway-brand img { width: 55px; }
+  .wwz-gateway h1 { font-size: clamp(54px, 5.5vw, 70px); }
+  .wwz-gateway-copy { margin-top: 18px; line-height: 1.6; }
+  .wwz-gateway-features { margin: 18px 0; }
+  .wwz-gateway-discord { min-height: 52px; }
+  .wwz-gateway-legal { margin-top: 15px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wwz-gateway-discord,
+  .wwz-server-card { transition: none; }
+}

@@ -109,8 +109,8 @@ const STATUS_LABELS = {
 };
 
 const authMessage = document.querySelector('[data-auth-message]');
-const startDiscordLoginButton = document.querySelector('[data-start-discord-login]');
-const startDiscordLoginLabel = document.querySelector('[data-start-discord-login-label]');
+const startDiscordLoginButtons = [...document.querySelectorAll('[data-start-discord-login]')];
+const startDiscordLoginLabels = [...document.querySelectorAll('[data-start-discord-login-label]')];
 const signOutButton = document.querySelector('[data-sign-out]');
 const authDialogNotice = document.querySelector('[data-auth-dialog-notice]');
 const serverActionDialog = document.querySelector('[data-server-action-dialog]');
@@ -521,6 +521,8 @@ const applySignedOutState = ({ unavailable = false } = {}) => {
   document.querySelector('[data-auth-guest-action]')?.removeAttribute('hidden');
   signOutButton?.setAttribute('hidden', '');
   setAuthBadgeState(unavailable ? 'unavailable' : 'offline', unavailable ? 'Verification unavailable' : 'Not connected');
+  window.WWZServerContext?.clearSelection();
+  if (unavailable || !discordAuthEnabled) window.WWZServerContext?.showLogin({ unavailable: true });
   window.dispatchEvent(new CustomEvent('wwz:authchange', { detail: { authenticated: false, accessLevel: 'guest' } }));
 };
 

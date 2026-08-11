@@ -12,6 +12,7 @@ const URLS = {
   serverStatus: `${API_BASE}/api/server/status`
 };
 const SESSION_KEY = 'wwz_dashboard_session';
+const SERVER_KEY = 'wwz_dashboard_server';
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
 const state = {
@@ -34,6 +35,29 @@ const state = {
   detailItem: null,
   orderScope: 'all'
 };
+
+const readSelectedServer = () => {
+  try { return JSON.parse(sessionStorage.getItem(SERVER_KEY) || 'null'); } catch { return null; }
+};
+const acceptServerContext = (payload) => {
+  const servers = Array.isArray(payload?.servers) ? payload.servers : [];
+  const stored = readSelectedServer();
+  const server = servers.find((entry) => entry?.key === stored?.key) || servers[0] || stored;
+  if (!server || !['chernarus', 'livonia'].includes(String(server.map_key || '').toLowerCase())) return;
+  state.server = server;
+  try { sessionStorage.setItem(SERVER_KEY, JSON.stringify(server)); } catch {}
+  const mapName = String(server.map_name || (server.map_key === 'livonia' ? 'Livonia' : 'Chernarus'));
+  const heroMap = document.querySelector('.shop-hero-image strong');
+  if (heroMap) heroMap.textContent = mapName.toUpperCase();
+  const mapFooter = document.querySelector('[data-shop-map-footer]');
+  if (mapFooter) mapFooter.textContent = `World War Z · PlayStation DayZ · ${mapName}`;
+  const coordinateMap = document.querySelector('[data-member-coordinate-map]');
+  if (coordinateMap) {
+    coordinateMap.setAttribute('aria-label', `${mapName} delivery coordinate selector. Click or tap to fill X and Z.`);
+  }
+};
+const activeMapKey = () => String(state.server?.map_key || readSelectedServer()?.map_key || 'chernarus').toLowerCase();
+const activeWorldSize = () => window.WWZMap?.getConfig(activeMapKey()).mapMetres || 15360;
 
 const elements = {
   apiState: $('[data-shop-api-state]'), apiLabel: $('[data-shop-api-label]'),
@@ -143,6 +167,7 @@ const setSignedOut = () => {
 };
 const setSignedIn = (payload) => {
   state.user = payload;
+  acceptServerContext(payload);
   const displayName = payload?.user?.display_name || payload?.user?.username || 'Survivor';
   elements.authLabel.textContent = displayName;
   avatar(payload?.user?.avatar_url, displayName.slice(0, 2).toUpperCase());
@@ -684,8 +709,11 @@ const syncLocationMode = () => {
   updateMarker();
 };
 const ensureCheckoutMap = () => {
-  if (checkoutMapInstance || !elements.coordinateMap || !window.WWZChernarusMap) return checkoutMapInstance;
-  checkoutMapInstance = window.WWZChernarusMap.create(elements.coordinateMap, {
+  if (checkoutMapInstance || !elements.coordinateMap || !window.WWZMap) return checkoutMapInstance;
+  const worldSize = activeWorldSize();
+  [elements.x, elements.z].forEach((input) => { if (input) input.max = String(worldSize); });
+  checkoutMapInstance = window.WWZMap.create(elements.coordinateMap, {
+    mapKey: activeMapKey(),
     mode: 'picker',
     selectable: true,
     copyOnSelect: false,
@@ -717,7 +745,8 @@ const updateMarker = () => {
   const rawX = String(elements.x?.value ?? '').trim();
   const rawZ = String(elements.z?.value ?? '').trim();
   const x = Number(rawX), z = Number(rawZ);
-  const valid = rawX !== '' && rawZ !== '' && Number.isFinite(x) && Number.isFinite(z) && x >= 0 && x <= 15360 && z >= 0 && z <= 15360;
+  const worldSize = activeWorldSize();
+  const valid = rawX !== '' && rawZ !== '' && Number.isFinite(x) && Number.isFinite(z) && x >= 0 && x <= worldSize && z >= 0 && z <= worldSize;
   if (elements.mapReadout && !checkoutMapInstance) {
     elements.mapReadout.textContent = valid ? `X ${x.toFixed(1)} · Z ${z.toFixed(1)}` : 'No coordinates selected';
   }

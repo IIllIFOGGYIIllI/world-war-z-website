@@ -1,0 +1,1630 @@
+{
+  "map": "ChernarusPlus",
+  "worldSize": 15360,
+  "coordinateSystem": "DayZ native X/Z metres",
+  "coordinateOrder": "X,Z",
+  "source": "world/config.cpp class Names",
+  "displayLanguage": "Latin/English-friendly where derivable from class ID",
+  "labelCount": 201,
+  "labels": [
+    {
+      "id": "Settlement_Chernogorsk",
+      "name": "Chernogorsk",
+      "nativeName": "Черногорск",
+      "x": 6778.6191,
+      "z": 2321.7739,
+      "type": "Capital"
+    },
+    {
+      "id": "Settlement_Novodmitrovsk",
+      "name": "Novodmitrovsk",
+      "nativeName": "Новодмитровск",
+      "x": 11339.77,
+      "z": 14391.05,
+      "type": "Capital"
+    },
+    {
+      "id": "Settlement_Novoselki",
+      "name": "Novoselki",
+      "nativeName": "Новоселки",
+      "x": 6115.9102,
+      "z": 3256.3601,
+      "type": "City"
+    },
+    {
+      "id": "Settlement_Dubovo",
+      "name": "Dubovo",
+      "nativeName": "Дубово",
+      "x": 6754.5098,
+      "z": 3595.2571,
+      "type": "City"
+    },
+    {
+      "id": "Settlement_Vysotovo",
+      "name": "Vysotovo",
+      "nativeName": "Высотово",
+      "x": 5701.2402,
+      "z": 2556.1101,
+      "type": "City"
+    },
+    {
+      "id": "Settlement_Zelenogorsk",
+      "name": "Zelenogorsk",
+      "nativeName": "Зеленогорск",
+      "x": 2796,
+      "z": 5166,
+      "type": "City"
+    },
+    {
+      "id": "Settlement_Berezino",
+      "name": "Berezino",
+      "nativeName": "Березино",
+      "x": 12372.383,
+      "z": 9760.9814,
+      "type": "City"
+    },
+    {
+      "id": "Settlement_Elektrozavodsk",
+      "name": "Elektrozavodsk",
+      "nativeName": "Электрозаводск",
+      "x": 10286.68,
+      "z": 1992.77,
+      "type": "City"
+    },
+    {
+      "id": "Settlement_NovayaPetrovka",
+      "name": "Novaya Petrovka",
+      "nativeName": "Новая Петровка",
+      "x": 3477.1689,
+      "z": 12931.243,
+      "type": "City"
+    },
+    {
+      "id": "Settlement_Gorka",
+      "name": "Gorka",
+      "nativeName": "Горка",
+      "x": 9524,
+      "z": 8945,
+      "type": "City"
+    },
+    {
+      "id": "Settlement_Solnechny",
+      "name": "Solnechny",
+      "nativeName": "Солнечный",
+      "x": 13487.724,
+      "z": 6225.8838,
+      "type": "City"
+    },
+    {
+      "id": "Settlement_StarySobor",
+      "name": "Stary Sobor",
+      "nativeName": "Старый Собор",
+      "x": 6114,
+      "z": 7849,
+      "type": "City"
+    },
+    {
+      "id": "Settlement_Vybor",
+      "name": "Vybor",
+      "nativeName": "Выбор",
+      "x": 3909.8311,
+      "z": 9019.6143,
+      "type": "City"
+    },
+    {
+      "id": "Settlement_Severograd",
+      "name": "Severograd",
+      "nativeName": "Североград",
+      "x": 8168.4839,
+      "z": 12573.602,
+      "type": "City"
+    },
+    {
+      "id": "Settlement_Bor",
+      "name": "Bor",
+      "nativeName": "Бор",
+      "x": 3316.406,
+      "z": 4070.9661,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Svetloyarsk",
+      "name": "Svetloyarsk",
+      "nativeName": "Светлоярск",
+      "x": 13989.74,
+      "z": 13263.78,
+      "type": "City"
+    },
+    {
+      "id": "Settlement_Krasnostav",
+      "name": "Krasnostav",
+      "nativeName": "Красностав",
+      "x": 11203.167,
+      "z": 12340.808,
+      "type": "City"
+    },
+    {
+      "id": "Settlement_ChernayaPolyana",
+      "name": "Chernaya Polyana",
+      "nativeName": "Черная Поляна",
+      "x": 12158.54,
+      "z": 13770.22,
+      "type": "City"
+    },
+    {
+      "id": "Settlement_Polyana",
+      "name": "Polyana",
+      "nativeName": "Поляна",
+      "x": 10794,
+      "z": 8160,
+      "type": "City"
+    },
+    {
+      "id": "Settlement_Tulga",
+      "name": "Tulga",
+      "nativeName": "Тулга",
+      "x": 12768,
+      "z": 4384,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Msta",
+      "name": "Msta",
+      "nativeName": "Мста",
+      "x": 11333.79,
+      "z": 5421.3999,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Staroye",
+      "name": "Staroye",
+      "nativeName": "Старое",
+      "x": 10212.52,
+      "z": 5385.0498,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Shakhovka",
+      "name": "Shakhovka",
+      "nativeName": "Шаковка",
+      "x": 9728.6396,
+      "z": 6567.2998,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Dolina",
+      "name": "Dolina",
+      "nativeName": "Долина",
+      "x": 11285.17,
+      "z": 6633.5801,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Orlovets",
+      "name": "Orlovets",
+      "nativeName": "Орловец",
+      "x": 12250,
+      "z": 7253,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_NovySobor",
+      "name": "Novy Sobor",
+      "nativeName": "Новый Собор",
+      "x": 7123.6299,
+      "z": 7774.6299,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Kabanino",
+      "name": "Kabanino",
+      "nativeName": "Кабанино",
+      "x": 5300.71,
+      "z": 8645.9004,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Mogilevka",
+      "name": "Mogilevka",
+      "nativeName": "Могилевка",
+      "x": 7650.4102,
+      "z": 5096.46,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Nadezhdino",
+      "name": "Nadezhdino",
+      "nativeName": "Надеждино",
+      "x": 5894,
+      "z": 4780,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Guglovo",
+      "name": "Guglovo",
+      "nativeName": "Гуглово",
+      "x": 8445,
+      "z": 6579,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Kamyshovo",
+      "name": "Kamyshovo",
+      "nativeName": "Камышово",
+      "x": 12170,
+      "z": 3458,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Pusta",
+      "name": "Pusta",
+      "nativeName": "Пуста",
+      "x": 9197,
+      "z": 3873,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Dubrovka",
+      "name": "Dubrovka",
+      "nativeName": "Дубровка",
+      "x": 10324.299,
+      "z": 9888.2373,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_VyshnayaDubrovka",
+      "name": "Vyshnaya Dubrovka",
+      "nativeName": "Верхняя Дубровка",
+      "x": 9926.8232,
+      "z": 10468.919,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Khelm",
+      "name": "Khelm",
+      "nativeName": "Хелм",
+      "x": 12329.27,
+      "z": 10771.01,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Olsha",
+      "name": "Olsha",
+      "nativeName": "Ольша",
+      "x": 13402,
+      "z": 12898,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Gvozdno",
+      "name": "Gvozdno",
+      "nativeName": "Гвоздно",
+      "x": 8644.751,
+      "z": 11934.115,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Grishino",
+      "name": "Grishino",
+      "nativeName": "Гришино",
+      "x": 5980,
+      "z": 10257,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Rogovo",
+      "name": "Rogovo",
+      "nativeName": "Рогово",
+      "x": 4802,
+      "z": 6748,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Pogorevka",
+      "name": "Pogorevka",
+      "nativeName": "Погоревка",
+      "x": 4445,
+      "z": 6322,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Pustoshka",
+      "name": "Pustoshka",
+      "nativeName": "Пустошка",
+      "x": 3137.9441,
+      "z": 7890.9248,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Kozlovka",
+      "name": "Kozlovka",
+      "nativeName": "Козловка",
+      "x": 4402,
+      "z": 4736,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Karmanovka",
+      "name": "Karmanovka",
+      "nativeName": "Кармановка",
+      "x": 12700.628,
+      "z": 14691.312,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Balota",
+      "name": "Balota",
+      "nativeName": "Балота",
+      "x": 4527.5801,
+      "z": 2465.3201,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Komarovo",
+      "name": "Komarovo",
+      "nativeName": "Комарово",
+      "x": 3702,
+      "z": 2440,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Kamenka",
+      "name": "Kamenka",
+      "nativeName": "Каменка",
+      "x": 1981,
+      "z": 2207,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Myshkino",
+      "name": "Myshkino",
+      "nativeName": "Мышкино",
+      "x": 2048,
+      "z": 7258,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Pavlovo",
+      "name": "Pavlovo",
+      "nativeName": "Павлово",
+      "x": 1693.98,
+      "z": 3858.6499,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Lopatino",
+      "name": "Lopatino",
+      "nativeName": "Лопатино",
+      "x": 2801,
+      "z": 10029,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Vyshnoye",
+      "name": "Vyshnoye",
+      "nativeName": "Вышное",
+      "x": 6629,
+      "z": 6051,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Prigorodki",
+      "name": "Prigorodki",
+      "nativeName": "Пригородки",
+      "x": 7760,
+      "z": 3336,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Drozhino",
+      "name": "Drozhino",
+      "nativeName": "Дрожжино",
+      "x": 3374,
+      "z": 4861,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Sosnovka",
+      "name": "Sosnovka",
+      "nativeName": "Сосновка",
+      "x": 2556,
+      "z": 6307,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Nizhneye",
+      "name": "Nizhneye",
+      "nativeName": "Нижнее",
+      "x": 12824.88,
+      "z": 8097.7002,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Pulkovo",
+      "name": "Pulkovo",
+      "nativeName": "Пулково",
+      "x": 5015,
+      "z": 5607,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Berezhki",
+      "name": "Berezhki",
+      "nativeName": "Бережки",
+      "x": 15020,
+      "z": 13905,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Turovo",
+      "name": "Turovo",
+      "nativeName": "Турово",
+      "x": 13630,
+      "z": 14146,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_BelayaPolyana",
+      "name": "Belaya Polyana",
+      "nativeName": "Белая Поляна",
+      "x": 14166,
+      "z": 14968,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Dobroye",
+      "name": "Dobroye",
+      "nativeName": "Доброе",
+      "x": 12996,
+      "z": 15066,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Nagornoye",
+      "name": "Nagornoye",
+      "nativeName": "Нагорное",
+      "x": 9286,
+      "z": 14677,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Svergino",
+      "name": "Svergino",
+      "nativeName": "Свергино",
+      "x": 9493.5195,
+      "z": 13875.27,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Ratnoye",
+      "name": "Ratnoye",
+      "nativeName": "Ратное",
+      "x": 6195.8779,
+      "z": 12761.802,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Kamensk",
+      "name": "Kamensk",
+      "nativeName": "Каменск",
+      "x": 6748.7412,
+      "z": 14430.046,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Krasnoye",
+      "name": "Krasnoye",
+      "nativeName": "Красное",
+      "x": 6411.374,
+      "z": 15029.961,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_StaryYar",
+      "name": "Stary Yar",
+      "nativeName": "Старый Яр",
+      "x": 4987.8599,
+      "z": 14992.976,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Polesovo",
+      "name": "Polesovo",
+      "nativeName": "Полесово",
+      "x": 5955.7368,
+      "z": 13558.046,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Tisy",
+      "name": "Tisy",
+      "nativeName": "Тисы",
+      "x": 3441.6499,
+      "z": 14799.55,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Topolniki",
+      "name": "Topolniki",
+      "nativeName": "Топольники",
+      "x": 2913.7451,
+      "z": 12366.357,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Zaprudnoye",
+      "name": "Zaprudnoye",
+      "nativeName": "Запрудное",
+      "x": 5214,
+      "z": 12792,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Sinystok",
+      "name": "Sinystok",
+      "nativeName": "Синысток",
+      "x": 1538.278,
+      "z": 11904.578,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Vavilovo",
+      "name": "Vavilovo",
+      "nativeName": "Вавилово",
+      "x": 2263,
+      "z": 11103,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Kumyrna",
+      "name": "Kumyrna",
+      "nativeName": "Кумырна",
+      "x": 8300,
+      "z": 6054,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Kalinovka",
+      "name": "Kalinovka",
+      "nativeName": "Калиновка",
+      "x": 7448,
+      "z": 13406,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Bogatyrka",
+      "name": "Bogatyrka",
+      "nativeName": "Богатырка",
+      "x": 1453.62,
+      "z": 8870.9199,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_SvyatoyRomanSkiResort",
+      "name": "Svyatoy Roman Ski Resort",
+      "nativeName": "Свято-Романовский Горнолыжный курорт",
+      "x": 638,
+      "z": 11667,
+      "type": "Local"
+    },
+    {
+      "id": "Settlement_SKVSChBiathlonArena",
+      "name": "SKVSCh Biathlon Arena",
+      "nativeName": "СКВСЧ Биатлон Арена",
+      "x": 357,
+      "z": 11142,
+      "type": "Local"
+    },
+    {
+      "id": "Settlement_Zvir",
+      "name": "Zvir",
+      "nativeName": "Звир",
+      "x": 577.33002,
+      "z": 5317.4199,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Zabolotye",
+      "name": "Zabolotye",
+      "nativeName": "Заболотье",
+      "x": 1256.859,
+      "z": 9993.2598,
+      "type": "Village"
+    },
+    {
+      "id": "Settlement_Galkino",
+      "name": "Galkino",
+      "nativeName": "Галкино",
+      "x": 1102.6801,
+      "z": 8798.2695,
+      "type": "Local"
+    },
+    {
+      "id": "Camp_Arsenovo",
+      "name": "Arsenovo",
+      "nativeName": "Арсеньево",
+      "x": 8509.6611,
+      "z": 13918.628,
+      "type": "Camp"
+    },
+    {
+      "id": "Camp_Stroytel",
+      "name": "Stroytel",
+      "nativeName": "Строитель",
+      "x": 7017.6299,
+      "z": 4365.21,
+      "type": "Camp"
+    },
+    {
+      "id": "Camp_Romashka",
+      "name": "Romashka",
+      "nativeName": "Ромашка",
+      "x": 8177.6021,
+      "z": 10980.289,
+      "type": "Camp"
+    },
+    {
+      "id": "Camp_Kometa",
+      "name": "Kometa",
+      "nativeName": "Комета",
+      "x": 10271.697,
+      "z": 3558.228,
+      "type": "Camp"
+    },
+    {
+      "id": "Camp_Druzhba",
+      "name": "Druzhba",
+      "nativeName": "Дружба",
+      "x": 11437,
+      "z": 10695,
+      "type": "Camp"
+    },
+    {
+      "id": "Camp_Nadezhda",
+      "name": "Nadezhda",
+      "nativeName": "Надежда",
+      "x": 7279.9678,
+      "z": 7014.3501,
+      "type": "Camp"
+    },
+    {
+      "id": "Camp_YouthPioneer",
+      "name": "Youth Pioneer",
+      "nativeName": "Юный Пионер",
+      "x": 11155.825,
+      "z": 7074.1431,
+      "type": "Camp"
+    },
+    {
+      "id": "Camp_ProudChernarus",
+      "name": "Proud Chernarus",
+      "nativeName": "Гордый Чернорус",
+      "x": 3199.6169,
+      "z": 6174.9321,
+      "type": "Camp"
+    },
+    {
+      "id": "Camp_Shkolnik",
+      "name": "Shkolnik",
+      "nativeName": "Школьник",
+      "x": 14856.503,
+      "z": 14571.028,
+      "type": "Camp"
+    },
+    {
+      "id": "Camp_Pobeda",
+      "name": "Pobeda",
+      "nativeName": "Победа",
+      "x": 3703.3821,
+      "z": 14876.384,
+      "type": "Camp"
+    },
+    {
+      "id": "Camp_Metalurg",
+      "name": "Metalurg",
+      "nativeName": "Металлург",
+      "x": 1035.406,
+      "z": 6677.3828,
+      "type": "Camp"
+    },
+    {
+      "id": "Hill_Zelenayagora",
+      "name": "Zelenayagora",
+      "nativeName": "Зеленая гора",
+      "x": 3767.1699,
+      "z": 6010.54,
+      "type": "Hill"
+    },
+    {
+      "id": "Local_Dichina",
+      "name": "Dichina",
+      "nativeName": "Дишина",
+      "x": 4618,
+      "z": 7821,
+      "type": "Local"
+    },
+    {
+      "id": "Local_Novylug",
+      "name": "Novylug",
+      "nativeName": "Новый луг",
+      "x": 9251,
+      "z": 11360,
+      "type": "Local"
+    },
+    {
+      "id": "Local_Staryeluga",
+      "name": "Staryeluga",
+      "nativeName": "Старые луга",
+      "x": 6919,
+      "z": 8995,
+      "type": "Local"
+    },
+    {
+      "id": "Hill_Vysota",
+      "name": "Vysota",
+      "nativeName": "Высота",
+      "x": 6591.6299,
+      "z": 3400,
+      "type": "Hill"
+    },
+    {
+      "id": "Hill_Kopyto",
+      "name": "Kopyto",
+      "nativeName": "Копыто",
+      "x": 7871.479,
+      "z": 3869.1021,
+      "type": "Hill"
+    },
+    {
+      "id": "Local_Grubyeskaly",
+      "name": "Grubyeskaly",
+      "nativeName": "Грубые скалы",
+      "x": 13115.06,
+      "z": 11900,
+      "type": "Local"
+    },
+    {
+      "id": "Local_Chernyles",
+      "name": "Chernyles",
+      "nativeName": "Черный лес",
+      "x": 9031,
+      "z": 7803,
+      "type": "Local"
+    },
+    {
+      "id": "Hill_Altar",
+      "name": "Altar",
+      "nativeName": "Алтар",
+      "x": 8143.3999,
+      "z": 9159.6797,
+      "type": "Hill"
+    },
+    {
+      "id": "Local_RadioZenit",
+      "name": "Radio Zenit",
+      "nativeName": "Радио Зенит",
+      "x": 8080.0098,
+      "z": 9341.6797,
+      "type": "Local"
+    },
+    {
+      "id": "Hill_PikKozlova",
+      "name": "Pik Kozlova",
+      "nativeName": "Пик Козлова",
+      "x": 8850.1699,
+      "z": 2880.53,
+      "type": "Hill"
+    },
+    {
+      "id": "Local_Pustoykhrebet",
+      "name": "Pustoykhrebet",
+      "nativeName": "Пустой хребет",
+      "x": 10890,
+      "z": 5665,
+      "type": "Local"
+    },
+    {
+      "id": "Hill_Bashnya",
+      "name": "Bashnya",
+      "nativeName": "Башня",
+      "x": 4178.27,
+      "z": 11771.22,
+      "type": "Hill"
+    },
+    {
+      "id": "Hill_Veresnik",
+      "name": "Veresnik",
+      "nativeName": "Вересник",
+      "x": 4440.1699,
+      "z": 8070.54,
+      "type": "Hill"
+    },
+    {
+      "id": "Hill_Kurgan",
+      "name": "Kurgan",
+      "nativeName": "Курган",
+      "x": 3368.52,
+      "z": 5296.8701,
+      "type": "Hill"
+    },
+    {
+      "id": "Hill_Kustryk",
+      "name": "Kustryk",
+      "nativeName": "Кустрык",
+      "x": 4912.8799,
+      "z": 5063.4502,
+      "type": "Hill"
+    },
+    {
+      "id": "Hill_Vetryanayagora",
+      "name": "Vetryanayagora",
+      "nativeName": "Ветреная гора",
+      "x": 3892.74,
+      "z": 4200.5898,
+      "type": "Hill"
+    },
+    {
+      "id": "Hill_Kalmyk",
+      "name": "Kalmyk",
+      "nativeName": "Калмык",
+      "x": 6903.7798,
+      "z": 4919.6602,
+      "type": "Hill"
+    },
+    {
+      "id": "Hill_PopIvan",
+      "name": "Pop Ivan",
+      "nativeName": "Поп Иван",
+      "x": 6420.2598,
+      "z": 6570.6602,
+      "type": "Hill"
+    },
+    {
+      "id": "Hill_Erbenka",
+      "name": "Erbenka",
+      "nativeName": "Ербенка",
+      "x": 2842.916,
+      "z": 4014.811,
+      "type": "Hill"
+    },
+    {
+      "id": "Local_Lesnoykhrebet",
+      "name": "Lesnoykhrebet",
+      "nativeName": "Лесной хребет",
+      "x": 8122.77,
+      "z": 7815.54,
+      "type": "Local"
+    },
+    {
+      "id": "Hill_Vysokiykamen",
+      "name": "Vysokiykamen",
+      "nativeName": "Высокий камень",
+      "x": 8940.1904,
+      "z": 4380.52,
+      "type": "Hill"
+    },
+    {
+      "id": "Hill_Dobry",
+      "name": "Dobry",
+      "nativeName": "Добрый",
+      "x": 10552.9,
+      "z": 3061.03,
+      "type": "Hill"
+    },
+    {
+      "id": "Hill_Baranchik",
+      "name": "Baranchik",
+      "nativeName": "Баранчик",
+      "x": 10153.147,
+      "z": 6208.521,
+      "type": "Hill"
+    },
+    {
+      "id": "Hill_Malinovka",
+      "name": "Malinovka",
+      "nativeName": "Малиновка",
+      "x": 10897.7,
+      "z": 7575.5898,
+      "type": "Hill"
+    },
+    {
+      "id": "Hill_Dubina",
+      "name": "Dubina",
+      "nativeName": "Дубина",
+      "x": 11107.9,
+      "z": 8474.8301,
+      "type": "Hill"
+    },
+    {
+      "id": "Hill_Klen",
+      "name": "Klen",
+      "nativeName": "Клен",
+      "x": 11473.511,
+      "z": 11315.393,
+      "type": "Hill"
+    },
+    {
+      "id": "Hill_Chernayagora",
+      "name": "Chernayagora",
+      "nativeName": "Черная гора",
+      "x": 10280.816,
+      "z": 12053.928,
+      "type": "Hill"
+    },
+    {
+      "id": "Ruin_Zolotar",
+      "name": "Zolotar",
+      "nativeName": "Золотарь",
+      "x": 10179,
+      "z": 11998,
+      "type": "Ruin"
+    },
+    {
+      "id": "Hill_Ostry",
+      "name": "Ostry",
+      "nativeName": "Острый",
+      "x": 10792.747,
+      "z": 12829.504,
+      "type": "Hill"
+    },
+    {
+      "id": "Hill_Olsha",
+      "name": "Olsha",
+      "nativeName": "Ольша",
+      "x": 12975.7,
+      "z": 12775.2,
+      "type": "Hill"
+    },
+    {
+      "id": "Marine_Tikhiyzaliv",
+      "name": "Tikhiyzaliv",
+      "nativeName": "Тихий залив",
+      "x": 1221.49,
+      "z": 2111.8899,
+      "type": "Marine"
+    },
+    {
+      "id": "Marine_Mutnyizaliv",
+      "name": "Mutnyizaliv",
+      "nativeName": "Мутный залив",
+      "x": 5735.479,
+      "z": 1918.92,
+      "type": "Marine"
+    },
+    {
+      "id": "Marine_Chernyzaliv",
+      "name": "Chernyzaliv",
+      "nativeName": "Черный залив",
+      "x": 7599.0688,
+      "z": 2486.5859,
+      "type": "Marine"
+    },
+    {
+      "id": "Marine_Zelenyzaliv",
+      "name": "Zelenyzaliv",
+      "nativeName": "Зеленый залив",
+      "x": 11227.019,
+      "z": 2989.8379,
+      "type": "Marine"
+    },
+    {
+      "id": "Marine_Skalistyproliv",
+      "name": "Skalistyproliv",
+      "nativeName": "Скалистый пролив",
+      "x": 13385.92,
+      "z": 3613.9399,
+      "type": "Marine"
+    },
+    {
+      "id": "Marine_Nizhniyzaliv",
+      "name": "Nizhniyzaliv",
+      "nativeName": "Нижний залив",
+      "x": 12989.3,
+      "z": 8515.7598,
+      "type": "Marine"
+    },
+    {
+      "id": "Marine_ZalivGuba",
+      "name": "Zaliv Guba",
+      "nativeName": "Залив Губа",
+      "x": 14328.374,
+      "z": 13136.732,
+      "type": "Marine"
+    },
+    {
+      "id": "Marine_Rify",
+      "name": "Rify",
+      "nativeName": "Рифы",
+      "x": 13931.73,
+      "z": 11288.61,
+      "type": "Local"
+    },
+    {
+      "id": "Marine_Ivovoyeozero",
+      "name": "Ivovoyeozero",
+      "nativeName": "Ивовое озеро",
+      "x": 13248,
+      "z": 11572,
+      "type": "Marine"
+    },
+    {
+      "id": "Marine_Chernoyeozero",
+      "name": "Chernoyeozero",
+      "nativeName": "Черное озеро",
+      "x": 13381,
+      "z": 12002,
+      "type": "Marine"
+    },
+    {
+      "id": "Marine_PlotinaTopolka",
+      "name": "Plotina Topolka",
+      "nativeName": "Плотина Тополька",
+      "x": 10231.33,
+      "z": 3691.1499,
+      "type": "Marine"
+    },
+    {
+      "id": "Marine_PlotinaPobeda",
+      "name": "Plotina Pobeda",
+      "nativeName": "Плотина Победа",
+      "x": 9928.2939,
+      "z": 13874.643,
+      "type": "Marine"
+    },
+    {
+      "id": "Marine_PlotinaTishina",
+      "name": "Plotina Tishina",
+      "nativeName": "Плотина Тишина",
+      "x": 1150.8199,
+      "z": 6432.4541,
+      "type": "Marine"
+    },
+    {
+      "id": "Marine_Ozerko",
+      "name": "Ozerko",
+      "nativeName": "Озерко",
+      "x": 6777.6299,
+      "z": 4492.4199,
+      "type": "Marine"
+    },
+    {
+      "id": "Marine_Prud",
+      "name": "Prud",
+      "nativeName": "Пруд",
+      "x": 6610.98,
+      "z": 9308.5703,
+      "type": "Marine"
+    },
+    {
+      "id": "Ruin_Chortovzamok",
+      "name": "Chortovzamok",
+      "nativeName": "Чертов замок",
+      "x": 6883.2388,
+      "z": 11501.288,
+      "type": "Ruin"
+    },
+    {
+      "id": "Ruin_Zub",
+      "name": "Zub",
+      "nativeName": "Зуб",
+      "x": 6574.2798,
+      "z": 5573.8501,
+      "type": "Ruin"
+    },
+    {
+      "id": "Ruin_Rog",
+      "name": "Rog",
+      "nativeName": "Рог",
+      "x": 11267.206,
+      "z": 4293.0361,
+      "type": "Ruin"
+    },
+    {
+      "id": "Local_Grozovypereval",
+      "name": "Grozovypereval",
+      "nativeName": "Грозовой перевал",
+      "x": 3318.1201,
+      "z": 15250.55,
+      "type": "Local"
+    },
+    {
+      "id": "Local_Sosnovypereval",
+      "name": "Sosnovypereval",
+      "nativeName": "Сосновый перевал",
+      "x": 2687.3999,
+      "z": 6590.2798,
+      "type": "Local"
+    },
+    {
+      "id": "Local_PerevalOreshka",
+      "name": "Pereval Oreshka",
+      "nativeName": "Перевал Орешка",
+      "x": 9822.1914,
+      "z": 6088.793,
+      "type": "Local"
+    },
+    {
+      "id": "Local_Turovskiypereval",
+      "name": "Turovskiypereval",
+      "nativeName": "Туровский перевал",
+      "x": 14674.241,
+      "z": 14089.306,
+      "type": "Local"
+    },
+    {
+      "id": "Local_Tridoliny",
+      "name": "Tridoliny",
+      "nativeName": "Три долины",
+      "x": 12764.47,
+      "z": 5412.21,
+      "type": "Local"
+    },
+    {
+      "id": "Local_Grozovyedoly",
+      "name": "Grozovyedoly",
+      "nativeName": "Грозовые доли",
+      "x": 10403.982,
+      "z": 14793.168,
+      "type": "Local"
+    },
+    {
+      "id": "Ruin_Klyuch",
+      "name": "Klyuch",
+      "nativeName": "Ключ",
+      "x": 9282.5703,
+      "z": 13476.67,
+      "type": "Ruin"
+    },
+    {
+      "id": "Hill_Lysayagora",
+      "name": "Lysayagora",
+      "nativeName": "Лысая гора",
+      "x": 6722.459,
+      "z": 14050.42,
+      "type": "Hill"
+    },
+    {
+      "id": "Marine_Glubokoyeozero",
+      "name": "Glubokoyeozero",
+      "nativeName": "Глубокое озеро",
+      "x": 1692.5551,
+      "z": 14821.565,
+      "type": "Marine"
+    },
+    {
+      "id": "Local_Skalka",
+      "name": "Skalka",
+      "nativeName": "Скалка",
+      "x": 5758,
+      "z": 14486,
+      "type": "Local"
+    },
+    {
+      "id": "Local_Vidy",
+      "name": "Vidy",
+      "nativeName": "Виды",
+      "x": 785.05402,
+      "z": 14398.815,
+      "type": "Local"
+    },
+    {
+      "id": "Hill_Tumannyverkh",
+      "name": "Tumannyverkh",
+      "nativeName": "Туманный верх",
+      "x": 331.224,
+      "z": 12982.99,
+      "type": "Hill"
+    },
+    {
+      "id": "Local_Adamovka",
+      "name": "Adamovka",
+      "nativeName": "Адамовка",
+      "x": 5340.6602,
+      "z": 11380.01,
+      "type": "Local"
+    },
+    {
+      "id": "Hill_Shishok",
+      "name": "Shishok",
+      "nativeName": "Шишок",
+      "x": 3559.313,
+      "z": 9422.2695,
+      "type": "Hill"
+    },
+    {
+      "id": "Settlement_Skalisty",
+      "name": "Skalisty",
+      "nativeName": "Скалистый",
+      "x": 13715.454,
+      "z": 3118.78,
+      "type": "Village"
+    },
+    {
+      "id": "Ruin_Storozh",
+      "name": "Storozh",
+      "nativeName": "Сторож",
+      "x": 2816.6011,
+      "z": 1277.96,
+      "type": "Ruin"
+    },
+    {
+      "id": "Local_MysGolova",
+      "name": "Mys Golova",
+      "nativeName": "Мыс Голова",
+      "x": 8286.0527,
+      "z": 2405.5979,
+      "type": "Local"
+    },
+    {
+      "id": "Local_Drakon",
+      "name": "Drakon",
+      "nativeName": "Дракон",
+      "x": 11191,
+      "z": 2443,
+      "type": "Local"
+    },
+    {
+      "id": "Local_Otmel",
+      "name": "Otmel",
+      "nativeName": "Отмель",
+      "x": 11581.25,
+      "z": 3213.24,
+      "type": "Local"
+    },
+    {
+      "id": "Local_MysKrutoy",
+      "name": "Mys Krutoy",
+      "nativeName": "Мыс Крутой",
+      "x": 13578.19,
+      "z": 3976.8201,
+      "type": "Local"
+    },
+    {
+      "id": "Hill_Tokarnya",
+      "name": "Tokarnya",
+      "nativeName": "Токарня",
+      "x": 8890.4775,
+      "z": 5672.5532,
+      "type": "Hill"
+    },
+    {
+      "id": "Hill_Ostrog",
+      "name": "Ostrog",
+      "nativeName": "Острог",
+      "x": 2655.7339,
+      "z": 2264.6321,
+      "type": "Hill"
+    },
+    {
+      "id": "Local_Maryanka",
+      "name": "Maryanka",
+      "nativeName": "Марьянка",
+      "x": 2789,
+      "z": 3386,
+      "type": "Local"
+    },
+    {
+      "id": "Local_Polonina",
+      "name": "Polonina",
+      "nativeName": "Полонина",
+      "x": 1004.486,
+      "z": 4242.8691,
+      "type": "Local"
+    },
+    {
+      "id": "Local_Kalinka",
+      "name": "Kalinka",
+      "nativeName": "Калинка",
+      "x": 3346.5,
+      "z": 11292.097,
+      "type": "Local"
+    },
+    {
+      "id": "Hill_Kikimora",
+      "name": "Kikimora",
+      "nativeName": "Кикимора",
+      "x": 1812,
+      "z": 6200,
+      "type": "Hill"
+    },
+    {
+      "id": "Hill_BolshoyKotel",
+      "name": "Bolshoy Kotel",
+      "nativeName": "Большой Котел",
+      "x": 714.64899,
+      "z": 6520.4312,
+      "type": "Hill"
+    },
+    {
+      "id": "Hill_Simurg",
+      "name": "Simurg",
+      "nativeName": "Симург",
+      "x": 134,
+      "z": 7569.9902,
+      "type": "Hill"
+    },
+    {
+      "id": "Hill_Volchiypik",
+      "name": "Volchiypik",
+      "nativeName": "Волчий пик",
+      "x": 320.254,
+      "z": 2719.269,
+      "type": "Hill"
+    },
+    {
+      "id": "Ruin_Krona",
+      "name": "Krona",
+      "nativeName": "Крона",
+      "x": 1493,
+      "z": 9270.3398,
+      "type": "Ruin"
+    },
+    {
+      "id": "Local_TriKresta",
+      "name": "Tri Kresta",
+      "nativeName": "Три Креста",
+      "x": 301,
+      "z": 9478,
+      "type": "Local"
+    },
+    {
+      "id": "Local_Rostoki",
+      "name": "Rostoki",
+      "nativeName": "Ростоки",
+      "x": 744.45001,
+      "z": 8647.8604,
+      "type": "Local"
+    },
+    {
+      "id": "Marine_OrlyeOzero",
+      "name": "Orlye Ozero",
+      "nativeName": "Орлиное озеро",
+      "x": 597,
+      "z": 5990,
+      "type": "Marine"
+    },
+    {
+      "id": "Local_Makosh",
+      "name": "Makosh",
+      "nativeName": "Макошь",
+      "x": 7849.7202,
+      "z": 6480.1899,
+      "type": "Local"
+    },
+    {
+      "id": "Local_Klenovyipereval",
+      "name": "Klenovyipereval",
+      "nativeName": "Кленовый перевал",
+      "x": 10862.702,
+      "z": 11585.512,
+      "type": "Local"
+    },
+    {
+      "id": "Local_Zmeinykhrebet",
+      "name": "Zmeinykhrebet",
+      "nativeName": "Змеиный хребет",
+      "x": 11446.17,
+      "z": 13606.92,
+      "type": "Local"
+    },
+    {
+      "id": "Hill_Sokol",
+      "name": "Sokol",
+      "nativeName": "Сокол",
+      "x": 12001,
+      "z": 14813,
+      "type": "Hill"
+    },
+    {
+      "id": "Local_Krutyeskaly",
+      "name": "Krutyeskaly",
+      "nativeName": "Крутые скалы",
+      "x": 14880.63,
+      "z": 13671.76,
+      "type": "Local"
+    },
+    {
+      "id": "Local_Bogat",
+      "name": "Bogat",
+      "nativeName": "Богат",
+      "x": 7058.0112,
+      "z": 12023.571,
+      "type": "Local"
+    },
+    {
+      "id": "Local_Dubnik",
+      "name": "Dubnik",
+      "nativeName": "Дубник",
+      "x": 3298.29,
+      "z": 10330.89,
+      "type": "Local"
+    },
+    {
+      "id": "Hill_Viselitsa",
+      "name": "Viselitsa",
+      "nativeName": "Виселица",
+      "x": 12722.157,
+      "z": 7504.0498,
+      "type": "Hill"
+    },
+    {
+      "id": "Local_Dazhbog",
+      "name": "Dazhbog",
+      "nativeName": "Дажбог",
+      "x": 6581,
+      "z": 8590,
+      "type": "Hill"
+    },
+    {
+      "id": "Marine_Verbnik",
+      "name": "Verbnik",
+      "nativeName": "Вербник",
+      "x": 4414.8789,
+      "z": 9103.002,
+      "type": "Marine"
+    },
+    {
+      "id": "Local_Medvezhilugi",
+      "name": "Medvezhilugi",
+      "nativeName": "Медвежьи луга",
+      "x": 9641,
+      "z": 13236,
+      "type": "Local"
+    },
+    {
+      "id": "Ruin_Voron",
+      "name": "Voron",
+      "nativeName": "Ворон",
+      "x": 13517.93,
+      "z": 3311.2451,
+      "type": "Ruin"
+    },
+    {
+      "id": "Ruin_Gnomovzamok",
+      "name": "Gnomovzamok",
+      "nativeName": "Гномский замок",
+      "x": 7446.915,
+      "z": 9097.1699,
+      "type": "Ruin"
+    },
+    {
+      "id": "Marine_Glaza",
+      "name": "Glaza",
+      "nativeName": "Глаза",
+      "x": 7383,
+      "z": 9320,
+      "type": "Marine"
+    },
+    {
+      "id": "Local_KarerKrasnayaZarya",
+      "name": "Karer Krasnaya Zarya",
+      "nativeName": "Kарьер Красная Заря",
+      "x": 8565.3486,
+      "z": 13418.684,
+      "type": "Local"
+    },
+    {
+      "id": "Local_Matveyevo",
+      "name": "Matveyevo",
+      "nativeName": "Матвеево",
+      "x": 4281,
+      "z": 7380,
+      "type": "Local"
+    },
+    {
+      "id": "Local_Kotka",
+      "name": "Kotka",
+      "nativeName": "Котька",
+      "x": 5873.7002,
+      "z": 6883.2402,
+      "type": "Local"
+    },
+    {
+      "id": "Local_Chernyeskaly",
+      "name": "Chernyeskaly",
+      "nativeName": "Черные скалы",
+      "x": 3932.572,
+      "z": 14599.496,
+      "type": "Local"
+    },
+    {
+      "id": "Hill_SvyatoyRoman",
+      "name": "Svyatoy Roman",
+      "nativeName": "Святой Роман",
+      "x": 84.832001,
+      "z": 11901.246,
+      "type": "Hill"
+    },
+    {
+      "id": "Hill_Koman",
+      "name": "Koman",
+      "nativeName": "Коман",
+      "x": 1660.652,
+      "z": 7415.6611,
+      "type": "Hill"
+    },
+    {
+      "id": "Hill_Mayak",
+      "name": "Mayak",
+      "nativeName": "Маяк",
+      "x": 12323.813,
+      "z": 4553.1069,
+      "type": "Hill"
+    },
+    {
+      "id": "Local_MB_VMC",
+      "name": "MB VMC",
+      "nativeName": "военная база",
+      "x": 4497,
+      "z": 8291,
+      "type": "Local"
+    },
+    {
+      "id": "Local_MB_Tisy",
+      "name": "MB Tisy",
+      "nativeName": "военная база",
+      "x": 1570,
+      "z": 14069,
+      "type": "Local"
+    },
+    {
+      "id": "Local_MB_Kamensk",
+      "name": "MB Kamensk",
+      "nativeName": "военная база",
+      "x": 7838.812,
+      "z": 14704.823,
+      "type": "Local"
+    },
+    {
+      "id": "Local_MB_Zeleno",
+      "name": "MB Zeleno",
+      "nativeName": "военная база",
+      "x": 2410.375,
+      "z": 5133.6812,
+      "type": "Local"
+    },
+    {
+      "id": "Local_MB_Pavlovo",
+      "name": "MB Pavlovo",
+      "nativeName": "военная база",
+      "x": 2016,
+      "z": 3408,
+      "type": "Local"
+    },
+    {
+      "id": "Local_AF_Balota",
+      "name": "Balota Airfield",
+      "nativeName": "аэродром",
+      "x": 5082.0308,
+      "z": 2376.3279,
+      "type": "Local",
+      "aliases": [
+        "Balota Airfield"
+      ]
+    },
+    {
+      "id": "Local_AF_Krasno",
+      "name": "Northeast Airfield (NEAF)",
+      "nativeName": "аэродром",
+      "x": 12100.681,
+      "z": 12573.896,
+      "type": "Local",
+      "aliases": [
+        "Northeast Airfield",
+        "NEAF"
+      ]
+    },
+    {
+      "id": "Local_AF_Vybor",
+      "name": "Northwest Airfield (NWAF)",
+      "nativeName": "Авиационная база Выбор",
+      "x": 4428,
+      "z": 10179,
+      "type": "Local",
+      "aliases": [
+        "Northwest Airfield",
+        "NWAF"
+      ]
+    }
+  ]
+}
