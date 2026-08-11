@@ -583,3 +583,169 @@ code { border-radius: var(--radius-xs); }
   clip-path: circle(50% at 50% 50%);
   filter: drop-shadow(0 0 8px rgba(217,39,27,.30));
 }
+
+
+/* v1.22.67 — dual-world community crest and military-survival palette */
+:root {
+  --brand-charcoal: #0a0b09;
+  --brand-iron: #151610;
+  --brand-iron-raised: #1d1e16;
+  --brand-olive: #716d3b;
+  --brand-olive-bright: #989157;
+  --brand-parchment: #ded2bd;
+  --brand-rust: #b72e22;
+  --brand-rust-bright: #e34635;
+  --ink: var(--brand-charcoal);
+  --ink-deep: #060705;
+  --ink-soft: #10110d;
+  --panel: var(--brand-iron);
+  --panel-raised: var(--brand-iron-raised);
+  --panel-soft: #24251b;
+  --panel-light: #24251b;
+  --paper: var(--brand-parchment);
+  --muted: #aaa18d;
+  --muted-dark: #77705f;
+  --line: rgba(222,210,189,.13);
+  --line-strong: rgba(222,210,189,.23);
+  --red: var(--brand-rust);
+  --red-bright: var(--brand-rust-bright);
+  --red-dark: #6f1812;
+  --amber: #c1a64a;
+  --surface-0: #090a08;
+  --surface-1: #10110d;
+  --surface-2: #171812;
+  --surface-3: #202118;
+  --surface-4: #292a1f;
+  --focus-ring: 0 0 0 3px rgba(227,70,53,.20);
+}
+
+body {
+  background:
+    radial-gradient(circle at 76% 8%, rgba(113,109,59,.085), transparent 34rem),
+    radial-gradient(circle at 10% 92%, rgba(183,46,34,.055), transparent 38rem),
+    var(--brand-charcoal) !important;
+}
+
+::selection { background: rgba(152,145,87,.36); color: #fff; }
+
+:where(a,button,input,select,textarea,summary,[tabindex]):focus-visible {
+  outline-color: rgba(225,209,178,.94);
+}
+
+.site-header.scrolled,
+.dashboard-topbar {
+  background: rgba(10,11,9,.92) !important;
+  border-color: rgba(152,145,87,.17) !important;
+  box-shadow: 0 14px 38px rgba(0,0,0,.30), inset 0 -1px rgba(183,46,34,.05);
+}
+
+.dashboard-sidebar,
+.sidebar-group,
+.panel,
+.feature-card,
+.roadmap-card,
+.content-card,
+.version {
+  border-color: rgba(222,210,189,.095) !important;
+}
+
+.panel,
+.feature-card,
+.roadmap-card,
+.content-card,
+.version {
+  background: linear-gradient(145deg, rgba(31,32,23,.86), rgba(13,14,11,.94)) !important;
+  box-shadow: 0 20px 58px rgba(0,0,0,.30), inset 0 1px rgba(222,210,189,.025);
+}
+
+.feature-card:hover,
+.roadmap-card:hover {
+  border-color: rgba(152,145,87,.32) !important;
+  background: linear-gradient(145deg, rgba(44,43,27,.90), rgba(16,16,12,.96)) !important;
+}
+
+.primary-action,
+.button-primary,
+.nav-cta {
+  background: linear-gradient(135deg, var(--brand-rust-bright), #8b1d16) !important;
+  border-color: rgba(224,177,155,.20) !important;
+  box-shadow: 0 12px 30px rgba(89,17,12,.28), inset 0 1px rgba(255,235,224,.10);
+}
+
+.secondary-action:not(:disabled):hover,
+.button-secondary:hover,
+.table-button:hover,
+.text-action:hover {
+  color: #eee2cc !important;
+  border-color: rgba(152,145,87,.52) !important;
+  background: rgba(113,109,59,.14) !important;
+}
+
+.eyebrow,
+.panel-kicker,
+.wwz-gateway-kicker {
+  color: var(--brand-rust-bright) !important;
+}
+
+.brand-mark img,
+.page-brand-mark img,
+.dashboard-brand-mark img,
+.shop-brand img,
+.wwz-gateway-brand img,
+.overview-command-mark img {
+  filter:
+    drop-shadow(0 0 1px rgba(222,210,189,.32))
+    drop-shadow(0 10px 22px rgba(0,0,0,.48))
+    drop-shadow(0 0 12px rgba(113,109,59,.16)) !important;
+}
+
+.wwz-gateway {
+  background:
+    linear-gradient(90deg, rgba(6,7,5,.985) 0%, rgba(8,9,6,.91) 42%, rgba(12,13,9,.43) 72%, rgba(5,6,4,.76) 100%),
+    linear-gradient(180deg, rgba(113,109,59,.035), #050604 115%),
+    url("../world-war-z-dashboard-bg.webp") center / cover fixed no-repeat;
+}
+
+.wwz-gateway::after {
+  border-color: rgba(222,210,189,.10);
+  box-shadow: inset 0 0 0 1px rgba(113,109,59,.10), inset 0 0 90px rgba(0,0,0,.22);
+}
+
+.wwz-gateway-card {
+  border-left-color: var(--brand-rust-bright);
+  background: linear-gradient(135deg, rgba(23,24,17,.97), rgba(10,11,8,.82));
+  box-shadow: 0 36px 100px rgba(0,0,0,.60), inset 0 0 0 1px rgba(222,210,189,.075);
+}
+
+.wwz-gateway-brand img { width: 82px; }
+.wwz-gateway-brand.compact img { width: 60px; }
+.wwz-gateway-brand small { color: #aaa18d; }
+
+.wwz-gateway-features span {
+  color: #c8bea9;
+  border-color: rgba(152,145,87,.28);
+  background: rgba(113,109,59,.095);
+}
+
+.wwz-server-card {
+  border-color: rgba(222,210,189,.105);
+  background: linear-gradient(145deg, rgba(28,29,21,.95), rgba(11,12,9,.97));
+}
+
+.wwz-server-card:hover,
+.wwz-server-card:focus-visible {
+  border-color: rgba(152,145,87,.48);
+  box-shadow: 0 26px 70px rgba(0,0,0,.48), inset 0 0 0 1px rgba(183,46,34,.08);
+}
+
+.wwz-server-icon {
+  border-color: rgba(152,145,87,.30);
+  background: radial-gradient(circle, rgba(40,41,29,.96), rgba(8,9,7,.98));
+}
+
+.wwz-server-live { color: #91b174; }
+
+@media (max-width: 740px) {
+  .wwz-gateway-brand img { width: 68px; }
+  .wwz-gateway-brand.compact img { width: 50px; }
+}
