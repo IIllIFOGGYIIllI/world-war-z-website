@@ -268,34 +268,6 @@ const resetAdminPlayerAdministration = () => {
   setAdminPlayerSearchState('Enter at least three characters to search.');
 };
 
-const handleAdminPlayerAuthorizationResponse = (
-  response,
-  payload = {},
-  { actionRequest = false } = {}
-) => {
-  if (response.status === 401) {
-    storageRemove(AUTH_SESSION_KEY);
-    applySignedOutState();
-    showView('overview', false);
-    showAuthMessage('Your dashboard session expired. Sign in again to continue.', 'error');
-    return true;
-  }
-
-  const explicitAdminAccessFailure =
-    response.status === 403 && payload?.error_code === 'admin_access_required';
-  const readEndpointAdminFailure = response.status === 403 && !actionRequest;
-
-  if (explicitAdminAccessFailure || readEndpointAdminFailure) {
-    if (authenticatedUser?.membership) authenticatedUser.membership.access_level = 'member';
-    applyAccessVisibility('member');
-    showView('overview', false);
-    showAuthMessage('Your current Discord account no longer has Admin access.', 'error');
-    return true;
-  }
-
-  return false;
-};
-
 const renderAdminPlayerResults = (players) => {
   if (!adminPlayerResults) return;
   const safePlayers = Array.isArray(players) ? players : [];
@@ -2232,32 +2204,3 @@ adminPlayerSearchForm?.addEventListener('submit', async (event) => {
     adminPlayerSearchButton?.removeAttribute('aria-busy');
   }
 });
-
-const renderTransactions = (transactions) => {
-  const list = document.querySelector('[data-economy-transactions]');
-  const empty = document.querySelector('[data-economy-empty]');
-  if (!list) return;
-
-  list.replaceChildren();
-  const safeTransactions = Array.isArray(transactions) ? transactions : [];
-  empty?.toggleAttribute('hidden', safeTransactions.length !== 0);
-
-  safeTransactions.forEach((transaction) => {
-    const change = Math.trunc(Number(transaction.change) || 0);
-    const item = document.createElement('li');
-    const symbol = document.createElement('span');
-    symbol.className = `activity-symbol ${change >= 0 ? 'green' : 'red'}`;
-    symbol.textContent = change >= 0 ? '+' : '−';
-
-    const content = document.createElement('div');
-    const title = document.createElement('strong');
-    title.textContent = String(transaction.details || transaction.command || 'Economy activity');
-    const details = document.createElement('small');
-    const signedChange = `${change >= 0 ? '+' : '−'}${formatMoney(Math.abs(change))}`;
-    details.textContent = `${signedChange} · Balance ${formatMoney(transaction.balance_after)} · ${formatAccountDate(transaction.created_at)}`;
-    content.append(title, details);
-    item.append(symbol, content);
-    list.append(item);
-  });
-};
-

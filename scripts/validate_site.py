@@ -22,7 +22,7 @@ RETIRED_MAP_PATHS = (
     MAP_ROOT / "tiles",
     ROOT / "assets/images/maps/chernarus-vector.svg",
 )
-EXPECTED_ASSET_VERSION = "1.22.72"
+EXPECTED_ASSET_VERSION = "1.22.73"
 
 EXPECTED_ROAD_GROUPS = {
     "paved_primary",
@@ -267,7 +267,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.22.72 · Bot v1.18.71" not in index:
+    if "Website v1.22.73 · Bot v1.18.72" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "participants", "Owner bulk catalogue controls"):
         if stale in index:
@@ -317,6 +317,39 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             if dependency_index >= 0 and dependency_index < formatter_index:
                 errors.append(f"dashboard.html: {dependency} must load after shared formatters.")
 
+
+    admin_access = (ROOT / "assets/js/dashboard/admin-access.js").read_text(encoding="utf-8")
+    administration = (ROOT / "assets/js/dashboard/administration.js").read_text(encoding="utf-8")
+    if "const handleAdminPlayerAuthorizationResponse =" not in admin_access:
+        errors.append("admin-access.js: missing shared protected-dashboard authorization helper.")
+    if "const handleAdminPlayerAuthorizationResponse =" in administration:
+        errors.append("administration.js: shared authorization helper must live in admin-access.js.")
+    admin_access_script = f'assets/js/dashboard/admin-access.js?v={EXPECTED_ASSET_VERSION}'
+    admin_access_index = dashboard.find(admin_access_script)
+    administration_index = dashboard.find("assets/js/dashboard/administration.js")
+    core_index = dashboard.find("assets/js/dashboard/core.js")
+    if admin_access_index < 0:
+        errors.append("dashboard.html: missing shared admin-access script.")
+    else:
+        if core_index >= 0 and admin_access_index < core_index:
+            errors.append("dashboard.html: admin-access.js must load after dashboard core state.")
+        if administration_index >= 0 and admin_access_index > administration_index:
+            errors.append("dashboard.html: admin-access.js must load before administration.js.")
+        for dependency in (
+            "assets/js/dashboard/command-centre.js",
+            "assets/js/dashboard/shop.js",
+            "assets/js/dashboard/delivery.js",
+            "assets/js/dashboard/configuration-studio.js",
+        ):
+            dependency_index = dashboard.find(dependency)
+            if dependency_index >= 0 and admin_access_index > dependency_index:
+                errors.append(f"dashboard.html: {dependency} must load after admin-access.js.")
+
+    if "const renderTransactions =" not in account:
+        errors.append("account.js: economy transaction renderer must live with the account controller.")
+    if "const renderTransactions =" in administration:
+        errors.append("administration.js: account transaction renderer must not be defined in Administration.")
+
     shop_helpers = (ROOT / "assets/js/dashboard/shop-helpers.js").read_text(encoding="utf-8")
     shop_helper_names = (
         "shopStatusLabel",
@@ -364,6 +397,8 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         errors.append("shop.js: shared restart-status subscription is missing.")
 
     changelog = (ROOT / "changelog.html").read_text(encoding="utf-8")
+    if '<h2>Version 1.22.73</h2></div><span>Dashboard Access Ownership</span>' not in changelog:
+        errors.append("changelog.html: dashboard access ownership release must be recorded as Website v1.22.73.")
     if '<h2>Version 1.22.57</h2></div><span>Objectives authentication hotfix</span>' not in changelog:
         errors.append("changelog.html: Objectives authentication hotfix must be recorded as Website v1.22.57.")
 

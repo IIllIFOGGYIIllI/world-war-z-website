@@ -1,15 +1,15 @@
-# World War Z Website v1.22.72
+# World War Z Website v1.22.73
 
-## Behaviour-preserving dashboard organisation
+## Behaviour-preserving dashboard access organisation
 
-- Adds `assets/js/dashboard/shop-helpers.js` for pure Survivor Shop status/order formatting, profile-list parsing, XML parsing/formatting and generated-SKU helpers.
-- Reduces `assets/js/dashboard/shop.js` from 1,889 to 1,703 lines while keeping DOM controllers, event listeners, API requests and protected write workflows in the existing Shop module.
-- Loads the Shop helper layer after the shared dashboard formatters and before the Shop controller, preserving the existing Delivery dependency on `shopStatusLabel` without relying on controller execution order.
-- Keeps every extracted helper body as a literal move from Website v1.22.71.
-- Extends website validation to require the helper layer, reject duplicate definitions and enforce safe script order.
-- Refreshes local asset cache versions so GitHub Pages clients receive the reorganised JavaScript immediately.
+- Moves the shared protected-dashboard authorization response handler from `administration.js` into `assets/js/dashboard/admin-access.js`.
+- Loads the new access helper after dashboard core state and before Administration, Command Centre, Shop, Delivery and Configuration Studio.
+- Moves the account economy transaction renderer out of `administration.js` and into `account.js`, its actual owner and only consumer.
+- Keeps both moved JavaScript function bodies as literal moves from Website v1.22.72.
+- Adds website validation that rejects duplicate definitions, missing helper ownership or unsafe script ordering.
+- Refreshes local asset cache versions so GitHub Pages clients receive the reorganised scripts immediately.
 
 ## Compatibility
 
-- Pair with Bot v1.18.71.
-- No Railway API contract, authentication flow, selected-server behaviour, shop workflow, map tiles, roads, labels or persistent data are changed.
+- Pair with Bot v1.18.72.
+- No Railway API contract, authentication rule, selected-server behaviour, protected action, shop workflow, map tile, road geometry, label data or persistent record is changed.
