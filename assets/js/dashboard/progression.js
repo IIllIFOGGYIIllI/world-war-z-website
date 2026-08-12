@@ -158,6 +158,20 @@
     });
   };
 
+  const resetProfileProgression = (message = 'Loading progression…') => {
+    const set = (selector, value) => document.querySelectorAll(selector).forEach((node) => { node.textContent = value; });
+    set('[data-profile-progression-title]', 'Survivor');
+    set('[data-profile-progression-rank]', '—');
+    set('[data-profile-progression-level]', '—');
+    set('[data-profile-progression-prestige]', '—');
+    set('[data-profile-progression-24h]', '—');
+    set('[data-profile-progression-7d]', '—');
+    set('[data-profile-progression-lifetime]', '—');
+    set('[data-profile-progression-progress]', message);
+    document.querySelectorAll('[data-profile-progression-track]').forEach((node) => node.style.setProperty('--xp-progress', '0%'));
+    document.querySelectorAll('[data-profile-progression-badges]').forEach((strip) => strip.replaceChildren());
+  };
+
   const renderProfileProgression = (payload) => {
     const member = payload?.member || {};
     const analytics = payload?.analytics || {};
@@ -254,10 +268,13 @@
     const sessionToken = token();
     if (!sessionToken) {
       memberLoaded = false;
+      memberPayload = null;
+      resetProfileProgression('Sign in to load progression');
       content?.setAttribute('hidden', '');
       guest?.removeAttribute('hidden');
       return;
     }
+    resetProfileProgression();
     try {
       const payload = await requestJson(ACCOUNT_PROGRESSION_URL, {
         headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` }
@@ -266,6 +283,8 @@
       memberLoaded = true;
     } catch (error) {
       memberLoaded = false;
+      memberPayload = null;
+      resetProfileProgression('Progression data is temporarily unavailable');
       content?.setAttribute('hidden', '');
       guest?.removeAttribute('hidden');
       setTextLocal('[data-progression-guest-copy]', error.status === 401
@@ -655,9 +674,18 @@
   window.addEventListener('wwz:authchange', () => {
     memberLoaded = false;
     adminLoaded = false;
+    memberPayload = null;
     if (document.querySelector('[data-view-panel="progression"].active')) activate({ admin: true });
     else if (document.querySelector('[data-view-panel="players"].active')) activate({ admin: false });
   });
+  window.addEventListener('wwz:serverchange', () => {
+    memberLoaded = false;
+    adminLoaded = false;
+    memberPayload = null;
+    loadMember({ force: true });
+    if (document.querySelector('[data-view-panel="progression"].active')) loadAdmin({ force: true });
+  });
 
   if (panel.classList.contains('active')) activate();
+  else if (document.querySelector('[data-view-panel="players"].active')) activate({ admin: false });
 })();
