@@ -22,7 +22,7 @@ RETIRED_MAP_PATHS = (
     MAP_ROOT / "tiles",
     ROOT / "assets/images/maps/chernarus-vector.svg",
 )
-EXPECTED_ASSET_VERSION = "1.22.73"
+EXPECTED_ASSET_VERSION = "1.22.74"
 
 EXPECTED_ROAD_GROUPS = {
     "paved_primary",
@@ -267,7 +267,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.22.73 · Bot v1.18.72" not in index:
+    if "Website v1.22.74 · Bot v1.18.73" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "participants", "Owner bulk catalogue controls"):
         if stale in index:
@@ -350,6 +350,39 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "const renderTransactions =" in administration:
         errors.append("administration.js: account transaction renderer must not be defined in Administration.")
 
+    load_current_start = account.find("const loadCurrentAccount = async")
+    load_current_end = account.find("const completeDiscordLogin = async", load_current_start)
+    complete_start = load_current_end
+    complete_end = account.find("const configureDiscordAuth = async", complete_start)
+    if min(load_current_start, load_current_end, complete_start, complete_end) < 0:
+        errors.append("account.js: authenticated bootstrap functions could not be audited.")
+    else:
+        eager_loaders = (
+            "loadMemberAppeals(",
+            "loadMemberShop(",
+            "loadAdminShopOrders(",
+            "loadOwnerAppealSettings(",
+            "loadOwnerShopConfig(",
+            "loadServerActionHistory(",
+            "loadModerationCases(",
+            "loadCurrentBanlists(",
+        )
+        for label, block in (
+            ("loadCurrentAccount", account[load_current_start:load_current_end]),
+            ("completeDiscordLogin", account[complete_start:complete_end]),
+        ):
+            for loader in eager_loaders:
+                if loader in block:
+                    errors.append(
+                        f"account.js: {label} must not eagerly load unrelated dashboard data: {loader}"
+                    )
+            if "showView(" not in block:
+                errors.append(
+                    f"account.js: {label} must re-dispatch the active view so on-demand loaders run after auth."
+                )
+            if "loadAccountSummary(" not in block:
+                errors.append(f"account.js: {label} must still load the signed-in account summary.")
+
     shop_helpers = (ROOT / "assets/js/dashboard/shop-helpers.js").read_text(encoding="utf-8")
     shop_helper_names = (
         "shopStatusLabel",
@@ -391,6 +424,8 @@ def validate_final_parity_polish(errors: list[str]) -> None:
 
     if "loadShopRestartStatus" in shop or "setInterval(loadShopRestartStatus" in shop:
         errors.append("shop.js: restart status must reuse the shared dashboard status poll.")
+    if re.search(r"(?m)^loadPublicShop\(\);\s*$", shop):
+        errors.append("shop.js: public catalogue must load on demand when the Shop view opens.")
     if "wwz:restartstatus" not in account or "WWZShopRestartOperations" not in account:
         errors.append("account.js: shared restart-status publication is missing.")
     if "wwz:restartstatus" not in shop:

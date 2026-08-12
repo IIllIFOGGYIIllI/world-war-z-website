@@ -622,17 +622,8 @@ const loadCurrentAccount = async (sessionToken) => {
     const payload = await response.json();
     applyAuthenticatedState(payload);
     window.WWZServerContext?.handleAuthenticated(payload, { requireSelection: false });
+    showView(location.hash.slice(1), false);
     await loadAccountSummary(sessionToken);
-    await loadMemberAppeals(sessionToken);
-    await loadMemberShop(sessionToken);
-    if (hasServerActionAccess()) await loadAdminShopOrders(sessionToken);
-    if (dashboardAccessLevel === 'owner') {
-      await loadOwnerAppealSettings(sessionToken);
-      await loadOwnerShopConfig(sessionToken);
-    }
-    await loadServerActionHistory(sessionToken);
-    await loadModerationCases(sessionToken);
-    await loadCurrentBanlists(sessionToken);
   } catch (error) {
     applySignedOutState({ unavailable: true });
   }
@@ -664,14 +655,9 @@ const completeDiscordLogin = async (loginTicket) => {
 
     applyAuthenticatedState(payload);
     window.WWZServerContext?.handleAuthenticated(payload, { requireSelection: true });
-    await loadAccountSummary(payload.session_token);
-    await loadMemberAppeals(payload.session_token);
-    if (dashboardAccessLevel === 'owner') await loadOwnerAppealSettings(payload.session_token);
-    await loadServerActionHistory(payload.session_token);
-    await loadModerationCases(payload.session_token);
-    await loadCurrentBanlists(payload.session_token);
     const returnView = clearCallbackFragment();
     showView(returnView, false);
+    await loadAccountSummary(payload.session_token);
     showAuthMessage(`Signed in as ${payload.user.display_name || payload.user.username}.`, 'success');
   } catch (error) {
     storageRemove(AUTH_SESSION_KEY);

@@ -154,7 +154,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   position: absolute;
   inset: 0;
   z-index: -3;
-  background: #080707 url("../../world-war-z-banner.webp?v=1.22.73") center / cover no-repeat;
+  background: #080707 url("../../world-war-z-banner.webp?v=1.22.74") center / cover no-repeat;
   filter: saturate(0.8) brightness(0.68);
   transform: scale(1.025);
   animation: hero-settle 1.6s cubic-bezier(.2,.7,.2,1) both;
@@ -391,7 +391,7 @@ code { padding: 2px 7px; border: 1px solid rgba(212,36,24,0.35); background: rgb
   .reveal { opacity: 1; transform: none; }
 }
 
-/* ========================================================================== 
+/* ==========================================================================
    Version 1.13.0 — Public Website UI Overhaul
    ========================================================================== */
 :root {

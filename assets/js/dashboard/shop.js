@@ -1699,5 +1699,3 @@ window.addEventListener('wwz:restartstatus', (event) => {
   if (memberShopOrders.length) renderMemberShopOrders(memberShopOrders);
 });
 shopRestartOperations = window.WWZShopRestartOperations || null;
-loadPublicShop();
-

@@ -1,15 +1,16 @@
-# World War Z Website v1.22.73
+# World War Z Website v1.22.74
 
-## Behaviour-preserving dashboard access organisation
+## Dashboard startup optimisation
 
-- Moves the shared protected-dashboard authorization response handler from `administration.js` into `assets/js/dashboard/admin-access.js`.
-- Loads the new access helper after dashboard core state and before Administration, Command Centre, Shop, Delivery and Configuration Studio.
-- Moves the account economy transaction renderer out of `administration.js` and into `account.js`, its actual owner and only consumer.
-- Keeps both moved JavaScript function bodies as literal moves from Website v1.22.72.
-- Adds website validation that rejects duplicate definitions, missing helper ownership or unsafe script ordering.
-- Refreshes local asset cache versions so GitHub Pages clients receive the reorganised scripts immediately.
+- Stops authenticated bootstrap from eagerly loading unrelated dashboard workspaces after sign-in/session restore.
+- Keeps the signed-in account summary immediate, then re-dispatches the active dashboard view so only that view's existing loader runs.
+- Avoids hidden startup calls for Appeals, Shop, Admin shop orders, Owner shop/appeal settings, server-action history, moderation cases and the live DayZ ban list when those views are not open.
+- Removes the unconditional public Shop catalogue request from every dashboard page load; the catalogue now loads on demand when Shop opens.
+- Adds validation that prevents unrelated authenticated bootstrap loaders or an unconditional Shop catalogue load from returning.
+- Refreshes local asset cache versions for GitHub Pages.
+- Updates stale public multi-server roadmap wording to reflect that Chernarus/Livonia isolation is operational, with mutable economy/progression/PvP and other server-owned data scoped independently.
 
 ## Compatibility
 
-- Pair with Bot v1.18.72.
-- No Railway API contract, authentication rule, selected-server behaviour, protected action, shop workflow, map tile, road geometry, label data or persistent record is changed.
+- Pair with Bot v1.18.73.
+- No Railway API contract, selected-server routing, authorization rule, protected write, shop purchase/delivery behaviour, map geometry or persistent record changes.
