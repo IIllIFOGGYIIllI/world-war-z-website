@@ -731,12 +731,48 @@ const renderAdminShopOrders = (payload) => {
   if (!adminShopOrderList) return;
   adminShopOrderList.replaceChildren();
   const summary = payload?.summary || {};
-  ['open', 'pending', 'processing', 'fulfilled', 'refunded', 'cancelled'].forEach((key) => setText(`[data-admin-shop-${key}]`, String(Number(summary[key] || 0))));
-  const openCount = Number(summary.open || 0);
+  const traderSummary = payload?.trader_ticket_summary || {};
+  const traderTickets = Array.isArray(payload?.trader_tickets) ? payload.trader_tickets : [];
+  const combinedOpen = Number(summary.open || 0) + Number(traderSummary.open || 0);
+  ['pending', 'processing', 'fulfilled', 'refunded', 'cancelled'].forEach((key) => setText(`[data-admin-shop-${key}]`, String(Number(summary[key] || 0))));
+  setText('[data-admin-shop-open]', String(combinedOpen));
   if (shopOrderNavBadge) {
-    shopOrderNavBadge.textContent = String(openCount);
-    shopOrderNavBadge.hidden = openCount === 0;
+    shopOrderNavBadge.textContent = String(combinedOpen);
+    shopOrderNavBadge.hidden = combinedOpen === 0;
   }
+
+  traderTickets.forEach((ticket) => {
+    const card = document.createElement('article');
+    card.className = 'shop-order-card admin-order';
+    const heading = document.createElement('div');
+    const title = document.createElement('strong');
+    title.textContent = `Trader Ticket #${ticket.ticket_number} · ${ticket.opener_name} · ${ticket.subject}`;
+    const status = document.createElement('span');
+    status.className = `shop-order-status ${ticket.status}`;
+    status.textContent = titleCaseState(ticket.status || 'open');
+    heading.append(title, status);
+
+    const detail = document.createElement('p');
+    detail.textContent = ticket.description || 'No trader-order details were provided.';
+    const meta = document.createElement('small');
+    meta.textContent = `${titleCaseState(ticket.priority || 'normal')} priority · ${ticket.tag || 'Uncategorised'} · ${formatAccountDate(ticket.created_at)}${ticket.claimed_by ? ` · Claimed by ${ticket.claimed_by}` : ''}`;
+    card.append(heading, detail, meta);
+
+    if (ticket.discord_url) {
+      const actions = document.createElement('div');
+      actions.className = 'heading-actions';
+      const open = document.createElement('a');
+      open.className = 'secondary-action compact-action';
+      open.href = ticket.discord_url;
+      open.target = '_blank';
+      open.rel = 'noopener noreferrer';
+      open.textContent = 'Open Discord Ticket';
+      actions.append(open);
+      card.append(actions);
+    }
+    adminShopOrderList.append(card);
+  });
+
   const orders = Array.isArray(payload?.orders) ? payload.orders : [];
   orders.forEach((order) => {
     const card = document.createElement('article');
@@ -775,7 +811,7 @@ const renderAdminShopOrders = (payload) => {
     if (actions.childElementCount) card.append(actions);
     adminShopOrderList.append(card);
   });
-  if (adminShopOrderEmpty) adminShopOrderEmpty.hidden = orders.length !== 0;
+  if (adminShopOrderEmpty) adminShopOrderEmpty.hidden = (orders.length + traderTickets.length) !== 0;
   if (adminShopOrderError) adminShopOrderError.hidden = true;
 };
 
