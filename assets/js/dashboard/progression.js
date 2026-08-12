@@ -274,6 +274,16 @@
       guest?.removeAttribute('hidden');
       return;
     }
+    const selectedServer = window.WWZServerContext?.getSelectedServer?.();
+    if (!selectedServer) {
+      memberLoaded = false;
+      memberPayload = null;
+      resetProfileProgression('Select a server to load progression');
+      content?.setAttribute('hidden', '');
+      guest?.removeAttribute('hidden');
+      setTextLocal('[data-progression-guest-copy]', 'Select a World War Z server to view progression.');
+      return;
+    }
     resetProfileProgression();
     try {
       const payload = await requestJson(ACCOUNT_PROGRESSION_URL, {
@@ -671,10 +681,18 @@
     if (event.detail?.view === 'progression') activate({ admin: true });
     if (event.detail?.view === 'players') activate({ admin: false });
   });
-  window.addEventListener('wwz:authchange', () => {
+  window.addEventListener('wwz:authchange', (event) => {
     memberLoaded = false;
     adminLoaded = false;
     memberPayload = null;
+    if (!event.detail?.authenticated) {
+      resetProfileProgression('Sign in to load progression');
+      return;
+    }
+    if (!window.WWZServerContext?.getSelectedServer?.()) {
+      resetProfileProgression('Select a server to load progression');
+      return;
+    }
     if (document.querySelector('[data-view-panel="progression"].active')) activate({ admin: true });
     else if (document.querySelector('[data-view-panel="players"].active')) activate({ admin: false });
   });

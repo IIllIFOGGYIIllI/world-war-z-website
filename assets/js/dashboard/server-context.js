@@ -1,6 +1,8 @@
 (() => {
   const STORAGE_KEY = 'wwz_dashboard_server';
   const gateway = document.querySelector('[data-dashboard-gateway]');
+  const loadingView = document.querySelector('[data-gateway-loading-view]');
+  const loadingCopy = document.querySelector('[data-gateway-loading-copy]');
   const loginView = document.querySelector('[data-gateway-login-view]');
   const serverView = document.querySelector('[data-gateway-server-view]');
   const serverGrid = document.querySelector('[data-server-selection-grid]');
@@ -65,11 +67,17 @@
   };
 
   const setGatewayView = (view) => {
+    if (loadingView) loadingView.hidden = view !== 'loading';
     if (loginView) loginView.hidden = view !== 'login';
     if (serverView) serverView.hidden = view !== 'servers';
     document.body.classList.toggle('dashboard-ready', view === 'dashboard');
     document.body.classList.toggle('dashboard-gated', view !== 'dashboard');
     if (gateway) gateway.setAttribute('aria-hidden', String(view === 'dashboard'));
+  };
+
+  const showLoading = (message = 'Restoring your secure dashboard session…') => {
+    if (loadingCopy) loadingCopy.textContent = message;
+    setGatewayView('loading');
   };
 
   const updateDashboardLabels = (server) => {
@@ -116,6 +124,7 @@
     selectedServer = normalized;
     storeServer(normalized);
     if (previousKey !== normalized.key && !restored) {
+      showLoading(`Switching securely to ${normalized.name}…`);
       location.reload();
       return true;
     }
@@ -261,8 +270,11 @@
     getWorldSize: () => selectedServer?.world_size || null,
     handleAuthenticated,
     selectServer,
+    showLoading,
     showLogin,
     showServerSelection,
     updatePublicStatus
   });
+
+  showLoading();
 })();
