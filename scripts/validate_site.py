@@ -22,7 +22,7 @@ RETIRED_MAP_PATHS = (
     MAP_ROOT / "tiles",
     ROOT / "assets/images/maps/chernarus-vector.svg",
 )
-EXPECTED_ASSET_VERSION = "1.22.70"
+EXPECTED_ASSET_VERSION = "1.22.71"
 
 EXPECTED_ROAD_GROUPS = {
     "paved_primary",
@@ -267,7 +267,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.22.70 · Bot v1.18.69" not in index:
+    if "Website v1.22.71 · Bot v1.18.70" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "participants", "Owner bulk catalogue controls"):
         if stale in index:
@@ -281,6 +281,41 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     for token in required_shop_labels:
         if token not in dashboard:
             errors.append(f"dashboard.html: required Shop/Trader workflow label missing: {token}")
+
+    formatters = (ROOT / "assets/js/dashboard/formatters.js").read_text(encoding="utf-8")
+    shared_formatters = (
+        "formatMoney",
+        "formatDuration",
+        "titleCaseState",
+        "formatAccountDate",
+    )
+    for helper in shared_formatters:
+        definition = f"const {helper} ="
+        if definition not in formatters:
+            errors.append(f"formatters.js: missing shared dashboard helper {helper}.")
+        for relative in (
+            "assets/js/dashboard/administration.js",
+            "assets/js/dashboard/account.js",
+            "assets/js/dashboard/shop.js",
+            "assets/js/dashboard/delivery.js",
+        ):
+            if definition in (ROOT / relative).read_text(encoding="utf-8"):
+                errors.append(f"{relative}: shared formatter {helper} must live in formatters.js.")
+
+    formatter_script = f'assets/js/dashboard/formatters.js?v={EXPECTED_ASSET_VERSION}'
+    formatter_index = dashboard.find(formatter_script)
+    if formatter_index < 0:
+        errors.append("dashboard.html: missing shared dashboard formatter script.")
+    else:
+        for dependency in (
+            "assets/js/dashboard/administration.js",
+            "assets/js/dashboard/account.js",
+            "assets/js/dashboard/shop.js",
+            "assets/js/dashboard/delivery.js",
+        ):
+            dependency_index = dashboard.find(dependency)
+            if dependency_index >= 0 and dependency_index < formatter_index:
+                errors.append(f"dashboard.html: {dependency} must load after shared formatters.")
 
     shop = (ROOT / "assets/js/dashboard/shop.js").read_text(encoding="utf-8")
     if "loadShopRestartStatus" in shop or "setInterval(loadShopRestartStatus" in shop:
@@ -442,6 +477,7 @@ def validate_required_files(errors: list[str]) -> None:
         "assets/js/pages/home.js",
         "assets/js/dashboard/shell.js",
         "assets/js/dashboard/core.js",
+        "assets/js/dashboard/formatters.js",
         "assets/js/dashboard/server-context.js",
         "assets/js/dashboard/administration.js",
         "assets/js/dashboard/account.js",

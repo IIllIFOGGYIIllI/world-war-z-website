@@ -1,21 +1,3 @@
-const formatMoney = (value) => {
-  const amount = Math.max(0, Math.trunc(Number(value) || 0));
-  return `$${new Intl.NumberFormat('en-AU').format(amount)}`;
-};
-
-const formatDuration = (value) => {
-  const totalMinutes = Math.max(0, Math.trunc((Number(value) || 0) / 60));
-  const days = Math.trunc(totalMinutes / 1440);
-  const hours = Math.trunc((totalMinutes % 1440) / 60);
-  const minutes = totalMinutes % 60;
-  if (days > 0) return `${days}d ${hours}h ${minutes}m`;
-  return `${hours}h ${minutes}m`;
-};
-
-const titleCaseState = (value) => String(value || 'unknown')
-  .replace(/_/g, ' ')
-  .replace(/\b\w/g, (letter) => letter.toUpperCase());
-
 const auditSubsystemLabel = (value) => ({
   moderation: 'Moderation',
   players: 'Player Admin',
@@ -157,18 +139,6 @@ auditNext?.addEventListener('click', () => {
   loadServerActionHistory();
 });
 
-const formatAccountDate = (value, fallback = 'Not recorded') => {
-  if (!value) return fallback;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return fallback;
-  return new Intl.DateTimeFormat('en-AU', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit'
-  }).format(date);
-};
 
 const setAdminPlayerSearchState = (message, state = 'idle') => {
   if (!adminPlayerSearchState) return;
@@ -980,7 +950,6 @@ const loadWebhookConfiguration = async (sessionToken = storageGet(AUTH_SESSION_K
 
 refreshWebhooksButton?.addEventListener('click', () => loadWebhookConfiguration());
 
-
 const showDiscordLogMessage = (message = '', tone = 'error') => {
   if (!discordLogMessage) return;
   discordLogMessage.hidden = !message;
@@ -1494,7 +1463,6 @@ moderationCaseDialog?.addEventListener('close', () => {
   setCaseEvidenceMode('add');
   showCaseDialogMessage('');
 });
-
 
 const banlistOpenPlayerButton = (psnId) => {
   const cleanPsn = String(psnId || '').trim();
@@ -2292,5 +2260,4 @@ const renderTransactions = (transactions) => {
     list.append(item);
   });
 };
-
 
