@@ -489,6 +489,17 @@
   previewButton?.addEventListener('click',()=>submit('preview'));
   applyButton?.addEventListener('click',()=>submit('apply'));
 
-  document.addEventListener('dashboard:owner-ready',()=>loadArea(state.area));
-  if (dashboardAccessLevel === 'owner' && storageGet(AUTH_SESSION_KEY)) loadArea(state.area);
+  const isStructuredViewActive = () => Boolean(
+    document.querySelector('[data-view-panel="serverconfig"].active [data-dashboard-section="structured"]:not([hidden])')
+  );
+  const activateIfVisible = () => {
+    if (dashboardAccessLevel === 'owner' && storageGet(AUTH_SESSION_KEY) && isStructuredViewActive()) loadArea(state.area);
+  };
+
+  document.addEventListener('dashboard:owner-ready', activateIfVisible);
+  window.addEventListener('wwz:viewchange', (event) => {
+    if (event.detail?.view === 'serverconfig' && event.detail?.section === 'structured') activateIfVisible();
+  });
+  activateIfVisible();
+  window.__wwzConfigurationStudioReady = true;
 })();

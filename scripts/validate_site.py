@@ -22,7 +22,7 @@ RETIRED_MAP_PATHS = (
     MAP_ROOT / "tiles",
     ROOT / "assets/images/maps/chernarus-vector.svg",
 )
-EXPECTED_ASSET_VERSION = "1.22.75"
+EXPECTED_ASSET_VERSION = "1.22.76"
 
 EXPECTED_ROAD_GROUPS = {
     "paved_primary",
@@ -267,7 +267,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.22.75 · Bot v1.18.74" not in index:
+    if "Website v1.22.76 · Bot v1.18.75" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "participants", "Owner bulk catalogue controls"):
         if stale in index:
@@ -447,7 +447,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     for token in (
         "const ensureCommandLibrary = () =>",
         "wwz:viewchange",
-        "data-view=\"commands\"",
+        "['commands', ensureCommandLibrary]",
         "window.__wwzCommandLibraryReady === true",
     ):
         if token not in lazy_assets:
@@ -457,7 +457,35 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             "lazy-assets.js: command-library lazy URL must use the current website cache version."
         )
 
+    lazy_view_assets = (
+        ("dashboard map", f"assets/js/pages/dashboard-map-loader.js?v={EXPECTED_ASSET_VERSION}&rev=3", "ensureDashboardMap"),
+        ("structured configuration", f"assets/js/dashboard/configuration-studio.js?v={EXPECTED_ASSET_VERSION}", "ensureConfigurationStudio"),
+        ("dashboard Shop wiki previews", f"assets/js/shop-wiki-previews.js?v={EXPECTED_ASSET_VERSION}", "ensureShopWikiPreviews"),
+    )
+    for label, asset_url, loader_name in lazy_view_assets:
+        if asset_url in dashboard:
+            errors.append(f"dashboard.html: {label} must remain view-lazy instead of loading on every dashboard visit.")
+        if asset_url not in lazy_assets or loader_name not in lazy_assets:
+            errors.append(f"lazy-assets.js: missing current lazy loader for {label}.")
+
+    config_studio = (ROOT / "assets/js/dashboard/configuration-studio.js").read_text(encoding="utf-8")
+    for token in ("const activateIfVisible = () =>", "isStructuredViewActive()", "wwz:viewchange"):
+        if token not in config_studio:
+            errors.append(f"configuration-studio.js: missing visible-view API guard: {token}")
+    if "await ensureShopPreviewRuntime();" not in shop:
+        errors.append("shop.js: Shop catalogue loads must await the lazy preview runtime before rendering.")
+
+    progression = (ROOT / "assets/js/dashboard/progression.js").read_text(encoding="utf-8")
+    serverchange_start = progression.find("window.addEventListener('wwz:serverchange'")
+    if serverchange_start >= 0:
+        serverchange_end = progression.find("});", serverchange_start)
+        serverchange_block = progression[serverchange_start:serverchange_end + 3]
+        if "loadMember({ force: true });" in serverchange_block and "[data-view-panel=\"progression\"].active" not in serverchange_block:
+            errors.append("progression.js: server changes must not refresh progression while unrelated views are active.")
+
     changelog = (ROOT / "changelog.html").read_text(encoding="utf-8")
+    if '<h2>Version 1.22.76</h2></div><span>View-Lazy Dashboard Runtime</span>' not in changelog:
+        errors.append("changelog.html: view-lazy dashboard runtime release must be recorded as Website v1.22.76.")
     if '<h2>Version 1.22.73</h2></div><span>Dashboard Access Ownership</span>' not in changelog:
         errors.append("changelog.html: dashboard access ownership release must be recorded as Website v1.22.73.")
     if '<h2>Version 1.22.57</h2></div><span>Objectives authentication hotfix</span>' not in changelog:
@@ -555,11 +583,16 @@ def validate_checkout_compatibility(errors: list[str]) -> None:
         for token in ("dayz.fandom.com", "IntersectionObserver", "MAX_CONCURRENT", "localStorage", "preview_image_url"):
             if token not in wiki_previews:
                 errors.append(f"DayZ Wiki preview resolver is missing required behaviour: {token}")
-    for html_name in ("dashboard.html", "shop.html"):
-        html_text = (ROOT / html_name).read_text(encoding="utf-8")
-        expected_preview_script = f'assets/js/shop-wiki-previews.js?v={EXPECTED_ASSET_VERSION}'
-        if expected_preview_script not in html_text:
-            errors.append(f"{html_name}: missing shared DayZ Wiki preview resolver reference.")
+    expected_preview_script = f'assets/js/shop-wiki-previews.js?v={EXPECTED_ASSET_VERSION}'
+    shop_html = (ROOT / "shop.html").read_text(encoding="utf-8")
+    if expected_preview_script not in shop_html:
+        errors.append("shop.html: missing shared DayZ Wiki preview resolver reference.")
+    dashboard_html = (ROOT / "dashboard.html").read_text(encoding="utf-8")
+    lazy_assets = (ROOT / "assets/js/dashboard/lazy-assets.js").read_text(encoding="utf-8")
+    if expected_preview_script in dashboard_html:
+        errors.append("dashboard.html: shared DayZ Wiki preview resolver must be lazy-loaded for Shop views.")
+    if expected_preview_script not in lazy_assets or "ensureShopWikiPreviews" not in lazy_assets:
+        errors.append("lazy-assets.js: dashboard Shop wiki previews must use the current lazy-loaded resolver.")
     if "WWZShopWikiPreviews?.createImage" not in standalone_shop:
         errors.append("Standalone shop must use the shared DayZ Wiki preview resolver.")
     if "WWZShopWikiPreviews?.createImage" not in dashboard_shop:

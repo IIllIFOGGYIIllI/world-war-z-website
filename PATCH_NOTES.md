@@ -1,17 +1,17 @@
-# World War Z Website v1.22.75
+# World War Z Website v1.22.76
 
-## Command-library lazy loading
+## View-specific dashboard lazy loading
 
-- Removes the command catalogue bundle from the dashboard's unconditional startup scripts.
-- Loads the approximately 20.5 KB command-library JavaScript only when the Commands workspace is requested.
-- Opportunistically warms the command bundle when the Commands navigation control is hovered or keyboard-focused so intentional navigation remains responsive.
-- Preserves direct `#commands` entry by loading the catalogue immediately when that is the requested initial view.
-- Prevents duplicate script injection when multiple view/focus events request the command library while it is still loading.
-- Avoids constructing the 128 command cards during ordinary Overview and unrelated workspace visits.
-- Adds site validation that rejects a return to eager command-library loading and verifies the lazy asset uses the current cache version.
-- Refreshes local GitHub Pages asset cache versions.
+- Removes the approximately 40.9 KB interactive-map controller from unconditional dashboard startup and loads it only when the Map workspace is requested.
+- Removes the approximately 41.7 KB Structured Configuration Studio from unconditional startup and loads it only for Server Configuration → Structured Controls.
+- Defers the approximately 17.9 KB DayZ Wiki preview resolver on the dashboard until the member Shop or Owner Shop workspace is requested; the standalone public Shop keeps its direct resolver.
+- Prevents Structured Configuration preloading/hover from triggering a live configuration API request until the structured workspace is actually visible.
+- Keeps first-use Shop rendering deterministic by awaiting the optional preview resolver before catalogue rendering, while retaining category SVG fallbacks if it cannot load.
+- Stops Progression from issuing a member progression API refresh on every server switch when neither Progression nor Players is active.
+- Extends site validation so these view-specific assets cannot silently return to eager dashboard loading.
+- Refreshes GitHub Pages cache versions.
 
 ## Compatibility
 
-- Pair with Bot v1.18.74.
-- No Railway API contract, selected-server routing, authorization rule, command definition, protected write, map geometry or persistent record changes.
+- Pair with Bot v1.18.75.
+- No Railway API contract, selected-server routing, authorization rule, map geometry, Shop transaction, structured configuration action or persistent record changes.

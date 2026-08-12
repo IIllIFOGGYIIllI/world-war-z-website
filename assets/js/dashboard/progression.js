@@ -700,8 +700,12 @@
     memberLoaded = false;
     adminLoaded = false;
     memberPayload = null;
-    loadMember({ force: true });
-    if (document.querySelector('[data-view-panel="progression"].active')) loadAdmin({ force: true });
+    if (document.querySelector('[data-view-panel="progression"].active')) {
+      loadMember({ force: true });
+      loadAdmin({ force: true });
+    } else if (document.querySelector('[data-view-panel="players"].active')) {
+      loadMember({ force: true });
+    }
   });
 
   if (panel.classList.contains('active')) activate();

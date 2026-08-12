@@ -526,11 +526,20 @@ const applyShopPayload = (payload, { member = false } = {}) => {
   renderShopCatalogue();
 };
 
+const ensureShopPreviewRuntime = async () => {
+  try {
+    await window.WWZLazyAssets?.ensureShopWikiPreviews?.();
+  } catch {
+    // Generic category previews remain available if the optional wiki helper fails.
+  }
+};
+
 const loadPublicShop = async () => {
   if (shopRequestInProgress) return;
   shopRequestInProgress = true;
   refreshShopButton?.setAttribute('disabled', '');
   try {
+    await ensureShopPreviewRuntime();
     const response = await authFetch(SHOP_CATALOGUE_URL, { headers: { Accept: 'application/json' } });
     const payload = await response.json().catch(() => ({}));
     if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Shop unavailable');
@@ -554,6 +563,7 @@ const loadMemberShop = async (sessionToken = storageGet(AUTH_SESSION_KEY)) => {
   refreshShopButton?.setAttribute('disabled', '');
   refreshShopOrdersButton?.setAttribute('disabled', '');
   try {
+    await ensureShopPreviewRuntime();
     const response = await authFetch(ACCOUNT_SHOP_URL, { headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` } });
     const payload = await response.json().catch(() => ({}));
     if (response.status === 401) {
@@ -1495,6 +1505,7 @@ const loadOwnerShopConfig = async (sessionToken = storageGet(AUTH_SESSION_KEY)) 
   refreshShopConfigButton?.setAttribute('disabled', '');
   refreshShopSettingsButton?.setAttribute('disabled', '');
   try {
+    await ensureShopPreviewRuntime();
     const response = await authFetch(OWNER_SHOP_CONFIG_URL, { headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` } });
     const payload = await response.json().catch(() => ({}));
     if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: false })) return false;
