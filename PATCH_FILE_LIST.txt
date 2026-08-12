@@ -1,3 +1,5 @@
+World War Z Website v1.22.69 - Updated files
+
 404.html
 changelog.html
 community-guidelines.html
@@ -8,10 +10,11 @@ moderation-policy.html
 privacy.html
 shop.html
 terms.html
-assets/js/dashboard/core.js
-assets/js/dashboard/shell.js
+assets/css/pages/home.css
+assets/js/dashboard/server-context.js
+assets/js/dashboard/shop.js
+assets/js/map/wwz-map.js
 scripts/validate_site.py
 README.md
 PATCH_NOTES.md
 PATCH_FILE_LIST.txt
-DELETE_THESE_FILES.txt

@@ -1883,8 +1883,6 @@ window.addEventListener('wwz:viewchange', (event) => {
   const { view, section } = event.detail || {};
   const token = storageGet(AUTH_SESSION_KEY);
   if (view === 'shop') token ? loadMemberShop(token) : loadPublicShop();
-loadShopRestartStatus();
-window.setInterval(loadShopRestartStatus, 30_000);
   if (view === 'staff' && section === 'shop-orders') loadAdminShopOrders(token);
   if (view === 'shopadmin') loadOwnerShopConfig(token);
 });
