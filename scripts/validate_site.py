@@ -22,7 +22,7 @@ RETIRED_MAP_PATHS = (
     MAP_ROOT / "tiles",
     ROOT / "assets/images/maps/chernarus-vector.svg",
 )
-EXPECTED_ASSET_VERSION = "1.22.74"
+EXPECTED_ASSET_VERSION = "1.22.75"
 
 EXPECTED_ROAD_GROUPS = {
     "paved_primary",
@@ -267,7 +267,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.22.74 · Bot v1.18.73" not in index:
+    if "Website v1.22.75 · Bot v1.18.74" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "participants", "Owner bulk catalogue controls"):
         if stale in index:
@@ -431,6 +431,32 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "wwz:restartstatus" not in shop:
         errors.append("shop.js: shared restart-status subscription is missing.")
 
+    lazy_assets = (ROOT / "assets/js/dashboard/lazy-assets.js").read_text(encoding="utf-8")
+    direct_command_library = f'assets/js/data/command-library.js?v={EXPECTED_ASSET_VERSION}'
+    if direct_command_library in dashboard:
+        errors.append(
+            "dashboard.html: command library must be lazy-loaded instead of downloaded on every dashboard visit."
+        )
+    lazy_script = f'assets/js/dashboard/lazy-assets.js?v={EXPECTED_ASSET_VERSION}'
+    lazy_index = dashboard.find(lazy_script)
+    shell_index = dashboard.find("assets/js/dashboard/shell.js")
+    if lazy_index < 0:
+        errors.append("dashboard.html: missing dashboard lazy-asset loader.")
+    elif shell_index >= 0 and lazy_index > shell_index:
+        errors.append("dashboard.html: lazy-assets.js must load before shell.js so it sees initial view changes.")
+    for token in (
+        "const ensureCommandLibrary = () =>",
+        "wwz:viewchange",
+        "data-view=\"commands\"",
+        "window.__wwzCommandLibraryReady === true",
+    ):
+        if token not in lazy_assets:
+            errors.append(f"lazy-assets.js: missing command-library lazy-loading guard: {token}")
+    if direct_command_library not in lazy_assets:
+        errors.append(
+            "lazy-assets.js: command-library lazy URL must use the current website cache version."
+        )
+
     changelog = (ROOT / "changelog.html").read_text(encoding="utf-8")
     if '<h2>Version 1.22.73</h2></div><span>Dashboard Access Ownership</span>' not in changelog:
         errors.append("changelog.html: dashboard access ownership release must be recorded as Website v1.22.73.")
@@ -586,6 +612,7 @@ def validate_required_files(errors: list[str]) -> None:
         "assets/js/dashboard/shell.js",
         "assets/js/dashboard/core.js",
         "assets/js/dashboard/formatters.js",
+        "assets/js/dashboard/lazy-assets.js",
         "assets/js/dashboard/shop-helpers.js",
         "assets/js/dashboard/server-context.js",
         "assets/js/dashboard/administration.js",

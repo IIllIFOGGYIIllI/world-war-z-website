@@ -1,4 +1,4 @@
-World War Z Website v1.22.74 - Updated files
+World War Z Website v1.22.75 - Updated files
 
 404.html
 changelog.html
@@ -11,9 +11,8 @@ privacy.html
 shop.html
 terms.html
 assets/css/pages/home.css
-assets/js/dashboard/account.js
+assets/js/dashboard/lazy-assets.js
 assets/js/dashboard/server-context.js
-assets/js/dashboard/shop.js
 assets/js/map/wwz-map.js
 scripts/validate_site.py
 README.md

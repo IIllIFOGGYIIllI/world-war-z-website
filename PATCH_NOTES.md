@@ -1,16 +1,17 @@
-# World War Z Website v1.22.74
+# World War Z Website v1.22.75
 
-## Dashboard startup optimisation
+## Command-library lazy loading
 
-- Stops authenticated bootstrap from eagerly loading unrelated dashboard workspaces after sign-in/session restore.
-- Keeps the signed-in account summary immediate, then re-dispatches the active dashboard view so only that view's existing loader runs.
-- Avoids hidden startup calls for Appeals, Shop, Admin shop orders, Owner shop/appeal settings, server-action history, moderation cases and the live DayZ ban list when those views are not open.
-- Removes the unconditional public Shop catalogue request from every dashboard page load; the catalogue now loads on demand when Shop opens.
-- Adds validation that prevents unrelated authenticated bootstrap loaders or an unconditional Shop catalogue load from returning.
-- Refreshes local asset cache versions for GitHub Pages.
-- Updates stale public multi-server roadmap wording to reflect that Chernarus/Livonia isolation is operational, with mutable economy/progression/PvP and other server-owned data scoped independently.
+- Removes the command catalogue bundle from the dashboard's unconditional startup scripts.
+- Loads the approximately 20.5 KB command-library JavaScript only when the Commands workspace is requested.
+- Opportunistically warms the command bundle when the Commands navigation control is hovered or keyboard-focused so intentional navigation remains responsive.
+- Preserves direct `#commands` entry by loading the catalogue immediately when that is the requested initial view.
+- Prevents duplicate script injection when multiple view/focus events request the command library while it is still loading.
+- Avoids constructing the 128 command cards during ordinary Overview and unrelated workspace visits.
+- Adds site validation that rejects a return to eager command-library loading and verifies the lazy asset uses the current cache version.
+- Refreshes local GitHub Pages asset cache versions.
 
 ## Compatibility
 
-- Pair with Bot v1.18.73.
-- No Railway API contract, selected-server routing, authorization rule, protected write, shop purchase/delivery behaviour, map geometry or persistent record changes.
+- Pair with Bot v1.18.74.
+- No Railway API contract, selected-server routing, authorization rule, command definition, protected write, map geometry or persistent record changes.
