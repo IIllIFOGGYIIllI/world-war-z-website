@@ -534,18 +534,6 @@ const renderMemberShopOrders = (orders) => {
   if (shopOrderEmpty) shopOrderEmpty.hidden = safeOrders.length !== 0;
 };
 
-const loadShopRestartStatus = async () => {
-  try {
-    const response = await authFetch(SERVER_STATUS_URL, { headers: { Accept: 'application/json' } });
-    const payload = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error('Restart status unavailable');
-    shopRestartOperations = window.WWZHttp?.normaliseRestartOperations?.(payload?.operations || {}) || (payload?.operations || null);
-    window.WWZShopRestartOperations = shopRestartOperations;
-    window.dispatchEvent(new CustomEvent('wwz:restartstatus', { detail: shopRestartOperations }));
-    if (memberShopOrders.length) renderMemberShopOrders(memberShopOrders);
-  } catch { shopRestartOperations = null; window.WWZShopRestartOperations = null; window.dispatchEvent(new CustomEvent('wwz:restartstatus', { detail: null })); }
-};
-
 const applyShopPayload = (payload, { member = false } = {}) => {
   const settings = payload?.settings || {};
   shopPurchasesEnabled = Boolean(settings.enabled);
@@ -616,7 +604,6 @@ const loadMemberShop = async (sessionToken = storageGet(AUTH_SESSION_KEY)) => {
     if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Shop unavailable');
     applyShopPayload(payload, { member: true });
     loadDeliveryLocations(sessionToken, { quiet: true });
-    loadShopRestartStatus();
     if (shopError) shopError.hidden = true;
     return true;
   } catch (error) {
@@ -1893,7 +1880,10 @@ window.addEventListener('wwz:serverchange', () => {
   ensureShopCoordinateMap()?.invalidateSize();
   updateCoordinateMarker();
 });
+window.addEventListener('wwz:restartstatus', (event) => {
+  shopRestartOperations = event.detail && typeof event.detail === 'object' ? event.detail : null;
+  if (memberShopOrders.length) renderMemberShopOrders(memberShopOrders);
+});
+shopRestartOperations = window.WWZShopRestartOperations || null;
 loadPublicShop();
-loadShopRestartStatus();
-window.setInterval(loadShopRestartStatus, 30_000);
 

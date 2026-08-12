@@ -22,7 +22,7 @@ RETIRED_MAP_PATHS = (
     MAP_ROOT / "tiles",
     ROOT / "assets/images/maps/chernarus-vector.svg",
 )
-EXPECTED_ASSET_VERSION = "1.22.69"
+EXPECTED_ASSET_VERSION = "1.22.70"
 
 EXPECTED_ROAD_GROUPS = {
     "paved_primary",
@@ -267,7 +267,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.22.69 · Bot v1.18.67" not in index:
+    if "Website v1.22.70 · Bot v1.18.69" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "participants", "Owner bulk catalogue controls"):
         if stale in index:
@@ -283,8 +283,12 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append(f"dashboard.html: required Shop/Trader workflow label missing: {token}")
 
     shop = (ROOT / "assets/js/dashboard/shop.js").read_text(encoding="utf-8")
-    if shop.count("setInterval(loadShopRestartStatus, 30_000)") != 1:
-        errors.append("shop.js: dashboard restart-status polling must use exactly one interval.")
+    if "loadShopRestartStatus" in shop or "setInterval(loadShopRestartStatus" in shop:
+        errors.append("shop.js: restart status must reuse the shared dashboard status poll.")
+    if "wwz:restartstatus" not in account or "WWZShopRestartOperations" not in account:
+        errors.append("account.js: shared restart-status publication is missing.")
+    if "wwz:restartstatus" not in shop:
+        errors.append("shop.js: shared restart-status subscription is missing.")
 
     changelog = (ROOT / "changelog.html").read_text(encoding="utf-8")
     if '<h2>Version 1.22.57</h2></div><span>Objectives authentication hotfix</span>' not in changelog:

@@ -795,6 +795,8 @@ const applyLiveStatus = (payload) => {
   const platform = String(payload.server.platform || 'PlayStation 4 & 5');
   const updatedAt = formatUpdatedAt(payload.updated_at);
   const operations = window.WWZHttp?.normaliseRestartOperations?.(payload.operations || {}) || (payload.operations || {});
+  window.WWZShopRestartOperations = operations;
+  window.dispatchEvent(new CustomEvent('wwz:restartstatus', { detail: operations }));
   const operationUpdatedAt = formatUpdatedAt(operations.last_successful_update || payload.updated_at);
   const discordHealthy = Boolean(operations.discord_connected && operations.discord_ready);
   const nitradoState = titleCaseState(operations.nitrado_state || 'unknown');
@@ -901,6 +903,8 @@ const applyLiveStatus = (payload) => {
 
 const showStatusUnavailable = () => {
   currentServerStatus = 'unavailable';
+  window.WWZShopRestartOperations = null;
+  window.dispatchEvent(new CustomEvent('wwz:restartstatus', { detail: null }));
   setConnectionState('unavailable', 'Bot API unavailable');
   if (dashboardMode) dashboardMode.textContent = 'Status unavailable';
   liveBanner?.classList.remove('live');
