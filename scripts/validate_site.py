@@ -22,7 +22,7 @@ RETIRED_MAP_PATHS = (
     MAP_ROOT / "tiles",
     ROOT / "assets/images/maps/chernarus-vector.svg",
 )
-EXPECTED_ASSET_VERSION = "1.22.71"
+EXPECTED_ASSET_VERSION = "1.22.72"
 
 EXPECTED_ROAD_GROUPS = {
     "paved_primary",
@@ -267,7 +267,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.22.71 · Bot v1.18.70" not in index:
+    if "Website v1.22.72 · Bot v1.18.71" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "participants", "Owner bulk catalogue controls"):
         if stale in index:
@@ -317,7 +317,45 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             if dependency_index >= 0 and dependency_index < formatter_index:
                 errors.append(f"dashboard.html: {dependency} must load after shared formatters.")
 
+    shop_helpers = (ROOT / "assets/js/dashboard/shop-helpers.js").read_text(encoding="utf-8")
+    shop_helper_names = (
+        "shopStatusLabel",
+        "shopStockText",
+        "shopMemberLimitText",
+        "dashboardShopDuration",
+        "dashboardOrderDeliveryState",
+        "dashboardOrderDisplayStatus",
+        "dashboardOrderClass",
+        "dashboardOrderCoordinates",
+        "dashboardOrderProgress",
+        "profileListText",
+        "parseProfileList",
+        "parseXmlEditorSnippet",
+        "parseEventXmlEditor",
+        "parseEventZoneEditor",
+        "formatXmlEditor",
+        "legacyEventXmlFromProfile",
+        "parseShopItemTypes",
+        "generatedShopSku",
+    )
     shop = (ROOT / "assets/js/dashboard/shop.js").read_text(encoding="utf-8")
+    for helper in shop_helper_names:
+        definition = f"const {helper} ="
+        if definition not in shop_helpers:
+            errors.append(f"shop-helpers.js: missing extracted shop helper {helper}.")
+        if definition in shop:
+            errors.append(f"shop.js: extracted helper {helper} must live in shop-helpers.js.")
+
+    shop_helper_script = f'assets/js/dashboard/shop-helpers.js?v={EXPECTED_ASSET_VERSION}'
+    shop_helper_index = dashboard.find(shop_helper_script)
+    shop_script_index = dashboard.find("assets/js/dashboard/shop.js")
+    if shop_helper_index < 0:
+        errors.append("dashboard.html: missing shared shop helper script.")
+    elif shop_script_index >= 0 and shop_helper_index > shop_script_index:
+        errors.append("dashboard.html: shop-helpers.js must load before shop.js.")
+    if formatter_index >= 0 and shop_helper_index >= 0 and shop_helper_index < formatter_index:
+        errors.append("dashboard.html: shop-helpers.js must load after shared formatters.")
+
     if "loadShopRestartStatus" in shop or "setInterval(loadShopRestartStatus" in shop:
         errors.append("shop.js: restart status must reuse the shared dashboard status poll.")
     if "wwz:restartstatus" not in account or "WWZShopRestartOperations" not in account:
@@ -478,6 +516,7 @@ def validate_required_files(errors: list[str]) -> None:
         "assets/js/dashboard/shell.js",
         "assets/js/dashboard/core.js",
         "assets/js/dashboard/formatters.js",
+        "assets/js/dashboard/shop-helpers.js",
         "assets/js/dashboard/server-context.js",
         "assets/js/dashboard/administration.js",
         "assets/js/dashboard/account.js",
