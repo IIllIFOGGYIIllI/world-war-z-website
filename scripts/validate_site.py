@@ -22,7 +22,7 @@ RETIRED_MAP_PATHS = (
     MAP_ROOT / "tiles",
     ROOT / "assets/images/maps/chernarus-vector.svg",
 )
-EXPECTED_ASSET_VERSION = "1.22.81"
+EXPECTED_ASSET_VERSION = "1.22.82"
 
 EXPECTED_ROAD_GROUPS = {
     "paved_primary",
@@ -267,7 +267,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.22.81 · Bot v1.18.80" not in index:
+    if "Website v1.22.82 · Bot v1.18.81" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "participants", "Owner bulk catalogue controls"):
         if stale in index:
@@ -492,6 +492,29 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         if token not in lazy_assets:
             errors.append(f"lazy-assets.js: missing shared map-runtime lazy-loading guard: {token}")
 
+    lazy_view_styles = (
+        ("Tickets styles", f"assets/css/dashboard/tickets.css?v={EXPECTED_ASSET_VERSION}", "ensureTicketsStyles"),
+        ("Moderation/appeals styles", f"assets/css/dashboard/moderation.css?v={EXPECTED_ASSET_VERSION}", "ensureModerationStyles"),
+        ("Progression styles", f"assets/css/dashboard/progression.css?v={EXPECTED_ASSET_VERSION}", "ensureProgressionStyles"),
+        ("Objectives styles", f"assets/css/dashboard/objectives.css?v={EXPECTED_ASSET_VERSION}", "ensureObjectivesStyles"),
+        ("Factions styles", f"assets/css/dashboard/factions.css?v={EXPECTED_ASSET_VERSION}", "ensureFactionsStyles"),
+    )
+    for label, asset_url, loader_name in lazy_view_styles:
+        if asset_url in dashboard:
+            errors.append(f"dashboard.html: {label} must be view-lazy instead of loading on every dashboard visit.")
+        if asset_url not in lazy_assets or f"const {loader_name} = () =>" not in lazy_assets:
+            errors.append(f"lazy-assets.js: missing current lazy stylesheet loader for {label}.")
+    for token in (
+        "ensureModerationStyles().then(() => loadAfterDashboardRuntime",
+        "ensureTicketsStyles().then(() => loadAfterDashboardRuntime",
+        "ensureProgressionStyles().then(() => loadAfterDashboardRuntime",
+        "ensureObjectivesStyles().then(() => loadAfterDashboardRuntime",
+        "ensureFactionsStyles().then(() => loadAfterDashboardRuntime",
+        "view === 'appeals' || (view === 'configuration' && section === 'appeals')",
+    ):
+        if token not in lazy_assets:
+            errors.append(f"lazy-assets.js: missing view-style lazy-loading guard: {token}")
+
     lazy_view_assets = (
         ("dashboard map", f"assets/js/pages/dashboard-map-loader.js?v={EXPECTED_ASSET_VERSION}&rev=3", "ensureDashboardMap"),
         ("structured configuration", f"assets/js/dashboard/configuration-studio.js?v={EXPECTED_ASSET_VERSION}", "ensureConfigurationStudio"),
@@ -608,6 +631,8 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append("progression.js: server changes must not refresh progression while unrelated views are active.")
 
     changelog = (ROOT / "changelog.html").read_text(encoding="utf-8")
+    if '<h2>Version 1.22.82</h2></div><span>Lazy Workspace Styles</span>' not in changelog:
+        errors.append("changelog.html: lazy workspace stylesheet release must be recorded as Website v1.22.82.")
     if '<h2>Version 1.22.81</h2></div><span>Lazy Shared Map Runtime</span>' not in changelog:
         errors.append("changelog.html: shared map-runtime lazy-loading release must be recorded as Website v1.22.81.")
     if '<h2>Version 1.22.80</h2></div><span>Administration Request Efficiency</span>' not in changelog:
