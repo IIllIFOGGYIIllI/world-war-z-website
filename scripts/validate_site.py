@@ -22,7 +22,7 @@ RETIRED_MAP_PATHS = (
     MAP_ROOT / "tiles",
     ROOT / "assets/images/maps/chernarus-vector.svg",
 )
-EXPECTED_ASSET_VERSION = "1.22.76"
+EXPECTED_ASSET_VERSION = "1.22.77"
 
 EXPECTED_ROAD_GROUPS = {
     "paved_primary",
@@ -267,7 +267,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.22.76 · Bot v1.18.75" not in index:
+    if "Website v1.22.77 · Bot v1.18.76" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "participants", "Owner bulk catalogue controls"):
         if stale in index:
@@ -431,6 +431,19 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "wwz:restartstatus" not in shop:
         errors.append("shop.js: shared restart-status subscription is missing.")
 
+    if shop.count("document.createDocumentFragment()") < 2:
+        errors.append("shop.js: Owner Shop table rows should be batched through document fragments.")
+    for token in (
+        "const refreshOwnerBulkState = () =>",
+        "ownerShopBulkAction?.addEventListener('change', refreshOwnerBulkState);",
+        "field?.addEventListener('input', refreshOwnerBulkState)",
+        "row.classList.toggle('shop-bulk-row-selected', checkbox.checked);",
+    ):
+        if token not in shop:
+            errors.append(f"shop.js: missing Owner Shop bulk-render optimisation guard: {token}")
+    if "field?.addEventListener('input', renderOwnerShopItems)" in shop:
+        errors.append("shop.js: Owner Shop bulk field edits must not rebuild both catalogue tables.")
+
     lazy_assets = (ROOT / "assets/js/dashboard/lazy-assets.js").read_text(encoding="utf-8")
     direct_command_library = f'assets/js/data/command-library.js?v={EXPECTED_ASSET_VERSION}'
     if direct_command_library in dashboard:
@@ -484,8 +497,8 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append("progression.js: server changes must not refresh progression while unrelated views are active.")
 
     changelog = (ROOT / "changelog.html").read_text(encoding="utf-8")
-    if '<h2>Version 1.22.76</h2></div><span>View-Lazy Dashboard Runtime</span>' not in changelog:
-        errors.append("changelog.html: view-lazy dashboard runtime release must be recorded as Website v1.22.76.")
+    if '<h2>Version 1.22.77</h2></div><span>Shop Rendering Efficiency</span>' not in changelog:
+        errors.append("changelog.html: Shop rendering optimisation release must be recorded as Website v1.22.77.")
     if '<h2>Version 1.22.73</h2></div><span>Dashboard Access Ownership</span>' not in changelog:
         errors.append("changelog.html: dashboard access ownership release must be recorded as Website v1.22.73.")
     if '<h2>Version 1.22.57</h2></div><span>Objectives authentication hotfix</span>' not in changelog:

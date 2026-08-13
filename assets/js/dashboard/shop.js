@@ -1013,13 +1013,20 @@ const renderOwnerShopItems = () => {
   ownerEventPage = renderOwnerPager(ownerEventPagination, ownerEventPageSummary, eventItems.length, ownerEventPage, (value) => { ownerEventPage = value; }, 'rentals');
   const manualPageItems = manualItems.slice((ownerShopPage - 1) * OWNER_SHOP_PAGE_SIZE, ownerShopPage * OWNER_SHOP_PAGE_SIZE);
   const eventPageItems = eventItems.slice((ownerEventPage - 1) * OWNER_SHOP_PAGE_SIZE, ownerEventPage * OWNER_SHOP_PAGE_SIZE);
+  const manualFragment = document.createDocumentFragment();
+  const eventFragment = document.createDocumentFragment();
 
   manualPageItems.forEach((item) => {
     const row = document.createElement('tr');
     if (ownerShopSelectedIds.has(Number(item.item_id))) row.classList.add('shop-bulk-row-selected');
     const selectCell = document.createElement('td'); selectCell.className = 'shop-bulk-checkbox-column';
     const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.className = 'shop-bulk-row-checkbox'; checkbox.setAttribute('aria-label', `Select ${item.name}`); checkbox.checked = ownerShopSelectedIds.has(Number(item.item_id));
-    checkbox.addEventListener('change', () => { if (checkbox.checked) ownerShopSelectedIds.add(Number(item.item_id)); else ownerShopSelectedIds.delete(Number(item.item_id)); renderOwnerShopItems(); });
+    checkbox.addEventListener('change', () => {
+      if (checkbox.checked) ownerShopSelectedIds.add(Number(item.item_id));
+      else ownerShopSelectedIds.delete(Number(item.item_id));
+      row.classList.toggle('shop-bulk-row-selected', checkbox.checked);
+      refreshOwnerBulkState();
+    });
     selectCell.append(checkbox);
     const itemCell = document.createElement('td'); const strong = document.createElement('strong'); strong.textContent = `#${item.item_id} · ${item.name}`; const small = document.createElement('small'); small.textContent = item.sku; itemCell.append(strong, document.createElement('br'), small);
     const category = document.createElement('td'); category.textContent = item.category;
@@ -1030,14 +1037,16 @@ const renderOwnerShopItems = () => {
     const state = document.createElement('td'); const pill = document.createElement('span'); pill.className = `table-status ${item.active ? 'online' : 'offline'}`; pill.textContent = item.active ? 'Active' : 'Inactive'; state.append(pill);
     const action = document.createElement('td'); action.append(ownerShopEditButton(item));
     row.append(selectCell, itemCell, category, scope, price, stock, limits, state, action);
-    ownerShopItemList.append(row);
+    manualFragment.append(row);
   });
 
   eventPageItems.forEach((item) => {
     const profile = item.delivery_profile || {};
     const row = document.createElement('tr'); const name = document.createElement('td'); const strong = document.createElement('strong'); strong.textContent = `#${item.item_id} · ${item.name}`; const small = document.createElement('small'); small.textContent = item.sku; name.append(strong, document.createElement('br'), small);
-    const category = document.createElement('td'); category.textContent = item.category; const child = document.createElement('td'); child.textContent = profile.child_type || 'Missing profile'; const price = document.createElement('td'); price.textContent = `${formatMoney(item.price)} / restart`; const restarts = document.createElement('td'); restarts.textContent = `${Number(profile.minimum_restarts || 1).toLocaleString()}–${Number(profile.maximum_restarts || 30000).toLocaleString()}`; const approval = document.createElement('td'); approval.textContent = 'Automatic queue'; const state = document.createElement('td'); const pill = document.createElement('span'); pill.className = `table-status ${item.active ? 'online' : 'offline'}`; pill.textContent = item.active ? 'Active' : 'Inactive'; state.append(pill); const action = document.createElement('td'); action.append(ownerShopEditButton(item)); row.append(name, category, child, price, restarts, approval, state, action); ownerEventItemList.append(row);
+    const category = document.createElement('td'); category.textContent = item.category; const child = document.createElement('td'); child.textContent = profile.child_type || 'Missing profile'; const price = document.createElement('td'); price.textContent = `${formatMoney(item.price)} / restart`; const restarts = document.createElement('td'); restarts.textContent = `${Number(profile.minimum_restarts || 1).toLocaleString()}–${Number(profile.maximum_restarts || 30000).toLocaleString()}`; const approval = document.createElement('td'); approval.textContent = 'Automatic queue'; const state = document.createElement('td'); const pill = document.createElement('span'); pill.className = `table-status ${item.active ? 'online' : 'offline'}`; pill.textContent = item.active ? 'Active' : 'Inactive'; state.append(pill); const action = document.createElement('td'); action.append(ownerShopEditButton(item)); row.append(name, category, child, price, restarts, approval, state, action); eventFragment.append(row);
   });
+  ownerShopItemList.append(manualFragment);
+  ownerEventItemList?.append(eventFragment);
   renderOwnerBulkState(manualItems, manualPageItems);
   if (ownerShopEmpty) ownerShopEmpty.hidden = manualItems.length !== 0;
   if (ownerEventItemEmpty) ownerEventItemEmpty.hidden = eventItems.length !== 0;
@@ -1048,6 +1057,10 @@ const ownerBulkCurrentPageItems = () => {
   const pages = Math.max(1, Math.ceil(filtered.length / OWNER_SHOP_PAGE_SIZE));
   const current = Math.min(Math.max(1, ownerShopPage), pages);
   return filtered.slice((current - 1) * OWNER_SHOP_PAGE_SIZE, current * OWNER_SHOP_PAGE_SIZE);
+};
+
+const refreshOwnerBulkState = () => {
+  renderOwnerBulkState(getOwnerManualFilteredItems(), ownerBulkCurrentPageItems());
 };
 
 ownerShopSelectPageButton?.addEventListener('click', () => {
@@ -1061,10 +1074,10 @@ ownerShopSelectFilteredButton?.addEventListener('click', () => {
   renderOwnerShopItems();
 });
 ownerShopClearSelectionButton?.addEventListener('click', () => { ownerShopSelectedIds.clear(); renderOwnerShopItems(); });
-ownerShopBulkAction?.addEventListener('change', renderOwnerShopItems);
-[ownerShopBulkValue, ownerShopBulkSecondary, ownerShopBulkPeriodUnit, ownerShopBulkShared].forEach((field) => field?.addEventListener('input', renderOwnerShopItems));
-ownerShopBulkPeriodUnit?.addEventListener('change', renderOwnerShopItems);
-ownerShopBulkShared?.addEventListener('change', renderOwnerShopItems);
+ownerShopBulkAction?.addEventListener('change', refreshOwnerBulkState);
+[ownerShopBulkValue, ownerShopBulkSecondary, ownerShopBulkPeriodUnit, ownerShopBulkShared].forEach((field) => field?.addEventListener('input', refreshOwnerBulkState));
+ownerShopBulkPeriodUnit?.addEventListener('change', refreshOwnerBulkState);
+ownerShopBulkShared?.addEventListener('change', refreshOwnerBulkState);
 
 ownerShopApplyBulkButton?.addEventListener('click', async () => {
   const sessionToken = storageGet(AUTH_SESSION_KEY);

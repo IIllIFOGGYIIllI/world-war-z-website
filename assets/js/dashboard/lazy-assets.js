@@ -34,25 +34,25 @@
 
   const ensureCommandLibrary = () => loadScriptOnce(
     'command-library',
-    'assets/js/data/command-library.js?v=1.22.76',
+    'assets/js/data/command-library.js?v=1.22.77',
     () => window.__wwzCommandLibraryReady === true
   );
 
   const ensureDashboardMap = () => loadScriptOnce(
     'dashboard-map',
-    'assets/js/pages/dashboard-map-loader.js?v=1.22.76&rev=3',
+    'assets/js/pages/dashboard-map-loader.js?v=1.22.77&rev=3',
     () => Boolean(window.WWZDashboardMap?.initialise)
   );
 
   const ensureConfigurationStudio = () => loadScriptOnce(
     'configuration-studio',
-    'assets/js/dashboard/configuration-studio.js?v=1.22.76',
+    'assets/js/dashboard/configuration-studio.js?v=1.22.77',
     () => window.__wwzConfigurationStudioReady === true
   );
 
   const ensureShopWikiPreviews = () => loadScriptOnce(
     'shop-wiki-previews',
-    'assets/js/shop-wiki-previews.js?v=1.22.76',
+    'assets/js/shop-wiki-previews.js?v=1.22.77',
     () => Boolean(window.WWZShopWikiPreviews?.createImage)
   );
 

@@ -1,17 +1,16 @@
-# World War Z Website v1.22.76
+# World War Z Website v1.22.77
 
-## View-specific dashboard lazy loading
+## Owner Shop rendering optimisation
 
-- Removes the approximately 40.9 KB interactive-map controller from unconditional dashboard startup and loads it only when the Map workspace is requested.
-- Removes the approximately 41.7 KB Structured Configuration Studio from unconditional startup and loads it only for Server Configuration → Structured Controls.
-- Defers the approximately 17.9 KB DayZ Wiki preview resolver on the dashboard until the member Shop or Owner Shop workspace is requested; the standalone public Shop keeps its direct resolver.
-- Prevents Structured Configuration preloading/hover from triggering a live configuration API request until the structured workspace is actually visible.
-- Keeps first-use Shop rendering deterministic by awaiting the optional preview resolver before catalogue rendering, while retaining category SVG fallbacks if it cannot load.
-- Stops Progression from issuing a member progression API refresh on every server switch when neither Progression nor Players is active.
-- Extends site validation so these view-specific assets cannot silently return to eager dashboard loading.
+- Stops Owner Shop bulk-action field edits from rebuilding both catalogue tables on every input/change event.
+- Updates only the bulk preview, selected count, validation state and Apply button while price/stock/limit/window values are being edited.
+- Keeps full table rendering for changes that actually alter the displayed catalogue, pagination or multi-row selection state.
+- Builds manual and event catalogue rows in `DocumentFragment` instances before attaching them to the live DOM.
+- Updates a single row locally when its selection checkbox changes instead of rebuilding the full current page.
+- Extends site validation so the lighter bulk-edit rendering path cannot silently regress.
 - Refreshes GitHub Pages cache versions.
 
 ## Compatibility
 
-- Pair with Bot v1.18.75.
-- No Railway API contract, selected-server routing, authorization rule, map geometry, Shop transaction, structured configuration action or persistent record changes.
+- Pair with Bot v1.18.76.
+- No Railway API contract, Shop filtering, catalogue selection semantics, protected bulk action, checkout, selected-server routing or persistent record changes.
