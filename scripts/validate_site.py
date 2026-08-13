@@ -22,7 +22,7 @@ RETIRED_MAP_PATHS = (
     MAP_ROOT / "tiles",
     ROOT / "assets/images/maps/chernarus-vector.svg",
 )
-EXPECTED_ASSET_VERSION = "1.22.82"
+EXPECTED_ASSET_VERSION = "1.22.83"
 
 EXPECTED_ROAD_GROUPS = {
     "paved_primary",
@@ -492,6 +492,22 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         if token not in lazy_assets:
             errors.append(f"lazy-assets.js: missing shared map-runtime lazy-loading guard: {token}")
 
+    overview_map_preview = f"assets/css/dashboard/overview-map-preview.css?v={EXPECTED_ASSET_VERSION}"
+    catalogue_styles = f"assets/css/dashboard/catalogue.css?v={EXPECTED_ASSET_VERSION}&rev=2"
+    if overview_map_preview not in dashboard:
+        errors.append("dashboard.html: missing lightweight Overview map-preview stylesheet.")
+    if catalogue_styles in dashboard:
+        errors.append("dashboard.html: full catalogue/map workspace stylesheet must be lazy-loaded.")
+    if catalogue_styles not in lazy_assets or "const ensureCatalogueStyles = () =>" not in lazy_assets:
+        errors.append("lazy-assets.js: missing lazy full catalogue/map workspace stylesheet loader.")
+    for token in (
+        "ensureCatalogueStyles(),\n    loadStylesheetOnce(",
+        "ensureCatalogueStyles(),\n    ensureDeliveryController()",
+        "ensureCatalogueStyles,",
+    ):
+        if token not in lazy_assets:
+            errors.append(f"lazy-assets.js: missing catalogue-style lazy-loading guard: {token}")
+
     lazy_view_styles = (
         ("Tickets styles", f"assets/css/dashboard/tickets.css?v={EXPECTED_ASSET_VERSION}", "ensureTicketsStyles"),
         ("Moderation/appeals styles", f"assets/css/dashboard/moderation.css?v={EXPECTED_ASSET_VERSION}", "ensureModerationStyles"),
@@ -631,6 +647,8 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append("progression.js: server changes must not refresh progression while unrelated views are active.")
 
     changelog = (ROOT / "changelog.html").read_text(encoding="utf-8")
+    if '<h2>Version 1.22.83</h2></div><span>Final Optimisation Consolidation</span>' not in changelog:
+        errors.append("changelog.html: final optimisation consolidation must be recorded as Website v1.22.83.")
     if '<h2>Version 1.22.82</h2></div><span>Lazy Workspace Styles</span>' not in changelog:
         errors.append("changelog.html: lazy workspace stylesheet release must be recorded as Website v1.22.82.")
     if '<h2>Version 1.22.81</h2></div><span>Lazy Shared Map Runtime</span>' not in changelog:
