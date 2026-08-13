@@ -1,15 +1,15 @@
-# World War Z Website v1.22.80
+# World War Z Website v1.22.81
 
-## Hidden administration refresh optimisation
+## Lazy shared map runtime
 
-- Removes the unconditional post-action refresh of hidden Moderation Cases and Ban Lists after protected player administration actions.
-- Cases and ban lists continue to refresh through their existing workspace activation loaders when an Admin actually opens those sections.
-- Eliminates two invisible follow-up API requests after common player actions such as notes and economy adjustments.
-- Avoids an unnecessary potentially Nitrado-backed ban-list read when the Ban Lists workspace is not visible.
-- Keeps the protected action response, selected player detail refresh, authorization checks and audit behaviour unchanged.
-- Extends site validation so hidden post-action refreshes cannot silently return.
+- Removes Leaflet, the shared `wwz-map.js` runtime and the DayZ map component stylesheet from ordinary dashboard startup.
+- Loads the shared map runtime once, on demand, when the Map workspace or a Shop/Delivery/Locations coordinate picker actually needs it.
+- Reuses the same in-flight/runtime promise across Map and commerce workspaces so multiple navigation events cannot inject duplicate Leaflet or map assets.
+- Keeps standalone `shop.html` unchanged because its coordinate picker is part of the page's primary workflow.
+- Preserves direct Map navigation, Shop event-coordinate picking, Saved Locations and Delivery coordinate maps with the existing validated Chernarus/Livonia data.
+- Extends site validation so the dashboard cannot silently return to eager Leaflet/shared-map loading.
 
 ## Compatibility
 
-- Pair with Bot v1.18.79.
-- No Railway API contract, moderation rule, Nitrado write, selected-server routing, map geometry or persistent-record changes.
+- Pair with Bot v1.18.80.
+- No Railway API contract, selected-server routing, map geometry, road/label data, Shop transaction or persistent-record changes.

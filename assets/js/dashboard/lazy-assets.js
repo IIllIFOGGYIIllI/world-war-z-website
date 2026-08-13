@@ -2,6 +2,7 @@
   'use strict';
 
   const pendingScripts = new Map();
+  const pendingStylesheets = new Map();
   let dashboardRuntimeReady = document.readyState === 'complete';
   const dashboardRuntimeReadyPromise = dashboardRuntimeReady
     ? Promise.resolve()
@@ -16,7 +17,7 @@
     dashboardRuntimeReady ? load() : dashboardRuntimeReadyPromise.then(load)
   );
 
-  const loadScriptOnce = (key, src, ready) => {
+  const loadScriptOnce = (key, src, ready, { integrity = '', crossOrigin = '' } = {}) => {
     if (ready?.()) return Promise.resolve();
     if (pendingScripts.has(key)) return pendingScripts.get(key);
 
@@ -25,6 +26,8 @@
       script.src = src;
       script.async = true;
       script.dataset.wwzLazyAsset = key;
+      if (integrity) script.integrity = integrity;
+      if (crossOrigin) script.crossOrigin = crossOrigin;
       script.addEventListener('load', () => {
         if (ready && !ready()) {
           reject(new Error(`${key} loaded without becoming ready.`));
@@ -45,45 +48,97 @@
     return promise;
   };
 
+  const loadStylesheetOnce = (key, href, { integrity = '', crossOrigin = '' } = {}) => {
+    if (pendingStylesheets.has(key)) return pendingStylesheets.get(key);
+
+    const promise = new Promise((resolve, reject) => {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = href;
+      link.dataset.wwzLazyAsset = key;
+      if (integrity) link.integrity = integrity;
+      if (crossOrigin) link.crossOrigin = crossOrigin;
+      link.addEventListener('load', resolve, { once: true });
+      link.addEventListener('error', () => {
+        reject(new Error(`${key} could not be loaded.`));
+      }, { once: true });
+      document.head.append(link);
+    }).catch((error) => {
+      pendingStylesheets.delete(key);
+      throw error;
+    });
+
+    pendingStylesheets.set(key, promise);
+    return promise;
+  };
+
+  const ensureMapRuntime = () => Promise.all([
+    loadStylesheetOnce(
+      'leaflet-css',
+      'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+      {
+        integrity: 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=',
+        crossOrigin: 'anonymous'
+      }
+    ),
+    loadStylesheetOnce(
+      'wwz-map-css',
+      'assets/css/components/chernarus-map.css?v=1.22.81&rev=2'
+    ),
+    loadScriptOnce(
+      'leaflet-runtime',
+      'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+      () => Boolean(window.L?.map),
+      {
+        integrity: 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=',
+        crossOrigin: 'anonymous'
+      }
+    )
+  ]).then(() => loadScriptOnce(
+    'wwz-map-runtime',
+    'assets/js/map/wwz-map.js?v=1.22.81&rev=3',
+    () => Boolean(window.WWZMap?.create)
+  ));
+
   const ensureCommandLibrary = () => loadScriptOnce(
     'command-library',
-    'assets/js/data/command-library.js?v=1.22.80',
+    'assets/js/data/command-library.js?v=1.22.81',
     () => window.__wwzCommandLibraryReady === true
   );
 
-  const ensureDashboardMap = () => loadAfterDashboardRuntime(() => loadScriptOnce(
+  const ensureDashboardMap = () => ensureMapRuntime().then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
     'dashboard-map',
-    'assets/js/pages/dashboard-map-loader.js?v=1.22.80&rev=3',
+    'assets/js/pages/dashboard-map-loader.js?v=1.22.81&rev=3',
     () => Boolean(window.WWZDashboardMap?.initialise)
-  ));
+  )));
 
   const ensureConfigurationStudio = () => loadAfterDashboardRuntime(() => loadScriptOnce(
     'configuration-studio',
-    'assets/js/dashboard/configuration-studio.js?v=1.22.80',
+    'assets/js/dashboard/configuration-studio.js?v=1.22.81',
     () => window.__wwzConfigurationStudioReady === true
   ));
 
   const ensureShopWikiPreviews = () => loadScriptOnce(
     'shop-wiki-previews',
-    'assets/js/shop-wiki-previews.js?v=1.22.80',
+    'assets/js/shop-wiki-previews.js?v=1.22.81',
     () => Boolean(window.WWZShopWikiPreviews?.createImage)
   );
 
   const ensureShopHelpers = () => loadAfterDashboardRuntime(() => loadScriptOnce(
     'shop-helpers',
-    'assets/js/dashboard/shop-helpers.js?v=1.22.80',
+    'assets/js/dashboard/shop-helpers.js?v=1.22.81',
     () => window.__wwzShopHelpersReady === true
   ));
 
   const ensureShopController = () => ensureShopHelpers().then(() => loadScriptOnce(
     'shop-controller',
-    'assets/js/dashboard/shop.js?v=1.22.80&rev=3',
+    'assets/js/dashboard/shop.js?v=1.22.81&rev=3',
     () => window.__wwzShopControllerReady === true
   ));
 
   const ensureDeliveryController = () => ensureShopController().then(() => loadScriptOnce(
     'delivery-controller',
-    'assets/js/dashboard/delivery.js?v=1.22.80&rev=2',
+    'assets/js/dashboard/delivery.js?v=1.22.81&rev=2',
     () => window.__wwzDeliveryControllerReady === true
   ));
 
@@ -95,44 +150,51 @@
     || (view === 'configuration' && ['workflow', 'backups'].includes(section))
   );
 
-  const activateCommerceView = (detail = {}) => ensureCommerceRuntime().then(() => {
+  const mapDependentCommerceView = ({ view = '' } = {}) => (
+    ['shop', 'shopadmin', 'locations', 'delivery'].includes(view)
+  );
+
+  const activateCommerceView = (detail = {}) => Promise.all([
+    ensureCommerceRuntime(),
+    mapDependentCommerceView(detail) ? ensureMapRuntime() : Promise.resolve()
+  ]).then(() => {
     window.WWZShopController?.activate?.(detail);
     window.WWZDeliveryController?.activate?.(detail);
   });
 
   const ensureAdministration = () => loadAfterDashboardRuntime(() => loadScriptOnce(
     'administration',
-    'assets/js/dashboard/administration.js?v=1.22.80',
+    'assets/js/dashboard/administration.js?v=1.22.81',
     () => window.__wwzAdministrationReady === true
   ));
 
   const ensureTickets = () => loadAfterDashboardRuntime(() => loadScriptOnce(
     'tickets',
-    'assets/js/dashboard/tickets.js?v=1.22.80',
+    'assets/js/dashboard/tickets.js?v=1.22.81',
     () => window.__wwzTicketsReady === true
   ));
 
   const ensureProgression = () => loadAfterDashboardRuntime(() => loadScriptOnce(
     'progression',
-    'assets/js/dashboard/progression.js?v=1.22.80&rev=3',
+    'assets/js/dashboard/progression.js?v=1.22.81&rev=3',
     () => window.__wwzProgressionReady === true
   ));
 
   const ensureObjectives = () => loadAfterDashboardRuntime(() => loadScriptOnce(
     'objectives',
-    'assets/js/dashboard/objectives.js?v=1.22.80',
+    'assets/js/dashboard/objectives.js?v=1.22.81',
     () => window.__wwzObjectivesReady === true
   ));
 
   const ensureFactions = () => loadAfterDashboardRuntime(() => loadScriptOnce(
     'factions',
-    'assets/js/dashboard/factions.js?v=1.22.80&rev=2',
+    'assets/js/dashboard/factions.js?v=1.22.81&rev=2',
     () => window.__wwzFactionsReady === true
   ));
 
   const ensureCommandCentre = () => loadAfterDashboardRuntime(() => loadScriptOnce(
     'command-centre',
-    'assets/js/dashboard/command-centre.js?v=1.22.80',
+    'assets/js/dashboard/command-centre.js?v=1.22.81',
     () => window.__wwzCommandCentreReady === true
   ));
 
@@ -171,10 +233,10 @@
   const preloads = [
     ['commands', ensureCommandLibrary],
     ['map', ensureDashboardMap],
-    ['shop', ensureCommerceRuntime],
-    ['shopadmin', ensureCommerceRuntime],
-    ['locations', ensureCommerceRuntime],
-    ['delivery', ensureCommerceRuntime],
+    ['shop', () => Promise.all([ensureCommerceRuntime(), ensureMapRuntime()])],
+    ['shopadmin', () => Promise.all([ensureCommerceRuntime(), ensureMapRuntime()])],
+    ['locations', () => Promise.all([ensureCommerceRuntime(), ensureMapRuntime()])],
+    ['delivery', () => Promise.all([ensureCommerceRuntime(), ensureMapRuntime()])],
     ['serverconfig', ensureCommerceRuntime],
     ['tickets', ensureTickets],
     ['progression', ensureProgression],
@@ -226,6 +288,7 @@
     ensureDashboardMap,
     ensureDeliveryController,
     ensureFactions,
+    ensureMapRuntime,
     ensureObjectives,
     ensureProgression,
     ensureShopController,
