@@ -2128,10 +2128,8 @@ playerActionForm?.addEventListener('submit', async (event) => {
     closePlayerActionDialog();
     showAuthMessage(successMessage, 'success');
     setAdminPlayerSearchState(successMessage, 'success');
-    window.setTimeout(() => {
-      loadModerationCases(sessionToken);
-      loadCurrentBanlists(sessionToken);
-    }, 250);
+    // Cases and ban lists reload when their workspace is opened. Avoid two
+    // hidden API refreshes here, including a potentially Nitrado-backed ban-list read.
     if (payload.player) {
       renderAdminPlayerDetails({ player: payload.player });
     } else {

@@ -47,43 +47,43 @@
 
   const ensureCommandLibrary = () => loadScriptOnce(
     'command-library',
-    'assets/js/data/command-library.js?v=1.22.79',
+    'assets/js/data/command-library.js?v=1.22.80',
     () => window.__wwzCommandLibraryReady === true
   );
 
   const ensureDashboardMap = () => loadAfterDashboardRuntime(() => loadScriptOnce(
     'dashboard-map',
-    'assets/js/pages/dashboard-map-loader.js?v=1.22.79&rev=3',
+    'assets/js/pages/dashboard-map-loader.js?v=1.22.80&rev=3',
     () => Boolean(window.WWZDashboardMap?.initialise)
   ));
 
   const ensureConfigurationStudio = () => loadAfterDashboardRuntime(() => loadScriptOnce(
     'configuration-studio',
-    'assets/js/dashboard/configuration-studio.js?v=1.22.79',
+    'assets/js/dashboard/configuration-studio.js?v=1.22.80',
     () => window.__wwzConfigurationStudioReady === true
   ));
 
   const ensureShopWikiPreviews = () => loadScriptOnce(
     'shop-wiki-previews',
-    'assets/js/shop-wiki-previews.js?v=1.22.79',
+    'assets/js/shop-wiki-previews.js?v=1.22.80',
     () => Boolean(window.WWZShopWikiPreviews?.createImage)
   );
 
   const ensureShopHelpers = () => loadAfterDashboardRuntime(() => loadScriptOnce(
     'shop-helpers',
-    'assets/js/dashboard/shop-helpers.js?v=1.22.79',
+    'assets/js/dashboard/shop-helpers.js?v=1.22.80',
     () => window.__wwzShopHelpersReady === true
   ));
 
   const ensureShopController = () => ensureShopHelpers().then(() => loadScriptOnce(
     'shop-controller',
-    'assets/js/dashboard/shop.js?v=1.22.79&rev=3',
+    'assets/js/dashboard/shop.js?v=1.22.80&rev=3',
     () => window.__wwzShopControllerReady === true
   ));
 
   const ensureDeliveryController = () => ensureShopController().then(() => loadScriptOnce(
     'delivery-controller',
-    'assets/js/dashboard/delivery.js?v=1.22.79&rev=2',
+    'assets/js/dashboard/delivery.js?v=1.22.80&rev=2',
     () => window.__wwzDeliveryControllerReady === true
   ));
 
@@ -102,37 +102,37 @@
 
   const ensureAdministration = () => loadAfterDashboardRuntime(() => loadScriptOnce(
     'administration',
-    'assets/js/dashboard/administration.js?v=1.22.79',
+    'assets/js/dashboard/administration.js?v=1.22.80',
     () => window.__wwzAdministrationReady === true
   ));
 
   const ensureTickets = () => loadAfterDashboardRuntime(() => loadScriptOnce(
     'tickets',
-    'assets/js/dashboard/tickets.js?v=1.22.79',
+    'assets/js/dashboard/tickets.js?v=1.22.80',
     () => window.__wwzTicketsReady === true
   ));
 
   const ensureProgression = () => loadAfterDashboardRuntime(() => loadScriptOnce(
     'progression',
-    'assets/js/dashboard/progression.js?v=1.22.79&rev=3',
+    'assets/js/dashboard/progression.js?v=1.22.80&rev=3',
     () => window.__wwzProgressionReady === true
   ));
 
   const ensureObjectives = () => loadAfterDashboardRuntime(() => loadScriptOnce(
     'objectives',
-    'assets/js/dashboard/objectives.js?v=1.22.79',
+    'assets/js/dashboard/objectives.js?v=1.22.80',
     () => window.__wwzObjectivesReady === true
   ));
 
   const ensureFactions = () => loadAfterDashboardRuntime(() => loadScriptOnce(
     'factions',
-    'assets/js/dashboard/factions.js?v=1.22.79&rev=2',
+    'assets/js/dashboard/factions.js?v=1.22.80&rev=2',
     () => window.__wwzFactionsReady === true
   ));
 
   const ensureCommandCentre = () => loadAfterDashboardRuntime(() => loadScriptOnce(
     'command-centre',
-    'assets/js/dashboard/command-centre.js?v=1.22.79',
+    'assets/js/dashboard/command-centre.js?v=1.22.80',
     () => window.__wwzCommandCentreReady === true
   ));
 

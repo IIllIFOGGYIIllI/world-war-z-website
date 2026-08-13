@@ -22,7 +22,7 @@ RETIRED_MAP_PATHS = (
     MAP_ROOT / "tiles",
     ROOT / "assets/images/maps/chernarus-vector.svg",
 )
-EXPECTED_ASSET_VERSION = "1.22.79"
+EXPECTED_ASSET_VERSION = "1.22.80"
 
 EXPECTED_ROAD_GROUPS = {
     "paved_primary",
@@ -267,7 +267,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.22.79 · Bot v1.18.78" not in index:
+    if "Website v1.22.80 · Bot v1.18.79" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "participants", "Owner bulk catalogue controls"):
         if stale in index:
@@ -561,6 +561,16 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "await loadModerationQueue(sessionToken);" in account:
         errors.append("account.js: hidden moderation refresh must not require the eager Administration controller.")
 
+    hidden_player_refresh = (
+        "window.setTimeout(() => {\n"
+        "      loadModerationCases(sessionToken);\n"
+        "      loadCurrentBanlists(sessionToken);"
+    )
+    if hidden_player_refresh in administration:
+        errors.append(
+            "administration.js: protected player actions must not refresh hidden Cases and Ban Lists workspaces."
+        )
+
     config_studio = (ROOT / "assets/js/dashboard/configuration-studio.js").read_text(encoding="utf-8")
     for token in ("const activateIfVisible = () =>", "isStructuredViewActive()", "wwz:viewchange"):
         if token not in config_studio:
@@ -577,6 +587,8 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append("progression.js: server changes must not refresh progression while unrelated views are active.")
 
     changelog = (ROOT / "changelog.html").read_text(encoding="utf-8")
+    if '<h2>Version 1.22.80</h2></div><span>Administration Request Efficiency</span>' not in changelog:
+        errors.append("changelog.html: administration request optimisation must be recorded as Website v1.22.80.")
     if '<h2>Version 1.22.79</h2></div><span>Lazy Commerce Runtime</span>' not in changelog:
         errors.append("changelog.html: commerce runtime lazy-loading release must be recorded as Website v1.22.79.")
     if '<h2>Version 1.22.78</h2></div><span>Lazy Dashboard Controllers</span>' not in changelog:
