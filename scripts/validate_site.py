@@ -22,7 +22,7 @@ RETIRED_MAP_PATHS = (
     MAP_ROOT / "tiles",
     ROOT / "assets/images/maps/chernarus-vector.svg",
 )
-EXPECTED_ASSET_VERSION = "1.22.77"
+EXPECTED_ASSET_VERSION = "1.22.78"
 
 EXPECTED_ROAD_GROUPS = {
     "paved_primary",
@@ -267,7 +267,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.22.77 · Bot v1.18.76" not in index:
+    if "Website v1.22.78 · Bot v1.18.77" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "participants", "Owner bulk catalogue controls"):
         if stale in index:
@@ -481,6 +481,38 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         if asset_url not in lazy_assets or loader_name not in lazy_assets:
             errors.append(f"lazy-assets.js: missing current lazy loader for {label}.")
 
+    lazy_dashboard_controllers = (
+        ("Administration controller", f"assets/js/dashboard/administration.js?v={EXPECTED_ASSET_VERSION}", "ensureAdministration", "__wwzAdministrationReady", "assets/js/dashboard/administration.js"),
+        ("Tickets controller", f"assets/js/dashboard/tickets.js?v={EXPECTED_ASSET_VERSION}", "ensureTickets", "__wwzTicketsReady", "assets/js/dashboard/tickets.js"),
+        ("Progression controller", f"assets/js/dashboard/progression.js?v={EXPECTED_ASSET_VERSION}&rev=3", "ensureProgression", "__wwzProgressionReady", "assets/js/dashboard/progression.js"),
+        ("Objectives controller", f"assets/js/dashboard/objectives.js?v={EXPECTED_ASSET_VERSION}", "ensureObjectives", "__wwzObjectivesReady", "assets/js/dashboard/objectives.js"),
+        ("Factions controller", f"assets/js/dashboard/factions.js?v={EXPECTED_ASSET_VERSION}&rev=2", "ensureFactions", "__wwzFactionsReady", "assets/js/dashboard/factions.js"),
+        ("Command Centre controller", f"assets/js/dashboard/command-centre.js?v={EXPECTED_ASSET_VERSION}", "ensureCommandCentre", "__wwzCommandCentreReady", "assets/js/dashboard/command-centre.js"),
+    )
+    for label, asset_url, loader_name, ready_flag, relative in lazy_dashboard_controllers:
+        if asset_url in dashboard:
+            errors.append(f"dashboard.html: {label} must be view-lazy instead of loading on every dashboard visit.")
+        if asset_url not in lazy_assets or f"const {loader_name} = () =>" not in lazy_assets:
+            errors.append(f"lazy-assets.js: missing current lazy loader for {label}.")
+        source = (ROOT / relative).read_text(encoding="utf-8")
+        if ready_flag not in source:
+            errors.append(f"{relative}: missing lazy-controller readiness flag {ready_flag}.")
+
+    for token in (
+        "loadAfterDashboardRuntime",
+        "DOMContentLoaded",
+        "administrationView({ view, section })",
+        "view === 'progression' || view === 'players'",
+        "view === 'staff' && section === 'command-centre'",
+    ):
+        if token not in lazy_assets:
+            errors.append(f"lazy-assets.js: missing dashboard-controller lazy-loading guard: {token}")
+
+    if "resetAdminPlayerAdministration();" in (ROOT / "assets/js/dashboard/core.js").read_text(encoding="utf-8"):
+        errors.append("core.js: Administration reset must be guarded through the lazy controller API.")
+    if "await loadModerationQueue(sessionToken);" in account:
+        errors.append("account.js: hidden moderation refresh must not require the eager Administration controller.")
+
     config_studio = (ROOT / "assets/js/dashboard/configuration-studio.js").read_text(encoding="utf-8")
     for token in ("const activateIfVisible = () =>", "isStructuredViewActive()", "wwz:viewchange"):
         if token not in config_studio:
@@ -497,6 +529,8 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append("progression.js: server changes must not refresh progression while unrelated views are active.")
 
     changelog = (ROOT / "changelog.html").read_text(encoding="utf-8")
+    if '<h2>Version 1.22.78</h2></div><span>Lazy Dashboard Controllers</span>' not in changelog:
+        errors.append("changelog.html: dashboard controller lazy-loading release must be recorded as Website v1.22.78.")
     if '<h2>Version 1.22.77</h2></div><span>Shop Rendering Efficiency</span>' not in changelog:
         errors.append("changelog.html: Shop rendering optimisation release must be recorded as Website v1.22.77.")
     if '<h2>Version 1.22.73</h2></div><span>Dashboard Access Ownership</span>' not in changelog:

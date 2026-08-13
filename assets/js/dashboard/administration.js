@@ -1076,15 +1076,17 @@ createWebhookButton?.addEventListener('click', async () => {
   if (created && webhookLabelInput) webhookLabelInput.value = '';
 });
 
-window.addEventListener('wwz:viewchange', (event) => {
-  const view = event.detail?.view;
-  const section = event.detail?.section;
+const activateAdministrationView = ({ view = '', section = '' } = {}) => {
   if (view === 'staff' && section === 'queue') loadModerationQueue();
   if (view === 'staff' && section === 'cases') loadModerationCases();
   if (view === 'staff' && section === 'banlists') loadCurrentBanlists();
   if (view === 'staff' && section === 'failures') loadOperationFailures();
   if (view === 'configuration' && section === 'discord-logs') loadDiscordLogConfiguration();
   if (view === 'configuration' && section === 'notifications') loadWebhookConfiguration();
+};
+
+window.addEventListener('wwz:viewchange', (event) => {
+  activateAdministrationView(event.detail || {});
 });
 
 const showCaseDialogMessage = (message = '', tone = 'error') => {
@@ -2204,3 +2206,22 @@ adminPlayerSearchForm?.addEventListener('submit', async (event) => {
     adminPlayerSearchButton?.removeAttribute('aria-busy');
   }
 });
+
+window.WWZAdministration = Object.freeze({
+  loadModerationQueue,
+  loadServerActionHistory,
+  resetAdminPlayerAdministration,
+});
+window.__wwzAdministrationReady = true;
+
+if (document.querySelector('[data-view-panel="staff"].active')) {
+  activateAdministrationView({
+    view: 'staff',
+    section: typeof activeDashboardSection === 'string' ? activeDashboardSection : '',
+  });
+} else if (document.querySelector('[data-view-panel="configuration"].active')) {
+  activateAdministrationView({
+    view: 'configuration',
+    section: typeof activeDashboardSection === 'string' ? activeDashboardSection : '',
+  });
+}

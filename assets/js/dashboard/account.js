@@ -295,7 +295,14 @@ const submitMemberAppealAction = async (payload, messageElement, button) => {
     }
     if (!response.ok) throw new Error(result.message || 'The appeal action could not be completed.');
     await loadMemberAppeals(sessionToken);
-    await loadModerationQueue(sessionToken);
+    if (['staff', 'owner'].includes(dashboardAccessLevel)) {
+      try {
+        await window.WWZLazyAssets?.ensureAdministration?.();
+        await window.WWZAdministration?.loadModerationQueue?.(sessionToken);
+      } catch (_) {
+        // The member appeal has already been saved; an optional hidden Admin refresh must not turn it into a failure.
+      }
+    }
     showAuthMessage(result.message || 'Appeal updated.', 'success');
     return result;
   } catch (error) {

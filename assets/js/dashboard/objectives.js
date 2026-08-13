@@ -419,5 +419,6 @@
     const dailyReset = panel.querySelector('[data-objectives-daily-reset]'); if (dailyReset) dailyReset.textContent = `Resets in ${relative(memberData.quests.daily_resets_at)}`;
     const weeklyReset = panel.querySelector('[data-objectives-weekly-reset]'); if (weeklyReset) weeklyReset.textContent = `Resets in ${relative(memberData.quests.weekly_resets_at)}`;
   }, 30000);
+  window.__wwzObjectivesReady = true;
   if (panel.classList.contains('active')) activate();
 })();

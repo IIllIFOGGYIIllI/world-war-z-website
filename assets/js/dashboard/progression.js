@@ -708,6 +708,7 @@
     }
   });
 
+  window.__wwzProgressionReady = true;
   if (panel.classList.contains('active')) activate();
   else if (document.querySelector('[data-view-panel="players"].active')) activate({ admin: false });
 })();

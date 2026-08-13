@@ -545,5 +545,6 @@
     if (panel.classList.contains('active')) loadAll({ forceAdmin: isStaff() });
   });
 
+  window.__wwzFactionsReady = true;
   if (panel.classList.contains('active')) loadAll({ forceAdmin: isStaff() });
 })();

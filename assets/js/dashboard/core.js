@@ -429,7 +429,7 @@ const applyAccessVisibility = (level) => {
   });
 
   syncServerActionControls();
-  if (!hasAdminAccess) resetAdminPlayerAdministration();
+  if (!hasAdminAccess) window.WWZAdministration?.resetAdminPlayerAdministration?.();
   window.dispatchEvent(new CustomEvent('wwz:accesschange', { detail: { level } }));
 
   const activeView = document.querySelector('[data-view-panel].active')?.dataset.viewPanel;
@@ -755,7 +755,11 @@ serverActionForm?.addEventListener('submit', async (event) => {
     const submittedButton = serverActionButtons.find((button) => button.dataset.serverAction === action);
     submittedButton?.classList.add('action-accepted');
     window.setTimeout(() => submittedButton?.classList.remove('action-accepted'), 30_000);
-    window.setTimeout(() => loadServerActionHistory(sessionToken), 1_000);
+    window.setTimeout(() => {
+      window.WWZLazyAssets?.ensureAdministration?.()
+        .then(() => window.WWZAdministration?.loadServerActionHistory?.(sessionToken))
+        .catch(() => {});
+    }, 1_000);
     window.setTimeout(refreshLiveStatus, 3_000);
     window.setTimeout(refreshLiveStatus, 15_000);
     window.setTimeout(refreshLiveStatus, 32_000);
@@ -770,4 +774,5 @@ serverActionForm?.addEventListener('submit', async (event) => {
     syncServerActionControls();
   }
 });
+
 

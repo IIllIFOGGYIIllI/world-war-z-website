@@ -1,16 +1,17 @@
-# World War Z Website v1.22.77
+# World War Z Website v1.22.78
 
-## Owner Shop rendering optimisation
+## Dashboard controller lazy-loading optimisation
 
-- Stops Owner Shop bulk-action field edits from rebuilding both catalogue tables on every input/change event.
-- Updates only the bulk preview, selected count, validation state and Apply button while price/stock/limit/window values are being edited.
-- Keeps full table rendering for changes that actually alter the displayed catalogue, pagination or multi-row selection state.
-- Builds manual and event catalogue rows in `DocumentFragment` instances before attaching them to the live DOM.
-- Updates a single row locally when its selection checkbox changes instead of rebuilding the full current page.
-- Extends site validation so the lighter bulk-edit rendering path cannot silently regress.
+- Removes six workspace-specific controllers from unconditional dashboard startup: Administration, Tickets, Progression, Objectives, Factions and Command Centre.
+- Loads each controller only when its owning workspace is requested, avoiding 261,530 bytes of JavaScript on a normal Overview visit.
+- Keeps Progression available for both the Progression and Players workspaces and scopes Administration loading to the staff/configuration sections that actually use it.
+- Preserves direct-hash startup by waiting for the eager dashboard runtime to finish before injecting lazy controllers.
+- Keeps pointer/focus preloading for intentional navigation without turning a preload into hidden API work.
+- Allows regular members to submit appeals without requiring the Administration controller; the optional staff queue refresh remains best-effort for authorised staff.
+- Extends site validation so these controllers cannot silently return to the eager dashboard bundle.
 - Refreshes GitHub Pages cache versions.
 
 ## Compatibility
 
-- Pair with Bot v1.18.76.
-- No Railway API contract, Shop filtering, catalogue selection semantics, protected bulk action, checkout, selected-server routing or persistent record changes.
+- Pair with Bot v1.18.77.
+- No Railway API contract, authentication rule, selected-server routing, protected action, workspace behaviour, map geometry or persistent-record changes.

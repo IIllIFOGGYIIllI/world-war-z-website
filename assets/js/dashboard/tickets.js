@@ -1065,4 +1065,7 @@
   window.addEventListener('wwz:accesschange', () => {
     if (qs('[data-view-panel="tickets"].active')) activate();
   });
+
+  window.__wwzTicketsReady = true;
+  if (qs('[data-view-panel="tickets"].active')) activate();
 })();

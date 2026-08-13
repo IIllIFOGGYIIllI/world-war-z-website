@@ -176,9 +176,21 @@ const scheduleCommandCentreRefresh = (active) => {
   if (active) commandCentreTimer = window.setInterval(() => loadCommandCentre(), 30_000);
 };
 
-commandCentreRefresh?.addEventListener('click', () => loadCommandCentre());
-window.addEventListener('wwz:viewchange', (event) => {
-  const active = event.detail?.view === 'staff' && event.detail?.section === 'command-centre';
+const activateCommandCentreView = ({ view = '', section = '' } = {}) => {
+  const active = view === 'staff' && section === 'command-centre';
   scheduleCommandCentreRefresh(active);
   if (active) loadCommandCentre();
+};
+
+commandCentreRefresh?.addEventListener('click', () => loadCommandCentre());
+window.addEventListener('wwz:viewchange', (event) => {
+  activateCommandCentreView(event.detail || {});
 });
+
+window.__wwzCommandCentreReady = true;
+if (document.querySelector('[data-view-panel="staff"].active')) {
+  activateCommandCentreView({
+    view: 'staff',
+    section: typeof activeDashboardSection === 'string' ? activeDashboardSection : '',
+  });
+}
