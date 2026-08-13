@@ -1,22 +1,30 @@
-World War Z Website v1.22.85 - Updated files
+World War Z Website v1.22.86 - Updated files
 
 404.html
 PATCH_FILE_LIST.txt
 PATCH_NOTES.md
 README.md
-assets/js/dashboard/account.js
-assets/js/dashboard/command-centre.js
+assets/css/pwa.css
+assets/icons/pwa/apple-touch-icon-180.png
+assets/icons/pwa/icon-192.png
+assets/icons/pwa/icon-512.png
+assets/icons/pwa/icon-maskable-192.png
+assets/icons/pwa/icon-maskable-512.png
+assets/js/core/http.js
 assets/js/dashboard/lazy-assets.js
 assets/js/dashboard/server-context.js
-assets/js/dashboard/tickets.js
 assets/js/map/wwz-map.js
+assets/js/pwa.js
 changelog.html
 community-guidelines.html
 dashboard.html
 index.html
 legal.html
+manifest.webmanifest
 moderation-policy.html
+offline.html
 privacy.html
 scripts/validate_site.py
 shop.html
+sw.js
 terms.html

@@ -1,0 +1,53 @@
+{
+  "id": "./dashboard.html",
+  "name": "World War Z Server Companion",
+  "short_name": "WWZ Companion",
+  "description": "Installable World War Z DayZ companion for live server status, survivor profiles, economy, shop, tickets, events, factions, maps and protected administration.",
+  "start_url": "./dashboard.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#050505",
+  "theme_color": "#0b0909",
+  "categories": ["utilities", "social"],
+  "icons": [
+    {
+      "src": "./assets/icons/pwa/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/icons/pwa/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/icons/pwa/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./assets/icons/pwa/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Open Dashboard",
+      "short_name": "Dashboard",
+      "url": "./dashboard.html",
+      "icons": [{ "src": "./assets/icons/pwa/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Open Survivor Shop",
+      "short_name": "Shop",
+      "url": "./shop.html",
+      "icons": [{ "src": "./assets/icons/pwa/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ]
+}

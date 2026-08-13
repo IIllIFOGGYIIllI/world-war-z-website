@@ -41,6 +41,11 @@
   };
 
   const request = async (url, options = {}, timeoutMs = DEFAULT_TIMEOUT_MS) => {
+    if (navigator.onLine === false) {
+      const error = new Error('Offline — live World War Z data and protected actions require a network connection.');
+      error.name = 'WWZOfflineError';
+      throw error;
+    }
     const controller = new AbortController();
     const upstreamSignal = options.signal;
     const abortFromUpstream = () => controller.abort(upstreamSignal?.reason);

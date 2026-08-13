@@ -1,0 +1,167 @@
+:root {
+  --wwz-safe-top: env(safe-area-inset-top, 0px);
+  --wwz-safe-right: env(safe-area-inset-right, 0px);
+  --wwz-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --wwz-safe-left: env(safe-area-inset-left, 0px);
+}
+
+.pwa-install-button {
+  min-height: 40px;
+  padding: 9px 13px;
+  border: 1px solid rgba(243, 58, 40, 0.48);
+  background: rgba(212, 36, 24, 0.1);
+  color: #f4ece5;
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pwa-install-button:hover,
+.pwa-install-button:focus-visible {
+  border-color: rgba(243, 58, 40, 0.82);
+  background: rgba(212, 36, 24, 0.2);
+}
+
+.pwa-network-banner,
+.pwa-update-banner {
+  position: fixed;
+  right: max(16px, var(--wwz-safe-right));
+  bottom: max(16px, var(--wwz-safe-bottom));
+  z-index: 5000;
+  max-width: min(520px, calc(100vw - 32px));
+  border: 1px solid rgba(243, 58, 40, 0.5);
+  background: rgba(16, 13, 13, 0.97);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.42);
+  color: #eee8de;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.pwa-network-banner {
+  padding: 12px 14px;
+}
+
+.pwa-update-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 10px 10px 14px;
+}
+
+.pwa-update-banner button,
+.pwa-dialog-action {
+  min-height: 38px;
+  border: 0;
+  background: #d42418;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.pwa-update-banner button { padding: 9px 12px; white-space: nowrap; }
+
+.pwa-dialog {
+  width: min(470px, calc(100vw - 28px));
+  border: 1px solid rgba(238, 232, 222, 0.16);
+  background: #121010;
+  color: #eee8de;
+  padding: 0;
+}
+
+.pwa-dialog::backdrop { background: rgba(0, 0, 0, 0.76); backdrop-filter: blur(7px); }
+.pwa-dialog form { position: relative; padding: 28px; }
+.pwa-dialog h2 { margin: 5px 0 14px; font-size: 28px; line-height: 1; }
+.pwa-dialog p, .pwa-dialog li { color: #aaa19a; font-size: 13px; line-height: 1.6; }
+.pwa-dialog ol { margin: 18px 0; padding-left: 22px; }
+.pwa-dialog li + li { margin-top: 8px; }
+.pwa-dialog-icon { width: 64px; height: 64px; border-radius: 14px; }
+.pwa-dialog-kicker { margin: 14px 0 0 !important; color: #f36b5e !important; font-size: 9px !important; font-weight: 850; letter-spacing: 0.14em; text-transform: uppercase; }
+.pwa-dialog-close { position: absolute; top: 12px; right: 12px; width: 38px; height: 38px; border: 1px solid rgba(238,232,222,.14); background: transparent; color: #eee8de; cursor: pointer; font-size: 22px; }
+.pwa-dialog-action { width: 100%; padding: 10px 14px; margin-top: 8px; }
+
+html.wwz-offline [data-api-connection],
+html.wwz-offline [data-shop-api-state] {
+  opacity: 0.72;
+}
+
+
+.site-navigation .pwa-install-button {
+  background: transparent;
+}
+
+.shop-account-actions .pwa-install-button,
+.dashboard-topbar .pwa-install-button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .site-navigation .pwa-install-button {
+    width: 100%;
+    margin-top: 12px;
+    text-align: center;
+  }
+  .shop-account-actions .pwa-install-button { flex: 1 1 auto; }
+}
+
+@media (max-width: 480px) {
+  .dashboard-topbar .pwa-install-button {
+    position: fixed;
+    right: max(10px, var(--wwz-safe-right));
+    bottom: max(10px, var(--wwz-safe-bottom));
+    z-index: 4900;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.38);
+  }
+  .wwz-offline .dashboard-topbar .pwa-install-button { bottom: 74px; }
+}
+
+@media (display-mode: standalone) {
+  .dashboard-topbar {
+    top: var(--wwz-safe-top);
+    right: var(--wwz-safe-right);
+    left: var(--wwz-safe-left);
+  }
+  .dashboard-shell {
+    padding-top: calc(var(--topbar, 72px) + var(--wwz-safe-top));
+    padding-bottom: var(--wwz-safe-bottom);
+  }
+  .dashboard-sidebar {
+    top: calc(var(--topbar, 72px) + var(--wwz-safe-top));
+    bottom: var(--wwz-safe-bottom);
+    left: var(--wwz-safe-left);
+  }
+  .site-header {
+    top: var(--wwz-safe-top);
+    right: var(--wwz-safe-right);
+    left: var(--wwz-safe-left);
+  }
+  .shop-topbar {
+    padding-top: calc(12px + var(--wwz-safe-top));
+    padding-right: max(clamp(16px, 4vw, 58px), var(--wwz-safe-right));
+    padding-left: max(clamp(16px, 4vw, 58px), var(--wwz-safe-left));
+  }
+  .member-shop-footer {
+    padding-bottom: calc(24px + var(--wwz-safe-bottom));
+  }
+}
+
+@media (max-width: 720px) {
+  .pwa-install-button { min-height: 44px; }
+  .pwa-network-banner,
+  .pwa-update-banner {
+    right: max(10px, var(--wwz-safe-right));
+    bottom: max(10px, var(--wwz-safe-bottom));
+    left: max(10px, var(--wwz-safe-left));
+    max-width: none;
+  }
+  .pwa-update-banner { align-items: stretch; flex-direction: column; }
+  .pwa-update-banner button { width: 100%; }
+}

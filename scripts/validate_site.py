@@ -4,6 +4,7 @@ import argparse
 import json
 import re
 import sys
+import struct
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -22,7 +23,7 @@ RETIRED_MAP_PATHS = (
     MAP_ROOT / "tiles",
     ROOT / "assets/images/maps/chernarus-vector.svg",
 )
-EXPECTED_ASSET_VERSION = "1.22.85"
+EXPECTED_ASSET_VERSION = "1.22.86"
 
 EXPECTED_ROAD_GROUPS = {
     "paved_primary",
@@ -304,7 +305,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.22.85 · Bot v1.18.84" not in index:
+    if "Website v1.22.86 · Bot v1.18.85" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "participants", "Owner bulk catalogue controls"):
         if stale in index:
@@ -852,6 +853,16 @@ def validate_required_files(errors: list[str]) -> None:
         "index.html",
         "dashboard.html",
         "shop.html",
+        "offline.html",
+        "manifest.webmanifest",
+        "sw.js",
+        "assets/css/pwa.css",
+        "assets/js/pwa.js",
+        "assets/icons/pwa/icon-192.png",
+        "assets/icons/pwa/icon-512.png",
+        "assets/icons/pwa/icon-maskable-192.png",
+        "assets/icons/pwa/icon-maskable-512.png",
+        "assets/icons/pwa/apple-touch-icon-180.png",
         "assets/css/pages/home.css",
         "assets/css/site-polish.css",
         "assets/css/dashboard/core.css",
@@ -1212,6 +1223,146 @@ def validate_shared_map_assets(errors: list[str], info: list[str]) -> None:
         )
 
 
+
+def _png_dimensions(path: Path) -> tuple[int, int] | None:
+    try:
+        header = path.read_bytes()[:24]
+    except OSError:
+        return None
+    if len(header) < 24 or header[:8] != b"\x89PNG\r\n\x1a\n" or header[12:16] != b"IHDR":
+        return None
+    return struct.unpack(">II", header[16:24])
+
+
+def validate_pwa(errors: list[str], info: list[str]) -> None:
+    manifest_path = ROOT / "manifest.webmanifest"
+    service_worker_path = ROOT / "sw.js"
+    pwa_js_path = ROOT / "assets/js/pwa.js"
+    pwa_css_path = ROOT / "assets/css/pwa.css"
+
+    if (ROOT / "site.webmanifest").exists():
+        errors.append("site.webmanifest: superseded manifest must be removed; manifest.webmanifest is authoritative.")
+
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        errors.append(f"manifest.webmanifest is invalid: {error}")
+        return
+
+    expected_manifest = {
+        "id": "./dashboard.html",
+        "start_url": "./dashboard.html",
+        "scope": "./",
+        "display": "standalone",
+        "theme_color": "#0b0909",
+        "background_color": "#050505",
+    }
+    for key, expected in expected_manifest.items():
+        if manifest.get(key) != expected:
+            errors.append(f"manifest.webmanifest: {key} is {manifest.get(key)!r}; expected {expected!r}.")
+
+    if manifest.get("name") != "World War Z Server Companion":
+        errors.append("manifest.webmanifest: installed application name is incorrect.")
+    if manifest.get("short_name") != "WWZ Companion":
+        errors.append("manifest.webmanifest: short_name is incorrect.")
+
+    icon_expectations = {
+        "./assets/icons/pwa/icon-192.png": (192, 192, "any"),
+        "./assets/icons/pwa/icon-512.png": (512, 512, "any"),
+        "./assets/icons/pwa/icon-maskable-192.png": (192, 192, "maskable"),
+        "./assets/icons/pwa/icon-maskable-512.png": (512, 512, "maskable"),
+    }
+    icons = {str(icon.get("src")): icon for icon in manifest.get("icons") or [] if isinstance(icon, dict)}
+    for src, (width, height, purpose) in icon_expectations.items():
+        icon = icons.get(src)
+        if not icon:
+            errors.append(f"manifest.webmanifest: missing icon {src}.")
+            continue
+        if icon.get("sizes") != f"{width}x{height}" or icon.get("purpose") != purpose:
+            errors.append(f"manifest.webmanifest: icon metadata is incorrect for {src}.")
+        dimensions = _png_dimensions(ROOT / src.removeprefix("./"))
+        if dimensions != (width, height):
+            errors.append(f"{src}: PNG dimensions are {dimensions}; expected {(width, height)}.")
+
+    apple_dimensions = _png_dimensions(ROOT / "assets/icons/pwa/apple-touch-icon-180.png")
+    if apple_dimensions != (180, 180):
+        errors.append(f"Apple touch icon dimensions are {apple_dimensions}; expected (180, 180).")
+
+    service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
+    required_sw_tokens = (
+        "const WWZ_PWA_VERSION = '1.22.86'",
+        "if (request.method !== 'GET') return;",
+        "if (url.origin !== self.location.origin) return;",
+        "relativePath.startsWith('/api/')",
+        "const MAP_TILE_CACHE_LIMIT = 180;",
+        "networkFirstNavigation(request)",
+        "event.data?.type === 'SKIP_WAITING'",
+    )
+    for token in required_sw_tokens:
+        if token not in service_worker:
+            errors.append(f"sw.js: missing PWA safety/update guard: {token}")
+    app_shell_start = service_worker.find("const APP_SHELL = [")
+    app_shell_end = service_worker.find("].map(scopedUrl);", app_shell_start)
+    app_shell = service_worker[app_shell_start:app_shell_end] if app_shell_start >= 0 and app_shell_end >= 0 else ""
+    if not app_shell:
+        errors.append("sw.js: APP_SHELL could not be audited.")
+    else:
+        if "/api/" in app_shell or "railway.app" in app_shell:
+            errors.append("sw.js: live Railway/API data must never be present in the app-shell cache.")
+        if "assets/maps/" in app_shell or "satellite-corrected" in app_shell:
+            errors.append("sw.js: map pyramids must not be precached in the app shell.")
+        for relative in re.findall(r"['\"](\./[^'\"]+)['\"]", app_shell):
+            local_path = urlsplit(relative).path.removeprefix("./")
+            if not (ROOT / local_path).is_file():
+                errors.append(f"sw.js: app-shell precache target does not exist: {relative}")
+        if "/world-war-z-website/" in app_shell:
+            errors.append("sw.js: app-shell paths must remain relative to the service-worker scope, not hardcode the GitHub Pages repository path.")
+
+    pwa_js = pwa_js_path.read_text(encoding="utf-8") if pwa_js_path.is_file() else ""
+    for token in (
+        "beforeinstallprompt",
+        "navigator.serviceWorker.register",
+        "updateViaCache: 'none'",
+        "data-pwa-install",
+        "wwz:networkchange",
+        "SKIP_WAITING",
+        "Add to Home Screen",
+    ):
+        if token not in pwa_js:
+            errors.append(f"assets/js/pwa.js: missing install/network/update behavior: {token}")
+
+    http_source = (ROOT / "assets/js/core/http.js").read_text(encoding="utf-8")
+    if "navigator.onLine === false" not in http_source or "WWZOfflineError" not in http_source:
+        errors.append("assets/js/core/http.js: live API requests must fail fast with the explicit offline guard.")
+
+    expected_manifest_ref = '<link href="manifest.webmanifest" rel="manifest"/>'
+    expected_pwa_css = f'assets/css/pwa.css?v={EXPECTED_ASSET_VERSION}'
+    expected_pwa_js = f'assets/js/pwa.js?v={EXPECTED_ASSET_VERSION}'
+    expected_apple = f'assets/icons/pwa/apple-touch-icon-180.png?v={EXPECTED_ASSET_VERSION}'
+    for html_path in sorted(ROOT.glob("*.html")):
+        source = html_path.read_text(encoding="utf-8")
+        for token, label in (
+            (expected_manifest_ref, "manifest reference"),
+            ("viewport-fit=cover", "viewport safe-area support"),
+            ('name="mobile-web-app-capable"', "mobile web-app metadata"),
+            ('name="apple-mobile-web-app-capable"', "Apple web-app metadata"),
+            (expected_pwa_css, "shared PWA stylesheet"),
+            (expected_pwa_js, "shared PWA controller"),
+            (expected_apple, "Apple touch icon"),
+        ):
+            if token not in source:
+                errors.append(f"{html_path.name}: missing PWA {label}: {token}")
+
+    for html_name in ("index.html", "dashboard.html", "shop.html"):
+        source = (ROOT / html_name).read_text(encoding="utf-8")
+        if 'data-pwa-install=""' not in source:
+            errors.append(f"{html_name}: missing install-app control.")
+
+    if pwa_css_path.is_file() and "safe-area-inset-top" not in pwa_css_path.read_text(encoding="utf-8"):
+        errors.append("assets/css/pwa.css: standalone safe-area handling is missing.")
+
+    info.append("PWA: manifest, service worker, install controls, offline guard and bounded map caching validated")
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Validate the World War Z static website.")
     parser.add_argument(
@@ -1238,6 +1389,7 @@ def main() -> int:
     validate_checkout_compatibility(errors)
     validate_json(errors)
     validate_place_names(errors)
+    validate_pwa(errors, info)
     validate_retired_map_assets(errors)
     validate_satellite_assets(errors, info, required=args.require_map_assets)
     validate_road_asset(errors, info, required=args.require_map_assets)
