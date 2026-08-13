@@ -187,3 +187,5 @@ const generatedShopSku = (name, isEvent) => {
   const base = String(name || '').trim().toUpperCase().replace(/[^A-Z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 32) || 'ITEM';
   return `${isEvent ? 'EVENT' : 'ITEM'}-${base}`.slice(0, 40);
 };
+
+window.__wwzShopHelpersReady = true;

@@ -1704,13 +1704,18 @@ shopItemForm?.addEventListener('submit', async (event) => {
   }
 });
 
-window.addEventListener('wwz:viewchange', (event) => {
-  const { view, section } = event.detail || {};
+const activateShopView = ({ view = '', section = '' } = {}) => {
   const token = storageGet(AUTH_SESSION_KEY);
   if (view === 'shop') token ? loadMemberShop(token) : loadPublicShop();
   if (view === 'staff' && section === 'shop-orders') loadAdminShopOrders(token);
   if (view === 'shopadmin') loadOwnerShopConfig(token);
+};
+
+window.WWZShopController = Object.freeze({
+  activate: activateShopView,
+  reset: resetShopPanels,
 });
+window.__wwzShopControllerReady = true;
 window.addEventListener('wwz:serverchange', () => {
   if (!shopCoordinateMapInstance) return;
   shopCoordinateMapInstance.destroy();

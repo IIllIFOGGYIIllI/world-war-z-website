@@ -22,7 +22,7 @@ RETIRED_MAP_PATHS = (
     MAP_ROOT / "tiles",
     ROOT / "assets/images/maps/chernarus-vector.svg",
 )
-EXPECTED_ASSET_VERSION = "1.22.78"
+EXPECTED_ASSET_VERSION = "1.22.79"
 
 EXPECTED_ROAD_GROUPS = {
     "paved_primary",
@@ -267,7 +267,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.22.78 · Bot v1.18.77" not in index:
+    if "Website v1.22.79 · Bot v1.18.78" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "participants", "Owner bulk catalogue controls"):
         if stale in index:
@@ -413,14 +413,15 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append(f"shop.js: extracted helper {helper} must live in shop-helpers.js.")
 
     shop_helper_script = f'assets/js/dashboard/shop-helpers.js?v={EXPECTED_ASSET_VERSION}'
-    shop_helper_index = dashboard.find(shop_helper_script)
-    shop_script_index = dashboard.find("assets/js/dashboard/shop.js")
-    if shop_helper_index < 0:
-        errors.append("dashboard.html: missing shared shop helper script.")
-    elif shop_script_index >= 0 and shop_helper_index > shop_script_index:
-        errors.append("dashboard.html: shop-helpers.js must load before shop.js.")
-    if formatter_index >= 0 and shop_helper_index >= 0 and shop_helper_index < formatter_index:
-        errors.append("dashboard.html: shop-helpers.js must load after shared formatters.")
+    shop_script = f'assets/js/dashboard/shop.js?v={EXPECTED_ASSET_VERSION}&rev=3'
+    delivery_script = f'assets/js/dashboard/delivery.js?v={EXPECTED_ASSET_VERSION}&rev=2'
+    for label, asset_url in (
+        ("shared Shop helpers", shop_helper_script),
+        ("Shop controller", shop_script),
+        ("Delivery/configuration controller", delivery_script),
+    ):
+        if asset_url in dashboard:
+            errors.append(f"dashboard.html: {label} must be commerce-lazy instead of loading on every dashboard visit.")
 
     if "loadShopRestartStatus" in shop or "setInterval(loadShopRestartStatus" in shop:
         errors.append("shop.js: restart status must reuse the shared dashboard status poll.")
@@ -501,12 +502,59 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     for token in (
         "loadAfterDashboardRuntime",
         "DOMContentLoaded",
-        "administrationView({ view, section })",
+        "administrationView(detail)",
         "view === 'progression' || view === 'players'",
         "view === 'staff' && section === 'command-centre'",
     ):
         if token not in lazy_assets:
             errors.append(f"lazy-assets.js: missing dashboard-controller lazy-loading guard: {token}")
+
+    commerce_assets = (
+        ("Shop helpers", shop_helper_script, "ensureShopHelpers", "__wwzShopHelpersReady", "assets/js/dashboard/shop-helpers.js"),
+        ("Shop controller", shop_script, "ensureShopController", "__wwzShopControllerReady", "assets/js/dashboard/shop.js"),
+        ("Delivery controller", delivery_script, "ensureDeliveryController", "__wwzDeliveryControllerReady", "assets/js/dashboard/delivery.js"),
+    )
+    for label, asset_url, loader_name, ready_flag, relative in commerce_assets:
+        if asset_url not in lazy_assets or loader_name not in lazy_assets:
+            errors.append(f"lazy-assets.js: missing current commerce-lazy loader for {label}.")
+        source = (ROOT / relative).read_text(encoding="utf-8")
+        if ready_flag not in source:
+            errors.append(f"{relative}: missing commerce-lazy readiness flag {ready_flag}.")
+
+    for token in (
+        "const ensureCommerceRuntime = () =>",
+        "const commerceView =",
+        "activateCommerceView(detail)",
+        "view === 'staff' && section === 'shop-orders'",
+        "view === 'configuration' && ['workflow', 'backups'].includes(section)",
+        "if (!sawViewChange) loadViewAssets(requestedLocation());",
+    ):
+        if token not in lazy_assets:
+            errors.append(f"lazy-assets.js: missing commerce/startup lazy-loading guard: {token}")
+
+    core_source = (ROOT / "assets/js/dashboard/core.js").read_text(encoding="utf-8")
+    if "resetShopPanels();" in core_source:
+        errors.append("core.js: Shop reset must be guarded because the Shop controller is lazy-loaded.")
+    if "window.WWZShopController?.reset?.();" not in core_source:
+        errors.append("core.js: missing lazy Shop reset guard.")
+
+    bootstrap = (ROOT / "assets/js/dashboard/bootstrap.js").read_text(encoding="utf-8")
+    if "configureDiscordAuth();" not in bootstrap or "showView(location.hash.slice(1), false);" not in bootstrap:
+        errors.append("bootstrap.js: dashboard authentication/navigation startup is incomplete.")
+    account_script = f'assets/js/dashboard/account.js?v={EXPECTED_ASSET_VERSION}'
+    bootstrap_script = f'assets/js/dashboard/bootstrap.js?v={EXPECTED_ASSET_VERSION}'
+    account_index = dashboard.find(account_script)
+    bootstrap_index = dashboard.find(bootstrap_script)
+    if bootstrap_index < 0:
+        errors.append("dashboard.html: missing dashboard bootstrap script.")
+    elif account_index < 0 or bootstrap_index < account_index:
+        errors.append("dashboard.html: bootstrap.js must load after account.js.")
+
+    delivery = (ROOT / "assets/js/dashboard/delivery.js").read_text(encoding="utf-8")
+    if "configureDiscordAuth();" in delivery or "showView(location.hash.slice(1), false);" in delivery:
+        errors.append("delivery.js: dashboard bootstrap must not live inside the lazy Delivery controller.")
+    if "view === 'configuration' && ['workflow', 'backups'].includes(section)" not in delivery:
+        errors.append("delivery.js: configuration reads must remain limited to workflow/backup sections.")
 
     if "resetAdminPlayerAdministration();" in (ROOT / "assets/js/dashboard/core.js").read_text(encoding="utf-8"):
         errors.append("core.js: Administration reset must be guarded through the lazy controller API.")
@@ -529,8 +577,10 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append("progression.js: server changes must not refresh progression while unrelated views are active.")
 
     changelog = (ROOT / "changelog.html").read_text(encoding="utf-8")
+    if '<h2>Version 1.22.79</h2></div><span>Lazy Commerce Runtime</span>' not in changelog:
+        errors.append("changelog.html: commerce runtime lazy-loading release must be recorded as Website v1.22.79.")
     if '<h2>Version 1.22.78</h2></div><span>Lazy Dashboard Controllers</span>' not in changelog:
-        errors.append("changelog.html: dashboard controller lazy-loading release must be recorded as Website v1.22.78.")
+        errors.append("changelog.html: dashboard controller lazy-loading release must remain recorded as Website v1.22.78.")
     if '<h2>Version 1.22.77</h2></div><span>Shop Rendering Efficiency</span>' not in changelog:
         errors.append("changelog.html: Shop rendering optimisation release must be recorded as Website v1.22.77.")
     if '<h2>Version 1.22.73</h2></div><span>Dashboard Access Ownership</span>' not in changelog:

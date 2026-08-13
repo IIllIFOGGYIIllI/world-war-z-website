@@ -504,7 +504,7 @@ const applySignedOutState = ({ unavailable = false } = {}) => {
   applyAccessVisibility('guest');
   resetMemberPanels();
   resetAppealPanels();
-  resetShopPanels();
+  window.WWZShopController?.reset?.();
   setText('[data-auth-button-label]', 'Sign in with Discord');
   setText('[data-access-card-title]', 'Guest access');
   setText('[data-access-card-copy]', 'Sign in will securely verify your community access.');

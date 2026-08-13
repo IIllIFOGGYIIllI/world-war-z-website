@@ -732,8 +732,7 @@ const loadServerEvents = async (token = storageGet(AUTH_SESSION_KEY)) => {
 refreshServerEventsButton?.addEventListener('click', () => loadServerEvents());
 serverEventSearch?.addEventListener('input', renderServerEvents);
 
-window.addEventListener('wwz:viewchange', (event) => {
-  const { view, section } = event.detail || {};
+const activateDeliveryView = ({ view = '', section = '' } = {}) => {
   const token = storageGet(AUTH_SESSION_KEY);
   if (view === 'locations') {
     loadDeliveryLocations(token);
@@ -749,11 +748,15 @@ window.addEventListener('wwz:viewchange', (event) => {
     else if (section === 'events') loadServerEvents(token);
     else Promise.all([loadServerConfigOverview(token), loadServerEvents(token)]);
   }
-  if (view === 'configuration') {
-    if (section === 'event-items') loadOwnerShopConfig(token);
-    else Promise.all([loadServerConfigOverview(token), loadConfigBackups(token)]);
+  if (view === 'configuration' && ['workflow', 'backups'].includes(section)) {
+    Promise.all([loadServerConfigOverview(token), loadConfigBackups(token)]);
   }
+};
+
+window.WWZDeliveryController = Object.freeze({
+  activate: activateDeliveryView,
 });
+window.__wwzDeliveryControllerReady = true;
 
 window.addEventListener('wwz:serverchange', () => {
   if (!deliveryLocationMapInstance) return;
@@ -763,5 +766,3 @@ window.addEventListener('wwz:serverchange', () => {
   syncDeliveryLocationMap();
 });
 
-configureDiscordAuth();
-showView(location.hash.slice(1), false);
