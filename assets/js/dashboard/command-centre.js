@@ -173,7 +173,11 @@ const loadCommandCentre = async (sessionToken = storageGet(AUTH_SESSION_KEY)) =>
 const scheduleCommandCentreRefresh = (active) => {
   if (commandCentreTimer) window.clearInterval(commandCentreTimer);
   commandCentreTimer = 0;
-  if (active) commandCentreTimer = window.setInterval(() => loadCommandCentre(), 30_000);
+  if (active && !document.hidden) {
+    commandCentreTimer = window.setInterval(() => {
+      if (!document.hidden) loadCommandCentre();
+    }, 30_000);
+  }
 };
 
 const activateCommandCentreView = ({ view = '', section = '' } = {}) => {
@@ -185,6 +189,16 @@ const activateCommandCentreView = ({ view = '', section = '' } = {}) => {
 commandCentreRefresh?.addEventListener('click', () => loadCommandCentre());
 window.addEventListener('wwz:viewchange', (event) => {
   activateCommandCentreView(event.detail || {});
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    scheduleCommandCentreRefresh(false);
+    return;
+  }
+  activateCommandCentreView({
+    view: document.querySelector('[data-view-panel="staff"].active') ? 'staff' : '',
+    section: typeof activeDashboardSection === 'string' ? activeDashboardSection : '',
+  });
 });
 
 window.__wwzCommandCentreReady = true;

@@ -22,7 +22,7 @@ RETIRED_MAP_PATHS = (
     MAP_ROOT / "tiles",
     ROOT / "assets/images/maps/chernarus-vector.svg",
 )
-EXPECTED_ASSET_VERSION = "1.22.84"
+EXPECTED_ASSET_VERSION = "1.22.85"
 
 EXPECTED_ROAD_GROUPS = {
     "paved_primary",
@@ -256,6 +256,42 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         if token not in account:
             errors.append(f"account.js: missing live overview intelligence handling: {token}")
 
+    visibility_polling = (
+        (
+            "account.js",
+            account,
+            (
+                "document.addEventListener('visibilitychange'",
+                "if (document.hidden) return;",
+                "scheduleLiveStatusPolling",
+            ),
+        ),
+        (
+            "command-centre.js",
+            (ROOT / "assets/js/dashboard/command-centre.js").read_text(encoding="utf-8"),
+            (
+                "document.addEventListener('visibilitychange'",
+                "if (document.hidden)",
+                "scheduleCommandCentreRefresh(false)",
+            ),
+        ),
+        (
+            "tickets.js",
+            (ROOT / "assets/js/dashboard/tickets.js").read_text(encoding="utf-8"),
+            (
+                "document.addEventListener('visibilitychange'",
+                "if (document.hidden)",
+                "window.clearInterval(pollTimer)",
+            ),
+        ),
+    )
+    for label, source, tokens in visibility_polling:
+        for token in tokens:
+            if token not in source:
+                errors.append(f"{label}: missing background-tab polling guard: {token}")
+    if "window.setInterval(refreshLiveStatus, LIVE_STATUS_REFRESH_MS)" in account:
+        errors.append("account.js: live status must not poll continuously while the tab is hidden.")
+
     required_shell = (
         "const canAccessElement = (element) =>",
         "canAccessElement(button)",
@@ -268,7 +304,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.22.84 · Bot v1.18.83" not in index:
+    if "Website v1.22.85 · Bot v1.18.84" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "participants", "Owner bulk catalogue controls"):
         if stale in index:
@@ -657,6 +693,8 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append("progression.js: server changes must not refresh progression while unrelated views are active.")
 
     changelog = (ROOT / "changelog.html").read_text(encoding="utf-8")
+    if '<h2>Version 1.22.85</h2></div><span>Visibility-Aware Dashboard Polling</span>' not in changelog:
+        errors.append("changelog.html: background-polling optimisation must be recorded as Website v1.22.85.")
     if '<h2>Version 1.22.84</h2></div><span>Profile-Guided Startup Optimisation</span>' not in changelog:
         errors.append("changelog.html: profile-guided startup release must be recorded as Website v1.22.84.")
     if '<h2>Version 1.22.83</h2></div><span>Final Optimisation Consolidation</span>' not in changelog:

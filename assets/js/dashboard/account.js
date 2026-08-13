@@ -525,7 +525,21 @@ const refreshLiveStatus = async () => {
   }
 };
 
+let liveStatusPollTimer = 0;
+const scheduleLiveStatusPolling = () => {
+  if (liveStatusPollTimer) window.clearInterval(liveStatusPollTimer);
+  liveStatusPollTimer = 0;
+  if (document.hidden) return;
+  liveStatusPollTimer = window.setInterval(() => {
+    if (!document.hidden) refreshLiveStatus();
+  }, LIVE_STATUS_REFRESH_MS);
+};
+
 refreshStatusButton?.addEventListener('click', refreshLiveStatus);
-refreshLiveStatus();
-window.setInterval(refreshLiveStatus, LIVE_STATUS_REFRESH_MS);
+document.addEventListener('visibilitychange', () => {
+  scheduleLiveStatusPolling();
+  if (!document.hidden) refreshLiveStatus();
+});
+if (!document.hidden) refreshLiveStatus();
+scheduleLiveStatusPolling();
 

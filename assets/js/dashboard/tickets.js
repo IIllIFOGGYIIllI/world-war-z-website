@@ -949,11 +949,14 @@
   };
 
   const activate = async () => {
+    window.clearInterval(pollTimer);
+    pollTimer = 0;
+    if (document.hidden) return;
     await loadMemberTickets();
     if (isStaff()) await loadAdminTickets();
     if (isOwner()) await loadOwnerConfig();
-    window.clearInterval(pollTimer);
     pollTimer = window.setInterval(async () => {
+      if (document.hidden) return;
       const active = qs('[data-view-panel="tickets"].active');
       if (!active || !token()) return;
       await loadMemberTickets({ quiet: true });
@@ -1057,7 +1060,18 @@
 
   window.addEventListener('wwz:viewchange', (event) => {
     if (event.detail?.view === 'tickets') activate();
-    else window.clearInterval(pollTimer);
+    else {
+      window.clearInterval(pollTimer);
+      pollTimer = 0;
+    }
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      window.clearInterval(pollTimer);
+      pollTimer = 0;
+      return;
+    }
+    if (qs('[data-view-panel="tickets"].active')) activate();
   });
   window.addEventListener('wwz:authchange', () => {
     if (qs('[data-view-panel="tickets"].active')) activate();

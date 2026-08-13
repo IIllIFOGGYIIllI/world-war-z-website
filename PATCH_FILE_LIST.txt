@@ -1,13 +1,14 @@
-World War Z Website v1.22.84 - Updated files
+World War Z Website v1.22.85 - Updated files
 
 404.html
 PATCH_FILE_LIST.txt
 PATCH_NOTES.md
 README.md
 assets/js/dashboard/account.js
-assets/js/dashboard/appeals.js
+assets/js/dashboard/command-centre.js
 assets/js/dashboard/lazy-assets.js
 assets/js/dashboard/server-context.js
+assets/js/dashboard/tickets.js
 assets/js/map/wwz-map.js
 changelog.html
 community-guidelines.html
