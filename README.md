@@ -1,9 +1,9 @@
-# World War Z Bot Website — v1.22.83
+# World War Z Bot Website — v1.22.84
 
-Final behaviour-preserving optimisation consolidation.
+Static GitHub Pages dashboard for the World War Z PlayStation DayZ community.
 
-Railway remains authoritative: Bot v1.18.82 verifies the signed-in member and their live roles in the selected Discord server before every protected operation. The browser never receives raw guild IDs, Nitrado service IDs, tokens or mission paths.
+## Current release
 
-Deploy with Bot v1.18.82.
+Website v1.22.84 continues the measurement-driven startup work. The member/Owner Appeals controller is now view-lazy instead of occupying the eager Account authentication bundle. Normal dashboard startup retains Discord authentication and account-summary behaviour while deferring roughly 22.7 KB of Appeals-specific JavaScript until Appeals or Owner Appeal Settings is actually opened.
 
-Website v1.22.83 completes the normal dashboard-startup optimisation pass by replacing the eager 22,879-byte catalogue/map workspace stylesheet with an 827-byte Overview-only map preview. The full stylesheet now loads once on demand with Map or commerce workflows while preserving the existing Chernarus/Livonia map, Shop, Delivery and administration behaviour.
+Chernarus/Livonia routing, Shop, Delivery, map geometry and protected Railway API behaviour are unchanged.

@@ -22,7 +22,7 @@ RETIRED_MAP_PATHS = (
     MAP_ROOT / "tiles",
     ROOT / "assets/images/maps/chernarus-vector.svg",
 )
-EXPECTED_ASSET_VERSION = "1.22.83"
+EXPECTED_ASSET_VERSION = "1.22.84"
 
 EXPECTED_ROAD_GROUPS = {
     "paved_primary",
@@ -230,6 +230,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     shell = (ROOT / "assets/js/dashboard/shell.js").read_text(encoding="utf-8")
     core = (ROOT / "assets/js/dashboard/core.js").read_text(encoding="utf-8")
     account = (ROOT / "assets/js/dashboard/account.js").read_text(encoding="utf-8")
+    appeals = (ROOT / "assets/js/dashboard/appeals.js").read_text(encoding="utf-8")
 
     for stale in ("Example event", "Demonstration feed", "Preview entries"):
         if stale in dashboard:
@@ -267,7 +268,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.22.82 · Bot v1.18.81" not in index:
+    if "Website v1.22.84 · Bot v1.18.83" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "participants", "Owner bulk catalogue controls"):
         if stale in index:
@@ -296,6 +297,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         for relative in (
             "assets/js/dashboard/administration.js",
             "assets/js/dashboard/account.js",
+            "assets/js/dashboard/appeals.js",
             "assets/js/dashboard/shop.js",
             "assets/js/dashboard/delivery.js",
         ):
@@ -310,6 +312,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         for dependency in (
             "assets/js/dashboard/administration.js",
             "assets/js/dashboard/account.js",
+            "assets/js/dashboard/appeals.js",
             "assets/js/dashboard/shop.js",
             "assets/js/dashboard/delivery.js",
         ):
@@ -349,6 +352,11 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         errors.append("account.js: economy transaction renderer must live with the account controller.")
     if "const renderTransactions =" in administration:
         errors.append("administration.js: account transaction renderer must not be defined in Administration.")
+    if "const loadMemberAppeals = async" in account or "const loadOwnerAppealSettings = async" in account:
+        errors.append("account.js: Appeals workspace logic must remain view-lazy in appeals.js.")
+    for token in ("const loadMemberAppeals = async", "const loadOwnerAppealSettings = async", "window.WWZAppeals = Object.freeze({ activate: activateAppealsView })", "window.__wwzAppealsReady = true"):
+        if token not in appeals:
+            errors.append(f"appeals.js: missing lazy Appeals controller token: {token}")
 
     load_current_start = account.find("const loadCurrentAccount = async")
     load_current_end = account.find("const completeDiscordLogin = async", load_current_start)
@@ -544,6 +552,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
 
     lazy_dashboard_controllers = (
         ("Administration controller", f"assets/js/dashboard/administration.js?v={EXPECTED_ASSET_VERSION}", "ensureAdministration", "__wwzAdministrationReady", "assets/js/dashboard/administration.js"),
+        ("Appeals controller", f"assets/js/dashboard/appeals.js?v={EXPECTED_ASSET_VERSION}", "ensureAppeals", "__wwzAppealsReady", "assets/js/dashboard/appeals.js"),
         ("Tickets controller", f"assets/js/dashboard/tickets.js?v={EXPECTED_ASSET_VERSION}", "ensureTickets", "__wwzTicketsReady", "assets/js/dashboard/tickets.js"),
         ("Progression controller", f"assets/js/dashboard/progression.js?v={EXPECTED_ASSET_VERSION}&rev=3", "ensureProgression", "__wwzProgressionReady", "assets/js/dashboard/progression.js"),
         ("Objectives controller", f"assets/js/dashboard/objectives.js?v={EXPECTED_ASSET_VERSION}", "ensureObjectives", "__wwzObjectivesReady", "assets/js/dashboard/objectives.js"),
@@ -565,6 +574,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         "administrationView(detail)",
         "view === 'progression' || view === 'players'",
         "view === 'staff' && section === 'command-centre'",
+        "ensureAppeals().then(() => window.WWZAppeals?.activate?.(detail)).catch(() => {})",
     ):
         if token not in lazy_assets:
             errors.append(f"lazy-assets.js: missing dashboard-controller lazy-loading guard: {token}")
@@ -647,6 +657,8 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append("progression.js: server changes must not refresh progression while unrelated views are active.")
 
     changelog = (ROOT / "changelog.html").read_text(encoding="utf-8")
+    if '<h2>Version 1.22.84</h2></div><span>Profile-Guided Startup Optimisation</span>' not in changelog:
+        errors.append("changelog.html: profile-guided startup release must be recorded as Website v1.22.84.")
     if '<h2>Version 1.22.83</h2></div><span>Final Optimisation Consolidation</span>' not in changelog:
         errors.append("changelog.html: final optimisation consolidation must be recorded as Website v1.22.83.")
     if '<h2>Version 1.22.82</h2></div><span>Lazy Workspace Styles</span>' not in changelog:
