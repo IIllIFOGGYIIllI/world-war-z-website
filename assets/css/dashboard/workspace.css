@@ -330,6 +330,19 @@ body::before { opacity: 0.045; }
   font-weight: 900;
   letter-spacing: .02em;
 }
+.side-link > .side-link-copy {
+  width: auto;
+  height: auto;
+  min-width: 0;
+  display: grid;
+  align-content: center;
+  gap: 1px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
 .side-link-copy { min-width: 0; display: grid; }
 .side-link-copy strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
 .side-link-copy small { margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #666b73; font-size: 8px; letter-spacing: 0; text-transform: none; }

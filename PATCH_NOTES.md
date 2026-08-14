@@ -1,3 +1,14 @@
+# World War Z Website v1.22.87
+
+## Fixed
+- Fixed mobile dashboard navigation labels inheriting the icon-box dimensions/border before lazy moderation styles loaded, removing the square boxes/overlap through sidebar text.
+- Moved the install action out of the crowded mobile topbar and into a full-width sidebar control directly below the selected-server card.
+- Updated the dashboard sidebar version label and bumped the PWA cache revision so installed devices receive the corrected mobile CSS immediately.
+
+## Compatibility
+- Pairs with Bot v1.18.90.
+- No API, authentication, map geometry, server-routing or backend behaviour changes.
+
 # World War Z Website v1.22.86
 
 ## Added

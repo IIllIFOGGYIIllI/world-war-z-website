@@ -103,6 +103,14 @@ html.wwz-offline [data-shop-api-state] {
   white-space: nowrap;
 }
 
+.pwa-install-sidebar {
+  display: none;
+  width: 100%;
+  margin: 0 0 12px;
+}
+
+.pwa-install-sidebar[hidden] { display: none !important; }
+
 @media (max-width: 720px) {
   .site-navigation .pwa-install-button {
     width: 100%;
@@ -112,15 +120,18 @@ html.wwz-offline [data-shop-api-state] {
   .shop-account-actions .pwa-install-button { flex: 1 1 auto; }
 }
 
-@media (max-width: 480px) {
-  .dashboard-topbar .pwa-install-button {
-    position: fixed;
-    right: max(10px, var(--wwz-safe-right));
-    bottom: max(10px, var(--wwz-safe-bottom));
-    z-index: 4900;
-    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.38);
+@media (max-width: 760px) {
+  .dashboard-topbar > .pwa-install-button { display: none !important; }
+  .dashboard-sidebar > .pwa-install-sidebar:not([hidden]) {
+    display: block;
+    min-height: 48px;
+    padding: 11px 14px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(237, 60, 49, 0.96), rgba(139, 29, 22, 0.98));
+    box-shadow: 0 12px 28px rgba(89, 17, 12, 0.28);
+    font-size: 11px;
+    text-align: center;
   }
-  .wwz-offline .dashboard-topbar .pwa-install-button { bottom: 74px; }
 }
 
 @media (display-mode: standalone) {

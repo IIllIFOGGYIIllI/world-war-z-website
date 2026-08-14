@@ -23,7 +23,7 @@ RETIRED_MAP_PATHS = (
     MAP_ROOT / "tiles",
     ROOT / "assets/images/maps/chernarus-vector.svg",
 )
-EXPECTED_ASSET_VERSION = "1.22.86"
+EXPECTED_ASSET_VERSION = "1.22.87"
 
 EXPECTED_ROAD_GROUPS = {
     "paved_primary",
@@ -305,7 +305,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.22.86 · Bot v1.18.86" not in index:
+    if "Website v1.22.87 · Bot v1.18.86" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "participants", "Owner bulk catalogue controls"):
         if stale in index:
@@ -1321,8 +1321,8 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.22.86'",
-        "const WWZ_PWA_CACHE_REVISION = 'restore-1'",
+        "const WWZ_PWA_VERSION = '1.22.87'",
+        "const WWZ_PWA_CACHE_REVISION = 'mobile-ui-1'",
         "if (request.method !== 'GET') return;",
         "if (url.origin !== self.location.origin) return;",
         "relativePath.startsWith('/api/')",
@@ -1392,6 +1392,27 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     if pwa_css_path.is_file() and "safe-area-inset-top" not in pwa_css_path.read_text(encoding="utf-8"):
         errors.append("assets/css/pwa.css: standalone safe-area handling is missing.")
+
+    dashboard_source = (ROOT / "dashboard.html").read_text(encoding="utf-8")
+    workspace_css = (ROOT / "assets/css/dashboard/workspace.css").read_text(encoding="utf-8")
+    pwa_css = (ROOT / "assets/css/pwa.css").read_text(encoding="utf-8")
+    if 'class="pwa-install-button pwa-install-sidebar"' not in dashboard_source:
+        errors.append("dashboard.html: mobile/sidebar PWA install control is missing.")
+    for token in (
+        ".side-link > .side-link-copy",
+        "width: auto;",
+        "height: auto;",
+        "border: 0;",
+        "background: transparent;",
+    ):
+        if token not in workspace_css:
+            errors.append(f"workspace.css: missing mobile navigation copy reset: {token}")
+    for token in (
+        ".dashboard-topbar > .pwa-install-button { display: none !important; }",
+        ".dashboard-sidebar > .pwa-install-sidebar:not([hidden])",
+    ):
+        if token not in pwa_css:
+            errors.append(f"pwa.css: missing mobile install placement guard: {token}")
 
     info.append("PWA: manifest, service worker, install controls, offline guard and bounded map caching validated")
 
