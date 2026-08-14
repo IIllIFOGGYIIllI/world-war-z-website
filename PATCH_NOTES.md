@@ -1,16 +1,19 @@
-# World War Z Website v1.22.91
+# World War Z Website v1.22.92
 
-## Discord Map Deep Links
+## Added
+- Added **Administration → Server Feeds** with create, edit and delete controls.
+- Added supported DayZ feed-type selection supplied by Railway, so unsupported/fake event types are not offered.
+- Added Discord channel routing with multiple feeds allowed for the same event type.
+- Added Location/map-link output, Minimize Output, footer timestamps, Custom Embed copy, embed colour and optional notes.
+- Added dynamic PlayStation **Allow/Ignore lists** per feed.
+- Added feed search, active/inactive filtering and route summary counts.
 
-- Added support for bot-generated map URLs containing the WWZ server key, map key, DayZ X/Z coordinates, marker label and source event.
-- The dashboard selects the matching authenticated WWZ server/map before opening the map when possible.
-- The interactive map centres on the linked X/Z position and renders a temporary labelled marker.
-- The marker uses the existing canonical Chernarus/Livonia world-to-map conversion; no alternate coordinate transform was introduced.
-- Deep-link state survives the Discord OAuth round-trip in the current browser tab so radar links still work when sign-in is required.
+## Security / Runtime
+- Server Feeds remain Admin-only.
+- Discord channel IDs are never exposed directly to the browser; opaque resource keys are used.
+- Events reuse the bot's existing ADM/PvP/intelligence runtime and do not create another Nitrado polling loop.
+- Location-enabled feeds use the same corrected Chernarus/Livonia X/Z conversion and clickable WWZ map deep links as Zone Radar and the PvP killfeed.
 
 ## Compatibility
-
-- Existing map search, private pins, public markers, roads, settlement labels, coordinate copy and fullscreen controls remain unchanged.
-- Existing Zones, Zone Map and Online Players workspaces remain unchanged.
-- PWA cache revision bumped so installed WWZ Server Companion clients receive the deep-link runtime.
-- Pairs with Bot v1.18.95.
+- Requires Bot v1.18.98.
+- Existing Zones, Online Players, PWA, Shop, tickets, moderation and server-routing behaviour are preserved.

@@ -1,6 +1,6 @@
 'use strict';
 
-const WWZ_PWA_VERSION = '1.22.91';
+const WWZ_PWA_VERSION = '1.22.92';
 const CACHE_PREFIX = 'wwz-pwa-';
 const WWZ_PWA_CACHE_REVISION = 'zones-base-radar-2';
 const CACHE_RELEASE = `${WWZ_PWA_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
@@ -27,22 +27,22 @@ const APP_SHELL = [
   './assets/icons/pwa/apple-touch-icon-180.png',
   './assets/world-war-z-icon.png',
   './assets/world-war-z-logo.webp',
-  './assets/css/pwa.css?v=1.22.91',
-  './assets/css/dashboard/core.css?v=1.22.91',
-  './assets/css/dashboard/gateway.css?v=1.22.91&rev=3',
-  './assets/css/dashboard/workspace.css?v=1.22.91',
-  './assets/css/dashboard/overview-map-preview.css?v=1.22.91',
-  './assets/css/site-polish.css?v=1.22.91',
-  './assets/js/pwa.js?v=1.22.91',
-  './assets/js/core/http.js?v=1.22.91&rev=2',
-  './assets/js/dashboard/lazy-assets.js?v=1.22.91',
-  './assets/js/dashboard/shell.js?v=1.22.91',
-  './assets/js/dashboard/core.js?v=1.22.91&rev=restore-1',
-  './assets/js/dashboard/formatters.js?v=1.22.91',
-  './assets/js/dashboard/server-context.js?v=1.22.91&rev=6',
-  './assets/js/dashboard/admin-access.js?v=1.22.91',
-  './assets/js/dashboard/account.js?v=1.22.91',
-  './assets/js/dashboard/bootstrap.js?v=1.22.91&rev=restore-1'
+  './assets/css/pwa.css?v=1.22.92',
+  './assets/css/dashboard/core.css?v=1.22.92',
+  './assets/css/dashboard/gateway.css?v=1.22.92&rev=3',
+  './assets/css/dashboard/workspace.css?v=1.22.92',
+  './assets/css/dashboard/overview-map-preview.css?v=1.22.92',
+  './assets/css/site-polish.css?v=1.22.92',
+  './assets/js/pwa.js?v=1.22.92',
+  './assets/js/core/http.js?v=1.22.92&rev=2',
+  './assets/js/dashboard/lazy-assets.js?v=1.22.92',
+  './assets/js/dashboard/shell.js?v=1.22.92',
+  './assets/js/dashboard/core.js?v=1.22.92&rev=restore-1',
+  './assets/js/dashboard/formatters.js?v=1.22.92',
+  './assets/js/dashboard/server-context.js?v=1.22.92&rev=6',
+  './assets/js/dashboard/admin-access.js?v=1.22.92',
+  './assets/js/dashboard/account.js?v=1.22.92',
+  './assets/js/dashboard/bootstrap.js?v=1.22.92&rev=restore-1'
 ].map(scopedUrl);
 
 const trimCache = async (cacheName, limit) => {
