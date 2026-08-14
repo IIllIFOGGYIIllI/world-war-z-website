@@ -1,5 +1,6 @@
 (() => {
   const STORAGE_KEY = 'wwz_dashboard_server';
+  const MAP_DEEP_LINK_STORAGE_KEY = 'wwz_dashboard_map_deep_link_v1';
   const gateway = document.querySelector('[data-dashboard-gateway]');
   const loadingView = document.querySelector('[data-gateway-loading-view]');
   const loadingCopy = document.querySelector('[data-gateway-loading-copy]');
@@ -16,6 +17,46 @@
   let restoreWatchdog = null;
   const RESTORE_WATCHDOG_MS = 18_000;
   const SERVER_KEY_PATTERN = /^[a-z0-9][a-z0-9-]{1,62}$/;
+
+  const parseMapDeepLink = (value = null) => {
+    const params = value instanceof URLSearchParams ? value : new URLSearchParams(String(value ?? location.search));
+    const mapKey = String(params.get('map') || '').trim().toLowerCase();
+    const serverKey = String(params.get('server') || '').trim().toLowerCase();
+    const x = Number(params.get('x'));
+    const z = Number(params.get('z'));
+    if (!['chernarus', 'livonia'].includes(mapKey) || !Number.isFinite(x) || !Number.isFinite(z)) return null;
+    const worldSize = mapKey === 'livonia' ? 12800 : 15360;
+    if (x < 0 || x > worldSize || z < 0 || z > worldSize) return null;
+    return {
+      map_key: mapKey,
+      server_key: SERVER_KEY_PATTERN.test(serverKey) ? serverKey : '',
+      x,
+      z,
+      marker: String(params.get('marker') || 'Discord Location').trim().slice(0, 80) || 'Discord Location',
+      source: String(params.get('source') || 'discord').trim().slice(0, 32) || 'discord'
+    };
+  };
+
+  const storeMapDeepLink = (link) => {
+    try {
+      if (link) sessionStorage.setItem(MAP_DEEP_LINK_STORAGE_KEY, JSON.stringify(link));
+      else sessionStorage.removeItem(MAP_DEEP_LINK_STORAGE_KEY);
+    } catch {}
+  };
+
+  const readMapDeepLink = () => {
+    const fromUrl = parseMapDeepLink();
+    if (fromUrl) {
+      storeMapDeepLink(fromUrl);
+      return fromUrl;
+    }
+    try {
+      const stored = sessionStorage.getItem(MAP_DEEP_LINK_STORAGE_KEY);
+      return stored ? parseMapDeepLink(new URLSearchParams(Object.entries(JSON.parse(stored)).map(([key, value]) => [key.replace(/_key$/, ''), value]))) : null;
+    } catch {
+      return null;
+    }
+  };
 
   const readStoredServer = () => {
     try {
@@ -120,8 +161,8 @@
     const mapPreview = document.querySelector('.map-live-preview img');
     if (mapPreview) {
       mapPreview.src = server.map_key === 'livonia'
-        ? 'assets/maps/livonia/tiles/0/0/0.webp?v=1.22.90'
-        : 'assets/maps/chernarus/tiles/z0/0/0.webp?v=1.22.90';
+        ? 'assets/maps/livonia/tiles/0/0/0.webp?v=1.22.91'
+        : 'assets/maps/chernarus/tiles/z0/0/0.webp?v=1.22.91';
       mapPreview.alt = `${server.map_name} satellite map preview`;
     }
     document.querySelectorAll('[data-map-frame], [data-location-map], [data-shop-coordinate-map]').forEach((element) => {
@@ -173,7 +214,7 @@
     const icon = document.createElement('span');
     icon.className = 'wwz-server-icon';
     const iconImage = document.createElement('img');
-    iconImage.src = server.icon_url || 'assets/world-war-z-logo.webp?v=1.22.90';
+    iconImage.src = server.icon_url || 'assets/world-war-z-logo.webp?v=1.22.91';
     iconImage.alt = '';
     icon.append(iconImage);
     const headingCopy = document.createElement('div');
@@ -232,6 +273,17 @@
     availableServers = Array.isArray(payload?.servers)
       ? payload.servers.map(normalizeServer).filter(Boolean)
       : [];
+    const deepLink = readMapDeepLink();
+    const requested = deepLink
+      ? availableServers.find((server) => (
+          (!deepLink.server_key || server.key === deepLink.server_key) &&
+          server.map_key === deepLink.map_key
+        ))
+      : null;
+    if (!requireSelection && requested) {
+      selectServer(requested, { restored: true });
+      return;
+    }
     const stored = normalizeServer(readStoredServer());
     const restored = stored
       ? availableServers.find((server) => server.key === stored.key && server.map_key === stored.map_key)
@@ -283,6 +335,8 @@
 
   window.WWZServerContext = Object.freeze({
     clearSelection,
+    clearMapDeepLink: () => storeMapDeepLink(null),
+    getMapDeepLink: () => readMapDeepLink(),
     getMapKey: () => selectedServer?.map_key || null,
     getSelectedServer: () => selectedServer,
     getWorldSize: () => selectedServer?.world_size || null,

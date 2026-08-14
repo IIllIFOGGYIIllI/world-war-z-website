@@ -27,6 +27,7 @@
   let poiLayer = null;
   let customLayer = null;
   let placeNameLayer = null;
+  let deepLinkLayer = null;
   let placeNames = [];
   let placeNamesVisible = true;
   let editorScope = 'custom';
@@ -323,6 +324,42 @@
   };
 
   const selectedMapPoint = () => mapInstance?.getSelection?.() || null;
+
+  const applyMapDeepLink = () => {
+    if (!mapInstance) return false;
+    const link = window.WWZServerContext?.getMapDeepLink?.();
+    if (!link || link.map_key !== activeMapKey) return false;
+    const x = clampCoordinate(link.x);
+    const z = clampCoordinate(link.z);
+    if (x === null || z === null) return false;
+
+    deepLinkLayer?.clearLayers?.();
+    selectedLocation = {
+      id: null,
+      name: String(link.marker || 'Discord Location'),
+      category: String(link.source || '').startsWith('zone-') ? 'Zone detection' : 'Discord location',
+      description: 'Opened directly from a World War Z Discord coordinate link.',
+      x,
+      z,
+      scope: 'selection'
+    };
+    mapInstance.setSelection(x, z, { notify: false, center: true, zoom: 7, marker: false });
+    mapInstance.addPoi(selectedLocation, {
+      layer: deepLinkLayer,
+      colour: COLOURS.red,
+      selected: true,
+      showLabel: true,
+      onClick: () => {
+        mapInstance.setSelection(x, z, { notify: false, marker: false });
+        selectLocation(selectedLocation, { focus: true, selectOnMap: false });
+      }
+    });
+    updateDetails(selectedLocation);
+    applyMarkerSelection();
+    renderResults();
+    window.WWZServerContext?.clearMapDeepLink?.();
+    return true;
+  };
 
   const openCustomEditor = (poi = null, scope = 'custom') => {
     if (!customPanel) return;
@@ -695,6 +732,7 @@
   const initialise = async () => {
     if (mapInstance) {
       mapInstance.invalidateSize();
+      applyMapDeepLink();
       return mapInstance;
     }
     if (loadPromise) return loadPromise;
@@ -764,9 +802,11 @@
       placeNameLayer = window.L.layerGroup().addTo(mapInstance.map);
       poiLayer = window.L.layerGroup().addTo(mapInstance.map);
       customLayer = window.L.layerGroup().addTo(mapInstance.map);
+      deepLinkLayer = window.L.layerGroup().addTo(mapInstance.map);
       mapInstance.map.on('zoomend', renderPlaceNames);
       renderFilters();
       renderResults();
+      applyMapDeepLink();
       window.setTimeout(() => mapInstance.invalidateSize(), 80);
       return mapInstance;
     })().catch((error) => {
@@ -959,6 +999,7 @@
     poiLayer = null;
     customLayer = null;
     placeNameLayer = null;
+    deepLinkLayer = null;
     placeNames = [];
     publicPois = [];
     customPois = [];
