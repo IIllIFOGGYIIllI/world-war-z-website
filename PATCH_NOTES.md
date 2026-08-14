@@ -1,17 +1,22 @@
-# World War Z Website v1.22.88
+# World War Z Website v1.22.89
 
-## Roadmap and release metadata
+## Admin Zones & Mapping
 
-- Updated the public and dashboard roadmaps to show Chernarus live, Livonia fully integrated but temporarily paused, and the WWZ Server Companion PWA as available now.
-- Marked the normal performance/optimisation audit as complete rather than current roadmap work.
-- Kept natural XP/Prestige milestone QA deferred until genuine production milestones occur.
-- Added future opt-in push notifications and optional Capacitor/App Store packaging to the planned app roadmap.
-- Corrected the Shop catalogue-scope help text so it describes the current multi-server platform instead of the retired single-server state.
-- Corrected the changelog so the original PWA release is v1.22.86 and the mobile navigation/install QA fix remains v1.22.87.
-- Updated website documentation and validation metadata to pair with Bot v1.18.91.
+- Added three verified-Admin navigation workspaces: **Zones**, **Zone Map** and **Online Players**.
+- Added circular-zone and polygon-zone creation/edit dialogs using the existing validated selected-server map runtime.
+- Circular zones can be positioned by map click or exact X/Z entry and configured with a radius in metres.
+- Polygon zones are drawn directly on the map with ordered points, visible point numbering, undo and clear controls.
+- Added saved-zone search/filtering, active/inactive status, geometry summaries, edit/delete actions and map focus controls.
+- Added zone configuration for colour, active state, entry alerts, exit alerts, coordinate detail, verbose alerts, Discord alert channel, ping roles, allowlist roles and allowlisted PlayStation IDs/names.
+- Added a dedicated Zone Map that renders saved circles/polygons on the existing Chernarus/Livonia satellite + road stack.
+- Added a protected Online Players map with recent ADM player names/positions and a visibility-aware 30-second refresh while that Admin workspace is actually open.
+- Updated dashboard help text so the public interactive map remains explicitly player-position-free while the new Admin-only map is documented separately.
 
-## Compatibility
+## Security and compatibility
 
-- No Railway API, authentication, database, map geometry, selected-server routing, Shop, ticket, moderation or Nitrado action behaviour changes.
-- Livonia data/configuration remains preserved while its operational runtime is paused.
-- Installed PWA users receive the current release cache revision; the same frontend remains usable normally through GitHub Pages.
+- Zones are Admin/Owner-only in both website navigation and Railway authorization.
+- The browser receives opaque Discord channel/role resource keys rather than raw snowflake IDs.
+- Online positions come from the bot's existing cached ADM snapshot; opening the page does not introduce a second Nitrado polling loop.
+- Advanced automatic ban/enforcement rules are deliberately not exposed in this release.
+- Existing public map, PWA, Shop, delivery, tickets, moderation, Chernarus/Livonia routing and member features remain intact.
+- Pairs with Bot v1.18.92.

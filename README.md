@@ -1,20 +1,23 @@
-# World War Z Bot Website — v1.22.88
+# World War Z Bot Website — v1.22.89
 
 Static GitHub Pages website/dashboard and installable WWZ Server Companion for the World War Z PlayStation DayZ community.
 
 ## Current release
 
-Website v1.22.88 synchronizes the public roadmap, deployment status and release metadata with the actual production platform. The normal runtime/UI feature set is unchanged by this documentation-focused release.
+Website v1.22.89 adds the production **Admin Zones & Mapping** workspace while keeping the existing public map and PWA architecture intact.
 
-Current state:
+Verified Admins/Owners now have:
 
-- Chernarus is live in production.
-- Livonia onboarding and multi-server isolation are complete; its Nitrado-dependent runtime is temporarily paused while that hosting service is inactive, with all Livonia data/configuration preserved.
-- The performance/optimisation audit is complete.
-- The existing website is installable as the **WWZ Server Companion** PWA; Windows and mobile installation have been confirmed in real-device testing.
-- Natural XP/Prestige milestone QA remains deferred until genuine production milestones occur.
-- Future app work can build toward opt-in push notifications and optional Capacitor/App Store packaging without creating a second frontend.
+- **Zones** — create, edit, search, filter and delete circular or polygon zones.
+- **Zone Map** — render all saved server zones on the validated Chernarus/Livonia satellite and road map.
+- **Online Players** — view recent cached ADM player positions in a protected Admin-only map.
+- Map-assisted circular centres and polygon drawing with exact DayZ X/Z geometry.
+- Entry/exit alert configuration, Discord alert channel selection, ping roles and allowlists.
 
-The PWA continues to use the same GitHub Pages frontend, Railway API, Discord authentication and server-owned data as the normal website. Railway/API/authenticated responses, economy, tickets, Shop transactions, moderation and Nitrado/server controls remain network-only and are never treated as offline-confirmed state.
+The public interactive map still never exposes live players. The protected Online Players workspace requires fresh Railway Admin authorization and uses the bot's existing ADM cache rather than triggering an extra Nitrado file request.
 
-Pairs with Bot v1.18.91.
+Advanced DayZ++-style automatic ban/enforcement rules are intentionally deferred; this release establishes the safe mapping, detection and alerting foundation first.
+
+The PWA continues to use the same GitHub Pages frontend, Railway API, Discord authentication and selected-server routing. Chernarus and Livonia geometry remain shared through the existing validated map runtime, and Railway-owned persistent data is never replaced by a website deployment.
+
+Pairs with Bot v1.18.92.

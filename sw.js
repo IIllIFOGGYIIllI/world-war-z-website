@@ -1,8 +1,8 @@
 'use strict';
 
-const WWZ_PWA_VERSION = '1.22.88';
+const WWZ_PWA_VERSION = '1.22.89';
 const CACHE_PREFIX = 'wwz-pwa-';
-const WWZ_PWA_CACHE_REVISION = 'roadmap-sync-1';
+const WWZ_PWA_CACHE_REVISION = 'zones-mapping-1';
 const CACHE_RELEASE = `${WWZ_PWA_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${CACHE_RELEASE}`;
@@ -27,22 +27,22 @@ const APP_SHELL = [
   './assets/icons/pwa/apple-touch-icon-180.png',
   './assets/world-war-z-icon.png',
   './assets/world-war-z-logo.webp',
-  './assets/css/pwa.css?v=1.22.88',
-  './assets/css/dashboard/core.css?v=1.22.88',
-  './assets/css/dashboard/gateway.css?v=1.22.88&rev=3',
-  './assets/css/dashboard/workspace.css?v=1.22.88',
-  './assets/css/dashboard/overview-map-preview.css?v=1.22.88',
-  './assets/css/site-polish.css?v=1.22.88',
-  './assets/js/pwa.js?v=1.22.88',
-  './assets/js/core/http.js?v=1.22.88&rev=2',
-  './assets/js/dashboard/lazy-assets.js?v=1.22.88',
-  './assets/js/dashboard/shell.js?v=1.22.88',
-  './assets/js/dashboard/core.js?v=1.22.88&rev=restore-1',
-  './assets/js/dashboard/formatters.js?v=1.22.88',
-  './assets/js/dashboard/server-context.js?v=1.22.88&rev=6',
-  './assets/js/dashboard/admin-access.js?v=1.22.88',
-  './assets/js/dashboard/account.js?v=1.22.88',
-  './assets/js/dashboard/bootstrap.js?v=1.22.88&rev=restore-1'
+  './assets/css/pwa.css?v=1.22.89',
+  './assets/css/dashboard/core.css?v=1.22.89',
+  './assets/css/dashboard/gateway.css?v=1.22.89&rev=3',
+  './assets/css/dashboard/workspace.css?v=1.22.89',
+  './assets/css/dashboard/overview-map-preview.css?v=1.22.89',
+  './assets/css/site-polish.css?v=1.22.89',
+  './assets/js/pwa.js?v=1.22.89',
+  './assets/js/core/http.js?v=1.22.89&rev=2',
+  './assets/js/dashboard/lazy-assets.js?v=1.22.89',
+  './assets/js/dashboard/shell.js?v=1.22.89',
+  './assets/js/dashboard/core.js?v=1.22.89&rev=restore-1',
+  './assets/js/dashboard/formatters.js?v=1.22.89',
+  './assets/js/dashboard/server-context.js?v=1.22.89&rev=6',
+  './assets/js/dashboard/admin-access.js?v=1.22.89',
+  './assets/js/dashboard/account.js?v=1.22.89',
+  './assets/js/dashboard/bootstrap.js?v=1.22.89&rev=restore-1'
 ].map(scopedUrl);
 
 const trimCache = async (cacheName, limit) => {
