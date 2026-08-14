@@ -1,13 +1,20 @@
-# World War Z Bot Website — v1.22.87
+# World War Z Bot Website — v1.22.88
 
-
-**Mobile PWA navigation QA:** sidebar labels no longer inherit icon-box styling, and mobile installation is exposed inside the sidebar rather than behind the topbar account control.
-Static GitHub Pages dashboard for the World War Z PlayStation DayZ community.
+Static GitHub Pages website/dashboard and installable WWZ Server Companion for the World War Z PlayStation DayZ community.
 
 ## Current release
 
-Website v1.22.87 is the first mobile-device QA follow-up for the installable WWZ Server Companion. It fixes the dashboard sidebar text/icon overlap seen on Android and moves the install action out of the crowded mobile topbar into a full-width control inside the sidebar.
+Website v1.22.88 synchronizes the public roadmap, deployment status and release metadata with the actual production platform. The normal runtime/UI feature set is unchanged by this documentation-focused release.
 
-The underlying v1.22.86 PWA architecture remains unchanged: the installed app and normal GitHub Pages site use the same frontend, Discord authentication and Railway API, with live/protected API data kept out of the service-worker cache.
+Current state:
 
-Pairs with Bot v1.18.90.
+- Chernarus is live in production.
+- Livonia onboarding and multi-server isolation are complete; its Nitrado-dependent runtime is temporarily paused while that hosting service is inactive, with all Livonia data/configuration preserved.
+- The performance/optimisation audit is complete.
+- The existing website is installable as the **WWZ Server Companion** PWA; Windows and mobile installation have been confirmed in real-device testing.
+- Natural XP/Prestige milestone QA remains deferred until genuine production milestones occur.
+- Future app work can build toward opt-in push notifications and optional Capacitor/App Store packaging without creating a second frontend.
+
+The PWA continues to use the same GitHub Pages frontend, Railway API, Discord authentication and server-owned data as the normal website. Railway/API/authenticated responses, economy, tickets, Shop transactions, moderation and Nitrado/server controls remain network-only and are never treated as offline-confirmed state.
+
+Pairs with Bot v1.18.91.
