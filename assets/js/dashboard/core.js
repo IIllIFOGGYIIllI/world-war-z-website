@@ -521,8 +521,14 @@ const applySignedOutState = ({ unavailable = false } = {}) => {
   document.querySelector('[data-auth-guest-action]')?.removeAttribute('hidden');
   signOutButton?.setAttribute('hidden', '');
   setAuthBadgeState(unavailable ? 'unavailable' : 'offline', unavailable ? 'Verification unavailable' : 'Not connected');
-  window.WWZServerContext?.clearSelection();
-  if (unavailable || !discordAuthEnabled) window.WWZServerContext?.showLogin({ unavailable: true });
+  if (unavailable) {
+    // A temporary Discord/Railway outage must not destroy the user's selected
+    // Chernarus/Livonia context.  Keep the stored selection for the next retry.
+    window.WWZServerContext?.showLogin({ unavailable: true });
+  } else {
+    window.WWZServerContext?.clearSelection();
+    if (!discordAuthEnabled) window.WWZServerContext?.showLogin({ unavailable: true });
+  }
   window.dispatchEvent(new CustomEvent('wwz:authchange', { detail: { authenticated: false, accessLevel: 'guest' } }));
 };
 

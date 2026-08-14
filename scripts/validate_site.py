@@ -305,7 +305,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.22.86 · Bot v1.18.85" not in index:
+    if "Website v1.22.86 · Bot v1.18.86" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "participants", "Owner bulk catalogue controls"):
         if stale in index:
@@ -646,8 +646,39 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         errors.append("core.js: missing lazy Shop reset guard.")
 
     bootstrap = (ROOT / "assets/js/dashboard/bootstrap.js").read_text(encoding="utf-8")
-    if "configureDiscordAuth();" not in bootstrap or "showView(location.hash.slice(1), false);" not in bootstrap:
+    if "await configureDiscordAuth();" not in bootstrap or "showView(location.hash.slice(1), false);" not in bootstrap:
         errors.append("bootstrap.js: dashboard authentication/navigation startup is incomplete.")
+    for token in (
+        "const failDashboardBootstrap = (error) =>",
+        "window.WWZServerContext?.showLogin({ unavailable: true });",
+        "No protected action was sent",
+    ):
+        if token not in bootstrap:
+            errors.append(f"bootstrap.js: missing terminal authentication restore guard: {token}")
+
+    server_context = (ROOT / "assets/js/dashboard/server-context.js").read_text(encoding="utf-8")
+    for token in (
+        "const RESTORE_WATCHDOG_MS = 18_000;",
+        "window.dispatchEvent(new CustomEvent('wwz:gatewaytimeout'))",
+        "Session verification took too long",
+        "setGatewayView('login');",
+    ):
+        if token not in server_context:
+            errors.append(f"server-context.js: missing restore watchdog guard: {token}")
+
+    signed_out_start = core_source.find("const applySignedOutState = ({ unavailable = false } = {}) =>")
+    signed_out_end = core_source.find("\nconst applyAuthenticatedState =", signed_out_start)
+    signed_out = core_source[signed_out_start:signed_out_end] if signed_out_start >= 0 and signed_out_end >= 0 else ""
+    if not signed_out:
+        errors.append("core.js: signed-out state could not be audited for temporary auth recovery.")
+    else:
+        unavailable_start = signed_out.find("if (unavailable) {")
+        unavailable_end = signed_out.find("} else {", unavailable_start)
+        unavailable_block = signed_out[unavailable_start:unavailable_end] if unavailable_start >= 0 and unavailable_end >= 0 else ""
+        if "showLogin({ unavailable: true })" not in unavailable_block:
+            errors.append("core.js: temporary auth outage must release the gateway to the unavailable login state.")
+        if "clearSelection()" in unavailable_block:
+            errors.append("core.js: temporary auth outage must preserve the selected Chernarus/Livonia server context.")
     account_script = f'assets/js/dashboard/account.js?v={EXPECTED_ASSET_VERSION}'
     bootstrap_script = f'assets/js/dashboard/bootstrap.js?v={EXPECTED_ASSET_VERSION}'
     account_index = dashboard.find(account_script)
@@ -1291,6 +1322,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
         "const WWZ_PWA_VERSION = '1.22.86'",
+        "const WWZ_PWA_CACHE_REVISION = 'restore-1'",
         "if (request.method !== 'GET') return;",
         "if (url.origin !== self.location.origin) return;",
         "relativePath.startsWith('/api/')",

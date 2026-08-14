@@ -13,6 +13,8 @@
   let availableServers = [];
   let selectedServer = null;
   let publicServer = null;
+  let restoreWatchdog = null;
+  const RESTORE_WATCHDOG_MS = 18_000;
   const SERVER_KEY_PATTERN = /^[a-z0-9][a-z0-9-]{1,62}$/;
 
   const readStoredServer = () => {
@@ -67,6 +69,10 @@
   };
 
   const setGatewayView = (view) => {
+    if (view !== 'loading' && restoreWatchdog !== null) {
+      window.clearTimeout(restoreWatchdog);
+      restoreWatchdog = null;
+    }
     if (loadingView) loadingView.hidden = view !== 'loading';
     if (loginView) loginView.hidden = view !== 'login';
     if (serverView) serverView.hidden = view !== 'servers';
@@ -78,6 +84,18 @@
   const showLoading = (message = 'Restoring your secure dashboard session…') => {
     if (loadingCopy) loadingCopy.textContent = message;
     setGatewayView('loading');
+    if (restoreWatchdog !== null) window.clearTimeout(restoreWatchdog);
+    restoreWatchdog = window.setTimeout(() => {
+      restoreWatchdog = null;
+      if (loadingView?.hidden !== false) return;
+      setNotice(
+        gatewayNotice,
+        'Session verification took too long. The dashboard was released from the loading screen; retry Discord sign-in when the connection is ready.',
+        'error'
+      );
+      setGatewayView('login');
+      window.dispatchEvent(new CustomEvent('wwz:gatewaytimeout'));
+    }, RESTORE_WATCHDOG_MS);
   };
 
   const updateDashboardLabels = (server) => {

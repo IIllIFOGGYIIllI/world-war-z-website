@@ -2,10 +2,12 @@
 
 const WWZ_PWA_VERSION = '1.22.86';
 const CACHE_PREFIX = 'wwz-pwa-';
-const SHELL_CACHE = `${CACHE_PREFIX}shell-${WWZ_PWA_VERSION}`;
-const STATIC_CACHE = `${CACHE_PREFIX}static-${WWZ_PWA_VERSION}`;
-const MAP_TILE_CACHE = `${CACHE_PREFIX}map-tiles-${WWZ_PWA_VERSION}`;
-const MAP_DATA_CACHE = `${CACHE_PREFIX}map-data-${WWZ_PWA_VERSION}`;
+const WWZ_PWA_CACHE_REVISION = 'restore-1';
+const CACHE_RELEASE = `${WWZ_PWA_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
+const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_RELEASE}`;
+const STATIC_CACHE = `${CACHE_PREFIX}static-${CACHE_RELEASE}`;
+const MAP_TILE_CACHE = `${CACHE_PREFIX}map-tiles-${CACHE_RELEASE}`;
+const MAP_DATA_CACHE = `${CACHE_PREFIX}map-data-${CACHE_RELEASE}`;
 const MAP_TILE_CACHE_LIMIT = 180;
 const MAP_DATA_CACHE_LIMIT = 8;
 const STATIC_CACHE_LIMIT = 160;
@@ -35,12 +37,12 @@ const APP_SHELL = [
   './assets/js/core/http.js?v=1.22.86&rev=2',
   './assets/js/dashboard/lazy-assets.js?v=1.22.86',
   './assets/js/dashboard/shell.js?v=1.22.86',
-  './assets/js/dashboard/core.js?v=1.22.86',
+  './assets/js/dashboard/core.js?v=1.22.86&rev=restore-1',
   './assets/js/dashboard/formatters.js?v=1.22.86',
-  './assets/js/dashboard/server-context.js?v=1.22.86&rev=5',
+  './assets/js/dashboard/server-context.js?v=1.22.86&rev=6',
   './assets/js/dashboard/admin-access.js?v=1.22.86',
   './assets/js/dashboard/account.js?v=1.22.86',
-  './assets/js/dashboard/bootstrap.js?v=1.22.86'
+  './assets/js/dashboard/bootstrap.js?v=1.22.86&rev=restore-1'
 ].map(scopedUrl);
 
 const trimCache = async (cacheName, limit) => {

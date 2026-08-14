@@ -9,6 +9,13 @@
 - Added standalone safe-area/notch handling, network/offline status UI and an explicit app-update prompt.
 - Added `offline.html` as a clear offline fallback rather than pretending live WWZ services are available.
 
+## Fixed
+
+- Dashboard authentication bootstrap now has a terminal failure path instead of being able to leave the secure gateway on “Restoring the Command Centre” indefinitely.
+- Added an 18-second gateway watchdog that releases the loading screen to a clear retry/login state if restoration does not complete.
+- Temporary Railway/Discord verification failures no longer erase the stored Chernarus/Livonia server selection; a later retry can restore the same context.
+- Failed session restoration explicitly states that no protected action was sent.
+
 ## Caching and safety
 
 - Railway/API/authenticated responses are never service-worker cached.
@@ -21,6 +28,6 @@
 
 ## Compatibility
 
-- Pairs with Bot v1.18.85.
+- Pairs with Bot v1.18.86.
 - The normal GitHub Pages website remains fully usable without installing the app.
-- No Railway API, Discord authentication, database, selected-server, Shop, ticket, moderation, Nitrado, map geometry or persistent-data behaviour changed.
+- No Railway API contract, database, selected-server routing, Shop transaction, ticket/moderation rule, Nitrado action, map geometry or persistent-data behaviour changed.

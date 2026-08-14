@@ -1,6 +1,7 @@
 World War Z Website v1.22.86 - Updated files
 
 404.html
+DELETE_THESE_FILES.txt
 PATCH_FILE_LIST.txt
 PATCH_NOTES.md
 README.md
@@ -11,6 +12,8 @@ assets/icons/pwa/icon-512.png
 assets/icons/pwa/icon-maskable-192.png
 assets/icons/pwa/icon-maskable-512.png
 assets/js/core/http.js
+assets/js/dashboard/bootstrap.js
+assets/js/dashboard/core.js
 assets/js/dashboard/lazy-assets.js
 assets/js/dashboard/server-context.js
 assets/js/map/wwz-map.js
