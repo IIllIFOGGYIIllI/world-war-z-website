@@ -5,6 +5,9 @@
     zones: [],
     channels: [],
     roles: [],
+    users: [],
+    eventOptions: [],
+    dynamicLists: [],
     mapKey: '',
     mapName: '',
     worldSize: 0,
@@ -39,6 +42,31 @@
     if (!config) return Number(radius) || 0;
     return (Number(radius) || 0) * (config.mapUnits / config.mapMetres);
   };
+
+
+  const ZONE_RULE_KEYS = [
+    'ban_on_login', 'ban_on_emote', 'ban_on_dismantle', 'ban_on_build', 'ban_on_place',
+    'ban_on_fold', 'ban_on_mount', 'ban_on_unmount', 'ban_on_bury', 'ban_on_unbury',
+    'ban_on_pack', 'ban_on_repair', 'ban_on_flag_lower', 'ban_on_flag_raise', 'ban_on_kill',
+    'ban_on_npc_kill', 'ban_on_kill_ignore_bounty_kills', 'ban_on_hit', 'ban_on_bear_death',
+    'ban_on_wolf_death', 'ban_on_explosion_death', 'ban_on_trap_death', 'ban_on_vehicle_death',
+    'ban_on_explosion_suicide_death', 'ban_on_zombie_death', 'ban_on_bleed_out_death',
+    'ban_on_fall_death', 'ban_on_suicide_death', 'ban_on_barbed_wire_death', 'ban_on_fire_death',
+    'ban_on_respawn_death', 'ban_on_pvp_respawn_death', 'ban_on_unknown_death',
+    'ban_on_detection_outside', 'ban_on_detection', 'kill_zone', 'kill_zone_ignore_bounty_kills', 'hit_zone',
+  ];
+
+  const setRuleValues = (zone = {}) => {
+    ZONE_RULE_KEYS.forEach((key) => {
+      const input = $(`[data-zone-rule="${key}"]`);
+      if (input) input.checked = Boolean(zone[key]);
+    });
+  };
+
+  const rulePayload = () => Object.fromEntries(ZONE_RULE_KEYS.map((key) => [
+    key,
+    Boolean($(`[data-zone-rule="${key}"]`)?.checked),
+  ]));
 
   const message = (text = '', kind = 'info') => {
     const element = $('[data-zone-message]');
@@ -283,8 +311,10 @@
       meta.className = 'zone-row-status';
       meta.append(
         checkboxPill(zone.active ? 'Active' : 'Inactive', zone.active, 'activity'),
+        checkboxPill(zone.ping_on_detection ? `Radar ${Number(zone.radar_interval_minutes || 5)}m` : 'Radar off', zone.ping_on_detection, 'activity'),
         checkboxPill(zone.alert_on_enter ? 'Entry alerts' : 'Entry off', zone.alert_on_enter),
-        checkboxPill(zone.alert_on_exit ? 'Exit alerts' : 'Exit off', zone.alert_on_exit)
+        checkboxPill(zone.alert_on_exit ? 'Exit alerts' : 'Exit off', zone.alert_on_exit),
+        checkboxPill(zone.channel_key ? 'Channel set' : 'No channel', Boolean(zone.channel_key))
       );
       copy.append(heading, geometry, meta);
 
@@ -356,7 +386,80 @@
     });
   };
 
+  const fillOptionChecklist = (selector, options = [], selectedKeys = [], emptyText = 'No options are available.') => {
+    const root = $(selector);
+    if (!root) return;
+    root.replaceChildren();
+    const selected = new Set((selectedKeys || []).map(String));
+    if (!options.length) {
+      const empty = document.createElement('small');
+      empty.textContent = emptyText;
+      root.append(empty);
+      return;
+    }
+    options.forEach((item) => {
+      const label = document.createElement('label');
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.value = String(item.key || '');
+      input.checked = selected.has(input.value);
+      const text = document.createElement('span');
+      text.textContent = String(item.name || item.key || 'Option');
+      label.append(input, text);
+      root.append(label);
+    });
+  };
+
   const selectedChecklistValues = (selector) => $$(selector).filter((input) => input.checked).map((input) => input.value);
+
+  const normaliseDynamicList = (item = {}) => ({
+    name: String(item.name || '').trim().slice(0, 80),
+    mode: String(item.mode || 'ignore').toLowerCase() === 'allow' ? 'allow' : 'ignore',
+    active: item.active !== false,
+    entries: Array.isArray(item.entries) ? item.entries.map(String).filter(Boolean) : [],
+  });
+
+  const renderDynamicLists = () => {
+    const root = $('[data-zone-dynamic-lists]');
+    if (!root) return;
+    root.replaceChildren();
+    if (!state.dynamicLists.length) {
+      const empty = document.createElement('p');
+      empty.className = 'zone-dynamic-empty';
+      empty.textContent = 'No dynamic lists configured.';
+      root.append(empty);
+      return;
+    }
+    state.dynamicLists.forEach((item, index) => {
+      const row = document.createElement('div');
+      row.className = 'zone-dynamic-row';
+      row.innerHTML = `
+        <label class="zone-field"><span>List Name</span><input type="text" maxlength="80" data-dynamic-name="${index}"></label>
+        <label class="zone-field"><span>Mode</span><select data-dynamic-mode="${index}"><option value="ignore">Ignore</option><option value="allow">Allow</option></select></label>
+        <label class="zone-dynamic-active"><input type="checkbox" data-dynamic-active="${index}"><span>Active</span></label>
+        <button class="danger-action compact-action" data-dynamic-remove="${index}" type="button">Remove</button>
+        <label class="zone-field zone-dynamic-entries"><span>Player Names / PSNs</span><textarea maxlength="4096" data-dynamic-entries="${index}" placeholder="One per line or comma-separated"></textarea></label>`;
+      const name = $('[data-dynamic-name]', row);
+      const mode = $('[data-dynamic-mode]', row);
+      const active = $('[data-dynamic-active]', row);
+      const entries = $('[data-dynamic-entries]', row);
+      name.value = item.name || '';
+      mode.value = item.mode || 'ignore';
+      active.checked = item.active !== false;
+      entries.value = (item.entries || []).join('\n');
+      name.addEventListener('input', () => { state.dynamicLists[index].name = name.value; });
+      mode.addEventListener('change', () => { state.dynamicLists[index].mode = mode.value; });
+      active.addEventListener('change', () => { state.dynamicLists[index].active = active.checked; });
+      entries.addEventListener('input', () => {
+        state.dynamicLists[index].entries = entries.value.split(/[\n,]+/).map((value) => value.trim()).filter(Boolean);
+      });
+      $('[data-dynamic-remove]', row)?.addEventListener('click', () => {
+        state.dynamicLists.splice(index, 1);
+        renderDynamicLists();
+      });
+      root.append(row);
+    });
+  };
 
   const setShapeFields = () => {
     const circle = state.editorShape === 'circle';
@@ -430,14 +533,24 @@
     state.editorZoneId = null;
     state.editorShape = 'circle';
     state.editorPoints = [];
+    state.dynamicLists = [];
     if ($('[data-zone-colour]')) $('[data-zone-colour]').value = '#d52b1e';
     if ($('[data-zone-active]')) $('[data-zone-active]').checked = true;
     if ($('[data-zone-alert-enter]')) $('[data-zone-alert-enter]').checked = true;
     if ($('[data-zone-include-location]')) $('[data-zone-include-location]').checked = true;
+    if ($('[data-zone-ping-on-detection]')) $('[data-zone-ping-on-detection]').checked = true;
+    if ($('[data-zone-radar-interval]')) $('[data-zone-radar-interval]').value = '5';
+    if ($('[data-zone-ping-payout]')) $('[data-zone-ping-payout]').value = '0';
+    if ($('[data-zone-temporary-ban-minutes]')) $('[data-zone-temporary-ban-minutes]').value = '60';
     if ($('[data-zone-radius]')) $('[data-zone-radius]').value = '150';
+    setRuleValues({});
     fillChannelOptions('');
     fillRoleChecklist('[data-zone-ping-roles]', []);
     fillRoleChecklist('[data-zone-allowlist-roles]', []);
+    fillOptionChecklist('[data-zone-management-users]', state.users, [], 'No Discord users are currently cached.');
+    fillOptionChecklist('[data-zone-ignored-events]', state.eventOptions, []);
+    fillOptionChecklist('[data-zone-allowed-events]', state.eventOptions, []);
+    renderDynamicLists();
     state.editorLayers?.clearLayers?.();
     state.editorMap?.clearSelection?.({ notify: false });
     editorMessage('');
@@ -458,10 +571,22 @@
       $('[data-zone-alert-exit]').checked = Boolean(zone.alert_on_exit);
       $('[data-zone-include-location]').checked = Boolean(zone.include_location);
       $('[data-zone-verbose]').checked = Boolean(zone.verbose_mode);
+      $('[data-zone-ping-on-detection]').checked = zone.ping_on_detection !== false;
+      $('[data-zone-ping-bounties]').checked = Boolean(zone.ping_bounties);
+      $('[data-zone-radar-interval]').value = String(Number(zone.radar_interval_minutes || 5));
+      $('[data-zone-ping-payout]').value = String(Number(zone.ping_on_detection_payout || 0));
+      $('[data-zone-temporary-ban]').checked = Boolean(zone.temporary_ban);
+      $('[data-zone-temporary-ban-minutes]').value = String(Number(zone.temporary_ban_minutes || 60));
+      setRuleValues(zone);
       $('[data-zone-allowlist-names]').value = (zone.allowlist_names || []).join('\n');
       fillChannelOptions(zone.channel_key || '');
       fillRoleChecklist('[data-zone-ping-roles]', zone.ping_role_keys || []);
       fillRoleChecklist('[data-zone-allowlist-roles]', zone.allowlist_role_keys || []);
+      fillOptionChecklist('[data-zone-management-users]', state.users, zone.allowlist_management_user_keys || [], 'No Discord users are currently cached.');
+      fillOptionChecklist('[data-zone-ignored-events]', state.eventOptions, zone.ignored_events || []);
+      fillOptionChecklist('[data-zone-allowed-events]', state.eventOptions, zone.allowed_events || []);
+      state.dynamicLists = (zone.dynamic_lists || []).map(normaliseDynamicList);
+      renderDynamicLists();
       if (state.editorShape === 'circle') {
         $('[data-zone-center-x]').value = formatCoordinate(zone.center_x);
         $('[data-zone-center-z]').value = formatCoordinate(zone.center_z);
@@ -496,10 +621,21 @@
       alert_on_exit: Boolean($('[data-zone-alert-exit]')?.checked),
       include_location: Boolean($('[data-zone-include-location]')?.checked),
       verbose_mode: Boolean($('[data-zone-verbose]')?.checked),
+      ping_on_detection: Boolean($('[data-zone-ping-on-detection]')?.checked),
+      ping_bounties: Boolean($('[data-zone-ping-bounties]')?.checked),
+      radar_interval_minutes: Number($('[data-zone-radar-interval]')?.value || 5),
+      ping_on_detection_payout: Number($('[data-zone-ping-payout]')?.value || 0),
+      temporary_ban: Boolean($('[data-zone-temporary-ban]')?.checked),
+      temporary_ban_minutes: Number($('[data-zone-temporary-ban-minutes]')?.value || 60),
       channel_key: String($('[data-zone-channel]')?.value || ''),
       ping_role_keys: selectedChecklistValues('[data-zone-ping-roles] input[type="checkbox"]'),
       allowlist_role_keys: selectedChecklistValues('[data-zone-allowlist-roles] input[type="checkbox"]'),
+      allowlist_management_user_keys: selectedChecklistValues('[data-zone-management-users] input[type="checkbox"]'),
+      ignored_events: selectedChecklistValues('[data-zone-ignored-events] input[type="checkbox"]'),
+      allowed_events: selectedChecklistValues('[data-zone-allowed-events] input[type="checkbox"]'),
+      dynamic_lists: state.dynamicLists.map(normaliseDynamicList),
       allowlist_names: String($('[data-zone-allowlist-names]')?.value || ''),
+      ...rulePayload(),
     };
     if (state.editorShape === 'circle') {
       common.center_x = Number($('[data-zone-center-x]')?.value);
@@ -519,6 +655,7 @@
     try {
       const payload = zonePayloadFromEditor();
       if (!payload.name) throw new Error('Enter a zone name.');
+      if (payload.ping_on_detection && !payload.channel_key) throw new Error('Select a Discord alert channel for Ping on Detection.');
       if (payload.shape === 'polygon' && payload.points.length < 3) throw new Error('Polygon zones need at least three map points.');
       const result = await authenticatedJson(ADMIN_ZONES_ACTION_URL, {
         method: 'POST',
@@ -568,6 +705,8 @@
       state.zones = Array.isArray(payload.zones) ? payload.zones : [];
       state.channels = Array.isArray(payload.channels) ? payload.channels : [];
       state.roles = Array.isArray(payload.roles) ? payload.roles : [];
+      state.users = Array.isArray(payload.users) ? payload.users : [];
+      state.eventOptions = Array.isArray(payload.event_options) ? payload.event_options : [];
       state.mapKey = String(payload.map_key || selectedMapKey());
       state.mapName = String(payload.map_name || window.WWZMap?.getConfig?.(state.mapKey)?.name || 'DayZ');
       state.worldSize = Number(payload.world_size) || window.WWZMap?.getConfig?.(state.mapKey)?.mapMetres || 0;
@@ -576,11 +715,19 @@
       fillChannelOptions('');
       fillRoleChecklist('[data-zone-ping-roles]', []);
       fillRoleChecklist('[data-zone-allowlist-roles]', []);
+      fillOptionChecklist('[data-zone-management-users]', state.users, [], 'No Discord users are currently cached.');
+      fillOptionChecklist('[data-zone-ignored-events]', state.eventOptions, []);
+      fillOptionChecklist('[data-zone-allowed-events]', state.eventOptions, []);
       renderZoneList();
       if (state.activeSection === 'map') renderZoneOverlays();
       const mapLabels = $$('[data-zone-world-name]');
       mapLabels.forEach((element) => { element.textContent = state.mapName; });
-      message('');
+      const radarWithoutChannel = state.zones.filter((zone) => zone.ping_on_detection && !zone.channel_key).length;
+      if (radarWithoutChannel) {
+        message(`${radarWithoutChannel} radar zone${radarWithoutChannel === 1 ? '' : 's'} need a Discord alert channel before detection pings can be delivered.`, 'warning');
+      } else {
+        message('');
+      }
     } catch (error) {
       message(error?.message || 'Zones are temporarily unavailable.', 'error');
     } finally {
@@ -685,6 +832,14 @@
     $('[data-zone-filter]')?.addEventListener('change', renderZoneList);
     $('[data-zone-online-refresh]')?.addEventListener('click', () => loadOnlinePlayers({ force: true }));
     $('[data-zone-editor-form]')?.addEventListener('submit', saveZone);
+    $('[data-zone-add-dynamic-list]')?.addEventListener('click', () => {
+      if (state.dynamicLists.length >= 20) {
+        editorMessage('A maximum of 20 dynamic lists can be configured per zone.', 'warning');
+        return;
+      }
+      state.dynamicLists.push({ name: `List ${state.dynamicLists.length + 1}`, mode: 'ignore', active: true, entries: [] });
+      renderDynamicLists();
+    });
     $$('[data-zone-editor-cancel]').forEach((button) => button.addEventListener('click', () => $('[data-zone-dialog]')?.close?.()));
     $('[data-zone-dialog]')?.addEventListener('click', (event) => {
       if (event.target === $('[data-zone-dialog]')) $('[data-zone-dialog]')?.close?.();
@@ -717,6 +872,9 @@
       state.zones = [];
       state.channels = [];
       state.roles = [];
+      state.users = [];
+      state.eventOptions = [];
+      state.dynamicLists = [];
       if (state.activeSection) loadZones({ force: true }).then(() => activate({ section: state.activeSection })).catch(() => {});
     });
     document.addEventListener('visibilitychange', () => {

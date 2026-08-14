@@ -1,23 +1,24 @@
-# World War Z Bot Website — v1.22.89
+# World War Z Bot Website — v1.22.90
 
 Static GitHub Pages website/dashboard and installable WWZ Server Companion for the World War Z PlayStation DayZ community.
 
 ## Current release
 
-Website v1.22.89 adds the production **Admin Zones & Mapping** workspace while keeping the existing public map and PWA architecture intact.
+Website v1.22.90 expands **Admin → Zones** into the full requested zone/base-radar configuration workspace.
 
-Verified Admins/Owners now have:
+The editor now exposes:
 
-- **Zones** — create, edit, search, filter and delete circular or polygon zones.
-- **Zone Map** — render all saved server zones on the validated Chernarus/Livonia satellite and road map.
-- **Online Players** — view recent cached ADM player positions in a protected Admin-only map.
-- Map-assisted circular centres and polygon drawing with exact DayZ X/Z geometry.
-- Entry/exit alert configuration, Discord alert channel selection, ping roles and allowlists.
+- Continuous **Ping on Detection** base radar with a configurable 5–60 minute interval.
+- Ping Bounties, Location, Verbose Mode, entry alerts and exit alerts.
+- Temporary Ban and the complete automatic-ban rule matrix requested from the DayZ++ reference workflow.
+- Kill Zone, Kill Zone Ignore Bounty Kills and Hit Zone controls.
+- Ignored Events and Allowed Events.
+- Ping Roles, Allowlist Roles, Allowlist Management Users and static PlayStation allowlists.
+- Named Dynamic Ignore/Allow Lists.
+- The existing circular/polygon geometry editor, Chernarus/Livonia maps, colour and Discord alert channel controls.
 
-The public interactive map still never exposes live players. The protected Online Players workspace requires fresh Railway Admin authorization and uses the bot's existing ADM cache rather than triggering an extra Nitrado file request.
+Automatic punishment settings are visibly separated and default OFF. Ping on Detection requires an alert channel so a base-radar zone cannot be saved in a silently non-functional state.
 
-Advanced DayZ++-style automatic ban/enforcement rules are intentionally deferred; this release establishes the safe mapping, detection and alerting foundation first.
+The PWA cache revision is bumped so installed WWZ Server Companion clients receive the updated zone editor and styles.
 
-The PWA continues to use the same GitHub Pages frontend, Railway API, Discord authentication and selected-server routing. Chernarus and Livonia geometry remain shared through the existing validated map runtime, and Railway-owned persistent data is never replaced by a website deployment.
-
-Pairs with Bot v1.18.92.
+Pairs with Bot v1.18.94.
