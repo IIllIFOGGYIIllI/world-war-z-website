@@ -59,7 +59,6 @@
 
   const optionsSummary = (feed) => {
     const parts = [];
-    if (feed.include_location) parts.push('Map location');
     if (feed.minimize_output) parts.push('Minimized');
     if (feed.footer_timestamp) parts.push('Timestamp');
     if (feed.custom_embed) parts.push('Custom embed');
@@ -221,7 +220,6 @@
     $('[data-server-feed-channel]').value = String(feed?.channel_key || '');
     $('[data-server-feed-colour]').value = /^#[0-9a-f]{6}$/i.test(String(feed?.colour || '')) ? feed.colour : '#6c5ce7';
     $('[data-server-feed-active]').checked = feed ? Boolean(feed.active) : true;
-    $('[data-server-feed-location]').checked = feed ? Boolean(feed.include_location) : true;
     $('[data-server-feed-minimize]').checked = Boolean(feed?.minimize_output);
     $('[data-server-feed-timestamp]').checked = feed ? Boolean(feed.footer_timestamp) : true;
     $('[data-server-feed-custom-embed]').checked = Boolean(feed?.custom_embed);
@@ -241,7 +239,6 @@
       channel_key: String($('[data-server-feed-channel]')?.value || ''),
       colour: String($('[data-server-feed-colour]')?.value || '#6c5ce7'),
       active: Boolean($('[data-server-feed-active]')?.checked),
-      include_location: Boolean($('[data-server-feed-location]')?.checked),
       minimize_output: Boolean($('[data-server-feed-minimize]')?.checked),
       footer_timestamp: Boolean($('[data-server-feed-timestamp]')?.checked),
       custom_embed: Boolean($('[data-server-feed-custom-embed]')?.checked),

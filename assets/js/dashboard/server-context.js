@@ -161,8 +161,8 @@
     const mapPreview = document.querySelector('.map-live-preview img');
     if (mapPreview) {
       mapPreview.src = server.map_key === 'livonia'
-        ? 'assets/maps/livonia/tiles/0/0/0.webp?v=1.22.92'
-        : 'assets/maps/chernarus/tiles/z0/0/0.webp?v=1.22.92';
+        ? 'assets/maps/livonia/tiles/0/0/0.webp?v=1.22.93'
+        : 'assets/maps/chernarus/tiles/z0/0/0.webp?v=1.22.93';
       mapPreview.alt = `${server.map_name} satellite map preview`;
     }
     document.querySelectorAll('[data-map-frame], [data-location-map], [data-shop-coordinate-map]').forEach((element) => {
@@ -214,7 +214,7 @@
     const icon = document.createElement('span');
     icon.className = 'wwz-server-icon';
     const iconImage = document.createElement('img');
-    iconImage.src = server.icon_url || 'assets/world-war-z-logo.webp?v=1.22.92';
+    iconImage.src = server.icon_url || 'assets/world-war-z-logo.webp?v=1.22.93';
     iconImage.alt = '';
     icon.append(iconImage);
     const headingCopy = document.createElement('div');
