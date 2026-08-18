@@ -1,11 +1,12 @@
-# World War Z Website v1.22.93
+# World War Z Website v1.22.94
 
-## Changed
-- Removed the **Location** option from Administration → Server Feeds.
-- Server Feed summaries and help text no longer advertise coordinate/map-link output.
-- Server Feed creation/editing continues to support channel routing, active state, colour, minimized output, footer timestamps, custom note/embed copy and dynamic PlayStation Allow/Ignore lists.
+## Added — public Zone Radar marker viewer
+- Added `map-link.html`, a lightweight public WWZ map view used only by Zone Radar / zone-detection Discord coordinate links.
+- The page reads the map and X/Z directly from the signed link, loads the correct Chernarus or Livonia map, focuses the exact location and displays a temporary labelled marker.
+- No Discord dashboard sign-in is required and no Chernarus/Livonia server-selection step is shown.
+- The viewer exposes no protected dashboard data, Online Players data, saved private locations or Admin controls.
 
 ## Compatibility
-- Requires Bot v1.18.99.
-- Existing Server Feed records remain compatible.
-- Zone Radar, Zones, Zone Map, Online Players, PWA, Shop, tickets, moderation and selected-server behaviour are preserved.
+- Designed for Bot v1.18.102 or later.
+- Server Feeds and the public PvP killfeed remain location-link free.
+- The protected dashboard, Zone Map and Online Players map are unchanged.

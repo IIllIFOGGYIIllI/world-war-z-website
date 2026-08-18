@@ -1,8 +1,8 @@
 'use strict';
 
-const WWZ_PWA_VERSION = '1.22.93';
+const WWZ_PWA_VERSION = '1.22.94';
 const CACHE_PREFIX = 'wwz-pwa-';
-const WWZ_PWA_CACHE_REVISION = 'zones-base-radar-2';
+const WWZ_PWA_CACHE_REVISION = 'zone-marker-links-1';
 const CACHE_RELEASE = `${WWZ_PWA_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${CACHE_RELEASE}`;
@@ -17,6 +17,7 @@ const scopedUrl = (path) => new URL(path, APP_SCOPE).href;
 
 const APP_SHELL = [
   './dashboard.html',
+  './map-link.html',
   './index.html',
   './offline.html',
   './manifest.webmanifest',
