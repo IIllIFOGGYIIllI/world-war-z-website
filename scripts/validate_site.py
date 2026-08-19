@@ -305,11 +305,39 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.22.93 · Bot v1.18.99" not in index:
+    if "Website v1.22.95 · Bot v1.18.103" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "Chernarus Live—Livonia Ready To Connect", "Livonia production onboarding", "current single-server setup", "participants", "Owner bulk catalogue controls"):
         if stale in index:
             errors.append(f"index.html: stale roadmap content remains: {stale}")
+
+    onboarding_tokens = (
+        'data-nav-label="Discord Onboarding"',
+        'data-section="discord-onboarding" data-view="configuration"',
+        'id="dashboard-configuration-onboarding"',
+        'data-onboarding-join-roles-enabled=""',
+        'data-onboarding-welcome-channel=""',
+        'data-onboarding-welcome-dm-enabled=""',
+        'data-onboarding-leave-channel=""',
+        'data-save-onboarding=""',
+    )
+    for token in onboarding_tokens:
+        if token not in dashboard:
+            errors.append(f"dashboard.html: Discord onboarding control missing: {token}")
+    for token in (
+        "OWNER_DISCORD_ONBOARDING_CONFIG_URL",
+        "onboardingConfiguration",
+    ):
+        if token not in core:
+            errors.append(f"core.js: Discord onboarding state/API missing: {token}")
+    onboarding_administration = (ROOT / "assets/js/dashboard/administration.js").read_text(encoding="utf-8")
+    for token in (
+        "loadOnboardingConfiguration",
+        "saveOnboardingConfiguration",
+        "renderOnboardingConfiguration",
+    ):
+        if token not in onboarding_administration:
+            errors.append(f"administration.js: Discord onboarding controller missing: {token}")
 
     required_shop_labels = (
         "<strong>Shop &amp; Trader</strong><small>3</small>",
@@ -1321,8 +1349,8 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.22.94'",
-        "const WWZ_PWA_CACHE_REVISION = 'zone-marker-links-1'",
+        "const WWZ_PWA_VERSION = '1.22.95'",
+        "const WWZ_PWA_CACHE_REVISION = 'discord-onboarding-1'",
         "if (request.method !== 'GET') return;",
         "if (url.origin !== self.location.origin) return;",
         "relativePath.startsWith('/api/')",

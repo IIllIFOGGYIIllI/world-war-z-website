@@ -230,7 +230,7 @@
 
   const ensureAdministration = () => ensureModerationStyles().then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
     'administration',
-    'assets/js/dashboard/administration.js?v=1.22.93',
+    'assets/js/dashboard/administration.js?v=1.22.93&rev=onboarding-1',
     () => window.__wwzAdministrationReady === true
   )));
 
@@ -272,7 +272,7 @@
 
   const administrationView = ({ view = '', section = '' } = {}) => (
     (view === 'staff' && ['queue', 'cases', 'banlists', 'players', 'server-controls', 'server-audit', 'failures'].includes(section))
-    || (view === 'configuration' && ['discord-logs', 'notifications'].includes(section))
+    || (view === 'configuration' && ['discord-onboarding', 'discord-logs', 'notifications'].includes(section))
   );
 
   const loadViewAssets = ({ view = '', section = '' } = {}) => {

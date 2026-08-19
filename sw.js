@@ -1,8 +1,8 @@
 'use strict';
 
-const WWZ_PWA_VERSION = '1.22.94';
+const WWZ_PWA_VERSION = '1.22.95';
 const CACHE_PREFIX = 'wwz-pwa-';
-const WWZ_PWA_CACHE_REVISION = 'zone-marker-links-1';
+const WWZ_PWA_CACHE_REVISION = 'discord-onboarding-1';
 const CACHE_RELEASE = `${WWZ_PWA_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${CACHE_RELEASE}`;
@@ -31,14 +31,14 @@ const APP_SHELL = [
   './assets/css/pwa.css?v=1.22.93',
   './assets/css/dashboard/core.css?v=1.22.93',
   './assets/css/dashboard/gateway.css?v=1.22.93&rev=3',
-  './assets/css/dashboard/workspace.css?v=1.22.93',
+  './assets/css/dashboard/workspace.css?v=1.22.93&rev=onboarding-1',
   './assets/css/dashboard/overview-map-preview.css?v=1.22.93',
   './assets/css/site-polish.css?v=1.22.93',
   './assets/js/pwa.js?v=1.22.93',
   './assets/js/core/http.js?v=1.22.93&rev=2',
-  './assets/js/dashboard/lazy-assets.js?v=1.22.93',
+  './assets/js/dashboard/lazy-assets.js?v=1.22.93&rev=onboarding-1',
   './assets/js/dashboard/shell.js?v=1.22.93',
-  './assets/js/dashboard/core.js?v=1.22.93&rev=restore-1',
+  './assets/js/dashboard/core.js?v=1.22.93&rev=onboarding-1',
   './assets/js/dashboard/formatters.js?v=1.22.93',
   './assets/js/dashboard/server-context.js?v=1.22.93&rev=6',
   './assets/js/dashboard/admin-access.js?v=1.22.93',

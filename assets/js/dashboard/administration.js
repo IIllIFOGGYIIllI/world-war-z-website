@@ -922,6 +922,204 @@ const loadWebhookConfiguration = async (sessionToken = storageGet(AUTH_SESSION_K
 
 refreshWebhooksButton?.addEventListener('click', () => loadWebhookConfiguration());
 
+const showOnboardingMessage = (message = '', tone = 'error') => {
+  if (!onboardingMessage) return;
+  onboardingMessage.hidden = !message;
+  onboardingMessage.textContent = message;
+  onboardingMessage.dataset.tone = tone;
+};
+
+const onboardingChannelLabel = (channel) => {
+  const category = String(channel?.category || '').trim();
+  const name = String(channel?.name || 'channel');
+  const suffix = channel?.can_send ? (channel?.can_embed ? '' : ' · no embed permission') : ' · cannot send';
+  return `${category ? `${category} / ` : ''}#${name}${suffix}`;
+};
+
+const syncOnboardingControls = () => {
+  const joinEnabled = Boolean(onboardingJoinRolesEnabled?.checked);
+  if (onboardingJoinRoles) onboardingJoinRoles.disabled = !joinEnabled;
+
+  const welcomeEnabled = Boolean(onboardingWelcomeEnabled?.checked);
+  [onboardingWelcomeChannel, onboardingWelcomeEmbed, onboardingWelcomeTitle, onboardingWelcomeMessage, onboardingWelcomeColour]
+    .forEach((control) => { if (control) control.disabled = !welcomeEnabled; });
+
+  const dmEnabled = Boolean(onboardingWelcomeDmEnabled?.checked);
+  if (onboardingWelcomeDmMessage) onboardingWelcomeDmMessage.disabled = !dmEnabled;
+
+  const leaveEnabled = Boolean(onboardingLeaveEnabled?.checked);
+  [onboardingLeaveChannel, onboardingLeaveEmbed, onboardingLeaveTitle, onboardingLeaveMessage, onboardingLeaveColour]
+    .forEach((control) => { if (control) control.disabled = !leaveEnabled; });
+};
+
+const renderOnboardingConfiguration = (payload = {}) => {
+  onboardingConfiguration = {
+    settings: payload.settings || {},
+    roles: Array.isArray(payload.roles) ? payload.roles : [],
+    channels: Array.isArray(payload.channels) ? payload.channels : [],
+    placeholders: Array.isArray(payload.placeholders) ? payload.placeholders : []
+  };
+  const configuration = onboardingConfiguration.settings;
+
+  if (onboardingJoinRoles) {
+    onboardingJoinRoles.replaceChildren();
+    onboardingConfiguration.roles.forEach((role) => onboardingJoinRoles.add(new Option(role.name, role.key)));
+    const selected = new Set(Array.isArray(configuration.join_role_keys) ? configuration.join_role_keys : []);
+    [...onboardingJoinRoles.options].forEach((option) => { option.selected = selected.has(option.value); });
+  }
+
+  const populateChannel = (select, firstLabel) => {
+    if (!select) return;
+    select.replaceChildren(new Option(firstLabel, ''));
+    onboardingConfiguration.channels.forEach((channel) => {
+      const option = new Option(onboardingChannelLabel(channel), channel.key);
+      option.disabled = !channel.can_send;
+      select.add(option);
+    });
+  };
+  populateChannel(onboardingWelcomeChannel, 'Select Discord channel…');
+  populateChannel(onboardingLeaveChannel, 'Use welcome channel');
+
+  if (onboardingJoinRolesEnabled) onboardingJoinRolesEnabled.checked = Boolean(configuration.join_roles_enabled);
+  if (onboardingWelcomeEnabled) onboardingWelcomeEnabled.checked = Boolean(configuration.welcome_enabled);
+  if (onboardingWelcomeChannel) onboardingWelcomeChannel.value = String(configuration.welcome_channel_key || '');
+  if (onboardingWelcomeEmbed) onboardingWelcomeEmbed.checked = configuration.welcome_embed !== false;
+  if (onboardingWelcomeTitle) onboardingWelcomeTitle.value = String(configuration.welcome_title || '');
+  if (onboardingWelcomeMessage) onboardingWelcomeMessage.value = String(configuration.welcome_message || '');
+  if (onboardingWelcomeColour) onboardingWelcomeColour.value = /^#[0-9a-f]{6}$/i.test(String(configuration.welcome_colour || '')) ? configuration.welcome_colour : '#8f1d1d';
+  if (onboardingWelcomeDmEnabled) onboardingWelcomeDmEnabled.checked = Boolean(configuration.welcome_dm_enabled);
+  if (onboardingWelcomeDmMessage) onboardingWelcomeDmMessage.value = String(configuration.welcome_dm_message || '');
+  if (onboardingLeaveEnabled) onboardingLeaveEnabled.checked = Boolean(configuration.leave_enabled);
+  if (onboardingLeaveChannel) onboardingLeaveChannel.value = String(configuration.leave_channel_key || '');
+  if (onboardingLeaveEmbed) onboardingLeaveEmbed.checked = configuration.leave_embed !== false;
+  if (onboardingLeaveTitle) onboardingLeaveTitle.value = String(configuration.leave_title || '');
+  if (onboardingLeaveMessage) onboardingLeaveMessage.value = String(configuration.leave_message || '');
+  if (onboardingLeaveColour) onboardingLeaveColour.value = /^#[0-9a-f]{6}$/i.test(String(configuration.leave_colour || '')) ? configuration.leave_colour : '#5d626d';
+
+  if (onboardingPlaceholderList) {
+    onboardingPlaceholderList.replaceChildren();
+    onboardingConfiguration.placeholders.forEach((item) => {
+      const chip = document.createElement('span');
+      chip.className = 'onboarding-placeholder';
+      const code = document.createElement('code');
+      code.textContent = String(item.key || '');
+      const label = document.createElement('span');
+      label.textContent = String(item.label || 'Placeholder');
+      chip.append(code, label);
+      onboardingPlaceholderList.append(chip);
+    });
+  }
+  if (onboardingUpdated) {
+    onboardingUpdated.textContent = configuration.updated_at
+      ? `Updated ${formatAccountDate(configuration.updated_at)}${configuration.updated_by_name ? ` by ${configuration.updated_by_name}` : ''}`
+      : 'Using defaults';
+  }
+  syncOnboardingControls();
+  if (Number(configuration.unavailable_join_role_count || 0) > 0) {
+    showOnboardingMessage(`${configuration.unavailable_join_role_count} previously selected join role${Number(configuration.unavailable_join_role_count) === 1 ? ' is' : 's are'} no longer assignable. Review the role selection before saving.`, 'warning');
+  } else {
+    showOnboardingMessage('');
+  }
+};
+
+const loadOnboardingConfiguration = async (sessionToken = storageGet(AUTH_SESSION_KEY)) => {
+  if (dashboardAccessLevel !== 'owner' || !sessionToken || onboardingRequestInProgress) return false;
+  onboardingRequestInProgress = true;
+  onboardingRefreshButton?.setAttribute('disabled', '');
+  onboardingSaveButton?.setAttribute('disabled', '');
+  showOnboardingMessage('Loading Discord onboarding settings…', 'pending');
+  try {
+    const response = await authFetch(OWNER_DISCORD_ONBOARDING_CONFIG_URL, {
+      headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` }
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: false })) return false;
+    if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Discord onboarding configuration unavailable.');
+    renderOnboardingConfiguration(payload);
+    return true;
+  } catch (error) {
+    showOnboardingMessage(error instanceof Error ? error.message : 'Discord onboarding configuration is temporarily unavailable.');
+    return false;
+  } finally {
+    onboardingRequestInProgress = false;
+    onboardingRefreshButton?.removeAttribute('disabled');
+    onboardingSaveButton?.removeAttribute('disabled');
+  }
+};
+
+const saveOnboardingConfiguration = async () => {
+  const sessionToken = storageGet(AUTH_SESSION_KEY);
+  if (dashboardAccessLevel !== 'owner' || !sessionToken || onboardingRequestInProgress) return false;
+  const joinRoleKeys = onboardingJoinRoles
+    ? [...onboardingJoinRoles.selectedOptions].map((option) => option.value).filter(Boolean)
+    : [];
+  const payload = {
+    join_roles_enabled: Boolean(onboardingJoinRolesEnabled?.checked),
+    join_role_keys: joinRoleKeys,
+    welcome_enabled: Boolean(onboardingWelcomeEnabled?.checked),
+    welcome_channel_key: String(onboardingWelcomeChannel?.value || ''),
+    welcome_embed: Boolean(onboardingWelcomeEmbed?.checked),
+    welcome_title: String(onboardingWelcomeTitle?.value || '').trim(),
+    welcome_message: String(onboardingWelcomeMessage?.value || '').trim(),
+    welcome_colour: String(onboardingWelcomeColour?.value || '#8f1d1d'),
+    welcome_dm_enabled: Boolean(onboardingWelcomeDmEnabled?.checked),
+    welcome_dm_message: String(onboardingWelcomeDmMessage?.value || '').trim(),
+    leave_enabled: Boolean(onboardingLeaveEnabled?.checked),
+    leave_channel_key: String(onboardingLeaveChannel?.value || ''),
+    leave_embed: Boolean(onboardingLeaveEmbed?.checked),
+    leave_title: String(onboardingLeaveTitle?.value || '').trim(),
+    leave_message: String(onboardingLeaveMessage?.value || '').trim(),
+    leave_colour: String(onboardingLeaveColour?.value || '#5d626d')
+  };
+  if (payload.join_roles_enabled && !payload.join_role_keys.length) {
+    showOnboardingMessage('Select at least one automatic join role or disable join roles.');
+    onboardingJoinRoles?.focus();
+    return false;
+  }
+  if (payload.welcome_enabled && !payload.welcome_channel_key) {
+    showOnboardingMessage('Select a welcome channel or disable the public welcome message.');
+    onboardingWelcomeChannel?.focus();
+    return false;
+  }
+  if (payload.leave_enabled && !payload.leave_channel_key && !payload.welcome_channel_key) {
+    showOnboardingMessage('Select a leave channel or configure a welcome channel for fallback.');
+    onboardingLeaveChannel?.focus();
+    return false;
+  }
+
+  onboardingRequestInProgress = true;
+  onboardingSaveButton?.setAttribute('disabled', '');
+  onboardingRefreshButton?.setAttribute('disabled', '');
+  showOnboardingMessage('Saving Discord onboarding settings…', 'pending');
+  try {
+    const response = await protectedActionFetch(OWNER_DISCORD_ONBOARDING_CONFIG_URL, {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken}` },
+      body: JSON.stringify(payload)
+    });
+    const result = await response.json().catch(() => ({}));
+    if (handleAdminPlayerAuthorizationResponse(response, result, { actionRequest: true })) return false;
+    if (!response.ok || result.status !== 'ok') throw new Error(result.message || 'Discord onboarding settings could not be saved.');
+    renderOnboardingConfiguration({ ...result, placeholders: onboardingConfiguration.placeholders });
+    showOnboardingMessage(result.message || 'Discord onboarding settings saved.', 'success');
+    return true;
+  } catch (error) {
+    showOnboardingMessage(error instanceof Error ? error.message : 'Discord onboarding settings could not be saved.');
+    return false;
+  } finally {
+    onboardingRequestInProgress = false;
+    onboardingSaveButton?.removeAttribute('disabled');
+    onboardingRefreshButton?.removeAttribute('disabled');
+  }
+};
+
+onboardingRefreshButton?.addEventListener('click', () => loadOnboardingConfiguration());
+onboardingSaveButton?.addEventListener('click', () => saveOnboardingConfiguration());
+[
+  onboardingJoinRolesEnabled, onboardingWelcomeEnabled, onboardingWelcomeEmbed,
+  onboardingWelcomeDmEnabled, onboardingLeaveEnabled, onboardingLeaveEmbed
+].forEach((control) => control?.addEventListener('change', syncOnboardingControls));
+
 const showDiscordLogMessage = (message = '', tone = 'error') => {
   if (!discordLogMessage) return;
   discordLogMessage.hidden = !message;
@@ -1081,6 +1279,7 @@ const activateAdministrationView = ({ view = '', section = '' } = {}) => {
   if (view === 'staff' && section === 'cases') loadModerationCases();
   if (view === 'staff' && section === 'banlists') loadCurrentBanlists();
   if (view === 'staff' && section === 'failures') loadOperationFailures();
+  if (view === 'configuration' && section === 'discord-onboarding') loadOnboardingConfiguration();
   if (view === 'configuration' && section === 'discord-logs') loadDiscordLogConfiguration();
   if (view === 'configuration' && section === 'notifications') loadWebhookConfiguration();
 };

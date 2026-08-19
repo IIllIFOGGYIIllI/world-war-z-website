@@ -1,12 +1,19 @@
-# World War Z Website v1.22.94
+# World War Z Website v1.22.95
 
-## Added — public Zone Radar marker viewer
-- Added `map-link.html`, a lightweight public WWZ map view used only by Zone Radar / zone-detection Discord coordinate links.
-- The page reads the map and X/Z directly from the signed link, loads the correct Chernarus or Livonia map, focuses the exact location and displays a temporary labelled marker.
-- No Discord dashboard sign-in is required and no Chernarus/Livonia server-selection step is shown.
-- The viewer exposes no protected dashboard data, Online Players data, saved private locations or Admin controls.
+## Added — Discord member onboarding configuration
+- Added Owner Configuration → Discord Onboarding.
+- Added safe multi-role selection for automatic join roles.
+- Added configurable public welcome channel, message, embed title and colour.
+- Added optional private welcome DM configuration.
+- Added configurable leave channel, message, embed title and colour, with welcome-channel fallback.
+- Added template placeholder reference chips directly in the editor.
+
+## Safety
+- The dashboard only offers join roles Railway confirms are below the bot and non-privileged.
+- Discord role/channel IDs stay server-side behind opaque resource keys.
+- Bot accounts are ignored and closed DMs are explicitly non-blocking.
+- The existing Linked role remains separate from automatic join roles.
 
 ## Compatibility
-- Designed for Bot v1.18.102 or later.
-- Server Feeds and the public PvP killfeed remain location-link free.
-- The protected dashboard, Zone Map and Online Players map are unchanged.
+- Requires Bot v1.18.103 or later.
+- Existing dashboard, PWA, maps, Zones, Server Feeds, tickets and account linking are unchanged.

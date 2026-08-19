@@ -1,5 +1,5 @@
-# World War Z Bot Website — v1.22.94
+# World War Z Bot Website — v1.22.95
 
-Website v1.22.94 adds a dedicated public single-marker viewer for Zone Radar Discord links. Detection links now open the correct Chernarus/Livonia map and exact X/Z marker directly, without requiring Discord dashboard authentication or manual server selection.
+Website v1.22.95 adds an Owner-only Discord Onboarding workspace. The Owner can configure safe automatic join roles, a public welcome message, an optional private welcome DM and a leave message without editing Railway variables or Discord IDs manually.
 
-The viewer is intentionally isolated from protected dashboard information: it does not load Online Players, Admin data, saved locations or Server Feed configuration. Server Feeds and the public PvP killfeed remain location-link free.
+The browser receives only opaque role/channel resource keys. Railway validates live role hierarchy, dangerous permissions and channel send/embed permissions before saving. The existing `Linked` role remains separate from automatic join roles.
