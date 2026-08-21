@@ -922,6 +922,269 @@ const loadWebhookConfiguration = async (sessionToken = storageGet(AUTH_SESSION_K
 
 refreshWebhooksButton?.addEventListener('click', () => loadWebhookConfiguration());
 
+const showCommunityMessage = (message = '', tone = 'error') => {
+  if (!communityMessage) return;
+  communityMessage.hidden = !message;
+  communityMessage.textContent = message;
+  communityMessage.dataset.tone = tone;
+};
+
+const communityChannelLabel = (channel) => {
+  const prefix = channel?.category ? `${channel.category} / ` : '';
+  return `${prefix}#${String(channel?.name || 'channel')}`;
+};
+
+const clearCommunityStickyForm = () => {
+  if (communityStickyId) communityStickyId.value = '';
+  if (communityStickyChannel) communityStickyChannel.value = '';
+  if (communityStickyEnabled) communityStickyEnabled.checked = true;
+  if (communityStickyEmbed) communityStickyEmbed.checked = true;
+  if (communityStickyTitle) communityStickyTitle.value = '';
+  if (communityStickyColour) communityStickyColour.value = '#8f1d1d';
+  if (communityStickyContent) communityStickyContent.value = '';
+  if (communityStickyThreshold) communityStickyThreshold.value = '1';
+  if (communityStickyInterval) communityStickyInterval.value = '30';
+  if (communitySaveStickyButton) communitySaveStickyButton.textContent = 'Save Sticky';
+};
+
+const clearCommunityRolePanelForm = () => {
+  if (communityRolePanelId) communityRolePanelId.value = '';
+  if (communityRolePanelChannel) communityRolePanelChannel.value = '';
+  if (communityRolePanelEnabled) communityRolePanelEnabled.checked = true;
+  if (communityRolePanelTitle) communityRolePanelTitle.value = '';
+  if (communityRolePanelColour) communityRolePanelColour.value = '#5865f2';
+  if (communityRolePanelDescription) communityRolePanelDescription.value = '';
+  if (communityRolePanelRoles) [...communityRolePanelRoles.options].forEach((option) => { option.selected = false; });
+  if (communitySaveRolePanelButton) communitySaveRolePanelButton.textContent = 'Save & Publish';
+};
+
+const renderCommunityTools = (payload) => {
+  communityToolsConfiguration = {
+    channels: Array.isArray(payload?.channels) ? payload.channels : [],
+    roles: Array.isArray(payload?.roles) ? payload.roles : [],
+    webhooks: Array.isArray(payload?.webhooks) ? payload.webhooks : [],
+    stickies: Array.isArray(payload?.stickies) ? payload.stickies : [],
+    role_panels: Array.isArray(payload?.role_panels) ? payload.role_panels : []
+  };
+  if (communityError) communityError.hidden = true;
+
+  const fillChannel = (select, placeholder) => {
+    if (!select) return;
+    const previous = select.value;
+    select.replaceChildren(createSelectOption('', placeholder));
+    communityToolsConfiguration.channels.forEach((channel) => {
+      select.append(createSelectOption(
+        channel.key,
+        `${communityChannelLabel(channel)}${channel.can_send ? '' : ' · unavailable'}`,
+        { disabled: !channel.can_send }
+      ));
+    });
+    if ([...select.options].some((option) => option.value === previous)) select.value = previous;
+  };
+  fillChannel(communityStickyChannel, 'Select Discord channel…');
+  fillChannel(communityRolePanelChannel, 'Select Discord channel…');
+
+  if (communityRolePanelRoles) {
+    const selected = new Set([...communityRolePanelRoles.selectedOptions].map((option) => option.value));
+    communityRolePanelRoles.replaceChildren();
+    communityToolsConfiguration.roles.forEach((role) => communityRolePanelRoles.add(new Option(role.name, role.key)));
+    [...communityRolePanelRoles.options].forEach((option) => { option.selected = selected.has(option.value); });
+  }
+
+  if (communityEmbedWebhook) {
+    const previous = communityEmbedWebhook.value;
+    communityEmbedWebhook.replaceChildren(createSelectOption('', 'Select managed webhook destination…'));
+    communityToolsConfiguration.webhooks.forEach((webhook) => {
+      communityEmbedWebhook.append(createSelectOption(
+        webhook.config_id,
+        `${String(webhook.label || 'Webhook')} · #${String(webhook.channel_name || 'channel')}`
+      ));
+    });
+    if ([...communityEmbedWebhook.options].some((option) => option.value === previous)) communityEmbedWebhook.value = previous;
+  }
+
+  setText('[data-community-sticky-count]', `${communityToolsConfiguration.stickies.length} configured`);
+  communityStickyList?.replaceChildren();
+  if (communityStickyEmpty) communityStickyEmpty.hidden = communityToolsConfiguration.stickies.length !== 0;
+  communityToolsConfiguration.stickies.forEach((sticky) => {
+    const row = document.createElement('article');
+    row.className = 'webhook-destination-card';
+    const copy = document.createElement('div');
+    const title = document.createElement('strong');
+    const channel = communityToolsConfiguration.channels.find((item) => item.key === sticky.channel_key);
+    title.textContent = sticky.title || (channel ? `#${channel.name}` : 'Sticky message');
+    const detail = document.createElement('p');
+    detail.textContent = `${channel ? communityChannelLabel(channel) : 'Unavailable channel'} · ${sticky.enabled ? 'Active' : 'Disabled'} · every ${sticky.message_threshold} message${Number(sticky.message_threshold) === 1 ? '' : 's'}`;
+    const status = document.createElement('small');
+    status.textContent = sticky.last_post_at ? `Last posted ${formatAccountDate(sticky.last_post_at)}` : 'Not posted yet';
+    copy.append(title, detail, status);
+    const actions = document.createElement('div');
+    actions.className = 'webhook-card-actions';
+    const edit = document.createElement('button');
+    edit.type = 'button'; edit.className = 'secondary-action compact-action'; edit.textContent = 'Edit';
+    edit.addEventListener('click', () => {
+      if (communityStickyId) communityStickyId.value = String(sticky.id);
+      if (communityStickyChannel) communityStickyChannel.value = sticky.channel_key || '';
+      if (communityStickyEnabled) communityStickyEnabled.checked = Boolean(sticky.enabled);
+      if (communityStickyEmbed) communityStickyEmbed.checked = Boolean(sticky.embed);
+      if (communityStickyTitle) communityStickyTitle.value = sticky.title || '';
+      if (communityStickyColour) communityStickyColour.value = sticky.colour || '#8f1d1d';
+      if (communityStickyContent) communityStickyContent.value = sticky.content || '';
+      if (communityStickyThreshold) communityStickyThreshold.value = String(sticky.message_threshold || 1);
+      if (communityStickyInterval) communityStickyInterval.value = String(sticky.min_interval_seconds || 30);
+      if (communitySaveStickyButton) communitySaveStickyButton.textContent = 'Update Sticky';
+    });
+    const post = document.createElement('button');
+    post.type = 'button'; post.className = 'secondary-action compact-action'; post.textContent = 'Post now';
+    post.addEventListener('click', () => communityToolsAction('post_sticky', { id: sticky.id }, post));
+    const remove = document.createElement('button');
+    remove.type = 'button'; remove.className = 'activity-row-action danger'; remove.textContent = 'Delete';
+    remove.addEventListener('click', () => {
+      if (!window.confirm('Remove this sticky message and its current Discord copy?')) return;
+      communityToolsAction('delete_sticky', { id: sticky.id }, remove);
+    });
+    actions.append(edit, post, remove);
+    row.append(copy, actions);
+    communityStickyList?.append(row);
+  });
+
+  setText('[data-community-role-panel-count]', `${communityToolsConfiguration.role_panels.length} configured`);
+  communityRolePanelList?.replaceChildren();
+  if (communityRolePanelEmpty) communityRolePanelEmpty.hidden = communityToolsConfiguration.role_panels.length !== 0;
+  communityToolsConfiguration.role_panels.forEach((panel) => {
+    const row = document.createElement('article');
+    row.className = 'webhook-destination-card';
+    const copy = document.createElement('div');
+    const title = document.createElement('strong'); title.textContent = panel.title || 'Self-role panel';
+    const channel = communityToolsConfiguration.channels.find((item) => item.key === panel.channel_key);
+    const detail = document.createElement('p');
+    detail.textContent = `${channel ? communityChannelLabel(channel) : 'Unavailable channel'} · ${panel.enabled ? 'Active' : 'Disabled'} · ${panel.role_keys.length} role${panel.role_keys.length === 1 ? '' : 's'}${panel.published ? ' · Published' : ''}`;
+    const status = document.createElement('small');
+    status.textContent = panel.unavailable_role_count ? `${panel.unavailable_role_count} saved role(s) are no longer safe/available` : `Updated ${panel.updated_at ? formatAccountDate(panel.updated_at) : 'not yet'}`;
+    copy.append(title, detail, status);
+    const actions = document.createElement('div'); actions.className = 'webhook-card-actions';
+    const edit = document.createElement('button'); edit.type = 'button'; edit.className = 'secondary-action compact-action'; edit.textContent = 'Edit';
+    edit.addEventListener('click', () => {
+      if (communityRolePanelId) communityRolePanelId.value = String(panel.id);
+      if (communityRolePanelChannel) communityRolePanelChannel.value = panel.channel_key || '';
+      if (communityRolePanelEnabled) communityRolePanelEnabled.checked = Boolean(panel.enabled);
+      if (communityRolePanelTitle) communityRolePanelTitle.value = panel.title || '';
+      if (communityRolePanelColour) communityRolePanelColour.value = panel.colour || '#5865f2';
+      if (communityRolePanelDescription) communityRolePanelDescription.value = panel.description || '';
+      if (communityRolePanelRoles) {
+        const selected = new Set(panel.role_keys || []);
+        [...communityRolePanelRoles.options].forEach((option) => { option.selected = selected.has(option.value); });
+      }
+      if (communitySaveRolePanelButton) communitySaveRolePanelButton.textContent = 'Update & Publish';
+    });
+    const publish = document.createElement('button'); publish.type = 'button'; publish.className = 'secondary-action compact-action'; publish.textContent = 'Re-publish';
+    publish.addEventListener('click', () => communityToolsAction('publish_role_panel', { id: panel.id }, publish));
+    const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'activity-row-action danger'; remove.textContent = 'Delete';
+    remove.addEventListener('click', () => {
+      if (!window.confirm('Remove this self-role panel and its published Discord message?')) return;
+      communityToolsAction('delete_role_panel', { id: panel.id }, remove);
+    });
+    actions.append(edit, publish, remove);
+    row.append(copy, actions);
+    communityRolePanelList?.append(row);
+  });
+};
+
+const loadCommunityTools = async (sessionToken = storageGet(AUTH_SESSION_KEY)) => {
+  if (dashboardAccessLevel !== 'owner' || !sessionToken || communityToolsRequestInProgress) return false;
+  communityToolsRequestInProgress = true;
+  communityRefreshButton?.setAttribute('disabled', '');
+  if (communityError) communityError.hidden = true;
+  try {
+    const response = await authFetch(OWNER_COMMUNITY_TOOLS_CONFIG_URL, {
+      headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` }
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: false })) return false;
+    if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Community tools unavailable.');
+    renderCommunityTools(payload);
+    return true;
+  } catch (error) {
+    if (communityError) {
+      communityError.hidden = false;
+      communityError.textContent = error instanceof Error ? error.message : 'Community tools are temporarily unavailable.';
+    }
+    return false;
+  } finally {
+    communityToolsRequestInProgress = false;
+    communityRefreshButton?.removeAttribute('disabled');
+  }
+};
+
+const communityToolsAction = async (action, extra = {}, button = null) => {
+  const sessionToken = storageGet(AUTH_SESSION_KEY);
+  if (!sessionToken || dashboardAccessLevel !== 'owner') return false;
+  button?.setAttribute('disabled', '');
+  showCommunityMessage('');
+  try {
+    const response = await authFetch(OWNER_COMMUNITY_TOOLS_ACTION_URL, {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken}` },
+      body: JSON.stringify({ action, ...extra })
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: true })) return false;
+    if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Community tool action failed.');
+    showCommunityMessage(payload.message || 'Community tools updated.', 'success');
+    await loadCommunityTools(sessionToken);
+    return true;
+  } catch (error) {
+    showCommunityMessage(error instanceof Error ? error.message : 'Community tool action failed.', 'error');
+    return false;
+  } finally {
+    button?.removeAttribute('disabled');
+  }
+};
+
+communityRefreshButton?.addEventListener('click', () => loadCommunityTools());
+communityClearStickyButton?.addEventListener('click', clearCommunityStickyForm);
+communityClearRolePanelButton?.addEventListener('click', clearCommunityRolePanelForm);
+communitySaveStickyButton?.addEventListener('click', async () => {
+  const saved = await communityToolsAction('save_sticky', {
+    id: communityStickyId?.value ? Number(communityStickyId.value) : null,
+    channel_key: communityStickyChannel?.value || '',
+    enabled: Boolean(communityStickyEnabled?.checked),
+    embed: Boolean(communityStickyEmbed?.checked),
+    title: communityStickyTitle?.value || '',
+    content: communityStickyContent?.value || '',
+    colour: communityStickyColour?.value || '#8f1d1d',
+    message_threshold: Number(communityStickyThreshold?.value || 1),
+    min_interval_seconds: Number(communityStickyInterval?.value || 30)
+  }, communitySaveStickyButton);
+  if (saved) clearCommunityStickyForm();
+});
+communitySaveRolePanelButton?.addEventListener('click', async () => {
+  const saved = await communityToolsAction('save_role_panel', {
+    id: communityRolePanelId?.value ? Number(communityRolePanelId.value) : null,
+    channel_key: communityRolePanelChannel?.value || '',
+    enabled: Boolean(communityRolePanelEnabled?.checked),
+    title: communityRolePanelTitle?.value || '',
+    description: communityRolePanelDescription?.value || '',
+    colour: communityRolePanelColour?.value || '#5865f2',
+    role_keys: communityRolePanelRoles ? [...communityRolePanelRoles.selectedOptions].map((option) => option.value) : [],
+    publish: true
+  }, communitySaveRolePanelButton);
+  if (saved) clearCommunityRolePanelForm();
+});
+communitySendEmbedButton?.addEventListener('click', () => communityToolsAction('send_embed', {
+  config_id: communityEmbedWebhook?.value ? Number(communityEmbedWebhook.value) : null,
+  sender_name: communityEmbedSender?.value || '',
+  avatar_url: communityEmbedAvatar?.value || '',
+  content: communityEmbedContent?.value || '',
+  title: communityEmbedTitle?.value || '',
+  colour: communityEmbedColour?.value || '#8f1d1d',
+  description: communityEmbedDescription?.value || '',
+  footer: communityEmbedFooter?.value || '',
+  link_url: communityEmbedLink?.value || '',
+  thumbnail_url: communityEmbedThumbnail?.value || '',
+  image_url: communityEmbedImage?.value || ''
+}, communitySendEmbedButton));
+
 const showOnboardingMessage = (message = '', tone = 'error') => {
   if (!onboardingMessage) return;
   onboardingMessage.hidden = !message;
@@ -1280,6 +1543,7 @@ const activateAdministrationView = ({ view = '', section = '' } = {}) => {
   if (view === 'staff' && section === 'banlists') loadCurrentBanlists();
   if (view === 'staff' && section === 'failures') loadOperationFailures();
   if (view === 'configuration' && section === 'discord-onboarding') loadOnboardingConfiguration();
+  if (view === 'configuration' && section === 'community-tools') loadCommunityTools();
   if (view === 'configuration' && section === 'discord-logs') loadDiscordLogConfiguration();
   if (view === 'configuration' && section === 'notifications') loadWebhookConfiguration();
 };

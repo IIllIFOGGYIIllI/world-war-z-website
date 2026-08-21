@@ -1,19 +1,12 @@
-# World War Z Website v1.22.95
+# World War Z Website v1.22.96
 
-## Added — Discord member onboarding configuration
-- Added Owner Configuration → Discord Onboarding.
-- Added safe multi-role selection for automatic join roles.
-- Added configurable public welcome channel, message, embed title and colour.
-- Added optional private welcome DM configuration.
-- Added configurable leave channel, message, embed title and colour, with welcome-channel fallback.
-- Added template placeholder reference chips directly in the editor.
+## Main Bot Community Tools
 
-## Safety
-- The dashboard only offers join roles Railway confirms are below the bot and non-privileged.
-- Discord role/channel IDs stay server-side behind opaque resource keys.
-- Bot accounts are ignored and closed DMs are explicitly non-blocking.
-- The existing Linked role remains separate from automatic join roles.
+- Added Owner Configuration → Community Tools.
+- Added a webhook Embed Builder using existing managed webhook destinations.
+- Added Sticky Message create/edit/delete/post-now controls with activity thresholds and anti-spam intervals.
+- Added persistent self-role panel creation, role selection, editing, re-publishing and removal.
+- Dashboard role choices only expose safe roles supplied by Railway.
+- Bumped dashboard/PWA cache revisions for the new controls.
 
-## Compatibility
-- Requires Bot v1.18.103 or later.
-- Existing dashboard, PWA, maps, Zones, Server Feeds, tickets and account linking are unchanged.
+Pairs with Bot v1.18.104.

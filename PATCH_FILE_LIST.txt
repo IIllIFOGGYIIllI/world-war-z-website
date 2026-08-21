@@ -1,7 +1,6 @@
-World War Z Website v1.22.95 - Updated files only
+World War Z Website v1.22.96 - Updated files only
 
 dashboard.html
-assets/css/dashboard/workspace.css
 assets/js/dashboard/core.js
 assets/js/dashboard/administration.js
 assets/js/dashboard/lazy-assets.js
