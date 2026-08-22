@@ -230,7 +230,7 @@
 
   const ensureAdministration = () => ensureModerationStyles().then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
     'administration',
-    'assets/js/dashboard/administration.js?v=1.22.93&rev=config-audit-1',
+    'assets/js/dashboard/administration.js?v=1.22.93&rev=discord-channel-refresh-1',
     () => window.__wwzAdministrationReady === true
   )));
 

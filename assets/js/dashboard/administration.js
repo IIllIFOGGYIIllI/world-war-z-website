@@ -785,8 +785,7 @@ const renderWebhookConfiguration = (payload) => {
       const prefix = channel.category ? `${channel.category} / ` : '';
       webhookChannelSelect.append(createSelectOption(
         channel.channel_key,
-        `${prefix}#${channel.name}${channel.can_manage_webhooks ? '' : ' · missing permissions'}`,
-        { disabled: !channel.can_manage_webhooks }
+        `${prefix}#${channel.name}${channel.can_manage_webhooks ? '' : ' · missing webhook permission'}`
       ));
     });
   }
@@ -988,8 +987,7 @@ const renderCommunityTools = (payload) => {
     communityToolsConfiguration.channels.forEach((channel) => {
       select.append(createSelectOption(
         channel.key,
-        `${communityChannelLabel(channel)}${channel.can_send ? '' : ' · unavailable'}`,
-        { disabled: !channel.can_send }
+        `${communityChannelLabel(channel)}${channel.can_send ? '' : ' · missing send permission'}`
       ));
     });
     if ([...select.options].some((option) => option.value === previous)) select.value = previous;
@@ -1221,19 +1219,15 @@ const onboardingChannelLabel = (channel) => {
 };
 
 const syncOnboardingControls = () => {
-  const joinEnabled = Boolean(onboardingJoinRolesEnabled?.checked);
-  if (onboardingJoinRoles) onboardingJoinRoles.disabled = !joinEnabled;
-
-  const welcomeEnabled = Boolean(onboardingWelcomeEnabled?.checked);
-  [onboardingWelcomeChannel, onboardingWelcomeEmbed, onboardingWelcomeTitle, onboardingWelcomeMessage, onboardingWelcomeColour]
-    .forEach((control) => { if (control) control.disabled = !welcomeEnabled; });
-
-  const dmEnabled = Boolean(onboardingWelcomeDmEnabled?.checked);
-  if (onboardingWelcomeDmMessage) onboardingWelcomeDmMessage.disabled = !dmEnabled;
-
-  const leaveEnabled = Boolean(onboardingLeaveEnabled?.checked);
-  [onboardingLeaveChannel, onboardingLeaveEmbed, onboardingLeaveTitle, onboardingLeaveMessage, onboardingLeaveColour]
-    .forEach((control) => { if (control) control.disabled = !leaveEnabled; });
+  // Keep onboarding fields editable even while their runtime toggle is off.
+  // This lets Owners preconfigure roles/channels/messages first and enable the
+  // feature only when they are ready, instead of presenting locked controls.
+  [
+    onboardingJoinRoles, onboardingWelcomeChannel, onboardingWelcomeEmbed,
+    onboardingWelcomeTitle, onboardingWelcomeMessage, onboardingWelcomeColour,
+    onboardingWelcomeDmMessage, onboardingLeaveChannel, onboardingLeaveEmbed,
+    onboardingLeaveTitle, onboardingLeaveMessage, onboardingLeaveColour
+  ].forEach((control) => { if (control && !onboardingRequestInProgress) control.disabled = false; });
 };
 
 const renderOnboardingConfiguration = (payload = {}) => {
@@ -1257,7 +1251,9 @@ const renderOnboardingConfiguration = (payload = {}) => {
     select.replaceChildren(new Option(firstLabel, ''));
     onboardingConfiguration.channels.forEach((channel) => {
       const option = new Option(onboardingChannelLabel(channel), channel.key);
-      option.disabled = !channel.can_send;
+      // Keep every discovered channel selectable. The API validates the bot's
+      // actual permissions when the feature is saved and returns a precise error
+      // if the selected channel cannot be used.
       select.add(option);
     });
   };
@@ -1470,8 +1466,7 @@ const renderDiscordLogConfiguration = () => {
       const prefix = channel.category ? `${channel.category} / ` : '';
       select.append(createSelectOption(
         channel.channel_key,
-        `${prefix}#${channel.name}${channel.can_log ? '' : ' · missing permissions'}`,
-        { disabled: !channel.can_log }
+        `${prefix}#${channel.name}${channel.can_log ? '' : ' · missing log permission'}`
       ));
     });
     select.value = entry.channel_key || '';

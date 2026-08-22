@@ -1,11 +1,13 @@
-# World War Z Website v1.22.97
+# World War Z Website v1.22.98
 
-## Configuration Regression Hardening
+## Fixed
+- Discord Onboarding roles, channels and message fields remain configurable before their individual enable toggles are switched on.
+- Discord channel choices are no longer hidden/locked solely because the bot is missing a permission; the channel remains selectable and the Railway API returns the precise permission error when saving or publishing.
+- Applied the same selectable-channel behaviour to Managed Webhook creation, Discord Logs and Community Tools.
+- Refreshed the dashboard lazy-asset revision so browsers/PWA installs cannot keep using the older Administration controller after deployment.
 
-- Clarified that Notification Routes use WWZ-managed webhook destinations rather than raw Discord channels.
-- When no managed webhook exists, notification route selectors now explain what must be created first instead of presenting an ambiguous standalone “No destination” option.
-- Route enable/save controls stay unavailable until a valid managed destination exists.
-- Community Tools Embed Builder now gives the same explicit dependency state and disables publishing until a managed webhook is available.
-- Added validation guards for the notification-routing dependency state and refreshed PWA/cache revisions.
+## Preserved
+- Notification Routes still require a WWZ-managed webhook destination; that selector is intentionally not a raw Discord-channel selector.
+- Backend permission enforcement remains unchanged: selecting a channel never grants the bot access it does not have.
 
-Pairs with Bot v1.18.105.
+Pairs with Bot v1.18.106.
