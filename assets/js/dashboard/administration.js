@@ -828,6 +828,13 @@ const renderWebhookConfiguration = (payload) => {
     webhookDestinationList?.append(card);
   });
 
+  const hasWebhookDestinations = webhookConfiguration.webhooks.length > 0;
+  if (webhookRouteNote) {
+    webhookRouteNote.textContent = hasWebhookDestinations
+      ? 'Choose a tested WWZ-managed webhook destination for each event you want delivered.'
+      : 'No managed webhook destinations exist yet. Create one above first; notification routes cannot be enabled until then.';
+  }
+
   webhookRouteList?.replaceChildren();
   webhookConfiguration.routes.forEach((route) => {
     const row = document.createElement('article');
@@ -844,20 +851,26 @@ const renderWebhookConfiguration = (payload) => {
     const enabled = document.createElement('input');
     enabled.type = 'checkbox';
     enabled.checked = Boolean(route.enabled);
+    enabled.disabled = !hasWebhookDestinations;
     const enabledText = document.createElement('span');
     enabledText.textContent = 'Enabled';
     enabledLabel.append(enabled, enabledText);
 
     const destination = document.createElement('select');
     destination.setAttribute('aria-label', `${route.label} destination`);
-    destination.append(createSelectOption('', 'No destination'));
+    destination.append(createSelectOption(
+      '',
+      hasWebhookDestinations ? 'No destination' : 'Create a managed webhook above first'
+    ));
     webhookConfiguration.webhooks.forEach((webhook) => destination.append(createSelectOption(webhook.config_id, webhook.label)));
     destination.value = route.webhook_config_id == null ? '' : String(route.webhook_config_id);
+    destination.disabled = !hasWebhookDestinations;
 
     const save = document.createElement('button');
     save.type = 'button';
     save.className = 'secondary-action compact-action';
     save.textContent = 'Save route';
+    save.disabled = !hasWebhookDestinations;
     save.addEventListener('click', () => {
       if (enabled.checked && !destination.value) {
         showWebhookMessage('Select a destination before enabling that notification route.', 'error');
@@ -993,13 +1006,21 @@ const renderCommunityTools = (payload) => {
 
   if (communityEmbedWebhook) {
     const previous = communityEmbedWebhook.value;
-    communityEmbedWebhook.replaceChildren(createSelectOption('', 'Select managed webhook destination…'));
+    const hasManagedWebhooks = communityToolsConfiguration.webhooks.length > 0;
+    communityEmbedWebhook.replaceChildren(createSelectOption(
+      '',
+      hasManagedWebhooks
+        ? 'Select managed webhook destination…'
+        : 'Create a managed webhook under Notifications & Webhooks first'
+    ));
     communityToolsConfiguration.webhooks.forEach((webhook) => {
       communityEmbedWebhook.append(createSelectOption(
         webhook.config_id,
         `${String(webhook.label || 'Webhook')} · #${String(webhook.channel_name || 'channel')}`
       ));
     });
+    communityEmbedWebhook.disabled = !hasManagedWebhooks;
+    if (communitySendEmbedButton) communitySendEmbedButton.disabled = !hasManagedWebhooks;
     if ([...communityEmbedWebhook.options].some((option) => option.value === previous)) communityEmbedWebhook.value = previous;
   }
 

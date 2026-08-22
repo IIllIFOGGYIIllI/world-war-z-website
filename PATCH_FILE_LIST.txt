@@ -1,4 +1,4 @@
-World War Z Website v1.22.96 - Updated files only
+World War Z Website v1.22.97 - Updated files only
 
 dashboard.html
 assets/js/dashboard/core.js

@@ -305,11 +305,21 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.22.96 · Bot v1.18.104" not in index:
+    if "Website v1.22.97 · Bot v1.18.105" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "Chernarus Live—Livonia Ready To Connect", "Livonia production onboarding", "current single-server setup", "participants", "Owner bulk catalogue controls"):
         if stale in index:
             errors.append(f"index.html: stale roadmap content remains: {stale}")
+
+    notification_route_tokens = (
+        'data-webhook-route-note=""',
+        'Create a managed webhook above first',
+        'notification routes cannot be enabled until then',
+    )
+    notification_sources = dashboard + "\n" + (ROOT / "assets/js/dashboard/administration.js").read_text(encoding="utf-8")
+    for token in notification_route_tokens:
+        if token not in notification_sources:
+            errors.append(f"Notifications & Webhooks missing configuration guard: {token}")
 
     onboarding_tokens = (
         'data-nav-label="Discord Onboarding"',
@@ -1349,8 +1359,8 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.22.96'",
-        "const WWZ_PWA_CACHE_REVISION = 'community-tools-1'",
+        "const WWZ_PWA_VERSION = '1.22.97'",
+        "const WWZ_PWA_CACHE_REVISION = 'config-audit-1'",
         "if (request.method !== 'GET') return;",
         "if (url.origin !== self.location.origin) return;",
         "relativePath.startsWith('/api/')",

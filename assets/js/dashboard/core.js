@@ -171,6 +171,7 @@ const createWebhookButton = document.querySelector('[data-create-webhook]');
 const webhookDestinationList = document.querySelector('[data-webhook-list]');
 const webhookEmpty = document.querySelector('[data-webhook-empty]');
 const webhookRouteList = document.querySelector('[data-webhook-route-list]');
+const webhookRouteNote = document.querySelector('[data-webhook-route-note]');
 const webhookAuditList = document.querySelector('[data-webhook-audit-list]');
 const webhookAuditEmpty = document.querySelector('[data-webhook-audit-empty]');
 const webhookMessage = document.querySelector('[data-webhook-message]');

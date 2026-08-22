@@ -1,8 +1,8 @@
 'use strict';
 
-const WWZ_PWA_VERSION = '1.22.96';
+const WWZ_PWA_VERSION = '1.22.97';
 const CACHE_PREFIX = 'wwz-pwa-';
-const WWZ_PWA_CACHE_REVISION = 'community-tools-1';
+const WWZ_PWA_CACHE_REVISION = 'config-audit-1';
 const CACHE_RELEASE = `${WWZ_PWA_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${CACHE_RELEASE}`;
@@ -36,9 +36,9 @@ const APP_SHELL = [
   './assets/css/site-polish.css?v=1.22.93',
   './assets/js/pwa.js?v=1.22.93',
   './assets/js/core/http.js?v=1.22.93&rev=2',
-  './assets/js/dashboard/lazy-assets.js?v=1.22.93&rev=onboarding-1',
+  './assets/js/dashboard/lazy-assets.js?v=1.22.93&rev=config-audit-1',
   './assets/js/dashboard/shell.js?v=1.22.93',
-  './assets/js/dashboard/core.js?v=1.22.93&rev=onboarding-1',
+  './assets/js/dashboard/core.js?v=1.22.93&rev=config-audit-1',
   './assets/js/dashboard/formatters.js?v=1.22.93',
   './assets/js/dashboard/server-context.js?v=1.22.93&rev=6',
   './assets/js/dashboard/admin-access.js?v=1.22.93',

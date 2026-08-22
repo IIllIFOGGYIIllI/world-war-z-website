@@ -1,12 +1,11 @@
-# World War Z Website v1.22.96
+# World War Z Website v1.22.97
 
-## Main Bot Community Tools
+## Configuration Regression Hardening
 
-- Added Owner Configuration → Community Tools.
-- Added a webhook Embed Builder using existing managed webhook destinations.
-- Added Sticky Message create/edit/delete/post-now controls with activity thresholds and anti-spam intervals.
-- Added persistent self-role panel creation, role selection, editing, re-publishing and removal.
-- Dashboard role choices only expose safe roles supplied by Railway.
-- Bumped dashboard/PWA cache revisions for the new controls.
+- Clarified that Notification Routes use WWZ-managed webhook destinations rather than raw Discord channels.
+- When no managed webhook exists, notification route selectors now explain what must be created first instead of presenting an ambiguous standalone “No destination” option.
+- Route enable/save controls stay unavailable until a valid managed destination exists.
+- Community Tools Embed Builder now gives the same explicit dependency state and disables publishing until a managed webhook is available.
+- Added validation guards for the notification-routing dependency state and refreshed PWA/cache revisions.
 
-Pairs with Bot v1.18.104.
+Pairs with Bot v1.18.105.
