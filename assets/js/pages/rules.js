@@ -8,7 +8,7 @@
 
   const load = async () => {
     try {
-      const response = await fetch(`${API_BASE}/api/rules/public`, { headers: { Accept: 'application/json' } });
+      const response = await fetch(`${API_BASE}/api/rules/public`, { headers: { Accept: 'application/json' }, cache: 'no-store' });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Rules unavailable.');
       host.replaceChildren();

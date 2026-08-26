@@ -1,8 +1,8 @@
 'use strict';
 
-const WWZ_PWA_VERSION = '1.22.99';
+const WWZ_PWA_VERSION = '1.22.100';
 const CACHE_PREFIX = 'wwz-pwa-';
-const WWZ_PWA_CACHE_REVISION = 'rules-manager-1';
+const WWZ_PWA_CACHE_REVISION = 'auth-rules-hotfix-1';
 const CACHE_RELEASE = `${WWZ_PWA_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${CACHE_RELEASE}`;
@@ -41,13 +41,13 @@ const APP_SHELL = [
   './assets/js/core/http.js?v=1.22.93&rev=2',
   './assets/js/dashboard/lazy-assets.js?v=1.22.93&rev=discord-channel-refresh-1',
   './assets/js/dashboard/shell.js?v=1.22.93',
-  './assets/js/dashboard/core.js?v=1.22.93&rev=config-audit-1',
+  './assets/js/dashboard/core.js?v=1.22.93&rev=auth-restore-fix-1',
   './assets/js/dashboard/formatters.js?v=1.22.93',
   './assets/js/dashboard/rules-manager.js?v=1.22.93&rev=rules-manager-1',
-  './assets/js/pages/rules.js?v=1.22.93&rev=rules-manager-1',
+  './assets/js/pages/rules.js?v=1.22.93&rev=public-rules-fix-1',
   './assets/js/dashboard/server-context.js?v=1.22.93&rev=6',
   './assets/js/dashboard/admin-access.js?v=1.22.93',
-  './assets/js/dashboard/account.js?v=1.22.93',
+  './assets/js/dashboard/account.js?v=1.22.93&rev=auth-restore-fix-1',
   './assets/js/dashboard/bootstrap.js?v=1.22.93&rev=restore-1'
 ].map(scopedUrl);
 

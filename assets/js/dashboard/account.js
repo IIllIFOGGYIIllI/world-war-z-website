@@ -137,34 +137,52 @@ const loadAccountSummary = async (sessionToken) => {
 };
 
 const loadCurrentAccount = async (sessionToken) => {
-  try {
-    const response = await authFetch(AUTH_ME_URL, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        Authorization: `Bearer ${sessionToken}`
+  let lastError = null;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const response = await authFetch(AUTH_ME_URL, {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Bearer ${sessionToken}`
+        }
+      });
+
+      if (response.status === 401 || response.status === 403) {
+        storageRemove(AUTH_SESSION_KEY);
+        applySignedOutState();
+        return;
       }
-    });
 
-    if (response.status === 401 || response.status === 403) {
-      storageRemove(AUTH_SESSION_KEY);
-      applySignedOutState();
-      return;
+      if (response.ok) {
+        const payload = await response.json();
+        applyAuthenticatedState(payload);
+        window.WWZServerContext?.handleAuthenticated(payload, { requireSelection: false });
+        showView(location.hash.slice(1), false);
+        await loadAccountSummary(sessionToken);
+        return;
+      }
+
+      lastError = new Error(`Session verification returned HTTP ${response.status}`);
+      if (response.status !== 503 || attempt === 2) break;
+    } catch (error) {
+      lastError = error;
+      if (attempt === 2) break;
     }
 
-    if (!response.ok) {
-      applySignedOutState({ unavailable: true });
-      return;
-    }
-
-    const payload = await response.json();
-    applyAuthenticatedState(payload);
-    window.WWZServerContext?.handleAuthenticated(payload, { requireSelection: false });
-    showView(location.hash.slice(1), false);
-    await loadAccountSummary(sessionToken);
-  } catch (error) {
-    applySignedOutState({ unavailable: true });
+    await new Promise((resolve) => window.setTimeout(resolve, 450 * (attempt + 1)));
   }
+
+  // A transient session-refresh failure does not mean Discord sign-in itself is
+  // unavailable. Keep the saved session token so a refresh can retry it, release
+  // the gateway back to the normal sign-in view, and avoid the misleading red
+  // "Discord verification unavailable" state.
+  applySignedOutState({ preserveSelection: true });
+  showAuthMessage(
+    'Your saved dashboard session could not be refreshed. Discord sign-in is still available; retry or sign in again.',
+    'info'
+  );
+  if (lastError) console.warn('WWZ dashboard session refresh delayed.', lastError);
 };
 
 const completeDiscordLogin = async (loginTicket) => {

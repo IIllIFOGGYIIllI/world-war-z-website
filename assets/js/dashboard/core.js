@@ -572,7 +572,7 @@ const renderDiscordAvatar = (selector, avatarUrl, fallback = 'DISCORD', alt = 'D
   });
 };
 
-const applySignedOutState = ({ unavailable = false } = {}) => {
+const applySignedOutState = ({ unavailable = false, preserveSelection = false } = {}) => {
   authenticatedUser = null;
   applyAccessVisibility('guest');
   resetMemberPanels();
@@ -596,8 +596,13 @@ const applySignedOutState = ({ unavailable = false } = {}) => {
   setAuthBadgeState(unavailable ? 'unavailable' : 'offline', unavailable ? 'Verification unavailable' : 'Not connected');
   if (unavailable) {
     // A temporary Discord/Railway outage must not destroy the user's selected
-    // Chernarus/Livonia context.  Keep the stored selection for the next retry.
+    // Chernarus/Livonia context. Keep the stored selection for the next retry.
     window.WWZServerContext?.showLogin({ unavailable: true });
+  } else if (preserveSelection) {
+    // A saved-session refresh can fail transiently even while Discord OAuth is
+    // healthy. Return to the normal sign-in view without falsely calling Discord
+    // unavailable and without discarding the user's selected server.
+    window.WWZServerContext?.showLogin();
   } else {
     window.WWZServerContext?.clearSelection();
     if (!discordAuthEnabled) window.WWZServerContext?.showLogin({ unavailable: true });

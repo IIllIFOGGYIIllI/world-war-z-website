@@ -1,18 +1,16 @@
-# World War Z Website v1.22.99
+# World War Z Website v1.22.100
 
-## Added
-- Admin/Owner **Rules Manager** under Administration.
-- Add, edit, delete and reorder rule sections and individual rules.
-- Select the Discord rules channel, save revisions, publish the full managed ruleset, or remove only WWZ-published copies.
-- Recent rule revision/activity history with actor attribution.
-- Public `rules.html` page driven by the same live Railway rules source.
+## Fixed
+- Saved dashboard sessions retry transient Discord verification failures before falling back to normal Discord sign-in while preserving the selected WWZ server.
+- A failed saved-session refresh no longer claims Discord verification/sign-in itself is unavailable.
+- Public Server Rules can load from the Railway public rules endpoint without requiring a dashboard server-selection header.
+- Paired Bot v1.18.108 fixes the Rules Manager's `A valid Rules Manager request is required.` error when saving/publishing the full ruleset by accepting the larger validated JSON body.
+- Bumped the PWA/account/rules asset revisions so cached v1.22.99 JavaScript cannot keep showing the old behaviour.
 
-## Discord safety
-- The UI explains that large rule sections are split only at whole-rule boundaries and remain in configured order.
-- Manual/unrelated Discord messages are never targeted by the managed publisher.
+## Regression validation
+- Full site validation passes across all dashboard workspaces, static/dynamic button wiring, PWA/offline behaviour and shared Chernarus/Livonia map assets.
+- All 34 JavaScript/service-worker files pass syntax validation.
 
-## Initial rules migration
-- Preserves the existing conduct, gameplay, building, raiding/PvP, vehicle and exploit sections.
-- Adds the supplied protected-base count, trader-tent limit, buried-cache limit, one-week flag claim and weekly Friday vehicle-wipe rules in their matching sections.
-
-Pairs with Bot v1.18.107.
+## Compatibility
+- No quest definitions or quest rotation contents were changed.
+- Pairs with Bot v1.18.108.

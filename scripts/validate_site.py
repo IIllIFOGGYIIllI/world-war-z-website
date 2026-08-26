@@ -292,6 +292,9 @@ def validate_final_parity_polish(errors: list[str]) -> None:
                 errors.append(f"{label}: missing background-tab polling guard: {token}")
     if "window.setInterval(refreshLiveStatus, LIVE_STATUS_REFRESH_MS)" in account:
         errors.append("account.js: live status must not poll continuously while the tab is hidden.")
+    for token in ("for (let attempt = 0; attempt < 3; attempt += 1)", "applySignedOutState({ preserveSelection: true })", "Discord sign-in is still available"):
+        if token not in account:
+            errors.append(f"account.js: missing transient Discord session recovery guard: {token}")
 
     required_shell = (
         "const canAccessElement = (element) =>",
@@ -305,7 +308,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.22.99 · Bot v1.18.107" not in index:
+    if "Website v1.22.100 · Bot v1.18.108" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "Chernarus Live—Livonia Ready To Connect", "Livonia production onboarding", "current single-server setup", "participants", "Owner bulk catalogue controls"):
         if stale in index:
@@ -714,7 +717,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         if token not in server_context:
             errors.append(f"server-context.js: missing restore watchdog guard: {token}")
 
-    signed_out_start = core_source.find("const applySignedOutState = ({ unavailable = false } = {}) =>")
+    signed_out_start = core_source.find("const applySignedOutState = ({ unavailable = false, preserveSelection = false } = {}) =>")
     signed_out_end = core_source.find("\nconst applyAuthenticatedState =", signed_out_start)
     signed_out = core_source[signed_out_start:signed_out_end] if signed_out_start >= 0 and signed_out_end >= 0 else ""
     if not signed_out:
@@ -727,6 +730,8 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append("core.js: temporary auth outage must release the gateway to the unavailable login state.")
         if "clearSelection()" in unavailable_block:
             errors.append("core.js: temporary auth outage must preserve the selected Chernarus/Livonia server context.")
+        if "else if (preserveSelection)" not in signed_out or "showLogin();" not in signed_out:
+            errors.append("core.js: transient saved-session failures must preserve server context without claiming Discord is unavailable.")
     account_script = f'assets/js/dashboard/account.js?v={EXPECTED_ASSET_VERSION}'
     bootstrap_script = f'assets/js/dashboard/bootstrap.js?v={EXPECTED_ASSET_VERSION}'
     account_index = dashboard.find(account_script)
@@ -1369,8 +1374,8 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.22.99'",
-        "const WWZ_PWA_CACHE_REVISION = 'rules-manager-1'",
+        "const WWZ_PWA_VERSION = '1.22.100'",
+        "const WWZ_PWA_CACHE_REVISION = 'auth-rules-hotfix-1'",
         "if (request.method !== 'GET') return;",
         "if (url.origin !== self.location.origin) return;",
         "relativePath.startsWith('/api/')",
