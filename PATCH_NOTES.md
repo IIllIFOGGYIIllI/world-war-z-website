@@ -1,16 +1,12 @@
-# World War Z Website v1.22.100
+# World War Z Website v1.22.101
 
-## Fixed
-- Saved dashboard sessions retry transient Discord verification failures before falling back to normal Discord sign-in while preserving the selected WWZ server.
-- A failed saved-session refresh no longer claims Discord verification/sign-in itself is unavailable.
-- Public Server Rules can load from the Railway public rules endpoint without requiring a dashboard server-selection header.
-- Paired Bot v1.18.108 fixes the Rules Manager's `A valid Rules Manager request is required.` error when saving/publishing the full ruleset by accepting the larger validated JSON body.
-- Bumped the PWA/account/rules asset revisions so cached v1.22.99 JavaScript cannot keep showing the old behaviour.
-
-## Regression validation
-- Full site validation passes across all dashboard workspaces, static/dynamic button wiring, PWA/offline behaviour and shared Chernarus/Livonia map assets.
-- All 34 JavaScript/service-worker files pass syntax validation.
+## Donation Manager
+- Added a dedicated Admin/Owner Donation Manager in the Administration workspace.
+- Supports editable/reorderable donation categories and items, Basic/Deluxe/Premium packages and structured typed benefits.
+- Supports editable payment copy/methods, optional HTTPS payment links and optional approximate USD prices while AUD remains authoritative.
+- Supports Discord donation-channel selection, save, ordered limit-aware publish, managed-copy removal and revision history.
+- Seeds the current Discord donation catalogue so it does not need to be rebuilt manually.
 
 ## Compatibility
-- No quest definitions or quest rotation contents were changed.
-- Pairs with Bot v1.18.108.
+- Pairs with Bot v1.18.110.
+- Existing Rules Manager, shop, quests, account, ticket and server-control workflows are preserved.

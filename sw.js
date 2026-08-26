@@ -1,8 +1,8 @@
 'use strict';
 
-const WWZ_PWA_VERSION = '1.22.100';
+const WWZ_PWA_VERSION = '1.22.101';
 const CACHE_PREFIX = 'wwz-pwa-';
-const WWZ_PWA_CACHE_REVISION = 'auth-rules-hotfix-1';
+const WWZ_PWA_CACHE_REVISION = 'donation-manager-1';
 const CACHE_RELEASE = `${WWZ_PWA_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${CACHE_RELEASE}`;
@@ -32,6 +32,7 @@ const APP_SHELL = [
   './assets/css/pwa.css?v=1.22.93',
   './assets/css/dashboard/core.css?v=1.22.93',
   './assets/css/dashboard/rules-manager.css?v=1.22.93&rev=rules-manager-1',
+  './assets/css/dashboard/donation-manager.css?v=1.22.101&rev=donation-manager-1',
   './assets/css/pages/rules.css?v=1.22.93&rev=rules-manager-1',
   './assets/css/dashboard/gateway.css?v=1.22.93&rev=3',
   './assets/css/dashboard/workspace.css?v=1.22.93&rev=onboarding-1',
@@ -44,6 +45,7 @@ const APP_SHELL = [
   './assets/js/dashboard/core.js?v=1.22.93&rev=auth-restore-fix-1',
   './assets/js/dashboard/formatters.js?v=1.22.93',
   './assets/js/dashboard/rules-manager.js?v=1.22.93&rev=rules-manager-1',
+  './assets/js/dashboard/donation-manager.js?v=1.22.101&rev=donation-manager-1',
   './assets/js/pages/rules.js?v=1.22.93&rev=public-rules-fix-1',
   './assets/js/dashboard/server-context.js?v=1.22.93&rev=6',
   './assets/js/dashboard/admin-access.js?v=1.22.93',

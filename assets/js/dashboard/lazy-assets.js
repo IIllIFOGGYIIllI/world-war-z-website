@@ -271,7 +271,7 @@
   };
 
   const administrationView = ({ view = '', section = '' } = {}) => (
-    (view === 'staff' && ['queue', 'cases', 'banlists', 'players', 'server-controls', 'server-audit', 'failures', 'rules'].includes(section))
+    (view === 'staff' && ['queue', 'cases', 'banlists', 'players', 'server-controls', 'server-audit', 'failures', 'rules', 'donations'].includes(section))
     || (view === 'configuration' && ['discord-onboarding', 'community-tools', 'discord-logs', 'notifications'].includes(section))
   );
 
