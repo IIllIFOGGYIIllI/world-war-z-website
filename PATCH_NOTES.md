@@ -1,20 +1,13 @@
-# World War Z Website v1.22.102
+# World War Z Website v1.22.103
 
-## Donation Storefront
-- Added a public `donations.html` Support WWZ storefront driven directly by the active Donation Manager catalogue.
-- Members can select Chernarus/Livonia, sign in with Discord, choose a single item or package, select PayPal/Nitrado and create a tracked donation order.
-- Payment remains external; the site never collects card details. AUD remains authoritative and optional USD estimates remain approximate.
-- Added `My Donation Orders` with immutable order IDs, status, payment reference/proof submission, purchase-ticket links and benefit-by-benefit fulfilment progress.
-- Product cards include a preview-ready presentation area for a later donation preview/media manager.
-
-## Admin Donation Orders
-- Added Admin/Owner `Donation Orders` management with status/search filters, payment review, approve/request-info/reject actions and per-benefit fulfilment controls.
-- Purchase-ticket links and automatic/manual benefit state are visible from the same order record.
-
-## PWA & Navigation
-- Added Donations links from the public homepage and Survivor Shop.
-- Added the donation storefront and new order assets to the PWA shell and bumped the cache release so GitHub Pages clients receive the new version.
+## Multi-Currency Donation Prices
+- Added a storefront display-currency selector while keeping AUD as the authoritative donation/order currency.
+- Uses live indicative AUD exchange rates from Frankfurter and caches the last successful rates locally so temporary FX-provider outages do not break the storefront.
+- Includes AUD, USD, NZD, GBP, EUR, CAD, PHP, JPY, SGD, INR, ZAR, CHF, SEK, NOK, DKK, KRW, BRL, MXN, PLN and AED display options.
+- The first visit can select a sensible display currency from the browser locale; members can override it at any time and their choice is remembered.
+- Product cards, checkout summaries and My Donation Orders show the selected approximate conversion alongside the real AUD amount.
+- PayPal/Nitrado remain responsible for the final payment conversion/rate/fees; no card details are collected by WWZ.
 
 ## Compatibility
-- Pairs with Bot v1.18.111.
-- Existing Donation Manager, Rules Manager, survivor shop, quests, tickets, maps and dashboard workflows are preserved.
+- Website-only patch; Bot v1.18.111 remains current.
+- Existing donation orders, purchase tickets, fulfilment, Donation Manager, Rules Manager, shop, quests and maps are unchanged.

@@ -15,6 +15,25 @@
   };
   const SESSION_KEY = 'wwz_dashboard_session';
   const SERVER_KEY = 'wwz_dashboard_server';
+  const CURRENCY_KEY = 'wwz_donation_display_currency';
+  const FX_CACHE_KEY = 'wwz_donation_fx_rates_v1';
+  const FX_URL = 'https://api.frankfurter.dev/v2/rates?base=AUD';
+  const FX_FRESH_MS = 6 * 60 * 60 * 1000;
+  const DISPLAY_CURRENCIES = [
+    ['AUD', 'Australian Dollar'], ['USD', 'US Dollar'], ['NZD', 'New Zealand Dollar'],
+    ['GBP', 'British Pound'], ['EUR', 'Euro'], ['CAD', 'Canadian Dollar'],
+    ['PHP', 'Philippine Peso'], ['JPY', 'Japanese Yen'], ['SGD', 'Singapore Dollar'],
+    ['INR', 'Indian Rupee'], ['ZAR', 'South African Rand'], ['CHF', 'Swiss Franc'],
+    ['SEK', 'Swedish Krona'], ['NOK', 'Norwegian Krone'], ['DKK', 'Danish Krone'],
+    ['KRW', 'South Korean Won'], ['BRL', 'Brazilian Real'], ['MXN', 'Mexican Peso'],
+    ['PLN', 'Polish Zloty'], ['AED', 'UAE Dirham']
+  ];
+  const REGION_CURRENCY = {
+    AU: 'AUD', US: 'USD', NZ: 'NZD', GB: 'GBP', CA: 'CAD', PH: 'PHP', JP: 'JPY', SG: 'SGD',
+    IN: 'INR', ZA: 'ZAR', CH: 'CHF', SE: 'SEK', NO: 'NOK', DK: 'DKK', KR: 'KRW', BR: 'BRL',
+    MX: 'MXN', PL: 'PLN', AE: 'AED', IE: 'EUR', DE: 'EUR', FR: 'EUR', ES: 'EUR', IT: 'EUR',
+    NL: 'EUR', BE: 'EUR', AT: 'EUR', PT: 'EUR', FI: 'EUR', GR: 'EUR', LU: 'EUR'
+  };
   const $ = (selector, root = document) => root.querySelector(selector);
 
   const state = {
@@ -26,6 +45,11 @@
     catalogue: { categories: [], packages: [], payment: { methods: [] } },
     orders: [],
     selectedPurchase: null,
+    displayCurrency: 'AUD',
+    fxRates: { AUD: 1 },
+    fxDate: '',
+    fxFetchedAt: 0,
+    fxLive: false,
     loading: false,
     actionPending: false
   };
@@ -45,6 +69,8 @@
     paymentIntro: $('[data-donation-payment-intro]'),
     paymentMethods: $('[data-donation-payment-methods]'),
     finalNotice: $('[data-donation-final-notice]'),
+    currencySelect: $('[data-donation-currency]'),
+    currencyStatus: $('[data-donation-currency-status]'),
     refresh: $('[data-donation-refresh]'),
     ordersRefresh: $('[data-donation-orders-refresh]'),
     ordersGuest: $('[data-donation-orders-guest]'),
@@ -71,6 +97,42 @@
     ...extra
   });
   const money = (value) => `$${Number(value || 0).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} AUD`;
+  const formatCurrency = (value, currency) => {
+    const amount = Number(value || 0);
+    try {
+      return new Intl.NumberFormat(undefined, { style: 'currency', currency, currencyDisplay: 'narrowSymbol', minimumFractionDigits: currency === 'JPY' || currency === 'KRW' ? 0 : 2, maximumFractionDigits: currency === 'JPY' || currency === 'KRW' ? 0 : 2 }).format(amount);
+    } catch {
+      return `${amount.toFixed(2)} ${currency}`;
+    }
+  };
+  const inferredCurrency = () => {
+    try {
+      const stored = String(localStorage.getItem(CURRENCY_KEY) || '').trim().toUpperCase();
+      if (DISPLAY_CURRENCIES.some(([code]) => code === stored)) return stored;
+      const locale = String(navigator.languages?.[0] || navigator.language || 'en-AU');
+      const region = locale.match(/[-_]([A-Za-z]{2})/)?.[1]?.toUpperCase() || '';
+      return REGION_CURRENCY[region] || 'AUD';
+    } catch { return 'AUD'; }
+  };
+  const convertedText = (audValue) => {
+    const currency = state.displayCurrency || 'AUD';
+    if (currency === 'AUD') {
+      if (!state.catalogue.show_usd_estimates) return '';
+      const manualUsdRate = Number(state.catalogue.usd_rate || 0);
+      if (!Number.isFinite(manualUsdRate) || manualUsdRate <= 0) return '';
+      return `Approx. ${formatCurrency(Number(audValue || 0) * manualUsdRate, 'USD')} USD`;
+    }
+    let rate = Number(state.fxRates?.[currency] || 0);
+    if ((!Number.isFinite(rate) || rate <= 0) && currency === 'USD') {
+      rate = Number(state.catalogue.usd_rate || 0);
+    }
+    if (!Number.isFinite(rate) || rate <= 0) return 'Conversion temporarily unavailable';
+    return `Approx. ${formatCurrency(Number(audValue || 0) * rate, currency)} ${currency}`;
+  };
+  const combinedPriceText = (audValue) => {
+    const local = convertedText(audValue);
+    return local ? `${money(audValue)} · ${local}` : money(audValue);
+  };
   const dateText = (value) => {
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return 'Recently';
@@ -164,11 +226,85 @@
     return true;
   };
 
-  const usdText = (price) => {
-    if (!state.catalogue.show_usd_estimates) return '';
-    const rate = Number(state.catalogue.usd_rate || 0);
-    if (!Number.isFinite(rate) || rate <= 0) return '';
-    return `Approx. $${(Number(price || 0) * rate).toFixed(2)} USD`;
+  const populateCurrencySelect = () => {
+    if (!elements.currencySelect) return;
+    elements.currencySelect.replaceChildren();
+    DISPLAY_CURRENCIES.forEach(([code, name]) => elements.currencySelect.add(new Option(`${code} — ${name}`, code)));
+    elements.currencySelect.value = state.displayCurrency;
+    if (!elements.currencySelect.value) {
+      state.displayCurrency = 'AUD';
+      elements.currencySelect.value = 'AUD';
+    }
+  };
+
+  const updateCurrencyStatus = (message = '') => {
+    if (!elements.currencyStatus) return;
+    if (message) {
+      elements.currencyStatus.textContent = message;
+      return;
+    }
+    if (state.displayCurrency === 'AUD') {
+      elements.currencyStatus.textContent = state.fxDate ? `Live rates available · ${state.fxDate}` : 'AUD is the checkout currency';
+      return;
+    }
+    const rate = Number(state.fxRates?.[state.displayCurrency] || 0);
+    if (Number.isFinite(rate) && rate > 0) {
+      elements.currencyStatus.textContent = `${state.fxLive ? 'Live' : 'Cached'} indicative rate · 1 AUD ≈ ${rate.toLocaleString(undefined, { maximumFractionDigits: 6 })} ${state.displayCurrency}${state.fxDate ? ` · ${state.fxDate}` : ''}`;
+    } else {
+      elements.currencyStatus.textContent = 'Conversion temporarily unavailable — AUD prices remain valid';
+    }
+  };
+
+  const readFxCache = () => {
+    try {
+      const cached = JSON.parse(localStorage.getItem(FX_CACHE_KEY) || 'null');
+      if (!cached || typeof cached !== 'object' || !cached.rates) return null;
+      return cached;
+    } catch { return null; }
+  };
+
+  const applyFxPayload = (rows, fetchedAt = Date.now(), live = true) => {
+    const rates = { AUD: 1 };
+    let date = '';
+    (Array.isArray(rows) ? rows : []).forEach((row) => {
+      const quote = String(row?.quote || '').trim().toUpperCase();
+      const rate = Number(row?.rate || 0);
+      if (/^[A-Z]{3}$/.test(quote) && Number.isFinite(rate) && rate > 0) rates[quote] = rate;
+      if (!date && row?.date) date = String(row.date);
+    });
+    state.fxRates = rates;
+    state.fxDate = date;
+    state.fxFetchedAt = fetchedAt;
+    state.fxLive = live;
+  };
+
+  const loadFxRates = async () => {
+    state.displayCurrency = inferredCurrency();
+    populateCurrencySelect();
+    const cached = readFxCache();
+    if (cached?.rates) {
+      state.fxRates = { AUD: 1, ...(cached.rates || {}) };
+      state.fxDate = String(cached.date || '');
+      state.fxFetchedAt = Number(cached.fetchedAt || 0);
+      state.fxLive = false;
+      updateCurrencyStatus();
+      if (Date.now() - state.fxFetchedAt < FX_FRESH_MS) return;
+    }
+    try {
+      const { response, payload } = await fetchJson(FX_URL, { headers: { Accept: 'application/json' } }, 8_000);
+      if (!response.ok || !Array.isArray(payload)) throw new Error('Exchange rates unavailable');
+      applyFxPayload(payload, Date.now(), true);
+      try { localStorage.setItem(FX_CACHE_KEY, JSON.stringify({ rates: state.fxRates, date: state.fxDate, fetchedAt: state.fxFetchedAt })); } catch {}
+      updateCurrencyStatus();
+      renderCatalogue();
+      renderOrders();
+      if (elements.checkoutDialog?.open && state.selectedPurchase?.entry) {
+        elements.checkoutPrice.textContent = combinedPriceText(state.selectedPurchase.entry.price_aud);
+      }
+    } catch {
+      state.fxLive = false;
+      updateCurrencyStatus(cached ? '' : 'Live conversion unavailable — AUD prices remain valid');
+    }
   };
 
   const purchasePreview = (kind) => {
@@ -203,7 +339,7 @@
     elements.checkoutTitle.textContent = 'Create Donation Order';
     elements.checkoutDescription.textContent = 'This creates a tracked WWZ order and private Discord purchase ticket. Payment remains external.';
     elements.checkoutPurchase.textContent = String(entry.name || 'Donation purchase');
-    elements.checkoutPrice.textContent = money(entry.price_aud);
+    elements.checkoutPrice.textContent = combinedPriceText(entry.price_aud);
     elements.checkoutPayment.replaceChildren();
     methods.forEach((method) => {
       const label = String(method.label || '').trim();
@@ -247,10 +383,10 @@
     const aud = document.createElement('strong');
     aud.textContent = money(entry.price_aud);
     price.append(aud);
-    const usd = usdText(entry.price_aud);
-    if (usd) {
+    const converted = convertedText(entry.price_aud);
+    if (converted) {
       const small = document.createElement('small');
-      small.textContent = usd;
+      small.textContent = converted;
       price.append(small);
     }
     copy.append(kicker, title, description, price);
@@ -438,7 +574,7 @@
       const meta = document.createElement('div');
       meta.className = 'donation-member-order-meta';
       [
-        ['Amount', money(order.price_aud)],
+        ['Amount', combinedPriceText(order.price_aud)],
         ['Payment', order.payment_method || '—'],
         ['Created', dateText(order.created_at)],
         ['Payment Reference', order.payment_reference || 'Not submitted']
@@ -634,7 +770,20 @@
     renderCatalogue();
     if (token) fetchJson(URLS.authLogout, { method: 'POST', headers: { Accept: 'application/json', Authorization: `Bearer ${token}` } }).catch(() => {});
   });
-  elements.refresh?.addEventListener('click', loadStorefront);
+  elements.currencySelect?.addEventListener('change', () => {
+    const selected = String(elements.currencySelect.value || 'AUD').toUpperCase();
+    state.displayCurrency = DISPLAY_CURRENCIES.some(([code]) => code === selected) ? selected : 'AUD';
+    try { localStorage.setItem(CURRENCY_KEY, state.displayCurrency); } catch {}
+    updateCurrencyStatus();
+    renderCatalogue();
+    renderOrders();
+    if (elements.checkoutDialog?.open && state.selectedPurchase?.entry) {
+      elements.checkoutPrice.textContent = combinedPriceText(state.selectedPurchase.entry.price_aud);
+    }
+  });
+  elements.refresh?.addEventListener('click', async () => {
+    await Promise.allSettled([loadStorefront(), loadFxRates()]);
+  });
   elements.ordersRefresh?.addEventListener('click', async () => {
     if (!state.user) { startLogin(); return; }
     try { await loadOrders(); showPageError(''); } catch (error) { showPageError(error.message || 'Donation orders could not be loaded.'); }
@@ -645,6 +794,10 @@
   const initialise = async () => {
     setSignedOut();
     setConnection('loading', 'Connecting');
+    state.displayCurrency = inferredCurrency();
+    populateCurrencySelect();
+    updateCurrencyStatus('Loading live exchange rates…');
+    loadFxRates().catch(() => {});
     try {
       const [authResult] = await Promise.all([
         fetchJson(URLS.authConfig, { headers: { Accept: 'application/json' } }).catch(() => ({ response: { ok: false }, payload: {} })),
