@@ -12,7 +12,8 @@
     '/api/auth/discord/callback',
     '/api/auth/discord/complete',
     '/api/auth/me',
-    '/api/auth/logout'
+    '/api/auth/logout',
+    '/api/donations/servers'
   ]);
 
   const selectedServerKey = () => {

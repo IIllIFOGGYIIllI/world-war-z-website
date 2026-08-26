@@ -1,12 +1,16 @@
-World War Z Website v1.22.101 - Updated files only
+World War Z Website v1.22.102 - Updated files only
 
 dashboard.html
 index.html
+shop.html
+donations.html
 changelog.html
 sw.js
-assets/css/dashboard/donation-manager.css
-assets/js/dashboard/donation-manager.js
-assets/js/dashboard/lazy-assets.js
+assets/js/core/http.js
+assets/js/dashboard/donation-orders.js
+assets/js/pages/donations.js
+assets/css/dashboard/donation-orders.css
+assets/css/pages/donations.css
 scripts/validate_site.py
 PATCH_NOTES.md
 README.md

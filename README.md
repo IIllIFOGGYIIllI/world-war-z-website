@@ -1,5 +1,7 @@
-# World War Z Bot Website — v1.22.101
+# World War Z Bot Website — v1.22.102
 
-Website v1.22.101 adds the Admin/Owner Donation Manager for structured donation items, packages, typed benefits, payment information, approximate USD display controls, revision history and ordered Discord publishing. It pairs with Bot v1.18.110 while preserving the existing Rules Manager, shop, quests and dashboard workflows.
+Website v1.22.102 adds Donation Manager Phase 2: a member-facing Support WWZ storefront, server selection, Discord-authenticated donation checkout, external PayPal/Nitrado hand-off, private order history/payment-proof submission and an Admin Donation Orders fulfilment workspace.
 
-The existing dashboard, quests/objectives editor, tickets, zones, server feeds, shop, configuration and community-tool surfaces remain unchanged.
+The storefront is driven by the existing Donation Manager catalogue, so prices/packages are not duplicated. Each created order is snapshotted by Railway so later catalogue edits cannot alter an existing purchase. Product cards include a preview-ready presentation area for a later media/previews pass.
+
+Pairs with Bot v1.18.111. Existing Donation Manager Phase 1, Rules Manager, survivor shop, quests, tickets, maps and dashboard workflows are preserved.
