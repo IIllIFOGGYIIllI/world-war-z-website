@@ -1,12 +1,18 @@
-World War Z Website v1.22.98 - Updated files only
+World War Z Website v1.22.99 - Updated files only
 
-assets/js/dashboard/administration.js
-assets/js/dashboard/lazy-assets.js
 dashboard.html
-sw.js
+rules.html
+assets/js/dashboard/rules-manager.js
+assets/css/dashboard/rules-manager.css
+assets/js/pages/rules.js
+assets/css/pages/rules.css
+assets/js/dashboard/lazy-assets.js
+community-guidelines.html
 index.html
-changelog.html
+sw.js
+sitemap.xml
 scripts/validate_site.py
-PATCH_NOTES.md
 README.md
+PATCH_NOTES.md
+changelog.html
 PATCH_FILE_LIST.txt

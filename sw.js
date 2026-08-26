@@ -1,8 +1,8 @@
 'use strict';
 
-const WWZ_PWA_VERSION = '1.22.98';
+const WWZ_PWA_VERSION = '1.22.99';
 const CACHE_PREFIX = 'wwz-pwa-';
-const WWZ_PWA_CACHE_REVISION = 'discord-channel-refresh-1';
+const WWZ_PWA_CACHE_REVISION = 'rules-manager-1';
 const CACHE_RELEASE = `${WWZ_PWA_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${CACHE_RELEASE}`;
@@ -17,6 +17,7 @@ const scopedUrl = (path) => new URL(path, APP_SCOPE).href;
 
 const APP_SHELL = [
   './dashboard.html',
+  './rules.html',
   './map-link.html',
   './index.html',
   './offline.html',
@@ -30,6 +31,8 @@ const APP_SHELL = [
   './assets/world-war-z-logo.webp',
   './assets/css/pwa.css?v=1.22.93',
   './assets/css/dashboard/core.css?v=1.22.93',
+  './assets/css/dashboard/rules-manager.css?v=1.22.93&rev=rules-manager-1',
+  './assets/css/pages/rules.css?v=1.22.93&rev=rules-manager-1',
   './assets/css/dashboard/gateway.css?v=1.22.93&rev=3',
   './assets/css/dashboard/workspace.css?v=1.22.93&rev=onboarding-1',
   './assets/css/dashboard/overview-map-preview.css?v=1.22.93',
@@ -40,6 +43,8 @@ const APP_SHELL = [
   './assets/js/dashboard/shell.js?v=1.22.93',
   './assets/js/dashboard/core.js?v=1.22.93&rev=config-audit-1',
   './assets/js/dashboard/formatters.js?v=1.22.93',
+  './assets/js/dashboard/rules-manager.js?v=1.22.93&rev=rules-manager-1',
+  './assets/js/pages/rules.js?v=1.22.93&rev=rules-manager-1',
   './assets/js/dashboard/server-context.js?v=1.22.93&rev=6',
   './assets/js/dashboard/admin-access.js?v=1.22.93',
   './assets/js/dashboard/account.js?v=1.22.93',

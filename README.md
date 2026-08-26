@@ -1,5 +1,5 @@
-# World War Z Bot Website — v1.22.98
+# World War Z Bot Website — v1.22.99
 
-Website v1.22.98 fixes Discord resource selection across the Owner/Admin dashboard. Onboarding and other Discord-channel configuration fields stay editable while disabled, discovered channels remain selectable with permission warnings, and a new lazy-controller cache revision forces the corrected Administration UI to load after deployment.
+Website v1.22.99 adds an Admin-accessible Rules Manager and a public live `rules.html` page. The dashboard is now the editing surface for the same server-rules dataset consumed by Discord publishing and the website.
 
-Pairs with Bot v1.18.106, which now refreshes Discord channel/category resources independently of an incomplete gateway cache.
+Pairs with Bot v1.18.107.
