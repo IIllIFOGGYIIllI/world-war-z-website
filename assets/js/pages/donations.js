@@ -17,8 +17,15 @@
   const SERVER_KEY = 'wwz_dashboard_server';
   const CURRENCY_KEY = 'wwz_donation_display_currency';
   const FX_CACHE_KEY = 'wwz_donation_fx_rates_v1';
-  const FX_URL = 'https://api.frankfurter.dev/v2/rates?base=AUD';
+  const FX_URL = 'https://api.frankfurter.dev/v2/rates?base=AUD&quotes=USD,NZD,GBP,EUR,CAD,PHP,JPY,SGD,INR,ZAR,CHF,SEK,NOK,DKK,KRW,BRL,MXN,PLN,AED';
   const FX_FRESH_MS = 6 * 60 * 60 * 1000;
+  const FALLBACK_FX_DATE = '2026-08-27';
+  const FALLBACK_FX_RATES = Object.freeze({
+    AUD: 1, USD: 0.71723, NZD: 1.2069, GBP: 0.527666, EUR: 0.615517, CAD: 0.995322,
+    PHP: 44.2544, JPY: 114.312, SGD: 0.9123, INR: 68.4342, ZAR: 11.4536, CHF: 0.577583,
+    SEK: 6.83707, NOK: 6.70847, DKK: 4.60125, KRW: 993.687, BRL: 3.69686, MXN: 12.1623,
+    PLN: 2.65498, AED: 2.63309
+  });
   const DISPLAY_CURRENCIES = [
     ['AUD', 'Australian Dollar'], ['USD', 'US Dollar'], ['NZD', 'New Zealand Dollar'],
     ['GBP', 'British Pound'], ['EUR', 'Euro'], ['CAD', 'Canadian Dollar'],
@@ -46,10 +53,11 @@
     orders: [],
     selectedPurchase: null,
     displayCurrency: 'AUD',
-    fxRates: { AUD: 1 },
-    fxDate: '',
+    fxRates: { ...FALLBACK_FX_RATES },
+    fxDate: FALLBACK_FX_DATE,
     fxFetchedAt: 0,
     fxLive: false,
+    fxSource: 'fallback',
     loading: false,
     actionPending: false
   };
@@ -110,9 +118,16 @@
       const stored = String(localStorage.getItem(CURRENCY_KEY) || '').trim().toUpperCase();
       if (DISPLAY_CURRENCIES.some(([code]) => code === stored)) return stored;
       const locale = String(navigator.languages?.[0] || navigator.language || 'en-AU');
-      const region = locale.match(/[-_]([A-Za-z]{2})/)?.[1]?.toUpperCase() || '';
+      const region = String(locale.split(/[-_]/)[1] || '').slice(0, 2).toUpperCase();
       return REGION_CURRENCY[region] || 'AUD';
     } catch { return 'AUD'; }
+  };
+  const activeFxRate = (currency = state.displayCurrency) => {
+    if (currency === 'AUD') return 1;
+    let rate = Number(state.fxRates?.[currency] || 0);
+    if ((!Number.isFinite(rate) || rate <= 0) && currency === 'USD') rate = Number(state.catalogue.usd_rate || 0);
+    if ((!Number.isFinite(rate) || rate <= 0)) rate = Number(FALLBACK_FX_RATES[currency] || 0);
+    return Number.isFinite(rate) && rate > 0 ? rate : 0;
   };
   const convertedText = (audValue) => {
     const currency = state.displayCurrency || 'AUD';
@@ -122,16 +137,21 @@
       if (!Number.isFinite(manualUsdRate) || manualUsdRate <= 0) return '';
       return `Approx. ${formatCurrency(Number(audValue || 0) * manualUsdRate, 'USD')} USD`;
     }
-    let rate = Number(state.fxRates?.[currency] || 0);
-    if ((!Number.isFinite(rate) || rate <= 0) && currency === 'USD') {
-      rate = Number(state.catalogue.usd_rate || 0);
-    }
-    if (!Number.isFinite(rate) || rate <= 0) return 'Conversion temporarily unavailable';
+    const rate = activeFxRate(currency);
+    if (!rate) return 'Conversion temporarily unavailable';
     return `Approx. ${formatCurrency(Number(audValue || 0) * rate, currency)} ${currency}`;
   };
+  const selectedPriceText = (audValue) => {
+    const currency = state.displayCurrency || 'AUD';
+    if (currency === 'AUD') return money(audValue);
+    const rate = activeFxRate(currency);
+    if (!rate) return money(audValue);
+    return `${formatCurrency(Number(audValue || 0) * rate, currency)} ${currency}`;
+  };
   const combinedPriceText = (audValue) => {
-    const local = convertedText(audValue);
-    return local ? `${money(audValue)} · ${local}` : money(audValue);
+    if ((state.displayCurrency || 'AUD') === 'AUD') return money(audValue);
+    const rate = activeFxRate(state.displayCurrency);
+    return rate ? `${selectedPriceText(audValue)} approx. · ${money(audValue)} authoritative` : money(audValue);
   };
   const dateText = (value) => {
     const date = new Date(value);
@@ -244,12 +264,13 @@
       return;
     }
     if (state.displayCurrency === 'AUD') {
-      elements.currencyStatus.textContent = state.fxDate ? `Live rates available · ${state.fxDate}` : 'AUD is the checkout currency';
+      elements.currencyStatus.textContent = 'AUD is the authoritative checkout currency';
       return;
     }
     const rate = Number(state.fxRates?.[state.displayCurrency] || 0);
     if (Number.isFinite(rate) && rate > 0) {
-      elements.currencyStatus.textContent = `${state.fxLive ? 'Live' : 'Cached'} indicative rate · 1 AUD ≈ ${rate.toLocaleString(undefined, { maximumFractionDigits: 6 })} ${state.displayCurrency}${state.fxDate ? ` · ${state.fxDate}` : ''}`;
+      const source = state.fxSource === 'live' ? 'Live' : state.fxSource === 'cached' ? 'Cached' : 'Fallback';
+      elements.currencyStatus.textContent = `${source} indicative rate · 1 AUD ≈ ${rate.toLocaleString(undefined, { maximumFractionDigits: 6 })} ${state.displayCurrency}${state.fxDate ? ` · ${state.fxDate}` : ''}`;
     } else {
       elements.currencyStatus.textContent = 'Conversion temporarily unavailable — AUD prices remain valid';
     }
@@ -264,7 +285,7 @@
   };
 
   const applyFxPayload = (rows, fetchedAt = Date.now(), live = true) => {
-    const rates = { AUD: 1 };
+    const rates = { ...FALLBACK_FX_RATES };
     let date = '';
     (Array.isArray(rows) ? rows : []).forEach((row) => {
       const quote = String(row?.quote || '').trim().toUpperCase();
@@ -276,17 +297,18 @@
     state.fxDate = date;
     state.fxFetchedAt = fetchedAt;
     state.fxLive = live;
+    state.fxSource = live ? 'live' : 'cached';
   };
 
   const loadFxRates = async () => {
-    state.displayCurrency = inferredCurrency();
     populateCurrencySelect();
     const cached = readFxCache();
     if (cached?.rates) {
-      state.fxRates = { AUD: 1, ...(cached.rates || {}) };
+      state.fxRates = { ...FALLBACK_FX_RATES, ...(cached.rates || {}) };
       state.fxDate = String(cached.date || '');
       state.fxFetchedAt = Number(cached.fetchedAt || 0);
       state.fxLive = false;
+      state.fxSource = 'cached';
       updateCurrencyStatus();
       if (Date.now() - state.fxFetchedAt < FX_FRESH_MS) return;
     }
@@ -303,7 +325,17 @@
       }
     } catch {
       state.fxLive = false;
-      updateCurrencyStatus(cached ? '' : 'Live conversion unavailable — AUD prices remain valid');
+      if (!cached) {
+        state.fxRates = { ...FALLBACK_FX_RATES };
+        state.fxDate = FALLBACK_FX_DATE;
+        state.fxSource = 'fallback';
+      }
+      updateCurrencyStatus();
+      renderCatalogue();
+      renderOrders();
+      if (elements.checkoutDialog?.open && state.selectedPurchase?.entry) {
+        elements.checkoutPrice.textContent = combinedPriceText(state.selectedPurchase.entry.price_aud);
+      }
     }
   };
 
@@ -380,14 +412,20 @@
     description.textContent = String(entry.description || (type === 'package' ? 'Bundled World War Z supporter benefits.' : 'World War Z supporter item.'));
     const price = document.createElement('div');
     price.className = 'donation-price';
-    const aud = document.createElement('strong');
-    aud.textContent = money(entry.price_aud);
-    price.append(aud);
-    const converted = convertedText(entry.price_aud);
-    if (converted) {
+    const primary = document.createElement('strong');
+    primary.textContent = selectedPriceText(entry.price_aud);
+    price.append(primary);
+    if ((state.displayCurrency || 'AUD') !== 'AUD') {
       const small = document.createElement('small');
-      small.textContent = converted;
+      small.textContent = `${money(entry.price_aud)} authoritative`;
       price.append(small);
+    } else {
+      const converted = convertedText(entry.price_aud);
+      if (converted) {
+        const small = document.createElement('small');
+        small.textContent = converted;
+        price.append(small);
+      }
     }
     copy.append(kicker, title, description, price);
     if (type === 'package') {

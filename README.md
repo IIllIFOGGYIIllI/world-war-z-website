@@ -1,7 +1,7 @@
-# World War Z Bot Website — v1.22.103
+# World War Z Bot Website — v1.22.104
 
-Website v1.22.103 adds live multi-currency price viewing to the Support WWZ storefront while keeping AUD authoritative for every donation order and external payment.
+Website v1.22.104 fixes the Support WWZ multi-currency selector so changing currency immediately changes the visible storefront price. The selected local currency is now the primary displayed amount while the authoritative AUD price remains directly underneath.
 
-The storefront is driven by the existing Donation Manager catalogue, so prices/packages are not duplicated. Each created order is snapshotted by Railway so later catalogue edits cannot alter an existing purchase. Product cards include a preview-ready presentation area for a later media/previews pass.
+Live Frankfurter rates are still preferred and cached, but a built-in indicative fallback table prevents the selector from becoming inert when the browser cannot reach the live FX provider. Refreshing the catalogue no longer resets the member's selected display currency, and browser-locale currency inference is corrected.
 
-Pairs with Bot v1.18.111. Existing donation orders, purchase tickets, Donation Manager, Rules Manager, survivor shop, quests, maps and dashboard workflows are preserved.
+Pairs with Bot v1.18.111. Donation orders, purchase tickets, fulfilment, Donation Manager and all existing dashboard systems are unchanged.

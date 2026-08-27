@@ -1,13 +1,13 @@
-# World War Z Website v1.22.103
+# World War Z Website v1.22.104
 
-## Multi-Currency Donation Prices
-- Added a storefront display-currency selector while keeping AUD as the authoritative donation/order currency.
-- Uses live indicative AUD exchange rates from Frankfurter and caches the last successful rates locally so temporary FX-provider outages do not break the storefront.
-- Includes AUD, USD, NZD, GBP, EUR, CAD, PHP, JPY, SGD, INR, ZAR, CHF, SEK, NOK, DKK, KRW, BRL, MXN, PLN and AED display options.
-- The first visit can select a sensible display currency from the browser locale; members can override it at any time and their choice is remembered.
-- Product cards, checkout summaries and My Donation Orders show the selected approximate conversion alongside the real AUD amount.
-- PayPal/Nitrado remain responsible for the final payment conversion/rate/fees; no card details are collected by WWZ.
+## Fixed
+- Changing the Support WWZ display-currency selector now immediately changes the primary price shown on every donation item and package.
+- The authoritative AUD amount remains visible underneath every converted price and remains the value recorded by checkout/order creation.
+- Added a release-time indicative fallback FX table so conversions continue to display when the live exchange-rate request is unavailable or blocked in the browser.
+- Live/cached/fallback rate status is shown clearly beside the selector.
+- Refreshing the catalogue no longer resets the member's selected display currency.
+- Corrected browser-locale region parsing used for first-visit currency selection.
 
 ## Compatibility
-- Website-only patch; Bot v1.18.111 remains current.
-- Existing donation orders, purchase tickets, fulfilment, Donation Manager, Rules Manager, shop, quests and maps are unchanged.
+- Website-only patch; Bot remains v1.18.111.
+- No donation catalogue, order, payment, ticket or fulfilment data is changed.
