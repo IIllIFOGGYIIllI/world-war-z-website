@@ -1,9 +1,14 @@
-World War Z Website v1.22.105 - Updated files only
+World War Z Website v1.22.106 - Updated files only
 
 index.html
-dashboard.html
+rules.html
+shop.html
 changelog.html
 sw.js
+assets/css/pages/rules.css
+assets/css/pages/shop.css
+assets/js/pages/rules.js
+assets/js/pages/shop.js
 scripts/validate_site.py
 README.md
 PATCH_NOTES.md

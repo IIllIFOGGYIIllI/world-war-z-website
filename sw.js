@@ -1,8 +1,8 @@
 'use strict';
 
-const WWZ_PWA_VERSION = '1.22.105';
+const WWZ_PWA_VERSION = '1.22.106';
 const CACHE_PREFIX = 'wwz-pwa-';
-const WWZ_PWA_CACHE_REVISION = 'livonia-reactivation-1';
+const WWZ_PWA_CACHE_REVISION = 'dual-server-public-parity-1';
 const CACHE_RELEASE = `${WWZ_PWA_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${CACHE_RELEASE}`;
@@ -18,6 +18,7 @@ const scopedUrl = (path) => new URL(path, APP_SCOPE).href;
 const APP_SHELL = [
   './dashboard.html',
   './donations.html',
+  './shop.html',
   './rules.html',
   './map-link.html',
   './index.html',
@@ -36,7 +37,8 @@ const APP_SHELL = [
   './assets/css/dashboard/donation-manager.css?v=1.22.101&rev=donation-manager-1',
   './assets/css/dashboard/donation-orders.css?v=1.22.102&rev=donation-orders-1',
   './assets/css/pages/donations.css?v=1.22.103&rev=multi-currency-1',
-  './assets/css/pages/rules.css?v=1.22.93&rev=rules-manager-1',
+  './assets/css/pages/shop.css?v=1.22.106&rev=dual-server-1',
+  './assets/css/pages/rules.css?v=1.22.106&rev=dual-server-1',
   './assets/css/dashboard/gateway.css?v=1.22.93&rev=3',
   './assets/css/dashboard/workspace.css?v=1.22.93&rev=onboarding-1',
   './assets/css/dashboard/overview-map-preview.css?v=1.22.93',
@@ -51,7 +53,8 @@ const APP_SHELL = [
   './assets/js/dashboard/donation-manager.js?v=1.22.101&rev=donation-manager-1',
   './assets/js/dashboard/donation-orders.js?v=1.22.102&rev=donation-orders-1',
   './assets/js/pages/donations.js?v=1.22.104&rev=currency-refresh-fix-1',
-  './assets/js/pages/rules.js?v=1.22.93&rev=public-rules-fix-1',
+  './assets/js/pages/shop.js?v=1.22.106&rev=dual-server-1',
+  './assets/js/pages/rules.js?v=1.22.106&rev=dual-server-1',
   './assets/js/dashboard/server-context.js?v=1.22.93&rev=6',
   './assets/js/dashboard/admin-access.js?v=1.22.93',
   './assets/js/dashboard/account.js?v=1.22.93&rev=auth-restore-fix-1',

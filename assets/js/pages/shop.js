@@ -5,6 +5,7 @@ const URLS = {
   authComplete: `${API_BASE}/api/auth/discord/complete`,
   authMe: `${API_BASE}/api/auth/me`,
   authLogout: `${API_BASE}/api/auth/logout`,
+  servers: `${API_BASE}/api/donations/servers`,
   catalogue: `${API_BASE}/api/shop/catalogue`,
   account: `${API_BASE}/api/account/shop`,
   purchase: `${API_BASE}/api/account/shop/purchase`,
@@ -19,6 +20,8 @@ const state = {
   token: sessionStorage.getItem(SESSION_KEY) || '',
   authEnabled: false,
   user: null,
+  servers: [],
+  server: null,
   settings: {},
   access: {},
   items: [],
@@ -39,13 +42,19 @@ const state = {
 const readSelectedServer = () => {
   try { return JSON.parse(sessionStorage.getItem(SERVER_KEY) || 'null'); } catch { return null; }
 };
+const saveSelectedServer = (server) => {
+  state.server = server || null;
+  try {
+    if (server) sessionStorage.setItem(SERVER_KEY, JSON.stringify(server));
+    else sessionStorage.removeItem(SERVER_KEY);
+  } catch {}
+};
 const acceptServerContext = (payload) => {
   const servers = Array.isArray(payload?.servers) ? payload.servers : [];
   const stored = readSelectedServer();
   const server = servers.find((entry) => entry?.key === stored?.key) || null;
-  if (!server || !['chernarus', 'livonia'].includes(String(server.map_key || '').toLowerCase())) { state.server = null; return; }
-  state.server = server;
-  try { sessionStorage.setItem(SERVER_KEY, JSON.stringify(server)); } catch {}
+  if (!server || !['chernarus', 'livonia'].includes(String(server.map_key || '').toLowerCase())) return;
+  saveSelectedServer(server);
   const mapName = String(server.map_name || (server.map_key === 'livonia' ? 'Livonia' : 'Chernarus'));
   const heroMap = document.querySelector('.shop-hero-image strong');
   if (heroMap) heroMap.textContent = mapName.toUpperCase();
@@ -107,7 +116,8 @@ const elements = {
   detailPrice: $('[data-member-item-detail-price]'), detailSku: $('[data-member-item-detail-sku]'),
   detailDescription: $('[data-member-item-detail-description]'), detailMeta: $('[data-member-item-detail-meta]'),
   detailTypes: $('[data-member-item-detail-types]'), detailClassname: $('[data-member-item-detail-classname]'),
-  detailBuy: $('[data-member-item-detail-buy]')
+  detailBuy: $('[data-member-item-detail-buy]'),
+  serverButtons: $('[data-shop-server-buttons]')
 };
 let checkoutMapInstance = null;
 
@@ -128,6 +138,56 @@ const durationText = (seconds) => {
 const fetchJson = (url, options = {}, timeoutMs = 15_000) =>
   window.WWZHttp.json(url, options, timeoutMs);
 const authHeaders = (extra = {}) => ({ Accept: 'application/json', ...(state.token ? { Authorization: `Bearer ${state.token}` } : {}), ...extra });
+const renderServerChoices = () => {
+  if (!elements.serverButtons) return;
+  elements.serverButtons.replaceChildren();
+  state.servers.forEach((server) => {
+    const control = document.createElement('button');
+    control.type = 'button';
+    control.className = 'shop-server-button';
+    const name = document.createElement('strong');
+    name.textContent = server.map_name || server.name || titleCase(server.map_key) || server.key;
+    const detail = document.createElement('small');
+    detail.textContent = `${server.paused ? 'Paused' : 'Live'} · isolated shop`;
+    control.append(name, detail);
+    const active = server.key === state.server?.key;
+    control.classList.toggle('active', active);
+    control.setAttribute('aria-pressed', String(active));
+    control.disabled = state.loading || Boolean(server.paused);
+    control.addEventListener('click', async () => {
+      if (state.loading || server.paused || server.key === state.server?.key) return;
+      if (checkoutMapInstance) {
+        checkoutMapInstance.destroy?.();
+        checkoutMapInstance = null;
+      }
+      saveSelectedServer(server);
+      state.locations = [];
+      state.orders = [];
+      acceptServerContext({ servers: state.servers });
+      renderServerChoices();
+      renderOrders();
+      await loadRestartStatus();
+      await loadShop();
+    });
+    elements.serverButtons.append(control);
+  });
+};
+const loadServerChoices = async () => {
+  const { response, payload } = await fetchJson(URLS.servers, { headers: { Accept: 'application/json' } });
+  if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'World War Z server choices could not be loaded.');
+  state.servers = Array.isArray(payload.servers) ? payload.servers : [];
+  const stored = readSelectedServer();
+  const requested = String(new URLSearchParams(location.search).get('server') || '').trim().toLowerCase();
+  const selected = state.servers.find((entry) => String(entry.key).toLowerCase() === requested || String(entry.map_key).toLowerCase() === requested)
+    || state.servers.find((entry) => entry.key === stored?.key)
+    || state.servers.find((entry) => !entry.paused)
+    || state.servers[0]
+    || null;
+  if (!selected) throw new Error('No World War Z shop server is currently available.');
+  saveSelectedServer(selected);
+  acceptServerContext({ servers: state.servers });
+  renderServerChoices();
+};
 const setConnection = (kind, label) => {
   if (elements.apiState) elements.apiState.dataset.state = kind;
   if (elements.apiLabel) elements.apiLabel.textContent = label;
@@ -172,6 +232,7 @@ const setSignedOut = () => {
 const setSignedIn = (payload) => {
   state.user = payload;
   acceptServerContext(payload);
+  renderServerChoices();
   const displayName = payload?.user?.display_name || payload?.user?.username || 'Survivor';
   elements.authLabel.textContent = displayName;
   avatar(payload?.user?.avatar_url, displayName.slice(0, 2).toUpperCase());
@@ -855,9 +916,22 @@ elements.purchaseForm.addEventListener('submit', submitPurchase);
 
 const initialise = async () => {
   try {
-    const { response, payload } = await fetchJson(URLS.authConfig, { headers: { Accept: 'application/json' } });
+    const [{ response, payload }] = await Promise.all([
+      fetchJson(URLS.authConfig, { headers: { Accept: 'application/json' } }),
+      loadServerChoices()
+    ]);
     state.authEnabled = Boolean(response.ok && payload?.discord_auth?.enabled);
-  } catch { state.authEnabled = false; }
+  } catch {
+    state.authEnabled = false;
+    if (!state.server) {
+      setConnection('unavailable', 'Shop unavailable');
+      if (elements.error) {
+        elements.error.hidden = false;
+        elements.error.textContent = 'World War Z server choices could not be loaded.';
+      }
+      return;
+    }
+  }
   elements.startLogin.disabled = !state.authEnabled;
   elements.startLogin.textContent = state.authEnabled ? 'Continue securely with Discord' : 'Discord sign-in is unavailable';
   const fragment = callback();
@@ -867,15 +941,7 @@ const initialise = async () => {
   } else {
     try { await loadIdentity(); } catch { setSignedOut(); }
   }
-  const storedSelection = readSelectedServer();
-  if (!storedSelection?.key) {
-    setConnection('unavailable', 'Select a server first');
-    if (elements.error) {
-      elements.error.hidden = false;
-      elements.error.textContent = 'Select Chernarus or Livonia from the dashboard before opening the member shop.';
-    }
-    return;
-  }
+  renderServerChoices();
   await loadRestartStatus();
   await loadShop();
   window.setInterval(loadRestartStatus, 30_000);

@@ -1,12 +1,13 @@
-# World War Z Website v1.22.105
+# World War Z Website v1.22.106
 
-## Livonia reactivation
-- Updates the public roadmap from Livonia paused/preserved to Livonia live.
-- Updates the dashboard roadmap so both WWZ servers are shown as active.
-- Clarifies that Livonia resumes its preserved, isolated progression/economy/PvP/ticket/faction/zone/feed/donation/configuration state rather than inheriting Chernarus data.
-- Corrects the roadmap command inventory to the current 99 top-level Discord commands.
-- Advances the service-worker release so stale paused-Livonia copy is replaced.
+## Dual-server public parity
+- Adds an explicit Chernarus/Livonia selector to the public Server Rules page.
+- Public rules requests now send the selected `X-WWZ-Server` context instead of silently reading the primary server ruleset.
+- Adds an explicit Chernarus/Livonia selector to the standalone Member Shop.
+- Direct shop visits now select an available server themselves instead of requiring a previous dashboard selection.
+- Switching shop server refreshes the isolated catalogue/account/orders, restart schedule, delivery locations and delivery-map context.
+- Advances the PWA cache release so stale rules/shop JavaScript cannot persist after deployment.
 
 ## Compatibility
-- Pairs with Bot v1.18.112.
-- Donation storefront/orders, multi-currency prices, Rules Manager, shop, maps and all existing dashboard workflows remain unchanged.
+- Website-only patch; Bot v1.18.112 remains current.
+- No server-owned persistent data or Donation Manager/order data is changed.

@@ -308,7 +308,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.22.105 · Bot v1.18.112" not in index:
+    if "Website v1.22.106 · Bot v1.18.112" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "Chernarus Live—Livonia Ready To Connect", "Livonia production onboarding", "current single-server setup", "participants", "Owner bulk catalogue controls"):
         if stale in index:
@@ -917,6 +917,45 @@ def validate_checkout_compatibility(errors: list[str]) -> None:
         )
 
 
+
+def validate_dual_server_public_parity(errors: list[str]) -> None:
+    rules_html = (ROOT / "rules.html").read_text(encoding="utf-8")
+    rules_js = (ROOT / "assets/js/pages/rules.js").read_text(encoding="utf-8")
+    shop_html = (ROOT / "shop.html").read_text(encoding="utf-8")
+    shop_js = (ROOT / "assets/js/pages/shop.js").read_text(encoding="utf-8")
+
+    for token in (
+        'data-rules-server-buttons',
+        'Chernarus and Livonia keep separate published rulesets',
+    ):
+        if token not in rules_html:
+            errors.append(f"rules.html: missing dual-server rules selector hook/copy: {token}")
+    for token in (
+        '/api/donations/servers',
+        "'X-WWZ-Server': state.server.key",
+        "new URLSearchParams(location.search).get(\'server\')",
+        'sessionStorage.setItem(SERVER_KEY',
+    ):
+        if token not in rules_js:
+            errors.append(f"rules.js: missing dual-server public-rules routing behaviour: {token}")
+
+    for token in (
+        'data-shop-server-buttons',
+        'Wallet, catalogue, orders, delivery locations and fulfilment are isolated to the selected server.',
+    ):
+        if token not in shop_html:
+            errors.append(f"shop.html: missing standalone server selector hook/copy: {token}")
+    for token in (
+        'servers: `${API_BASE}/api/donations/servers`',
+        'const loadServerChoices = async () =>',
+        'saveSelectedServer(server);',
+        'checkoutMapInstance.destroy?.();',
+        'await loadRestartStatus();',
+        'await loadShop();',
+    ):
+        if token not in shop_js:
+            errors.append(f"shop.js: missing direct dual-server shop behaviour: {token}")
+
 def validate_json(errors: list[str]) -> None:
     required_json = (
         ROOT / "assets/data/chernarus/pois.json",
@@ -1374,8 +1413,8 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.22.105'",
-        "const WWZ_PWA_CACHE_REVISION = 'livonia-reactivation-1'",
+        "const WWZ_PWA_VERSION = '1.22.106'",
+        "const WWZ_PWA_CACHE_REVISION = 'dual-server-public-parity-1'",
         "if (request.method !== 'GET') return;",
         "if (url.origin !== self.location.origin) return;",
         "relativePath.startsWith('/api/')",
@@ -1493,6 +1532,7 @@ def main() -> int:
     validate_map_marker_auth(errors)
     validate_progression_dashboard_controls(errors)
     validate_checkout_compatibility(errors)
+    validate_dual_server_public_parity(errors)
     validate_json(errors)
     validate_place_names(errors)
     validate_pwa(errors, info)
