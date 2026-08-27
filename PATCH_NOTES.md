@@ -1,19 +1,18 @@
-# World War Z Website v1.23.0
+# World War Z Website v1.24.0
 
-## Unified website overhaul
-- Added a new shared `ui-system.css` design layer to every website page.
-- Added a shared `ui-system.js` navigation/accessibility controller to every website page.
-- Standardised the visual treatment of public headers, policy headers, donation/shop headers, dashboard shell, cards, panels, forms, buttons, tables, dialogs and footers.
-- Added consistent public navigation and active-page states.
-- Added searchable Quick Access with Ctrl/Cmd+K and a back-to-top control on public pages.
-- Added compact on-page navigation for the homepage and donation storefront.
-- Alphabetised Dashboard navigation items within each existing access group, keeping Overview first.
-- Standalone Survivor Shop now defaults to Name A–Z; Dashboard member shop also renders items A–Z.
-- Donation storefront packages, categories, items and payment methods render A–Z while Admin-managed source ordering remains stored unchanged.
-- Updated the homepage to represent both active Chernarus and Livonia worlds.
-- Advanced the PWA release/cache revision and expanded validation for the unified design system.
+## Operations Interface visual redesign
+- Replaces the v1.23 consistency layer with a substantially different tactical/operations visual system across every website surface.
+- Redesigns the global shell, navigation, homepage hero, dashboard workstation, sidebar, cards, metrics, forms, dialogs, tables, Shop, Donations, Rules and policy pages.
+- Adds a WWZ network status rail and stronger Chernarus/Livonia operations branding on public/member surfaces.
+- Preserves the established A–Z discoverability improvements and existing feature/data hooks.
+
+## Performance optimisation
+- Standalone Shop no longer downloads Leaflet, map CSS or WWZ map runtime during initial page load; checkout loads them on demand.
+- Dashboard no longer eagerly downloads Rules Manager, Donation Manager or Donation Orders feature bundles for users/views that do not need them.
+- PWA install/update precache now contains only the minimal application shell instead of heavyweight dashboard/feature assets.
+- Long card-heavy surfaces use browser render containment/content visibility, and scroll-state UI work is animation-frame throttled.
+- Validator now guards the lazy-loading and reduced-precache architecture against regressions.
 
 ## Compatibility
-- Website-only update; Bot v1.18.113 remains current.
-- No backend API, server configuration, user data or persistent database changes.
-- Chernarus/Livonia isolation and all existing shop, donation, ticket, rules, map and delivery workflows remain intact.
+- Pairs with Bot v1.18.114.
+- No backend API contracts, server configuration, member data, orders, economy balances, map datasets or Chernarus/Livonia isolation rules are changed.

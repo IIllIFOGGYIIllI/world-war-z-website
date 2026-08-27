@@ -53,6 +53,21 @@
     }));
   };
 
+  const createNetworkRail = () => {
+    if ($('.wwz-network-rail') || fileName() === 'dashboard.html' || fileName() === 'map-link.html') return;
+    const header = $('.site-header, .page-header, .donation-topbar, .shop-topbar');
+    if (!header) return;
+    const rail = document.createElement('div');
+    rail.className = 'wwz-network-rail';
+    rail.setAttribute('aria-label', 'World War Z network summary');
+    const left = document.createElement('span');
+    left.innerHTML = '<strong>WWZ OPS NETWORK</strong> <span class="rail-divider">//</span> PLAYSTATION DAYZ';
+    const right = document.createElement('span');
+    right.innerHTML = '<span class="rail-live">● DUAL-WORLD ACTIVE</span> <span class="rail-divider">//</span> CHERNARUS + LIVONIA';
+    rail.append(left, right);
+    header.insertAdjacentElement('afterend', rail);
+  };
+
   const addPageTabs = () => {
     if ($('.wwz-page-tabs')) return;
     const current = fileName();
@@ -83,8 +98,10 @@
       }
       nav.append(link);
     });
+    const rail = $('.wwz-network-rail');
     const header = $('.site-header, .donation-topbar');
-    if (header) header.insertAdjacentElement('afterend', nav);
+    if (rail) rail.insertAdjacentElement('afterend', nav);
+    else if (header) header.insertAdjacentElement('afterend', nav);
   };
 
   const sortDashboardNavigation = () => {
@@ -212,8 +229,16 @@
     button.textContent = '↑';
     button.setAttribute('aria-label', 'Back to top');
     button.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-    const update = () => button.classList.toggle('visible', window.scrollY > 650);
-    window.addEventListener('scroll', update, { passive: true });
+    let framePending = false;
+    const update = () => {
+      framePending = false;
+      button.classList.toggle('visible', window.scrollY > 650);
+    };
+    window.addEventListener('scroll', () => {
+      if (framePending) return;
+      framePending = true;
+      requestAnimationFrame(update);
+    }, { passive: true });
     document.body.append(button);
     update();
   };
@@ -230,12 +255,14 @@
   };
 
   const markUiReady = () => {
-    document.documentElement.dataset.wwzUi = '1.23.0';
-    document.body.classList.add('wwz-ui-ready');
+    document.documentElement.dataset.wwzUi = '1.24.0';
+    document.body.dataset.wwzPage = fileName().replace(/\.html$/i, '') || 'home';
+    document.body.classList.add('wwz-ui-ready', 'wwz-ops-interface');
   };
 
   const start = () => {
     normalizePublicNavigation();
+    createNetworkRail();
     addPageTabs();
     sortDashboardNavigation();
     ensureGlobalFooter();

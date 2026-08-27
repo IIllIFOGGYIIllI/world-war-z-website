@@ -72,6 +72,63 @@ const acceptServerContext = (payload) => {
 const activeMapKey = () => String(state.server?.map_key || '').toLowerCase();
 const activeWorldSize = () => state.server?.map_key === 'livonia' ? 12800 : state.server?.map_key === 'chernarus' ? 15360 : null;
 
+const MAP_ASSETS = {
+  leafletCss: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+  leafletJs: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+  mapCss: 'assets/css/components/chernarus-map.css?v=1.22.93&rev=2',
+  mapJs: 'assets/js/map/wwz-map.js?v=1.22.93&rev=3'
+};
+let checkoutMapRuntimePromise = null;
+const loadStylesheetOnce = (key, href, integrity = '') => {
+  const existing = document.querySelector(`link[data-shop-lazy-asset="${key}"]`);
+  if (existing) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    link.dataset.shopLazyAsset = key;
+    if (integrity) { link.integrity = integrity; link.crossOrigin = 'anonymous'; }
+    link.addEventListener('load', resolve, { once: true });
+    link.addEventListener('error', () => reject(new Error(`${key} stylesheet failed to load.`)), { once: true });
+    document.head.append(link);
+  });
+};
+const loadScriptOnce = (key, src, ready, integrity = '') => {
+  if (ready?.()) return Promise.resolve();
+  const existing = document.querySelector(`script[data-shop-lazy-asset="${key}"]`);
+  if (existing) {
+    return new Promise((resolve, reject) => {
+      if (ready?.()) { resolve(); return; }
+      existing.addEventListener('load', resolve, { once: true });
+      existing.addEventListener('error', () => reject(new Error(`${key} script failed to load.`)), { once: true });
+    });
+  }
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = true;
+    script.dataset.shopLazyAsset = key;
+    if (integrity) { script.integrity = integrity; script.crossOrigin = 'anonymous'; }
+    script.addEventListener('load', () => ready && !ready() ? reject(new Error(`${key} loaded without becoming ready.`)) : resolve(), { once: true });
+    script.addEventListener('error', () => reject(new Error(`${key} script failed to load.`)), { once: true });
+    document.head.append(script);
+  });
+};
+const ensureCheckoutMapRuntime = () => {
+  if (window.WWZMap?.create) return Promise.resolve();
+  if (checkoutMapRuntimePromise) return checkoutMapRuntimePromise;
+  checkoutMapRuntimePromise = Promise.all([
+    loadStylesheetOnce('leaflet-css', MAP_ASSETS.leafletCss, 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY='),
+    loadStylesheetOnce('wwz-map-css', MAP_ASSETS.mapCss),
+    loadScriptOnce('leaflet-js', MAP_ASSETS.leafletJs, () => Boolean(window.L?.map), 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=')
+  ]).then(() => loadScriptOnce('wwz-map-js', MAP_ASSETS.mapJs, () => Boolean(window.WWZMap?.create)))
+    .catch((error) => {
+      checkoutMapRuntimePromise = null;
+      throw error;
+    });
+  return checkoutMapRuntimePromise;
+};
+
 const elements = {
   apiState: $('[data-shop-api-state]'), apiLabel: $('[data-shop-api-label]'),
   authButton: $('[data-shop-auth-button]'), authLabel: $('[data-shop-auth-label]'),
@@ -845,11 +902,17 @@ const openPurchase = (item) => {
   elements.purchaseTitle.textContent = `Buy ${item.name}?`; elements.purchaseItem.textContent = `${item.name} · ${item.sku}`;
   elements.purchasePrice.textContent = `${money(item.price)}${eventItem ? ' per restart' : ' each'} · ${stockText(item)}`;
   populateLocations(); updateMarker(); updateTotal(); showMessage(''); elements.purchaseDialog.showModal();
-  window.setTimeout(() => {
-    const instance = ensureCheckoutMap();
-    resetCheckoutMap();
-    updateMarker();
-    instance?.invalidateSize();
+  window.setTimeout(async () => {
+    try {
+      await ensureCheckoutMapRuntime();
+      const instance = ensureCheckoutMap();
+      resetCheckoutMap();
+      updateMarker();
+      instance?.invalidateSize();
+    } catch (error) {
+      if (elements.mapReadout) elements.mapReadout.textContent = 'Map preview unavailable — enter X/Z manually';
+      console.warn('Shop delivery map lazy-load failed:', error);
+    }
   }, 0);
 };
 const submitPurchase = async (event) => {

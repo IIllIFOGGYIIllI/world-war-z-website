@@ -24,6 +24,8 @@ RETIRED_MAP_PATHS = (
     ROOT / "assets/images/maps/chernarus-vector.svg",
 )
 EXPECTED_ASSET_VERSION = "1.22.93"
+EXPECTED_UI_VERSION = "1.24.0"
+EXPECTED_UI_REVISION = "ops-ui-1"
 
 EXPECTED_ROAD_GROUPS = {
     "paved_primary",
@@ -308,7 +310,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.23.0 · Bot v1.18.113" not in index:
+    if "Website v1.24.0 · Bot v1.18.114" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "Chernarus Live—Livonia Ready To Connect", "Livonia production onboarding", "current single-server setup", "participants", "Owner bulk catalogue controls"):
         if stale in index:
@@ -547,7 +549,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         errors.append(
             "dashboard.html: command library must be lazy-loaded instead of downloaded on every dashboard visit."
         )
-    lazy_script = f'assets/js/dashboard/lazy-assets.js?v={EXPECTED_ASSET_VERSION}'
+    lazy_script = f'assets/js/dashboard/lazy-assets.js?v={EXPECTED_UI_VERSION}'
     lazy_index = dashboard.find(lazy_script)
     shell_index = dashboard.find("assets/js/dashboard/shell.js")
     if lazy_index < 0:
@@ -1033,8 +1035,8 @@ def validate_required_files(errors: list[str]) -> None:
 
 def validate_site_wide_theme(errors: list[str]) -> None:
     expected = f'assets/css/site-polish.css?v={EXPECTED_ASSET_VERSION}'
-    unified_css = f'assets/css/ui-system.css?v={EXPECTED_ASSET_VERSION}&rev=unified-ui-1'
-    unified_js = f'assets/js/ui-system.js?v={EXPECTED_ASSET_VERSION}&rev=unified-ui-1'
+    unified_css = f'assets/css/ui-system.css?v={EXPECTED_UI_VERSION}&rev={EXPECTED_UI_REVISION}'
+    unified_js = f'assets/js/ui-system.js?v={EXPECTED_UI_VERSION}&rev={EXPECTED_UI_REVISION}'
     for html_path in sorted(ROOT.glob("*.html")):
         source = html_path.read_text(encoding="utf-8")
         if expected not in source:
@@ -1042,9 +1044,9 @@ def validate_site_wide_theme(errors: list[str]) -> None:
                 f"{html_path.name}: missing site-wide UI theme reference {expected}"
             )
         if unified_css not in source:
-            errors.append(f"{html_path.name}: missing unified v1.23 design-system stylesheet.")
+            errors.append(f"{html_path.name}: missing v1.24 operations-interface stylesheet.")
         if unified_js not in source:
-            errors.append(f"{html_path.name}: missing unified v1.23 UI controller.")
+            errors.append(f"{html_path.name}: missing v1.24 operations-interface controller.")
 
     ui_js = (ROOT / "assets/js/ui-system.js").read_text(encoding="utf-8")
     for token in (
@@ -1052,6 +1054,8 @@ def validate_site_wide_theme(errors: list[str]) -> None:
         "sortDashboardNavigation",
         "createQuickAccess",
         "Ctrl+K",
+        "createNetworkRail",
+        "wwz-ops-interface",
     ):
         if token not in ui_js:
             errors.append(f"ui-system.js: missing unified navigation/accessibility behaviour: {token}")
@@ -1059,6 +1063,20 @@ def validate_site_wide_theme(errors: list[str]) -> None:
     donations = (ROOT / "assets/js/pages/donations.js").read_text(encoding="utf-8")
     if "catalogueSort: 'name-asc'" not in standalone_shop:
         errors.append("Standalone shop must default to alphabetical Name A-Z ordering.")
+    shop_html = (ROOT / "shop.html").read_text(encoding="utf-8")
+    for eager in ("leaflet.js", "leaflet.css", "assets/js/map/wwz-map.js", "assets/css/components/chernarus-map.css"):
+        if eager in shop_html:
+            errors.append(f"shop.html: performance regression: checkout-map asset must remain lazy: {eager}")
+    for token in ("ensureCheckoutMapRuntime", "MAP_ASSETS", "Map preview unavailable"):
+        if token not in standalone_shop:
+            errors.append(f"assets/js/pages/shop.js: missing lazy checkout-map behaviour: {token}")
+    dashboard_html = (ROOT / "dashboard.html").read_text(encoding="utf-8")
+    lazy_assets = (ROOT / "assets/js/dashboard/lazy-assets.js").read_text(encoding="utf-8")
+    for eager in ("assets/js/dashboard/rules-manager.js", "assets/js/dashboard/donation-manager.js", "assets/js/dashboard/donation-orders.js"):
+        if eager in dashboard_html:
+            errors.append(f"dashboard.html: performance regression: admin manager must remain lazy: {eager}")
+        if eager not in lazy_assets:
+            errors.append(f"assets/js/dashboard/lazy-assets.js: missing lazy manager loader: {eager}")
     if "localeCompare(String(b.name || '')" not in donations:
         errors.append("Donation storefront must alphabetize public catalogue entries.")
 
@@ -1437,8 +1455,8 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.23.0'",
-        "const WWZ_PWA_CACHE_REVISION = 'unified-ui-1'",
+        "const WWZ_PWA_VERSION = '1.24.0'",
+        "const WWZ_PWA_CACHE_REVISION = 'ops-ui-perf-1'",
         "if (request.method !== 'GET') return;",
         "if (url.origin !== self.location.origin) return;",
         "relativePath.startsWith('/api/')",
@@ -1465,6 +1483,9 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
                 errors.append(f"sw.js: app-shell precache target does not exist: {relative}")
         if "/world-war-z-website/" in app_shell:
             errors.append("sw.js: app-shell paths must remain relative to the service-worker scope, not hardcode the GitHub Pages repository path.")
+        for heavy in ("dashboard.html", "shop.html", "assets/js/map/wwz-map.js", "assets/js/dashboard/rules-manager.js", "assets/js/dashboard/donation-manager.js", "assets/js/dashboard/donation-orders.js"):
+            if heavy in app_shell:
+                errors.append(f"sw.js: performance regression: heavy/non-shell asset must remain lazy: {heavy}")
 
     pwa_js = pwa_js_path.read_text(encoding="utf-8") if pwa_js_path.is_file() else ""
     for token in (

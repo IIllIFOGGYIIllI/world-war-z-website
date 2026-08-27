@@ -1,8 +1,8 @@
 'use strict';
 
-const WWZ_PWA_VERSION = '1.23.0';
+const WWZ_PWA_VERSION = '1.24.0';
 const CACHE_PREFIX = 'wwz-pwa-';
-const WWZ_PWA_CACHE_REVISION = 'unified-ui-1';
+const WWZ_PWA_CACHE_REVISION = 'ops-ui-perf-1';
 const CACHE_RELEASE = `${WWZ_PWA_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${CACHE_RELEASE}`;
@@ -16,11 +16,6 @@ const APP_SCOPE = new URL('./', self.registration.scope);
 const scopedUrl = (path) => new URL(path, APP_SCOPE).href;
 
 const APP_SHELL = [
-  './dashboard.html',
-  './donations.html',
-  './shop.html',
-  './rules.html',
-  './map-link.html',
   './index.html',
   './offline.html',
   './manifest.webmanifest',
@@ -31,36 +26,13 @@ const APP_SHELL = [
   './assets/icons/pwa/apple-touch-icon-180.png',
   './assets/world-war-z-icon.png',
   './assets/world-war-z-logo.webp',
-  './assets/css/pwa.css?v=1.22.93',
-  './assets/css/dashboard/core.css?v=1.22.93',
-  './assets/css/dashboard/rules-manager.css?v=1.22.93&rev=rules-manager-1',
-  './assets/css/dashboard/donation-manager.css?v=1.22.101&rev=donation-manager-1',
-  './assets/css/dashboard/donation-orders.css?v=1.22.102&rev=donation-orders-1',
-  './assets/css/pages/donations.css?v=1.22.103&rev=multi-currency-1',
-  './assets/css/pages/shop.css?v=1.22.106&rev=dual-server-1',
-  './assets/css/pages/rules.css?v=1.22.106&rev=dual-server-1',
-  './assets/css/dashboard/gateway.css?v=1.22.93&rev=3',
-  './assets/css/dashboard/workspace.css?v=1.22.93&rev=onboarding-1',
-  './assets/css/dashboard/overview-map-preview.css?v=1.22.93',
+  './assets/css/pages/home.css?v=1.22.93',
   './assets/css/site-polish.css?v=1.22.93',
-  './assets/css/ui-system.css?v=1.22.93&rev=unified-ui-1',
+  './assets/css/pwa.css?v=1.22.93',
+  './assets/css/ui-system.css?v=1.24.0&rev=ops-ui-1',
+  './assets/js/pages/home.js?v=1.22.93',
   './assets/js/pwa.js?v=1.22.93',
-  './assets/js/ui-system.js?v=1.22.93&rev=unified-ui-1',
-  './assets/js/core/http.js?v=1.22.93&rev=2',
-  './assets/js/dashboard/lazy-assets.js?v=1.22.93&rev=unified-ui-1',
-  './assets/js/dashboard/shell.js?v=1.22.93',
-  './assets/js/dashboard/core.js?v=1.22.93&rev=auth-restore-fix-1',
-  './assets/js/dashboard/formatters.js?v=1.22.93',
-  './assets/js/dashboard/rules-manager.js?v=1.22.93&rev=rules-manager-1',
-  './assets/js/dashboard/donation-manager.js?v=1.22.101&rev=donation-manager-1',
-  './assets/js/dashboard/donation-orders.js?v=1.22.102&rev=donation-orders-1',
-  './assets/js/pages/donations.js?v=1.23.0&rev=ui-order-1',
-  './assets/js/pages/shop.js?v=1.23.0&rev=ui-order-1',
-  './assets/js/pages/rules.js?v=1.22.106&rev=dual-server-1',
-  './assets/js/dashboard/server-context.js?v=1.22.93&rev=6',
-  './assets/js/dashboard/admin-access.js?v=1.22.93',
-  './assets/js/dashboard/account.js?v=1.22.93&rev=auth-restore-fix-1',
-  './assets/js/dashboard/bootstrap.js?v=1.22.93&rev=restore-1'
+  './assets/js/ui-system.js?v=1.24.0&rev=ops-ui-1'
 ].map(scopedUrl);
 
 const trimCache = async (cacheName, limit) => {
