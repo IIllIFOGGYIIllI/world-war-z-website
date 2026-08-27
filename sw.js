@@ -1,6 +1,6 @@
 'use strict';
 
-const WWZ_PWA_VERSION = '1.22.106';
+const WWZ_PWA_VERSION = '1.22.107';
 const CACHE_PREFIX = 'wwz-pwa-';
 const WWZ_PWA_CACHE_REVISION = 'dual-server-public-parity-1';
 const CACHE_RELEASE = `${WWZ_PWA_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
@@ -45,7 +45,7 @@ const APP_SHELL = [
   './assets/css/site-polish.css?v=1.22.93',
   './assets/js/pwa.js?v=1.22.93',
   './assets/js/core/http.js?v=1.22.93&rev=2',
-  './assets/js/dashboard/lazy-assets.js?v=1.22.93&rev=discord-channel-refresh-1',
+  './assets/js/dashboard/lazy-assets.js?v=1.22.93&rev=missing-spawn-1',
   './assets/js/dashboard/shell.js?v=1.22.93',
   './assets/js/dashboard/core.js?v=1.22.93&rev=auth-restore-fix-1',
   './assets/js/dashboard/formatters.js?v=1.22.93',
@@ -53,7 +53,7 @@ const APP_SHELL = [
   './assets/js/dashboard/donation-manager.js?v=1.22.101&rev=donation-manager-1',
   './assets/js/dashboard/donation-orders.js?v=1.22.102&rev=donation-orders-1',
   './assets/js/pages/donations.js?v=1.22.104&rev=currency-refresh-fix-1',
-  './assets/js/pages/shop.js?v=1.22.106&rev=dual-server-1',
+  './assets/js/pages/shop.js?v=1.22.107&rev=missing-spawn-1',
   './assets/js/pages/rules.js?v=1.22.106&rev=dual-server-1',
   './assets/js/dashboard/server-context.js?v=1.22.93&rev=6',
   './assets/js/dashboard/admin-access.js?v=1.22.93',

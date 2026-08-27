@@ -1,13 +1,12 @@
-# World War Z Website v1.22.106
+# World War Z Website v1.22.107
 
-## Dual-server public parity
-- Adds an explicit Chernarus/Livonia selector to the public Server Rules page.
-- Public rules requests now send the selected `X-WWZ-Server` context instead of silently reading the primary server ruleset.
-- Adds an explicit Chernarus/Livonia selector to the standalone Member Shop.
-- Direct shop visits now select an available server themselves instead of requiring a previous dashboard selection.
-- Switching shop server refreshes the isolated catalogue/account/orders, restart schedule, delivery locations and delivery-map context.
-- Advances the PWA cache release so stale rules/shop JavaScript cannot persist after deployment.
+## Missing vehicle/event spawn diagnostics
+- Automatic Delivery cards now show the exact CE event name and exact X/Z/angle target used for vehicle/event spawns.
+- Vehicle/event coordinates are displayed as terrain-height CE positions instead of implying the saved Y value is written to cfgeventspawns.xml.
+- Adds `Copy CE XML` for direct inspection of the generated `<event><pos ... /></event>` target.
+- Adds `Retry missing spawn` for Admin/Owner recovery of a paid event order without a second purchase or charge.
+- Standalone member Shop order history uses the same X/Z/angle terrain-height presentation for event deliveries.
 
 ## Compatibility
-- Website-only patch; Bot v1.18.112 remains current.
-- No server-owned persistent data or Donation Manager/order data is changed.
+- Pairs with Bot v1.18.113.
+- Chernarus/Livonia selectors, donations, currency display and all existing dashboard/storefront behaviour remain intact.

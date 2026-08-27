@@ -512,7 +512,11 @@ const orderStatusClass = (order) => {
 };
 const orderLocationText = (order) => {
   const point = order?.delivery?.location || {};
-  if (point.x == null || point.y == null || point.z == null) return '';
+  if (point.x == null || point.z == null) return '';
+  if (order?.delivery_type === 'event') {
+    return `X ${Number(point.x).toFixed(1)}, Z ${Number(point.z).toFixed(1)}, A ${Number(point.rotation || 0).toFixed(1)}° · terrain height`;
+  }
+  if (point.y == null) return '';
   return `X ${Number(point.x).toFixed(1)}, Y ${Number(point.y).toFixed(1)}, Z ${Number(point.z).toFixed(1)}, A ${Number(point.rotation || 0).toFixed(1)}°`;
 };
 const copyOrderCoordinates = async (order, button) => {

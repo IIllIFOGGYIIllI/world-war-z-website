@@ -195,7 +195,7 @@
 
   const ensureDeliveryController = () => ensureShopController().then(() => loadScriptOnce(
     'delivery-controller',
-    'assets/js/dashboard/delivery.js?v=1.22.93&rev=2',
+    'assets/js/dashboard/delivery.js?v=1.22.93&rev=3',
     () => window.__wwzDeliveryControllerReady === true
   ));
 

@@ -308,7 +308,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.22.106 · Bot v1.18.112" not in index:
+    if "Website v1.22.107 · Bot v1.18.113" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "Chernarus Live—Livonia Ready To Connect", "Livonia production onboarding", "current single-server setup", "participants", "Owner bulk catalogue controls"):
         if stale in index:
@@ -510,7 +510,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
 
     shop_helper_script = f'assets/js/dashboard/shop-helpers.js?v={EXPECTED_ASSET_VERSION}'
     shop_script = f'assets/js/dashboard/shop.js?v={EXPECTED_ASSET_VERSION}&rev=3'
-    delivery_script = f'assets/js/dashboard/delivery.js?v={EXPECTED_ASSET_VERSION}&rev=2'
+    delivery_script = f'assets/js/dashboard/delivery.js?v={EXPECTED_ASSET_VERSION}&rev=3'
     for label, asset_url in (
         ("shared Shop helpers", shop_helper_script),
         ("Shop controller", shop_script),
@@ -1413,7 +1413,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.22.106'",
+        "const WWZ_PWA_VERSION = '1.22.107'",
         "const WWZ_PWA_CACHE_REVISION = 'dual-server-public-parity-1'",
         "if (request.method !== 'GET') return;",
         "if (url.origin !== self.location.origin) return;",
