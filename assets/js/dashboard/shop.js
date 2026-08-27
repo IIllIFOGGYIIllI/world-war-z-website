@@ -404,7 +404,7 @@ const renderShopCatalogue = () => {
     const matchesCategory = category === 'all' || String(item.category) === category;
     const haystack = `${item.item_id} ${item.name} ${item.sku} ${item.category} ${item.description}`.toLowerCase();
     return matchesMode && matchesCategory && (!query || haystack.includes(query));
-  });
+  }).sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), undefined, { sensitivity: 'base', numeric: true }));
   shopCatalogue.replaceChildren();
   visible.forEach((item) => {
     const card = document.createElement('article');

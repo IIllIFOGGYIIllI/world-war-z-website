@@ -308,7 +308,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.22.107 · Bot v1.18.113" not in index:
+    if "Website v1.23.0 · Bot v1.18.113" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "Chernarus Live—Livonia Ready To Connect", "Livonia production onboarding", "current single-server setup", "participants", "Owner bulk catalogue controls"):
         if stale in index:
@@ -509,7 +509,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append(f"shop.js: extracted helper {helper} must live in shop-helpers.js.")
 
     shop_helper_script = f'assets/js/dashboard/shop-helpers.js?v={EXPECTED_ASSET_VERSION}'
-    shop_script = f'assets/js/dashboard/shop.js?v={EXPECTED_ASSET_VERSION}&rev=3'
+    shop_script = f'assets/js/dashboard/shop.js?v={EXPECTED_ASSET_VERSION}&rev=4'
     delivery_script = f'assets/js/dashboard/delivery.js?v={EXPECTED_ASSET_VERSION}&rev=3'
     for label, asset_url in (
         ("shared Shop helpers", shop_helper_script),
@@ -981,6 +981,7 @@ def validate_required_files(errors: list[str]) -> None:
         "sw.js",
         "assets/css/pwa.css",
         "assets/js/pwa.js",
+        "assets/js/ui-system.js",
         "assets/icons/pwa/icon-192.png",
         "assets/icons/pwa/icon-512.png",
         "assets/icons/pwa/icon-maskable-192.png",
@@ -988,6 +989,7 @@ def validate_required_files(errors: list[str]) -> None:
         "assets/icons/pwa/apple-touch-icon-180.png",
         "assets/css/pages/home.css",
         "assets/css/site-polish.css",
+        "assets/css/ui-system.css",
         "assets/css/dashboard/core.css",
         "assets/css/dashboard/gateway.css",
         "assets/css/dashboard/moderation.css",
@@ -1031,12 +1033,34 @@ def validate_required_files(errors: list[str]) -> None:
 
 def validate_site_wide_theme(errors: list[str]) -> None:
     expected = f'assets/css/site-polish.css?v={EXPECTED_ASSET_VERSION}'
+    unified_css = f'assets/css/ui-system.css?v={EXPECTED_ASSET_VERSION}&rev=unified-ui-1'
+    unified_js = f'assets/js/ui-system.js?v={EXPECTED_ASSET_VERSION}&rev=unified-ui-1'
     for html_path in sorted(ROOT.glob("*.html")):
         source = html_path.read_text(encoding="utf-8")
         if expected not in source:
             errors.append(
                 f"{html_path.name}: missing site-wide UI theme reference {expected}"
             )
+        if unified_css not in source:
+            errors.append(f"{html_path.name}: missing unified v1.23 design-system stylesheet.")
+        if unified_js not in source:
+            errors.append(f"{html_path.name}: missing unified v1.23 UI controller.")
+
+    ui_js = (ROOT / "assets/js/ui-system.js").read_text(encoding="utf-8")
+    for token in (
+        "normalizePublicNavigation",
+        "sortDashboardNavigation",
+        "createQuickAccess",
+        "Ctrl+K",
+    ):
+        if token not in ui_js:
+            errors.append(f"ui-system.js: missing unified navigation/accessibility behaviour: {token}")
+    standalone_shop = (ROOT / "assets/js/pages/shop.js").read_text(encoding="utf-8")
+    donations = (ROOT / "assets/js/pages/donations.js").read_text(encoding="utf-8")
+    if "catalogueSort: 'name-asc'" not in standalone_shop:
+        errors.append("Standalone shop must default to alphabetical Name A-Z ordering.")
+    if "localeCompare(String(b.name || '')" not in donations:
+        errors.append("Donation storefront must alphabetize public catalogue entries.")
 
 def validate_retired_map_assets(errors: list[str]) -> None:
     for path in RETIRED_MAP_PATHS:
@@ -1413,8 +1437,8 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.22.107'",
-        "const WWZ_PWA_CACHE_REVISION = 'dual-server-public-parity-1'",
+        "const WWZ_PWA_VERSION = '1.23.0'",
+        "const WWZ_PWA_CACHE_REVISION = 'unified-ui-1'",
         "if (request.method !== 'GET') return;",
         "if (url.origin !== self.location.origin) return;",
         "relativePath.startsWith('/api/')",

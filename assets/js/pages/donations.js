@@ -450,14 +450,14 @@
   const renderCatalogue = () => {
     if (elements.intro) elements.intro.textContent = String(state.catalogue.intro || 'Support the World War Z community through optional donation items and packages.');
     elements.packages.replaceChildren();
-    const packages = Array.isArray(state.catalogue.packages) ? state.catalogue.packages : [];
+    const packages = (Array.isArray(state.catalogue.packages) ? [...state.catalogue.packages] : []).sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), undefined, { sensitivity: 'base', numeric: true }));
     packages.forEach((entry) => elements.packages.append(buildCard('package', entry)));
     elements.packagesEmpty.hidden = packages.length > 0;
 
     elements.categories.replaceChildren();
     let itemCount = 0;
-    (state.catalogue.categories || []).forEach((category) => {
-      const items = Array.isArray(category.items) ? category.items : [];
+    [...(state.catalogue.categories || [])].sort((a, b) => String(a.title || '').localeCompare(String(b.title || ''), undefined, { sensitivity: 'base', numeric: true })).forEach((category) => {
+      const items = (Array.isArray(category.items) ? [...category.items] : []).sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), undefined, { sensitivity: 'base', numeric: true }));
       if (!items.length) return;
       itemCount += items.length;
       const block = document.createElement('section');
@@ -475,7 +475,7 @@
     const payment = state.catalogue.payment || {};
     elements.paymentIntro.textContent = String(payment.intro || 'Choose one of the configured external payment methods after creating an order.');
     elements.paymentMethods.replaceChildren();
-    (payment.methods || []).forEach((method) => {
+    [...(payment.methods || [])].sort((a, b) => String(a.label || '').localeCompare(String(b.label || ''), undefined, { sensitivity: 'base' })).forEach((method) => {
       const card = document.createElement('div');
       card.className = 'donation-payment-method';
       const title = document.createElement('strong');

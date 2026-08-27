@@ -34,7 +34,7 @@ const state = {
   restart: null,
   cataloguePage: 1,
   cataloguePageSize: 24,
-  catalogueSort: 'recommended',
+  catalogueSort: 'name-asc',
   detailItem: null,
   orderScope: 'all'
 };
@@ -317,7 +317,7 @@ const filteredModeItems = ({ ignoreCategory = false } = {}) => {
   });
 };
 const sortCatalogueItems = (items) => {
-  const sort = state.catalogueSort || 'recommended';
+  const sort = state.catalogueSort || 'name-asc';
   return items.map((item, index) => ({ item, index })).sort((left, right) => {
     const a = left.item, b = right.item;
     if (sort === 'name-asc') return String(a.name).localeCompare(String(b.name));
@@ -436,7 +436,7 @@ const renderPagination = (totalItems) => {
 };
 
 const renderCatalogue = () => {
-  state.catalogueSort = elements.sort?.value || state.catalogueSort || 'recommended';
+  state.catalogueSort = elements.sort?.value || state.catalogueSort || 'name-asc';
   state.cataloguePageSize = Math.max(1, Number(elements.pageSize?.value || state.cataloguePageSize || 24));
   const visible = sortCatalogueItems(filteredModeItems());
   const total = visible.length;
@@ -894,7 +894,7 @@ elements.sort?.addEventListener('change', () => { state.catalogueSort = elements
 elements.pageSize?.addEventListener('change', () => { state.cataloguePageSize = Number(elements.pageSize.value || 24); resetCataloguePage(); renderCatalogue(); });
 elements.resetFilters?.addEventListener('click', () => {
   elements.search.value = ''; elements.category.value = 'all'; if (elements.sort) elements.sort.value = 'recommended'; if (elements.pageSize) elements.pageSize.value = '24';
-  state.catalogueSort = 'recommended'; state.cataloguePageSize = 24; resetCataloguePage(); renderCatalogue(); elements.search.focus();
+  state.catalogueSort = 'name-asc'; state.cataloguePageSize = 24; resetCataloguePage(); renderCatalogue(); elements.search.focus();
 });
 $$('[data-member-item-detail-close]').forEach((button) => button.addEventListener('click', () => elements.detailDialog?.close()));
 elements.detailBuy?.addEventListener('click', () => {

@@ -21,6 +21,7 @@
 <link href="assets/css/pages/shop.css?v=1.22.106&rev=dual-server-1" rel="stylesheet"/><link href="assets/css/components/chernarus-map.css?v=1.22.93&amp;rev=2" rel="stylesheet"/>
 <link href="https://iillifoggyiilli.github.io/world-war-z-website/shop.html" rel="canonical"/><meta content="https://iillifoggyiilli.github.io/world-war-z-website/shop.html" property="og:url"/><link href="assets/css/site-polish.css?v=1.22.93" rel="stylesheet"/><link href="assets/icons/pwa/apple-touch-icon-180.png?v=1.22.93" rel="apple-touch-icon" sizes="180x180"/>
 <link href="assets/css/pwa.css?v=1.22.93" rel="stylesheet"/>
+<link href="assets/css/ui-system.css?v=1.22.93&rev=unified-ui-1" rel="stylesheet"/>
 </head>
 <body class="member-shop-page">
 <a class="skip-link" href="#shop-main">Skip to shop</a>
@@ -86,7 +87,7 @@
 <div class="shop-toolbar command-bar member-catalogue-toolbar">
 <label class="command-search member-catalogue-search"><span aria-hidden="true">⌕</span><span class="sr-only">Search shop</span><input autocomplete="off" data-member-shop-search="" placeholder="Search item, classname, category or SKU…" type="search"/></label>
 <label class="dialog-field compact-select member-category-select"><span>Category</span><select data-member-shop-category=""><option value="all">All categories</option></select></label>
-<label class="dialog-field compact-select"><span>Sort</span><select data-member-shop-sort=""><option value="recommended">Recommended</option><option value="name-asc">Name A–Z</option><option value="name-desc">Name Z–A</option><option value="price-asc">Price low to high</option><option value="price-desc">Price high to low</option><option value="category">Category</option></select></label>
+<label class="dialog-field compact-select"><span>Sort</span><select data-member-shop-sort=""><option value="recommended">Catalogue order</option><option selected value="name-asc">Name A–Z</option><option value="name-desc">Name Z–A</option><option value="price-asc">Price low to high</option><option value="price-desc">Price high to low</option><option value="category">Category</option></select></label>
 <label class="dialog-field compact-select"><span>Per page</span><select data-member-shop-page-size=""><option value="24">24</option><option value="48">48</option><option value="96">96</option></select></label>
 <button class="secondary-action compact-action member-reset-filters" data-member-shop-reset-filters="" type="button">Reset Filters</button>
 <div class="toolbar-view-note"><span>LIVE</span><strong data-member-shop-mode-label="">Items</strong><small>Connected to Railway</small></div>
@@ -201,7 +202,8 @@
 <button class="dialog-cancel" data-member-purchase-cancel="" type="button">Cancel</button>
 </form>
 </dialog>
-<script crossorigin="" defer="" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script defer="" src="assets/js/map/wwz-map.js?v=1.22.93&amp;rev=3"></script><script defer="" src="assets/js/core/http.js?v=1.22.93&amp;rev=2"></script><script defer="" src="assets/js/shop-wiki-previews.js?v=1.22.93"></script><script defer="" src="assets/js/pages/shop.js?v=1.22.107&amp;rev=missing-spawn-1"></script>
+<script crossorigin="" defer="" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script defer="" src="assets/js/map/wwz-map.js?v=1.22.93&amp;rev=3"></script><script defer="" src="assets/js/core/http.js?v=1.22.93&amp;rev=2"></script><script defer="" src="assets/js/shop-wiki-previews.js?v=1.22.93"></script><script defer="" src="assets/js/pages/shop.js?v=1.23.0&amp;rev=ui-order-1"></script>
 <script defer src="assets/js/pwa.js?v=1.22.93"></script>
+<script defer src="assets/js/ui-system.js?v=1.22.93&rev=unified-ui-1"></script>
 </body>
 </html>

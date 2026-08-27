@@ -189,7 +189,7 @@
 
   const ensureShopController = () => ensureShopHelpers().then(() => loadScriptOnce(
     'shop-controller',
-    'assets/js/dashboard/shop.js?v=1.22.93&rev=3',
+    'assets/js/dashboard/shop.js?v=1.22.93&rev=4',
     () => window.__wwzShopControllerReady === true
   ));
 
