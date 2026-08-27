@@ -1,13 +1,12 @@
-# World War Z Website v1.22.104
+# World War Z Website v1.22.105
 
-## Fixed
-- Changing the Support WWZ display-currency selector now immediately changes the primary price shown on every donation item and package.
-- The authoritative AUD amount remains visible underneath every converted price and remains the value recorded by checkout/order creation.
-- Added a release-time indicative fallback FX table so conversions continue to display when the live exchange-rate request is unavailable or blocked in the browser.
-- Live/cached/fallback rate status is shown clearly beside the selector.
-- Refreshing the catalogue no longer resets the member's selected display currency.
-- Corrected browser-locale region parsing used for first-visit currency selection.
+## Livonia reactivation
+- Updates the public roadmap from Livonia paused/preserved to Livonia live.
+- Updates the dashboard roadmap so both WWZ servers are shown as active.
+- Clarifies that Livonia resumes its preserved, isolated progression/economy/PvP/ticket/faction/zone/feed/donation/configuration state rather than inheriting Chernarus data.
+- Corrects the roadmap command inventory to the current 99 top-level Discord commands.
+- Advances the service-worker release so stale paused-Livonia copy is replaced.
 
 ## Compatibility
-- Website-only patch; Bot remains v1.18.111.
-- No donation catalogue, order, payment, ticket or fulfilment data is changed.
+- Pairs with Bot v1.18.112.
+- Donation storefront/orders, multi-currency prices, Rules Manager, shop, maps and all existing dashboard workflows remain unchanged.
