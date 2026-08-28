@@ -310,7 +310,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.24.0 · Bot v1.18.114" not in index:
+    if "Website v1.25.0 · Bot v1.19.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "Chernarus Live—Livonia Ready To Connect", "Livonia production onboarding", "current single-server setup", "participants", "Owner bulk catalogue controls"):
         if stale in index:
@@ -549,7 +549,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         errors.append(
             "dashboard.html: command library must be lazy-loaded instead of downloaded on every dashboard visit."
         )
-    lazy_script = f'assets/js/dashboard/lazy-assets.js?v={EXPECTED_UI_VERSION}'
+    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.25.0'
     lazy_index = dashboard.find(lazy_script)
     shell_index = dashboard.find("assets/js/dashboard/shell.js")
     if lazy_index < 0:
@@ -630,7 +630,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append(f"lazy-assets.js: missing view-style lazy-loading guard: {token}")
 
     lazy_view_assets = (
-        ("dashboard map", f"assets/js/pages/dashboard-map-loader.js?v={EXPECTED_ASSET_VERSION}&rev=3", "ensureDashboardMap"),
+        ("dashboard map", f"assets/js/pages/dashboard-map-loader.js?v={EXPECTED_ASSET_VERSION}&rev=4", "ensureDashboardMap"),
         ("structured configuration", f"assets/js/dashboard/configuration-studio.js?v={EXPECTED_ASSET_VERSION}", "ensureConfigurationStudio"),
         ("dashboard Shop wiki previews", f"assets/js/shop-wiki-previews.js?v={EXPECTED_ASSET_VERSION}", "ensureShopWikiPreviews"),
     )
@@ -639,6 +639,28 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append(f"dashboard.html: {label} must remain view-lazy instead of loading on every dashboard visit.")
         if asset_url not in lazy_assets or loader_name not in lazy_assets:
             errors.append(f"lazy-assets.js: missing current lazy loader for {label}.")
+
+    for token in (
+        "assets/css/components/map-intelligence.css?v=1.25.0",
+        "assets/js/pages/dashboard-map-intelligence.js?v=1.25.0&rev=1",
+        "window.__wwzMapIntelligenceReady === true",
+    ):
+        if token not in lazy_assets:
+            errors.append(f"lazy-assets.js: missing collaborative-map lazy-loading guard: {token}")
+    map_intelligence_js = (ROOT / "assets/js/pages/dashboard-map-intelligence.js").read_text(encoding="utf-8") if (ROOT / "assets/js/pages/dashboard-map-intelligence.js").exists() else ""
+    for token in (
+        "/api/map/intelligence",
+        "/api/account/map/markers/action",
+        "/api/account/map/groups/action",
+        "document.addEventListener('visibilitychange'",
+        "ACTIVE_REFRESH_MS = 45_000",
+        "zone.shape === 'polygon' ? zone.points : circleWorldPoints(zone)",
+    ):
+        if token not in map_intelligence_js:
+            errors.append(f"dashboard-map-intelligence.js: missing privacy/performance/geometry guard: {token}")
+    for forbidden in ("localStorage.setItem", "sessionStorage.setItem"):
+        if forbidden in map_intelligence_js:
+            errors.append(f"dashboard-map-intelligence.js: collaborative Group/Faction data must not be persisted in browser storage: {forbidden}")
 
     lazy_dashboard_controllers = (
         ("Administration controller", f"assets/js/dashboard/administration.js?v={EXPECTED_ASSET_VERSION}", "ensureAdministration", "__wwzAdministrationReady", "assets/js/dashboard/administration.js"),
@@ -1455,8 +1477,8 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.24.0'",
-        "const WWZ_PWA_CACHE_REVISION = 'ops-ui-perf-1'",
+        "const WWZ_PWA_VERSION = '1.25.0'",
+        "const WWZ_PWA_CACHE_REVISION = 'collaborative-map-1'",
         "if (request.method !== 'GET') return;",
         "if (url.origin !== self.location.origin) return;",
         "relativePath.startsWith('/api/')",

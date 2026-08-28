@@ -1010,5 +1010,24 @@
 
   if (requestedView() === 'map') initialise().catch(() => {});
 
-  window.WWZDashboardMap = Object.freeze({ initialise });
+  const setBaseLayerVisible = (scope, visible) => {
+    if (!mapInstance) return false;
+    const layer = scope === 'public' ? poiLayer : scope === 'private' ? customLayer : null;
+    if (!layer) return false;
+    if (visible) {
+      if (!mapInstance.map.hasLayer(layer)) layer.addTo(mapInstance.map);
+    } else if (mapInstance.map.hasLayer(layer)) {
+      mapInstance.map.removeLayer(layer);
+    }
+    return true;
+  };
+
+  window.WWZDashboardMap = Object.freeze({
+    initialise,
+    getInstance: () => mapInstance,
+    getSelection: selectedMapPoint,
+    setBaseLayerVisible,
+    focus: (x, z, zoom = 7) => mapInstance?.focus?.(x, z, zoom),
+    select: (x, z) => mapInstance?.setSelection?.(x, z, { notify: false, marker: false })
+  });
 })();

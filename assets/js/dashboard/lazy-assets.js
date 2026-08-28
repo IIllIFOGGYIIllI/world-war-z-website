@@ -166,11 +166,23 @@
     () => window.__wwzCommandLibraryReady === true
   );
 
-  const ensureDashboardMap = () => ensureMapRuntime().then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
-    'dashboard-map',
-    'assets/js/pages/dashboard-map-loader.js?v=1.22.93&rev=3',
-    () => Boolean(window.WWZDashboardMap?.initialise)
-  )));
+  const ensureMapIntelligenceStyles = () => loadStylesheetOnce(
+    'map-intelligence-css',
+    'assets/css/components/map-intelligence.css?v=1.25.0'
+  );
+
+  const ensureDashboardMap = () => ensureMapRuntime().then(() => loadAfterDashboardRuntime(() => Promise.all([
+    ensureMapIntelligenceStyles(),
+    loadScriptOnce(
+      'dashboard-map',
+      'assets/js/pages/dashboard-map-loader.js?v=1.22.93&rev=4',
+      () => Boolean(window.WWZDashboardMap?.initialise)
+    )
+  ]))).then(() => loadScriptOnce(
+    'dashboard-map-intelligence',
+    'assets/js/pages/dashboard-map-intelligence.js?v=1.25.0&rev=1',
+    () => window.__wwzMapIntelligenceReady === true
+  ));
 
   const ensureZonesStyles = () => loadStylesheetOnce(
     'zones-css',
