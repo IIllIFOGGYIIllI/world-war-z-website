@@ -1,17 +1,24 @@
-# World War Z Website v1.25.5
+# World War Z Website v1.26.0
 
-## Chernarus Console PvE Telemetry Hotfix
-- Replaces inferred infected/predator/wildlife kill displays with console-safe expedition participation telemetry from periodic ADM positions.
-- PvE leaderboards now rank check-ins, first visits and expedition objective coverage rather than unsupported NPC-kill counts.
-- Weekly community goals, faction standings, records, recent activity and the PvE heatmap now use the same participation model.
-- Actual player deaths to infected, bears and wolves remain visible separately when the bot receives those ADM death causes.
-- Clearly identifies the telemetry source as console ADM positions and states that NPC-kill inference is not used.
-- Removes the unsupported NPC Kill zone-rule control from the Command Centre.
+## Chernarus PvE Progression
+- Adds the Survivor Passport workspace with 27 discoverable Chernarus locations, category completion, progress percentage and badges.
+- Adds current-life survival telemetry and personal best records from the paired console-safe Bot v1.20.0.
+- Adds PvE reputation rank/progress, reputation leaders and operation streak presentation.
 
-## Chernarus Travel Quests
-- The paired Bot v1.19.5 introduces a Chernarus travel/PvE-heavy quest rotation and validated distance-travelled objectives.
-- Quest progress displayed by the existing quest surfaces automatically reflects the new travel, named-location, patrol and expedition objectives.
+## Multi-stage Operations
+- Adds full WWZ Operation cards showing ordered travel stages, active stage progress, required dwell time, completion state and rewards.
+- Presents the new Northern Watch, Coast-to-Coast, Airfield Circuit, Western Front and Endgame Pilgrimage progression loop.
+
+## Campaigns & Records
+- Adds weekly community campaign objectives for legitimate travel, discoveries, operations, expedition visits and unique explorers.
+- Adds existing-faction seasonal PvE standings and seasonal player record panels.
+- Adds admin-only Adaptive World Analytics recommendations without exposing automatic mission-edit controls.
+
+## Map Intelligence
+- Adds an authenticated **My Survivor Passport** layer to the collaborative Chernarus map.
+- Discovered and undiscovered Passport locations render separately while personal Passport state remains private to the linked viewer.
+- Existing expedition, heatmap, group, faction, kill-zone and public/private marker layers are preserved.
 
 ## Isolation / PWA
-- Chernarus-only correction; Livonia PvP Operations remain unchanged and isolated.
-- Advances the installed PWA/service-worker cache to v1.25.5 and cache-busts the corrected Chernarus PvE, map-intelligence and zone modules.
+- Chernarus-only progression release; Livonia PvP Operations remain unchanged and isolated.
+- Advances the installed PWA/service-worker release to v1.26.0 and cache-busts changed Chernarus progression/map modules.

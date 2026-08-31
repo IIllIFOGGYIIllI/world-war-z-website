@@ -180,7 +180,7 @@
     )
   ]))).then(() => loadScriptOnce(
     'dashboard-map-intelligence',
-    'assets/js/pages/dashboard-map-intelligence.js?v=1.25.5&rev=console-pve-travel-1',
+    'assets/js/pages/dashboard-map-intelligence.js?v=1.26.0&rev=chernarus-progression-1',
     () => window.__wwzMapIntelligenceReady === true
   ));
 
@@ -307,10 +307,10 @@
   ]).then(() => undefined);
 
   const ensureChernarusPve = () => Promise.all([
-    loadStylesheetOnce('chernarus-pve-css', 'assets/css/dashboard/chernarus-pve.css?v=1.25.4'),
+    loadStylesheetOnce('chernarus-pve-css', 'assets/css/dashboard/chernarus-pve.css?v=1.26.0&rev=chernarus-progression-1'),
     loadAfterDashboardRuntime(() => loadScriptOnce(
       'chernarus-pve',
-      'assets/js/dashboard/chernarus-pve.js?v=1.25.5&rev=console-pve-travel-1',
+      'assets/js/dashboard/chernarus-pve.js?v=1.26.0&rev=chernarus-progression-1',
       () => window.__wwzChernarusPveReady === true
     ))
   ]).then(() => undefined);

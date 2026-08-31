@@ -1,18 +1,24 @@
-# World War Z Bot Website — v1.25.5
+# World War Z Bot Website — v1.26.0
 
-Website v1.25.5 is the Chernarus **console-safe PvE telemetry hotfix** and pairs with Bot v1.19.5.
+Website v1.26.0 is the **Chernarus PvE Progression** dashboard release and pairs with Bot v1.20.0 / Chernarus mission v1.1.
 
-## Chernarus PvE
-- Live rotating expedition cards and population-scaled activity.
-- Periodic ADM check-ins, first visits, participants and objective coverage instead of inferred NPC kills.
-- Weekly community goal progress, player/faction participation standings and PvE records.
-- Actual PvE-caused player deaths shown separately when available.
-- Separate Chernarus PvE Expedition and participation Heatmap layers.
+## Survivor Passport
+- Adds personal Chernarus exploration completion with category progress, badges and all 27 Passport locations.
+- Adds a private **My Survivor Passport** map layer for authenticated linked survivors; undiscovered and discovered locations are visually distinct.
+- Passport state is never exposed as another player's personal map layer.
 
-## Chernarus Quests
-- Bot v1.19.5 supplies travel/PvE-heavy daily and weekly quests, including validated distance travelled, named-location tours, patrols and expedition visits.
+## Survival & Operations
+- Adds Current Survivor stats for tracked life time, valid distance, discoveries, expedition visits, operation completions and personal records.
+- Adds multi-stage WWZ Operation cards with ordered stages, dwell requirements, active progress and no-death operation streaks.
+- Adds PvE reputation rank/progress and a seasonal reputation leaderboard.
 
-## Compatibility
-- Pairs with Bot v1.19.5 and Chernarus mission v1.1.
-- Livonia PvP Operations and Livonia quest behaviour remain unchanged.
-- Existing Group/Faction map privacy, Kill Zones, Shop, donations, rules, tickets and Admin workflows are preserved.
+## Community & Seasonal Progression
+- Adds weekly Chernarus community campaign progress.
+- Adds existing-faction PvE campaign standings.
+- Adds seasonal survival/exploration/operation record panels.
+- Adds admin-only adaptive world analytics based on real participation and performance data.
+
+## Console Safety
+- All progression remains based on console-safe coordinate/activity telemetry from Bot v1.20.0.
+- No infected/animal kill totals are inferred.
+- Livonia PvP Operations, map layers and quest behaviour remain isolated and unchanged.

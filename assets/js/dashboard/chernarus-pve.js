@@ -25,6 +25,27 @@
   const heatSummary = root.querySelector('[data-chernarus-heat-summary]');
   const recentActivity = root.querySelector('[data-chernarus-recent-activity]');
   const catalogue = root.querySelector('[data-chernarus-catalogue]');
+  const passportSummary = root.querySelector('[data-chernarus-passport-summary]');
+  const passportDetail = root.querySelector('[data-chernarus-passport-detail]');
+  const reputationSummary = root.querySelector('[data-chernarus-reputation-summary]');
+  const reputationDetail = root.querySelector('[data-chernarus-reputation-detail]');
+  const lifeSummary = root.querySelector('[data-chernarus-life-summary]');
+  const lifeDetail = root.querySelector('[data-chernarus-life-detail]');
+  const streakSummary = root.querySelector('[data-chernarus-streak-summary]');
+  const streakDetail = root.querySelector('[data-chernarus-streak-detail]');
+  const passportProgress = root.querySelector('[data-chernarus-passport-progress]');
+  const passportCategories = root.querySelector('[data-chernarus-passport-categories]');
+  const passportBadges = root.querySelector('[data-chernarus-passport-badges]');
+  const passportLocations = root.querySelector('[data-chernarus-passport-locations]');
+  const lifeStats = root.querySelector('[data-chernarus-life-stats]');
+  const lifeRecords = root.querySelector('[data-chernarus-life-records]');
+  const journeys = root.querySelector('[data-chernarus-journeys]');
+  const campaignGoals = root.querySelector('[data-chernarus-campaign-goals]');
+  const campaignFactions = root.querySelector('[data-chernarus-campaign-factions]');
+  const reputationLeaderboard = root.querySelector('[data-chernarus-reputation-leaderboard]');
+  const seasonalRecords = root.querySelector('[data-chernarus-seasonal-records]');
+  const adaptivePanel = root.querySelector('[data-chernarus-adaptive-panel]');
+  const adaptiveRecommendations = root.querySelector('[data-chernarus-adaptive-recommendations]');
   let timer = null;
   let countdownTimer = null;
   let active = false;
@@ -48,6 +69,22 @@
     const secs = seconds % 60;
     return hours > 0 ? `${hours}h ${String(minutes).padStart(2,'0')}m` : `${minutes}m ${String(secs).padStart(2,'0')}s`;
   };
+  const fmtDuration = (seconds) => {
+    const total = Math.max(0, Number(seconds || 0));
+    const hours = Math.floor(total / 3600);
+    const minutes = Math.floor((total % 3600) / 60);
+    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+  };
+  const fmtDistance = (metres) => `${(Math.max(0, Number(metres || 0)) / 1000).toFixed(1)} km`;
+  const fmtRecordValue = (key, row) => {
+    if (!row) return 'No record yet';
+    const value = Number(row.value || 0);
+    if (key === 'longest_life') return fmtDuration(value);
+    if (key === 'furthest_life' || key === 'distance') return fmtDistance(value);
+    if (key === 'reputation') return `${Math.round(value).toLocaleString()} rep`;
+    return Math.round(value).toLocaleString();
+  };
+
   const setStatus = (message = '', tone = '') => {
     if (!status) return;
     status.hidden = !message;
@@ -98,6 +135,61 @@
     if (activity) {
       activity.innerHTML = `<div class="chernarus-stat-row"><span>1</span><strong>24-hour participation</strong><b>${Number(day.visits || 0)} visits</b><small>${Number(day.participants || 0)} survivors · ${Number(day.checkins || 0)} periodic check-ins · ${Number(day.pve_deaths || 0)} PvE deaths</small></div><div class="chernarus-stat-row"><span>2</span><strong>7-day participation</strong><b>${Number(week.visits || 0)} visits</b><small>${Number(week.participants || 0)} survivors · ${Number(week.objectives || 0)} expedition locations · ${Number(week.pve_deaths || 0)} PvE deaths</small></div>`;
     }
+
+    const personal = payload.personal || null;
+    if (personal) {
+      const passport = personal.passport || {};
+      const rep = personal.reputation || {};
+      const currentLife = personal.life?.current || null;
+      const streak = personal.journey_streak || {};
+      if (passportSummary) passportSummary.textContent = `${Number(passport.discovered || 0)} / ${Number(passport.total || 0)} · ${Number(passport.percent || 0).toFixed(0)}%`;
+      if (passportDetail) passportDetail.textContent = `${Object.values(passport.categories || {}).filter((item) => Number(item.discovered || 0) >= Number(item.total || 0) && Number(item.total || 0) > 0).length} categories completed`;
+      if (reputationSummary) reputationSummary.textContent = `${escapeHtml(rep.name || 'Survivor')} · ${Number(rep.points || 0).toLocaleString()} rep`;
+      if (reputationDetail) reputationDetail.textContent = rep.next_name ? `${Number(rep.to_next || 0).toLocaleString()} to ${rep.next_name}` : 'Maximum PvE reputation rank reached';
+      if (lifeSummary) lifeSummary.textContent = currentLife ? `${fmtDuration(currentLife.active_seconds)} alive` : 'Waiting for next position';
+      if (lifeDetail) lifeDetail.textContent = currentLife ? `${fmtDistance(currentLife.distance_metres)} · ${Number(currentLife.discoveries || 0)} discoveries · ${Number(currentLife.expedition_visits || 0)} expedition visits` : 'A new tracked life starts on the next periodic ADM position after death.';
+      if (streakSummary) streakSummary.textContent = `${Number(streak.current || 0)} current`;
+      if (streakDetail) streakDetail.textContent = `Best streak: ${Number(streak.best || 0)}`;
+      if (passportProgress) passportProgress.innerHTML = `<div class="chernarus-goal-head"><div><strong>${escapeHtml(personal.psn || 'Linked survivor')}</strong><small>Permanent Chernarus exploration completion</small></div><b>${Number(passport.percent || 0).toFixed(1)}%</b></div><div class="chernarus-passport-progress-bar" style="--passport-progress:${Math.max(0, Math.min(100, Number(passport.percent || 0)))}%"><i></i></div>`;
+      if (passportCategories) passportCategories.innerHTML = Object.entries(passport.categories || {}).map(([name, item], index) => `<div class="chernarus-stat-row"><span>${index + 1}</span><strong>${escapeHtml(name)}</strong><b>${Number(item.discovered || 0)} / ${Number(item.total || 0)}</b><small>${Number(item.total || 0) > 0 ? (Number(item.discovered || 0) / Number(item.total || 1) * 100).toFixed(0) : 0}% complete</small></div>`).join('') || '<p class="empty-state">No passport categories are available.</p>';
+      if (passportBadges) passportBadges.innerHTML = (passport.badges || []).map((badge) => `<div class="chernarus-badge" data-earned="${Boolean(badge.earned)}"><strong>${badge.earned ? '✓ ' : ''}${escapeHtml(badge.name)}</strong><small>${Number(badge.progress || 0)} / ${Number(badge.target || 0)} locations</small></div>`).join('');
+      if (passportLocations) passportLocations.innerHTML = (passport.locations || []).map((item) => `<div class="chernarus-passport-location" data-discovered="${Boolean(item.discovered)}"><strong>${item.discovered ? '✓ ' : ''}${escapeHtml(item.name)}</strong><small>${escapeHtml(item.category)} · ${item.discovered ? `discovered ${escapeHtml(fmtTime(item.first_discovered_at))}` : 'undiscovered'}</small></div>`).join('');
+      if (lifeStats) lifeStats.innerHTML = currentLife ? `<div><span>Tracked alive</span><strong>${fmtDuration(currentLife.active_seconds)}</strong><small>Offline gaps excluded</small></div><div><span>This-life distance</span><strong>${fmtDistance(currentLife.distance_metres)}</strong><small>Validated consecutive movement only</small></div><div><span>Expeditions</span><strong>${Number(currentLife.expedition_visits || 0)}</strong><small>First visits this life</small></div>` : '<p class="empty-state">No active life is currently tracked.</p>';
+      const bestTime = personal.life?.best_time || null;
+      const bestDistance = personal.life?.best_distance || null;
+      if (lifeRecords) lifeRecords.innerHTML = `<div class="chernarus-stat-row"><span>1</span><strong>Longest tracked life</strong><b>${bestTime ? fmtDuration(bestTime.active_seconds) : '—'}</b><small>${bestTime ? `${fmtDistance(bestTime.distance_metres)} travelled · ${escapeHtml(bestTime.end_reason || 'current')}` : 'No record yet'}</small></div><div class="chernarus-stat-row"><span>2</span><strong>Furthest travelled in one life</strong><b>${bestDistance ? fmtDistance(bestDistance.distance_metres) : '—'}</b><small>${bestDistance ? `${fmtDuration(bestDistance.active_seconds)} tracked alive` : 'No record yet'}</small></div>`;
+      if (journeys) journeys.innerHTML = (personal.journeys?.catalogue || []).map((item) => { const current = Number(item.current_stage || 0); return `<article class="chernarus-operation-card" data-status="${escapeHtml(item.status || 'not_started')}"><span class="chernarus-pve-tag ${String(item.difficulty || '').toLowerCase() === 'elite' ? 'endgame' : ''}">${escapeHtml(item.difficulty || 'OPERATION')} · ${escapeHtml(String(item.status || 'not_started').replaceAll('_',' '))}</span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.detail || '')}</small><div class="operation-stage-list">${(item.stages || []).map((stage, index) => `<div class="operation-stage ${index < current ? 'is-done' : index === current && item.status === 'active' ? 'is-current' : ''}"><span>${index + 1}. ${escapeHtml(stage.name)}</span><b>${index < current ? '✓' : stage.dwell_seconds ? `${Math.round(Number(stage.dwell_seconds)/60)}m hold` : ''}</b></div>`).join('')}</div><div class="operation-reward">+$${Number(item.reward_money || 0).toLocaleString()} · +${Number(item.reward_xp || 0).toLocaleString()} XP · +${Number(item.reputation || 0)} rep</div></article>`; }).join('') || '<p class="empty-state">Operation catalogue unavailable.</p>';
+    } else {
+      if (passportSummary) passportSummary.textContent = 'Sign in to view';
+      if (reputationSummary) reputationSummary.textContent = 'Linked account required';
+      if (lifeSummary) lifeSummary.textContent = 'Linked account required';
+      if (streakSummary) streakSummary.textContent = '—';
+      const locked = '<div class="chernarus-personal-locked">Sign in with Discord and link your PSN account to view personal Survivor Passport, current-life records, operation progress and PvE reputation.</div>';
+      if (passportProgress) passportProgress.innerHTML = locked;
+      if (passportCategories) passportCategories.innerHTML = '';
+      if (passportBadges) passportBadges.innerHTML = '';
+      if (passportLocations) passportLocations.innerHTML = '';
+      if (lifeStats) lifeStats.innerHTML = locked;
+      if (lifeRecords) lifeRecords.innerHTML = '';
+      if (journeys) journeys.innerHTML = (payload.progression?.journeys?.catalogue || []).map((item) => `<article class="chernarus-operation-card"><span class="chernarus-pve-tag">${escapeHtml(item.difficulty || 'OPERATION')}</span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.detail || '')}</small><div class="operation-reward">${Number(item.stages || 0)} stages · +$${Number(item.reward_money || 0).toLocaleString()} · +${Number(item.reward_xp || 0).toLocaleString()} XP</div></article>`).join('');
+    }
+
+    const campaign = payload.progression?.community_campaign || {};
+    if (campaignGoals) campaignGoals.innerHTML = (campaign.goals || []).map((item) => `<div class="chernarus-campaign-goal" data-complete="${Boolean(item.completed)}"><div class="chernarus-goal-head"><div><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.detail || '')}</small></div><b>${Number(item.percent || 0).toFixed(1)}%</b></div><div class="chernarus-goal-progress" style="--goal-progress:${Math.max(0, Math.min(100, Number(item.percent || 0)))}%"><i></i></div><small>${Number(item.progress || 0).toLocaleString()} / ${Number(item.target || 0).toLocaleString()} ${escapeHtml(item.unit || '')}</small></div>`).join('') || '<p class="empty-state">Community campaign data is waiting for activity.</p>';
+
+    if (campaignFactions) campaignFactions.innerHTML = (payload.progression?.faction_campaign || []).map((item, index) => `<div class="chernarus-stat-row"><span>${index + 1}</span><strong>${escapeHtml(item.faction_name || `Faction #${item.faction_id}`)}</strong><b>${Number(item.reputation || 0).toLocaleString()} rep</b><small>${Number(item.contributors || 0)} contributors · ${Number(item.events || 0)} progression events</small></div>`).join('') || '<p class="empty-state">No faction-attributed PvE reputation has been earned this season yet.</p>';
+
+    if (reputationLeaderboard) reputationLeaderboard.innerHTML = (payload.progression?.reputation?.leaderboard || []).map((item, index) => `<div class="chernarus-stat-row"><span>${index + 1}</span><strong>${escapeHtml(item.psn || 'Survivor')}</strong><b>${Number(item.reputation || 0).toLocaleString()} rep</b><small>Current ${escapeHtml(payload.progression?.season?.name || 'season')}</small></div>`).join('') || '<p class="empty-state">No PvE reputation has been earned this season yet.</p>';
+
+    const seasonRecords = payload.progression?.seasonal_records || {};
+    if (seasonalRecords) {
+      const definitions = [['reputation','PvE Reputation'],['distance','Distance Travelled'],['discoveries','New Discoveries'],['journeys','Operations Completed'],['longest_life','Longest Tracked Life'],['furthest_life','Furthest One-Life Journey'],['journey_streak','Best Operation Streak']];
+      seasonalRecords.innerHTML = definitions.map(([key,label]) => { const row = seasonRecords[key]; return `<div><span>${escapeHtml(label)}</span><strong>${row ? escapeHtml(row.psn || 'Survivor') : '—'}</strong><small>${row ? fmtRecordValue(key,row) : 'No record yet'}</small></div>`; }).join('');
+    }
+
+    const adaptive = payload.progression?.adaptive_analytics || null;
+    if (adaptivePanel) adaptivePanel.hidden = !adaptive;
+    if (adaptiveRecommendations && adaptive) adaptiveRecommendations.innerHTML = (adaptive.recommendations || []).map((item, index) => `<div class="chernarus-stat-row"><span>${index + 1}</span><strong>${escapeHtml(item.title || 'Analytics')}</strong><b>${escapeHtml(String(item.type || 'info').replaceAll('_',' '))}</b><small>${escapeHtml(item.detail || '')}</small></div>`).join('');
 
     renderLeaderboard();
 

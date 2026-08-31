@@ -1,13 +1,12 @@
-WORLD WAR Z WEBSITE v1.25.5 - UPDATED FILES ONLY
-
-PATCH_NOTES.md
 README.md
-assets/js/dashboard/chernarus-pve.js
-assets/js/dashboard/lazy-assets.js
-assets/js/dashboard/zones.js
-assets/js/pages/dashboard-map-intelligence.js
+PATCH_NOTES.md
+PATCH_FILE_LIST.txt
 changelog.html
 dashboard.html
 index.html
-scripts/validate_site.py
 sw.js
+scripts/validate_site.py
+assets/css/dashboard/chernarus-pve.css
+assets/js/dashboard/chernarus-pve.js
+assets/js/dashboard/lazy-assets.js
+assets/js/pages/dashboard-map-intelligence.js
