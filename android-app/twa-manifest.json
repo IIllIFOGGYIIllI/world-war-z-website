@@ -1,0 +1,32 @@
+{
+  "packageId": "com.worldwarz.companion",
+  "host": "iillifoggyiilli.github.io",
+  "name": "World War Z Companion",
+  "launcherName": "WWZ Companion",
+  "display": "standalone",
+  "themeColor": "#0b0909",
+  "themeColorDark": "#050505",
+  "navigationColor": "#050505",
+  "navigationColorDark": "#050505",
+  "navigationDividerColor": "#1b1111",
+  "navigationDividerColorDark": "#1b1111",
+  "backgroundColor": "#050505",
+  "enableNotifications": true,
+  "enableSiteSettingsShortcut": true,
+  "fallbackType": "customtabs",
+  "orientation": "any",
+  "startUrl": "/world-war-z-website/dashboard.html?source=android-app",
+  "webManifestUrl": "https://iillifoggyiilli.github.io/world-war-z-website/manifest.webmanifest",
+  "iconUrl": "https://iillifoggyiilli.github.io/world-war-z-website/assets/icons/pwa/icon-512.png",
+  "maskableIconUrl": "https://iillifoggyiilli.github.io/world-war-z-website/assets/icons/pwa/icon-maskable-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "appVersion": "1.0.0",
+  "appVersionCode": 10000,
+  "minSdkVersion": 23,
+  "signingKey": {
+    "path": "./android-keystore",
+    "alias": "wwzcompanion"
+  },
+  "generatorApp": "bubblewrap-cli",
+  "features": {}
+}

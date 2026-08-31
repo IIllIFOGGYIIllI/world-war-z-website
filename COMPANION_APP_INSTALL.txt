@@ -1,0 +1,21 @@
+WORLD WAR Z COMPANION - ANDROID v1.0.0
+=====================================
+
+COPY THESE INTO THE WEBSITE REPOSITORY:
+
+android-app/
+.github/workflows/build-wwz-companion-android.yml
+
+Then commit/push. GitHub Actions will automatically start a test Android build.
+
+DOWNLOAD THE TEST APK:
+GitHub -> Actions -> Build WWZ Companion Android -> latest run -> Artifacts -> wwz-companion-debug-apk
+
+The debug APK is installable on Android and is for initial player testing.
+
+FOR STABLE SIGNED UPDATES:
+Run android-app/scripts/create_signing_key.ps1 on Windows, keep the generated .jks safe, add the four reported GitHub Secrets, generate .well-known/assetlinks.json using the reported SHA-256 fingerprint, then push again. The workflow will output a signed APK and Google Play AAB.
+
+Native package ID: com.worldwarz.companion
+App version: 1.0.0
+Website content source: live WWZ GitHub Pages PWA
