@@ -297,6 +297,15 @@
     () => window.__wwzFactionsReady === true
   )));
 
+  const ensureLivoniaPvp = () => Promise.all([
+    loadStylesheetOnce('livonia-pvp-css', 'assets/css/dashboard/livonia-pvp.css?v=1.25.1'),
+    loadAfterDashboardRuntime(() => loadScriptOnce(
+      'livonia-pvp',
+      'assets/js/dashboard/livonia-pvp.js?v=1.25.1',
+      () => window.__wwzLivoniaPvpReady === true
+    ))
+  ]).then(() => undefined);
+
   const ensureCommandCentre = () => loadAfterDashboardRuntime(() => loadScriptOnce(
     'command-centre',
     'assets/js/dashboard/command-centre.js?v=1.22.93',
@@ -332,6 +341,7 @@
     if (view === 'progression' || view === 'players') ensureProgression().catch(() => {});
     if (view === 'objectives') ensureObjectives().catch(() => {});
     if (view === 'factions') ensureFactions().catch(() => {});
+    if (view === 'livoniapvp') ensureLivoniaPvp().then(() => window.WWZLivoniaPvp?.activate?.(detail)).catch(() => {});
     if (view === 'staff' && section === 'command-centre') ensureCommandCentre().catch(() => {});
   };
 
@@ -356,6 +366,7 @@
     ['players', ensureProgression],
     ['objectives', ensureObjectives],
     ['factions', ensureFactions],
+    ['livoniapvp', ensureLivoniaPvp],
   ];
   preloads.forEach(([view, load]) => {
     document.querySelectorAll(`[data-view="${view}"]`).forEach((button) => {
@@ -423,6 +434,7 @@
     ensureServerFeedsStyles,
     ensureDeliveryController,
     ensureFactions,
+    ensureLivoniaPvp,
     ensureMapRuntime,
     ensureModerationStyles,
     ensureRulesManager,

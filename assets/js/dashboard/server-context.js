@@ -173,6 +173,9 @@
     });
     const mapNavigation = document.querySelector('[data-view="map"][data-section="explorer"]');
     if (mapNavigation) mapNavigation.dataset.navLabel = `${server.map_name} Map`;
+    document.querySelectorAll('[data-livonia-only]').forEach((element) => {
+      element.hidden = server.map_key !== 'livonia';
+    });
     changeServerButton?.removeAttribute('hidden');
   };
 

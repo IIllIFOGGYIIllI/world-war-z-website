@@ -1,14 +1,12 @@
-World War Z Website v1.25.0 - Updated files only
-
-PATCH_FILE_LIST.txt
-PATCH_NOTES.md
 README.md
-assets/css/components/map-intelligence.css
-assets/js/dashboard/lazy-assets.js
-assets/js/pages/dashboard-map-intelligence.js
-assets/js/pages/dashboard-map-loader.js
 changelog.html
 dashboard.html
-index.html
-scripts/validate_site.py
-sw.js
+PATCH_FILE_LIST.txt
+DELETE_THESE_FILES.txt
+PATCH_NOTES.md
+assets/css/dashboard/livonia-pvp.css
+assets/js/dashboard/livonia-pvp.js
+assets/js/dashboard/lazy-assets.js
+assets/js/dashboard/server-context.js
+assets/js/dashboard/shell.js
+assets/js/pages/dashboard-map-intelligence.js

@@ -38,6 +38,7 @@ const canAccessElement = (element) => {
 };
 
 const canOpenView = (view) => {
+  if (view === 'livoniapvp' && window.WWZServerContext?.getSelectedServer?.()?.map_key !== 'livonia') return false;
   if (['staff', 'delivery', 'zones', 'feeds'].includes(view)) return ['staff', 'owner'].includes(dashboardAccessLevel);
   if (['configuration', 'serverconfig', 'shopadmin'].includes(view)) return dashboardAccessLevel === 'owner';
   return true;

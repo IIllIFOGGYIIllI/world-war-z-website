@@ -43,12 +43,14 @@
   let requestInFlight = null;
   let lastFetchAt = 0;
   let lastFingerprint = '';
-  let state = { authenticated: false, groups: [], faction: null, shared_markers: [], kill_zones: [] };
+  let state = { authenticated: false, groups: [], faction: null, shared_markers: [], kill_zones: [], livonia_pvp: null };
   let groupLayers = new Map();
   let factionLayer = null;
   let killZoneLayer = null;
   let killLabelLayer = null;
-  let layerVisibility = { private: true, public: true, faction: true, killzones: true, groups: new Map() };
+  let livoniaHotspotLayer = null;
+  let livoniaObjectiveLayer = null;
+  let layerVisibility = { private: true, public: true, faction: true, killzones: true, livoniapvp: true, groups: new Map() };
 
   const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (character) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
@@ -89,9 +91,13 @@
     factionLayer?.clearLayers?.();
     killZoneLayer?.clearLayers?.();
     killLabelLayer?.clearLayers?.();
+    livoniaHotspotLayer?.clearLayers?.();
+    livoniaObjectiveLayer?.clearLayers?.();
     factionLayer = null;
     killZoneLayer = null;
     killLabelLayer = null;
+    livoniaHotspotLayer = null;
+    livoniaObjectiveLayer = null;
   };
 
   const ensureLayer = (scope, id = null) => {
@@ -107,6 +113,14 @@
     if (scope === 'killlabels') {
       if (!killLabelLayer) killLabelLayer = L.layerGroup();
       return killLabelLayer;
+    }
+    if (scope === 'livoniahotspots') {
+      if (!livoniaHotspotLayer) livoniaHotspotLayer = L.layerGroup();
+      return livoniaHotspotLayer;
+    }
+    if (scope === 'livoniaobjective') {
+      if (!livoniaObjectiveLayer) livoniaObjectiveLayer = L.layerGroup();
+      return livoniaObjectiveLayer;
     }
     const key = Number(id);
     if (!groupLayers.has(key)) groupLayers.set(key, L.layerGroup());
@@ -167,6 +181,38 @@
     if (killCount) killCount.textContent = String(state.kill_zones.length);
   };
 
+  const renderLivoniaPvp = () => {
+    const hotspotLayer = ensureLayer('livoniahotspots');
+    const objectiveLayer = ensureLayer('livoniaobjective');
+    hotspotLayer?.clearLayers?.();
+    objectiveLayer?.clearLayers?.();
+    if (!instance || !hotspotLayer || !objectiveLayer || !state.livonia_pvp) {
+      syncLayerToMap(hotspotLayer, false);
+      syncLayerToMap(objectiveLayer, false);
+      return;
+    }
+    const makeCircle = (item, colour, label) => {
+      const center = window.WWZMap?.worldToLeaflet?.([Number(item.x), Number(item.z)], instance.mapKey);
+      if (!center) return null;
+      const zone = { center_x: Number(item.x), center_z: Number(item.z), radius: Number(item.radius) };
+      const latLngs = circleWorldPoints(zone).map((point) => window.WWZMap?.worldToLeaflet?.([point.x, point.z], instance.mapKey)).filter(Boolean);
+      if (latLngs.length < 3) return null;
+      const polygon = L.polygon(latLngs, { color: colour, weight: 2.5, opacity: .95, fillColor: colour, fillOpacity: .12, interactive: true });
+      polygon.bindPopup(`<div class="wwz-map-intel-popup"><strong>${escapeHtml(item.name)}</strong><span>${escapeHtml(label)}</span><small>${Number(item.radius).toFixed(0)} m radius</small></div>`);
+      return polygon;
+    };
+    (state.livonia_pvp.hotspots || []).forEach((item) => {
+      const shape = makeCircle(item, '#f2a33a', 'Active Livonia PvP Hotspot');
+      if (shape) hotspotLayer.addLayer(shape);
+    });
+    if (state.livonia_pvp.faction_objective) {
+      const shape = makeCircle(state.livonia_pvp.faction_objective, '#d52b1e', 'Active Faction Control Objective');
+      if (shape) objectiveLayer.addLayer(shape);
+    }
+    syncLayerToMap(hotspotLayer, layerVisibility.livoniapvp);
+    syncLayerToMap(objectiveLayer, layerVisibility.livoniapvp);
+  };
+
   const renderSharedMarkers = () => {
     groupLayers.forEach((layer) => layer.clearLayers());
     factionLayer?.clearLayers?.();
@@ -197,10 +243,11 @@
       return `<label class="map-intel-layer-row"><input data-intel-layer-group="${id}" type="checkbox" ${checked ? 'checked' : ''}><span class="map-intel-swatch" style="--intel-colour:${cleanColour(group.colour)}"></span><span><strong>${escapeHtml(group.name)}</strong><small>Group · ${Number(group.member_count || 0)} members</small></span></label>`;
     }).join('');
     const factionRow = state.faction ? `<label class="map-intel-layer-row"><input data-intel-layer="faction" type="checkbox" ${layerVisibility.faction ? 'checked' : ''}><span class="map-intel-swatch" style="--intel-colour:${cleanColour(state.faction.colour, '#8F1D1D')}"></span><span><strong>${escapeHtml(state.faction.name)}</strong><small>Faction</small></span></label>` : '';
+    const livoniaPvpRow = state.livonia_pvp ? `<label class="map-intel-layer-row"><input data-intel-layer="livoniapvp" type="checkbox" ${layerVisibility.livoniapvp ? 'checked' : ''}><span class="map-intel-swatch" style="--intel-colour:#f2a33a"></span><span><strong>Livonia PvP</strong><small>Hotspots &amp; faction objective</small></span></label>` : '';
     layerControls.innerHTML = `
       <label class="map-intel-layer-row"><input data-intel-layer="private" type="checkbox" ${layerVisibility.private ? 'checked' : ''}><span class="map-intel-swatch private"></span><span><strong>Private</strong><small>This browser only</small></span></label>
       <label class="map-intel-layer-row"><input data-intel-layer="public" type="checkbox" ${layerVisibility.public ? 'checked' : ''}><span class="map-intel-swatch public"></span><span><strong>Public</strong><small>Admin published</small></span></label>
-      ${groupRows}${factionRow}
+      ${groupRows}${factionRow}${livoniaPvpRow}
       <label class="map-intel-layer-row"><input data-intel-layer="killzones" type="checkbox" ${layerVisibility.killzones ? 'checked' : ''}><span class="map-intel-swatch killzone"></span><span><strong>Kill Zones</strong><small><span data-inline-kill-count>${state.kill_zones.length}</span> active areas</small></span></label>`;
   };
 
@@ -254,6 +301,7 @@
     renderLayers();
     renderSharedMarkers();
     renderKillZones();
+    renderLivoniaPvp();
     renderMarkerList();
     renderGroups();
     syncAuthUi();
@@ -263,7 +311,7 @@
   const fingerprint = (payload) => JSON.stringify({
     authenticated: Boolean(payload.authenticated), map_key: payload.map_key,
     groups: payload.groups || [], faction: payload.faction || null,
-    shared_markers: payload.shared_markers || [], kill_zones: payload.kill_zones || []
+    shared_markers: payload.shared_markers || [], kill_zones: payload.kill_zones || [], livonia_pvp: payload.livonia_pvp || null
   });
 
   const fetchState = async ({ force = false } = {}) => {
@@ -285,7 +333,8 @@
         groups: Array.isArray(payload.groups) ? payload.groups : [],
         faction: payload.faction || null,
         shared_markers: Array.isArray(payload.shared_markers) ? payload.shared_markers : [],
-        kill_zones: Array.isArray(payload.kill_zones) ? payload.kill_zones : []
+        kill_zones: Array.isArray(payload.kill_zones) ? payload.kill_zones : [],
+        livonia_pvp: payload.livonia_pvp || null
       };
       if (nextFingerprint !== lastFingerprint) {
         lastFingerprint = nextFingerprint;
@@ -413,6 +462,10 @@
       layerVisibility.killzones = visible;
       syncLayerToMap(killZoneLayer, visible);
       syncLayerToMap(killLabelLayer, visible);
+    } else if (scope === 'livoniapvp') {
+      layerVisibility.livoniapvp = visible;
+      syncLayerToMap(livoniaHotspotLayer, visible);
+      syncLayerToMap(livoniaObjectiveLayer, visible);
     }
   });
 

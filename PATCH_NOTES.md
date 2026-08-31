@@ -1,16 +1,15 @@
-# World War Z Website v1.25.0
+# World War Z Website v1.25.1
 
-## Collaborative Map Intelligence
-- Adds Group and Faction shared marker layers while preserving browser-only Private pins and Admin-only Public marker management.
-- Adds map-group creation/join/invite/member management and per-group visibility toggles.
-- Adds actual active Kill Zone geometry from existing Zone configuration, including exact polygon vertices.
-- Adds strict signed-in membership handling: Group/Faction data is not persisted in browser storage and Admin status does not bypass membership.
+## Added
+- Livonia-only PvP Operations workspace for hotspots, faction control, Most Wanted bounties and contested objectives.
+- Livonia-only hotspot/faction-objective overlays on the existing collaborative map.
+- Admin-only possible combat-disconnect intelligence display.
 
-## Performance
-- New map intelligence JS/CSS remains view-lazy.
-- Refresh pauses when the map/tab is not active and skips rerendering unchanged payloads.
-- Existing heavy map runtime remains lazy and no new global eager bundle is introduced.
+## Isolation
+- Livonia navigation is hidden unless the selected server map is Livonia.
+- Direct/deep-link access to the Livonia PvP workspace is blocked while Chernarus is selected.
+- Chernarus map-intelligence payloads receive no Livonia PvP overlay field.
 
-## Compatibility
-- Pairs with Bot v1.19.0.
-- Preserves the v1.24 Operations Interface, both map datasets and all existing website workflows.
+## Preserved
+- Existing Chernarus dashboard/map/pages and all other website workflows remain unchanged.
+- No existing files need deleting.
