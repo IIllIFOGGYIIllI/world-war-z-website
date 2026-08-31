@@ -1,12 +1,14 @@
-README.md
+World War Z Website v1.25.4 — UPDATED FILES ONLY
+
 PATCH_NOTES.md
-PATCH_FILE_LIST.txt
+README.md
+assets/css/dashboard/chernarus-pve.css
+assets/js/dashboard/chernarus-pve.js
+assets/js/dashboard/lazy-assets.js
+assets/js/dashboard/server-context.js
+assets/js/pages/dashboard-map-intelligence.js
 changelog.html
 dashboard.html
 index.html
-sw.js
 scripts/validate_site.py
-assets/css/dashboard/livonia-pvp.css
-assets/js/dashboard/lazy-assets.js
-assets/js/dashboard/livonia-pvp.js
-assets/js/pages/dashboard-map-intelligence.js
+sw.js

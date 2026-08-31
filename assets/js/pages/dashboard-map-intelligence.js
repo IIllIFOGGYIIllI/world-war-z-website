@@ -43,7 +43,7 @@
   let requestInFlight = null;
   let lastFetchAt = 0;
   let lastFingerprint = '';
-  let state = { authenticated: false, groups: [], faction: null, shared_markers: [], kill_zones: [], livonia_pvp: null };
+  let state = { authenticated: false, groups: [], faction: null, shared_markers: [], kill_zones: [], livonia_pvp: null, chernarus_pve: null };
   let groupLayers = new Map();
   let factionLayer = null;
   let killZoneLayer = null;
@@ -51,7 +51,9 @@
   let livoniaHotspotLayer = null;
   let livoniaObjectiveLayer = null;
   let livoniaHeatmapLayer = null;
-  let layerVisibility = { private: true, public: true, faction: true, killzones: true, livoniapvp: true, livoniaheatmap: false, groups: new Map() };
+  let chernarusExpeditionLayer = null;
+  let chernarusHeatmapLayer = null;
+  let layerVisibility = { private: true, public: true, faction: true, killzones: true, livoniapvp: true, livoniaheatmap: false, chernaruspve: true, chernarusheatmap: false, groups: new Map() };
 
   const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (character) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
@@ -95,12 +97,16 @@
     livoniaHotspotLayer?.clearLayers?.();
     livoniaObjectiveLayer?.clearLayers?.();
     livoniaHeatmapLayer?.clearLayers?.();
+    chernarusExpeditionLayer?.clearLayers?.();
+    chernarusHeatmapLayer?.clearLayers?.();
     factionLayer = null;
     killZoneLayer = null;
     killLabelLayer = null;
     livoniaHotspotLayer = null;
     livoniaObjectiveLayer = null;
     livoniaHeatmapLayer = null;
+    chernarusExpeditionLayer = null;
+    chernarusHeatmapLayer = null;
   };
 
   const ensureLayer = (scope, id = null) => {
@@ -128,6 +134,14 @@
     if (scope === 'livoniaheatmap') {
       if (!livoniaHeatmapLayer) livoniaHeatmapLayer = L.layerGroup();
       return livoniaHeatmapLayer;
+    }
+    if (scope === 'chernarusexpeditions') {
+      if (!chernarusExpeditionLayer) chernarusExpeditionLayer = L.layerGroup();
+      return chernarusExpeditionLayer;
+    }
+    if (scope === 'chernarusheatmap') {
+      if (!chernarusHeatmapLayer) chernarusHeatmapLayer = L.layerGroup();
+      return chernarusHeatmapLayer;
     }
     const key = Number(id);
     if (!groupLayers.has(key)) groupLayers.set(key, L.layerGroup());
@@ -241,6 +255,51 @@
     syncLayerToMap(heatmapLayer, layerVisibility.livoniaheatmap);
   };
 
+
+  const renderChernarusPve = () => {
+    const expeditionLayer = ensureLayer('chernarusexpeditions');
+    const heatmapLayer = ensureLayer('chernarusheatmap');
+    expeditionLayer?.clearLayers?.();
+    heatmapLayer?.clearLayers?.();
+    if (!instance || !expeditionLayer || !heatmapLayer || !state.chernarus_pve) {
+      syncLayerToMap(expeditionLayer, false);
+      syncLayerToMap(heatmapLayer, false);
+      return;
+    }
+    const makeCircle = (item) => {
+      const zone = { center_x: Number(item.x), center_z: Number(item.z), radius: Number(item.radius) };
+      const latLngs = circleWorldPoints(zone).map((point) => window.WWZMap?.worldToLeaflet?.([point.x, point.z], instance.mapKey)).filter(Boolean);
+      if (latLngs.length < 3) return null;
+      const colour = String(item.tier || '').toLowerCase() === 'endgame' ? '#d52b1e' : '#4caf78';
+      const polygon = L.polygon(latLngs, { color: colour, weight: 2.5, opacity: .95, fillColor: colour, fillOpacity: .12, interactive: true });
+      polygon.bindPopup(`<div class="wwz-map-intel-popup"><strong>${escapeHtml(item.name)}</strong><span>Active Chernarus PvE Expedition · ${escapeHtml(item.tier || 'PvE')}</span><small>${Number(item.radius).toFixed(0)} m radius</small></div>`);
+      return polygon;
+    };
+    (state.chernarus_pve.expeditions || []).forEach((item) => {
+      const shape = makeCircle(item);
+      if (shape) expeditionLayer.addLayer(shape);
+    });
+    const heat = Array.isArray(state.chernarus_pve.heatmap_24h) ? state.chernarus_pve.heatmap_24h : [];
+    const peak = Math.max(1, ...heat.map((item) => Number(item.kills || 0)));
+    heat.forEach((item) => {
+      const size = Math.max(200, Number(item.grid_size || 600));
+      const half = size / 2;
+      const corners = [
+        [Number(item.x) - half, Number(item.z) - half],
+        [Number(item.x) + half, Number(item.z) - half],
+        [Number(item.x) + half, Number(item.z) + half],
+        [Number(item.x) - half, Number(item.z) + half]
+      ].map((point) => window.WWZMap?.worldToLeaflet?.(point, instance.mapKey)).filter(Boolean);
+      if (corners.length !== 4) return;
+      const intensity = Math.max(.07, Math.min(.44, .09 + (Number(item.kills || 0) / peak) * .35));
+      const polygon = L.polygon(corners, { color: '#4caf78', weight: 1, opacity: .35, fillColor: '#4caf78', fillOpacity: intensity, interactive: true });
+      polygon.bindPopup(`<div class="wwz-map-intel-popup"><strong>PvE Activity</strong><span>${Number(item.kills || 0)} tracked kills · last 24h</span><small>X ${Number(item.x).toFixed(0)} / Z ${Number(item.z).toFixed(0)} · ${size.toFixed(0)} m grid</small></div>`);
+      heatmapLayer.addLayer(polygon);
+    });
+    syncLayerToMap(expeditionLayer, layerVisibility.chernaruspve);
+    syncLayerToMap(heatmapLayer, layerVisibility.chernarusheatmap);
+  };
+
   const renderSharedMarkers = () => {
     groupLayers.forEach((layer) => layer.clearLayers());
     factionLayer?.clearLayers?.();
@@ -273,10 +332,12 @@
     const factionRow = state.faction ? `<label class="map-intel-layer-row"><input data-intel-layer="faction" type="checkbox" ${layerVisibility.faction ? 'checked' : ''}><span class="map-intel-swatch" style="--intel-colour:${cleanColour(state.faction.colour, '#8F1D1D')}"></span><span><strong>${escapeHtml(state.faction.name)}</strong><small>Faction</small></span></label>` : '';
     const livoniaPvpRow = state.livonia_pvp ? `<label class="map-intel-layer-row"><input data-intel-layer="livoniapvp" type="checkbox" ${layerVisibility.livoniapvp ? 'checked' : ''}><span class="map-intel-swatch" style="--intel-colour:#f2a33a"></span><span><strong>Livonia PvP</strong><small>Hotspots &amp; faction objective</small></span></label>` : '';
     const livoniaHeatRow = state.livonia_pvp ? `<label class="map-intel-layer-row"><input data-intel-layer="livoniaheatmap" type="checkbox" ${layerVisibility.livoniaheatmap ? 'checked' : ''}><span class="map-intel-swatch" style="--intel-colour:#ff5c48"></span><span><strong>PvP Heatmap</strong><small>Confirmed kills · last 24 hours</small></span></label>` : '';
+    const chernarusPveRow = state.chernarus_pve ? `<label class="map-intel-layer-row"><input data-intel-layer="chernaruspve" type="checkbox" ${layerVisibility.chernaruspve ? 'checked' : ''}><span class="map-intel-swatch" style="--intel-colour:#4caf78"></span><span><strong>Chernarus PvE</strong><small>Active expedition areas</small></span></label>` : '';
+    const chernarusHeatRow = state.chernarus_pve ? `<label class="map-intel-layer-row"><input data-intel-layer="chernarusheatmap" type="checkbox" ${layerVisibility.chernarusheatmap ? 'checked' : ''}><span class="map-intel-swatch" style="--intel-colour:#8ad7a9"></span><span><strong>PvE Heatmap</strong><small>Tracked NPC kills · last 24 hours</small></span></label>` : '';
     layerControls.innerHTML = `
       <label class="map-intel-layer-row"><input data-intel-layer="private" type="checkbox" ${layerVisibility.private ? 'checked' : ''}><span class="map-intel-swatch private"></span><span><strong>Private</strong><small>This browser only</small></span></label>
       <label class="map-intel-layer-row"><input data-intel-layer="public" type="checkbox" ${layerVisibility.public ? 'checked' : ''}><span class="map-intel-swatch public"></span><span><strong>Public</strong><small>Admin published</small></span></label>
-      ${groupRows}${factionRow}${livoniaPvpRow}${livoniaHeatRow}
+      ${groupRows}${factionRow}${livoniaPvpRow}${livoniaHeatRow}${chernarusPveRow}${chernarusHeatRow}
       <label class="map-intel-layer-row"><input data-intel-layer="killzones" type="checkbox" ${layerVisibility.killzones ? 'checked' : ''}><span class="map-intel-swatch killzone"></span><span><strong>Kill Zones</strong><small><span data-inline-kill-count>${state.kill_zones.length}</span> active areas</small></span></label>`;
   };
 
@@ -331,6 +392,7 @@
     renderSharedMarkers();
     renderKillZones();
     renderLivoniaPvp();
+    renderChernarusPve();
     renderMarkerList();
     renderGroups();
     syncAuthUi();
@@ -340,7 +402,7 @@
   const fingerprint = (payload) => JSON.stringify({
     authenticated: Boolean(payload.authenticated), map_key: payload.map_key,
     groups: payload.groups || [], faction: payload.faction || null,
-    shared_markers: payload.shared_markers || [], kill_zones: payload.kill_zones || [], livonia_pvp: payload.livonia_pvp || null
+    shared_markers: payload.shared_markers || [], kill_zones: payload.kill_zones || [], livonia_pvp: payload.livonia_pvp || null, chernarus_pve: payload.chernarus_pve || null
   });
 
   const fetchState = async ({ force = false } = {}) => {
@@ -363,7 +425,8 @@
         faction: payload.faction || null,
         shared_markers: Array.isArray(payload.shared_markers) ? payload.shared_markers : [],
         kill_zones: Array.isArray(payload.kill_zones) ? payload.kill_zones : [],
-        livonia_pvp: payload.livonia_pvp || null
+        livonia_pvp: payload.livonia_pvp || null,
+        chernarus_pve: payload.chernarus_pve || null
       };
       if (nextFingerprint !== lastFingerprint) {
         lastFingerprint = nextFingerprint;
@@ -498,6 +561,13 @@
     } else if (scope === 'livoniaheatmap') {
       layerVisibility.livoniaheatmap = visible;
       syncLayerToMap(livoniaHeatmapLayer, visible);
+    }
+    else if (scope === 'chernaruspve') {
+      layerVisibility.chernaruspve = visible;
+      syncLayerToMap(chernarusExpeditionLayer, visible);
+    } else if (scope === 'chernarusheatmap') {
+      layerVisibility.chernarusheatmap = visible;
+      syncLayerToMap(chernarusHeatmapLayer, visible);
     }
   });
 

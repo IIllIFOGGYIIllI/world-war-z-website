@@ -1,16 +1,13 @@
-# World War Z Website v1.25.3
+# World War Z Website v1.25.4
 
-## Livonia Combat & Competition
-- Expands the Livonia-only PvP Operations workspace with population-aware hotspot status and 90-minute rotation countdowns.
-- Adds 24h, 7d, 30d, 90-day season and all-time PvP leaderboards.
-- Adds longest-kill, best-streak and hottest-hotspot records plus 30-day weapon statistics.
-- Adds Livonia faction-vs-faction results.
-- Adds Admin-only spawn-camping and enhanced combat-disconnect intelligence.
-- Adds server-performance telemetry status when compatible DayZ server-FPS log data is available.
-- Adds a separate 24-hour PvP Heatmap layer to the Livonia collaborative map.
-- Advances the installed PWA/service-worker cache to v1.25.3 so the new competition UI reaches installed apps.
+## Chernarus PvE Operations
+- Adds a Chernarus-only PvE Operations workspace with active expedition rotations, countdown, population scaling, weekly community goals and ADM-driven activity totals.
+- Adds 24h/7d/30d/current-season/all-time PvE leaderboards and seasonal records.
+- Adds existing-faction seasonal PvE standings based on event-time membership snapshots.
+- Adds 30-day expedition-area analytics, recent activity, server-FPS telemetry and expedition catalogue surfaces.
+- Adds independent PvE Expedition and 24-hour PvE Heatmap layers to the collaborative Chernarus map.
+- Keeps objective overlays explicitly informational: bot-defined activity areas do not claim a DayZ heli/convoy event is physically spawned.
 
-## Isolation
-- All new competition sections remain Livonia-only.
-- Chernarus navigation, map layers and dashboards remain unchanged.
-- No existing website section is removed.
+## Isolation / PWA
+- Chernarus-only workspace and overlays; Livonia PvP Operations remain unchanged and isolated.
+- Advances the installed PWA/service-worker cache to v1.25.4 and cache-busts the changed Chernarus PvE/map modules.

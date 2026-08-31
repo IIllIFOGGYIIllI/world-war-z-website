@@ -180,7 +180,7 @@
     )
   ]))).then(() => loadScriptOnce(
     'dashboard-map-intelligence',
-    'assets/js/pages/dashboard-map-intelligence.js?v=1.25.3&rev=combat-competition-1',
+    'assets/js/pages/dashboard-map-intelligence.js?v=1.25.4&rev=chernarus-pve-1',
     () => window.__wwzMapIntelligenceReady === true
   ));
 
@@ -306,6 +306,15 @@
     ))
   ]).then(() => undefined);
 
+  const ensureChernarusPve = () => Promise.all([
+    loadStylesheetOnce('chernarus-pve-css', 'assets/css/dashboard/chernarus-pve.css?v=1.25.4'),
+    loadAfterDashboardRuntime(() => loadScriptOnce(
+      'chernarus-pve',
+      'assets/js/dashboard/chernarus-pve.js?v=1.25.4',
+      () => window.__wwzChernarusPveReady === true
+    ))
+  ]).then(() => undefined);
+
   const ensureCommandCentre = () => loadAfterDashboardRuntime(() => loadScriptOnce(
     'command-centre',
     'assets/js/dashboard/command-centre.js?v=1.22.93',
@@ -342,6 +351,7 @@
     if (view === 'objectives') ensureObjectives().catch(() => {});
     if (view === 'factions') ensureFactions().catch(() => {});
     if (view === 'livoniapvp') ensureLivoniaPvp().then(() => window.WWZLivoniaPvp?.activate?.(detail)).catch(() => {});
+    if (view === 'chernaruspve') ensureChernarusPve().then(() => window.WWZChernarusPve?.activate?.(detail)).catch(() => {});
     if (view === 'staff' && section === 'command-centre') ensureCommandCentre().catch(() => {});
   };
 

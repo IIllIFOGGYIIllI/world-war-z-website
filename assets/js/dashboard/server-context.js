@@ -176,6 +176,9 @@
     document.querySelectorAll('[data-livonia-only]').forEach((element) => {
       element.hidden = server.map_key !== 'livonia';
     });
+    document.querySelectorAll('[data-chernarus-only]').forEach((element) => {
+      element.hidden = server.map_key !== 'chernarus';
+    });
     changeServerButton?.removeAttribute('hidden');
   };
 
