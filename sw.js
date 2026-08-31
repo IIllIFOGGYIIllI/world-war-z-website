@@ -1,8 +1,8 @@
 'use strict';
 
-const WWZ_PWA_VERSION = '1.26.1';
+const WWZ_PWA_VERSION = '1.27.0';
 const CACHE_PREFIX = 'wwz-pwa-';
-const WWZ_PWA_CACHE_REVISION = 'chernarus-progression-1';
+const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const CACHE_RELEASE = `${WWZ_PWA_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${CACHE_RELEASE}`;
@@ -189,4 +189,62 @@ self.addEventListener('fetch', (event) => {
   if (isStaticAsset(url.pathname)) {
     event.respondWith(staleWhileRevalidate(request));
   }
+});
+
+
+const notificationTarget = (rawUrl = '') => {
+  const value = String(rawUrl || '').trim();
+  if (!value) return scopedUrl('./dashboard.html');
+  if (/^https?:\/\//i.test(value)) {
+    try {
+      const parsed = new URL(value);
+      return parsed.origin === self.location.origin ? parsed.href : scopedUrl('./dashboard.html');
+    } catch {
+      return scopedUrl('./dashboard.html');
+    }
+  }
+  const normalized = value.replace(/^\/+/, '');
+  return scopedUrl(`./${normalized}`);
+};
+
+self.addEventListener('push', (event) => {
+  let payload = {};
+  try {
+    payload = event.data ? event.data.json() : {};
+  } catch {
+    payload = { body: event.data ? event.data.text() : '' };
+  }
+  const title = String(payload.title || 'World War Z');
+  const body = String(payload.body || 'There is a new World War Z update.');
+  const topic = String(payload.topic || 'community');
+  const url = notificationTarget(payload.url || './dashboard.html');
+  event.waitUntil(self.registration.showNotification(title, {
+    body,
+    icon: scopedUrl('./assets/icons/pwa/icon-192.png'),
+    badge: scopedUrl('./assets/icons/pwa/icon-192.png'),
+    tag: `wwz-${topic}`,
+    renotify: false,
+    data: { url, topic },
+  }));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const target = notificationTarget(event.notification?.data?.url || './dashboard.html');
+  event.waitUntil((async () => {
+    const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const client of windows) {
+      try {
+        const current = new URL(client.url);
+        const wanted = new URL(target);
+        if (current.origin === wanted.origin && current.pathname === wanted.pathname) {
+          await client.navigate(target);
+          return client.focus();
+        }
+      } catch {
+        // Ignore malformed historical client URLs and fall through to openWindow.
+      }
+    }
+    return self.clients.openWindow(target);
+  })());
 });

@@ -315,6 +315,16 @@
     ))
   ]).then(() => undefined);
 
+
+  const ensureCommunity = () => Promise.all([
+    loadStylesheetOnce('community-css', 'assets/css/dashboard/community.css?v=1.27.0&rev=community-workflows-1'),
+    loadAfterDashboardRuntime(() => loadScriptOnce(
+      'community',
+      'assets/js/dashboard/community.js?v=1.27.0&rev=community-workflows-1',
+      () => window.__wwzCommunityReady === true
+    ))
+  ]).then(() => undefined);
+
   const ensureCommandCentre = () => loadAfterDashboardRuntime(() => loadScriptOnce(
     'command-centre',
     'assets/js/dashboard/command-centre.js?v=1.22.93',
@@ -352,6 +362,7 @@
     if (view === 'factions') ensureFactions().catch(() => {});
     if (view === 'livoniapvp') ensureLivoniaPvp().then(() => window.WWZLivoniaPvp?.activate?.(detail)).catch(() => {});
     if (view === 'chernaruspve') ensureChernarusPve().then(() => window.WWZChernarusPve?.activate?.(detail)).catch(() => {});
+    if (view === 'community') ensureCommunity().then(() => window.WWZCommunity?.activate?.(detail)).catch(() => {});
     if (view === 'staff' && section === 'command-centre') ensureCommandCentre().catch(() => {});
   };
 
@@ -377,6 +388,7 @@
     ['objectives', ensureObjectives],
     ['factions', ensureFactions],
     ['livoniapvp', ensureLivoniaPvp],
+    ['community', ensureCommunity],
   ];
   preloads.forEach(([view, load]) => {
     document.querySelectorAll(`[data-view="${view}"]`).forEach((button) => {
@@ -435,6 +447,7 @@
     ensureCatalogueStyles,
     ensureCommandCentre,
     ensureCommandLibrary,
+    ensureCommunity,
     ensureCommerceRuntime,
     ensureConfigurationStudio,
     ensureDashboardMap,

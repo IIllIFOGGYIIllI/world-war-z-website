@@ -168,20 +168,19 @@
 <div class="section-heading reveal roadmap-heading">
 <div>
 <p class="eyebrow">Development roadmap</p>
-<h2 id="roadmap-title">Chernarus + Livonia Live—PvE Progression Online</h2>
-<p>The core WWZ platform, dual-map architecture, multi-server isolation and installable PWA are complete. Chernarus now also has its full console-safe PvE progression layer, while Chernarus and Livonia continue to retain isolated Discord, Nitrado, map, progression, economy and operational state.</p>
+<h2 id="roadmap-title">Chernarus + Livonia Live—Community Operations Online</h2>
+<p>The core WWZ platform, dual-map architecture, PvE/PvP progression, community analytics, event workflows, opt-in browser notifications and installable PWA are complete. Chernarus and Livonia continue to retain isolated Discord, Nitrado, map, progression, economy and operational state.</p>
 </div>
 <div aria-label="Current roadmap release" class="roadmap-release">
 <small>Roadmap updated</small>
 <strong>1 September 2026</strong>
-<span>Website v1.26.1 · Bot v1.20.0</span>
+<span>Website v1.27.0 · Bot v1.21.0</span>
 </div>
 </div>
 <div aria-label="Roadmap status key" class="roadmap-status-key reveal">
 <span class="complete">Available now</span>
 <span class="complete">Live server</span>
 <span class="complete">Production verified</span>
-<span class="next">Planned expansion</span>
 <span class="future">Later improvements</span>
 </div>
 <div class="roadmap-grid">
@@ -213,7 +212,7 @@
 <li>The installed app uses the same Railway API, Discord authentication, database, server selection and feature set as the website.</li>
 <li>Static app-shell assets use safe PWA caching while Railway/API/admin/Nitrado operations remain network-only.</li>
 <li>Map caching is bounded and on-demand rather than precaching the full Chernarus/Livonia tile sets.</li>
-<li>The service-worker architecture leaves a clean path for future opt-in push notifications and optional Capacitor/App Store packaging.</li>
+<li>The service worker now supports fully opt-in browser push, while the same website release can be prepared for Android/iOS through the Capacitor wrapper foundation.</li>
 </ul>
 </article>
 <article class="roadmap-card roadmap-card-complete reveal">
@@ -257,19 +256,29 @@
 <li>Livonia PvP Operations remain isolated and unchanged.</li>
 </ul>
 </article>
-<article class="roadmap-card roadmap-card-future reveal">
-<div class="roadmap-card-heading"><span>08</span><div><small>Planned expansion</small><h3>Notifications &amp; Community Workflow Enhancements</h3></div></div>
-<p>Future work should build on the now-stable shared platform and shipped PvE/PvP progression systems rather than replacing them.</p>
+<article class="roadmap-card roadmap-card-complete reveal">
+<div class="roadmap-card-heading"><span>08</span><div><small>Available now</small><h3>Notifications &amp; Community Workflow Enhancements</h3></div></div>
+<p>The shared platform now includes community analytics, reusable event automation, member-controlled browser notifications and a repeatable native-wrapper foundation without forking the website.</p>
 <ul>
-<li>Opt-in web push for appropriate server status, event and ticket notifications without notification spam.</li>
-<li>Reusable event plans, scheduling and additional operational workflow automation.</li>
-<li>Further seasonal, exploration and operational analytics where existing ledgers and console-safe telemetry support them reliably.</li>
-<li>Further mobile/PWA accessibility and map usability improvements driven by real-device use.</li>
-<li>Optional later packaging through Capacitor or a similar wrapper for Google Play / Apple App Store distribution.</li>
+<li>Fully opt-in Web Push topics for scheduled events, meaningful server-status changes, personal ticket replies, PvE/PvP rotations and shop/order updates.</li>
+<li>Reusable event plans with staff scheduling, immediate starts, Discord announcement routing and restart-safe reminder/start/end transitions.</li>
+<li>Privacy-safe Chernarus/Livonia analytics built from existing console-safe ledgers, including activity timelines, active locations, participation and server-FPS summaries.</li>
+<li>A responsive Community Hub improves touch/mobile access to analytics, the event calendar, notification preferences and staff Event Planner.</li>
+<li>A Capacitor 8 wrapper foundation prepares the same canonical website release for Android/iOS; store signing and publication remain external developer-account steps.</li>
+</ul>
+</article>
+<article class="roadmap-card roadmap-card-future reveal">
+<div class="roadmap-card-heading"><span>09</span><div><small>Production observation</small><h3>Live QA &amp; Optional Store Publication</h3></div></div>
+<p>No major platform subsystem is currently waiting to be built. Future work is driven by real server use, DayZ updates and optional native-store publication.</p>
+<ul>
+<li>Observe event reminders, push opt-ins, analytics trends and Chernarus/Livonia progression under normal community activity.</li>
+<li>Continue real-device accessibility and map usability refinements when practical issues are observed.</li>
+<li>If desired, use the shipped Capacitor workflow with administrator-owned Google Play / Apple Developer signing credentials and store-review metadata.</li>
+<li>Keep mission/economy compatibility audits aligned with future DayZ console updates instead of changing stable systems without evidence.</li>
 </ul>
 </article>
 </div>
-<div class="roadmap-note reveal"><span aria-hidden="true">✓</span><p><strong>Roadmap rule:</strong> validated Chernarus/Livonia map sources and geometry stay preserved, both live servers retain isolated mutable state, live Railway/API/admin data is never treated as offline-confirmed state, XP/Prestige is production-verified, Chernarus PvE progression remains limited to console-safe telemetry, and Railway-owned persistent records are never replaced by a website release.</p></div>
+<div class="roadmap-note reveal"><span aria-hidden="true">✓</span><p><strong>Roadmap rule:</strong> validated Chernarus/Livonia map sources and geometry stay preserved, both live servers retain isolated mutable state, live Railway/API/admin data is never treated as offline-confirmed state, XP/Prestige is production-verified, Chernarus PvE progression remains limited to console-safe telemetry, browser push is opt-in, community workflows remain guild-isolated, and Railway-owned persistent records are never replaced by a website release.</p></div>
 </div>
 </section>
 <section aria-labelledby="faq-title" class="faq section" id="faq">

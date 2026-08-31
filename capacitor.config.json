@@ -1,0 +1,9 @@
+{
+  "appId": "com.worldwarz.community",
+  "appName": "World War Z",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  }
+}

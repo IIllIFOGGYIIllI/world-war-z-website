@@ -1,18 +1,27 @@
-# World War Z Bot Website — v1.26.1
+# World War Z Bot Website — v1.27.0
 
-Website v1.26.1 is a small **roadmap and release-status sync** on top of the Chernarus PvE Progression release. It pairs with Bot v1.20.0 / Chernarus mission v1.1.
+Website v1.27.0 completes the **Notifications & Community Workflow Enhancements** milestone and pairs with Bot v1.21.0 / Chernarus mission v1.1.
 
-## Roadmap Sync
-- Marks Natural XP & Prestige as production verified instead of deferred verification.
-- Adds Chernarus PvE Progression & Survivor Passport as a completed roadmap milestone.
-- Moves Notifications & Community Workflow Enhancements to milestone 08.
-- Removes already-shipped community campaign work from the future-work list.
+## Community Hub
+- Adds privacy-safe 14-day analytics for the selected Chernarus or Livonia service.
+- Adds active-location trends, participation summaries, scheduled/live Event Calendar and existing server-FPS visibility.
+- Adds a staff Event Planner with reusable Owner-managed plans, scheduling, immediate starts and cancellation.
 
-## Changelog / PWA
-- Adds Website v1.26.1 to the public changelog.
-- Advances the installed PWA/service-worker release to v1.26.1 so cached homepage/changelog content refreshes.
+## Opt-in browser notifications
+- Adds member-controlled topics for events, server status, ticket replies, PvE/PvP rotations and shop/orders.
+- Uses the installed PWA/service worker for notification display and safe dashboard deep links.
+- No browser is subscribed until the signed-in member grants notification permission and opts in.
+
+## Mobile / PWA
+- Adds responsive Community Hub layouts, larger touch targets and safe-area spacing.
+- Advances the service-worker release to v1.27.0.
+
+## Native wrapper foundation
+- Adds Capacitor 8 configuration and a repeatable `native:prepare` / `native:sync` workflow.
+- The website/PWA remains the canonical source; generated native wrappers do not become a separate frontend.
+- Google Play / Apple publication requires administrator-owned signing credentials and store accounts and is intentionally not embedded in the repository.
 
 ## Compatibility
-- Bot v1.20.0 remains current.
-- Chernarus mission v1.1 remains current.
-- No bot, database, mission, map geometry or persistent gameplay data is changed.
+- Pairs with Bot v1.21.0.
+- Chernarus mission v1.1 remains current; no mission upload is required.
+- Existing Chernarus PvE / Livonia PvP features and server isolation remain unchanged.
