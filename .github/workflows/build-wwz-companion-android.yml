@@ -32,9 +32,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: "npm"
-          cache-dependency-path: "android-app/package-lock.json"
-        continue-on-error: true
 
       - name: Setup Java 17
         uses: actions/setup-java@v4
@@ -48,8 +45,26 @@ jobs:
       - name: Configure Bubblewrap toolchain
         shell: bash
         run: |
-          bubblewrap updateConfig --jdkPath="$JAVA_HOME" --androidSdkPath="$ANDROID_HOME"
-          bubblewrap doctor || true
+          mkdir -p "$HOME/.bubblewrap"
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          config = {
+              "jdkPath": os.environ["JAVA_HOME"],
+              "androidSdkPath": os.environ["ANDROID_HOME"],
+          }
+
+          path = Path.home() / ".bubblewrap" / "config.json"
+          path.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
+
+          print(f"Configured Bubblewrap: {path}")
+          print(f"JDK: {config['jdkPath']}")
+          print(f"Android SDK: {config['androidSdkPath']}")
+          PY
+
+          bubblewrap doctor
 
       - name: Generate Android project
         working-directory: android-app
@@ -90,8 +105,10 @@ jobs:
             echo "Signing key is configured but one or more signing secrets are missing." >&2
             exit 1
           fi
+
           export BUBBLEWRAP_KEYSTORE_PASSWORD="$WWZ_ANDROID_KEYSTORE_PASSWORD"
           export BUBBLEWRAP_KEY_PASSWORD="$WWZ_ANDROID_KEY_PASSWORD"
+
           bubblewrap build \
             --skipPwaValidation \
             --manifest=twa-manifest.json \
