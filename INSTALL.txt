@@ -1,17 +1,24 @@
-WWZ Website false Discord error fix
+WWZ Website false Discord error fix v2
 
-Updated file only:
+UPDATED FILE ONLY
 assets/js/dashboard/bootstrap.js
 
-What changed:
-- A dashboard/navigation restore error no longer gets presented as a Discord outage.
-- The red "Discord verification is temporarily unavailable" state is reserved for a genuine auth bootstrap/config failure.
-- If Discord auth is already available, a later UI restore problem returns to the normal login state instead of falsely disabling sign-in.
+Why v2:
+The first false-error patch fixed the runtime behaviour but changed two literal
+authentication-restore guard strings that scripts/validate_site.py intentionally
+checks. This version preserves those existing terminal-authentication guards and
+separates navigation/UI restore failures into their own non-auth failure path.
 
-Install:
-Copy the included assets folder over the website repository, preserving the folder structure, then commit/push.
+Runtime behaviour:
+- Genuine configureDiscordAuth/bootstrap failure:
+  keeps the existing unavailable=true terminal authentication guard.
+- Later showView/navigation restore failure:
+  uses a normal login state and DOES NOT claim Discord verification is unavailable.
+
+Validator compatibility:
+- const failDashboardBootstrap = (error) =>
+- window.WWZServerContext?.showLogin({ unavailable: true });
+- No protected action was sent
 
 Suggested commit:
-Fix false Discord auth error
-
-After GitHub Pages updates, do one Ctrl+F5 hard refresh on desktop.
+Fix false Discord auth error v2
