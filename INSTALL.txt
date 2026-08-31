@@ -1,24 +1,32 @@
-WWZ Website false Discord error fix v2
+WWZ false Discord error + PWA update push hotfix
 
-UPDATED FILE ONLY
-assets/js/dashboard/bootstrap.js
+UPDATED FILES ONLY
+- assets/js/dashboard/bootstrap.js
+- sw.js
 
-Why v2:
-The first false-error patch fixed the runtime behaviour but changed two literal
-authentication-restore guard strings that scripts/validate_site.py intentionally
-checks. This version preserves those existing terminal-authentication guards and
-separates navigation/UI restore failures into their own non-auth failure path.
+Root cause fixed:
+The Discord auth config succeeds first, which enables the sign-in button. Immediately
+afterward the signed-out reset calls resetAppealPanels(), but appeals.js is intentionally
+lazy-loaded and is not present on the initial gateway. That ReferenceError propagated
+back into bootstrap and was incorrectly rendered as:
+"Discord verification is temporarily unavailable."
 
-Runtime behaviour:
-- Genuine configureDiscordAuth/bootstrap failure:
-  keeps the existing unavailable=true terminal authentication guard.
-- Later showView/navigation restore failure:
-  uses a normal login state and DOES NOT claim Discord verification is unavailable.
+bootstrap.js now supplies a temporary safe reset fallback until appeals.js is loaded.
+The existing real authentication-failure guard remains intact for genuine outages.
 
-Validator compatibility:
-- const failDashboardBootstrap = (error) =>
-- window.WWZServerContext?.showLogin({ unavailable: true });
-- No protected action was sent
+PWA behaviour:
+sw.js now contains WWZ_PWA_UPDATE_REVISION. Bump this token for every deployed website
+update so installed PWAs/TWAs detect a new service worker and surface the existing
+"Update Now" flow. This hotfix also invalidates the cached bootstrap.js specifically,
+without clearing users' bounded map/tile caches.
 
 Suggested commit:
-Fix false Discord auth error v2
+Fix Discord gateway false error
+
+Testing:
+1. Push both files together.
+2. Let GitHub Actions validation finish.
+3. Reload the website/PWA. Existing installed PWA users should receive the update flow.
+4. On the signed-out gateway, the Discord button should remain enabled and the notice
+   should read the normal secure-verification message, not the red unavailable error.
+5. Complete a Discord sign-in to confirm normal auth still works.

@@ -3,6 +3,9 @@
 const WWZ_PWA_VERSION = '1.27.0';
 const CACHE_PREFIX = 'wwz-pwa-';
 const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
+// Bump this token on every deployed website update. Changing sw.js makes installed
+// PWAs/TWAs discover the update and surface the existing "Update Now" flow.
+const WWZ_PWA_UPDATE_REVISION = '2026-09-01-auth-false-error-1';
 const CACHE_RELEASE = `${WWZ_PWA_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${CACHE_RELEASE}`;
@@ -33,6 +36,12 @@ const APP_SHELL = [
   './assets/js/pages/home.js?v=1.22.93',
   './assets/js/pwa.js?v=1.22.93',
   './assets/js/ui-system.js?v=1.24.0&rev=ops-ui-1'
+].map(scopedUrl);
+
+// Targeted invalidations let a small hotfix refresh changed runtime files without
+// throwing away users' bounded satellite/map caches.
+const UPDATE_INVALIDATIONS = [
+  './assets/js/dashboard/bootstrap.js?v=1.22.93&rev=auth-restore-fix-1'
 ].map(scopedUrl);
 
 const trimCache = async (cacheName, limit) => {
@@ -70,6 +79,10 @@ self.addEventListener('activate', (event) => {
     await Promise.all(names
       .filter((name) => name.startsWith(CACHE_PREFIX) && !keep.has(name))
       .map((name) => caches.delete(name)));
+
+    const staticCache = await caches.open(STATIC_CACHE);
+    await Promise.all(UPDATE_INVALIDATIONS.map((url) => staticCache.delete(url)));
+
     await self.clients.claim();
   })());
 });

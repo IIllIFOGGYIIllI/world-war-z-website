@@ -1,6 +1,27 @@
 (() => {
   'use strict';
 
+  /*
+   * account.js intentionally keeps the Appeals controller lazy, but its signed-out
+   * reset path still calls resetAppealPanels(). On a fresh signed-out load the
+   * appeals bundle has not been loaded yet, which previously threw a ReferenceError
+   * after Discord auth had already been confirmed. bootstrap.js then interpreted
+   * that unrelated UI reset exception as an authentication outage.
+   *
+   * Provide a temporary configurable no-op only until appeals.js is lazy-loaded.
+   * appeals.js later declares its real global lexical resetAppealPanels binding,
+   * which takes precedence for subsequent signed-out resets.
+   */
+  const ensureLazyAuthResetFallbacks = () => {
+    if (typeof resetAppealPanels !== 'function') {
+      Object.defineProperty(window, 'resetAppealPanels', {
+        value: () => {},
+        configurable: true,
+        writable: true
+      });
+    }
+  };
+
   const failDashboardBootstrap = (error) => {
     console.error('WWZ dashboard authentication bootstrap failed.', error);
     try {
@@ -40,6 +61,8 @@
   };
 
   const startDashboard = async () => {
+    ensureLazyAuthResetFallbacks();
+
     try {
       window.WWZServerContext?.showLoading('Verifying your Discord session…');
       await configureDiscordAuth();
