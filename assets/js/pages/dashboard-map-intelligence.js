@@ -280,7 +280,7 @@
       if (shape) expeditionLayer.addLayer(shape);
     });
     const heat = Array.isArray(state.chernarus_pve.heatmap_24h) ? state.chernarus_pve.heatmap_24h : [];
-    const peak = Math.max(1, ...heat.map((item) => Number(item.kills || 0)));
+    const peak = Math.max(1, ...heat.map((item) => Number(item.checkins || 0)));
     heat.forEach((item) => {
       const size = Math.max(200, Number(item.grid_size || 600));
       const half = size / 2;
@@ -291,9 +291,9 @@
         [Number(item.x) - half, Number(item.z) + half]
       ].map((point) => window.WWZMap?.worldToLeaflet?.(point, instance.mapKey)).filter(Boolean);
       if (corners.length !== 4) return;
-      const intensity = Math.max(.07, Math.min(.44, .09 + (Number(item.kills || 0) / peak) * .35));
+      const intensity = Math.max(.07, Math.min(.44, .09 + (Number(item.checkins || 0) / peak) * .35));
       const polygon = L.polygon(corners, { color: '#4caf78', weight: 1, opacity: .35, fillColor: '#4caf78', fillOpacity: intensity, interactive: true });
-      polygon.bindPopup(`<div class="wwz-map-intel-popup"><strong>PvE Activity</strong><span>${Number(item.kills || 0)} tracked kills · last 24h</span><small>X ${Number(item.x).toFixed(0)} / Z ${Number(item.z).toFixed(0)} · ${size.toFixed(0)} m grid</small></div>`);
+      polygon.bindPopup(`<div class="wwz-map-intel-popup"><strong>PvE Participation</strong><span>${Number(item.checkins || 0)} periodic check-ins · ${Number(item.participants || 0)} survivors · last 24h</span><small>X ${Number(item.x).toFixed(0)} / Z ${Number(item.z).toFixed(0)} · ${size.toFixed(0)} m grid</small></div>`);
       heatmapLayer.addLayer(polygon);
     });
     syncLayerToMap(expeditionLayer, layerVisibility.chernaruspve);
@@ -333,7 +333,7 @@
     const livoniaPvpRow = state.livonia_pvp ? `<label class="map-intel-layer-row"><input data-intel-layer="livoniapvp" type="checkbox" ${layerVisibility.livoniapvp ? 'checked' : ''}><span class="map-intel-swatch" style="--intel-colour:#f2a33a"></span><span><strong>Livonia PvP</strong><small>Hotspots &amp; faction objective</small></span></label>` : '';
     const livoniaHeatRow = state.livonia_pvp ? `<label class="map-intel-layer-row"><input data-intel-layer="livoniaheatmap" type="checkbox" ${layerVisibility.livoniaheatmap ? 'checked' : ''}><span class="map-intel-swatch" style="--intel-colour:#ff5c48"></span><span><strong>PvP Heatmap</strong><small>Confirmed kills · last 24 hours</small></span></label>` : '';
     const chernarusPveRow = state.chernarus_pve ? `<label class="map-intel-layer-row"><input data-intel-layer="chernaruspve" type="checkbox" ${layerVisibility.chernaruspve ? 'checked' : ''}><span class="map-intel-swatch" style="--intel-colour:#4caf78"></span><span><strong>Chernarus PvE</strong><small>Active expedition areas</small></span></label>` : '';
-    const chernarusHeatRow = state.chernarus_pve ? `<label class="map-intel-layer-row"><input data-intel-layer="chernarusheatmap" type="checkbox" ${layerVisibility.chernarusheatmap ? 'checked' : ''}><span class="map-intel-swatch" style="--intel-colour:#8ad7a9"></span><span><strong>PvE Heatmap</strong><small>Tracked NPC kills · last 24 hours</small></span></label>` : '';
+    const chernarusHeatRow = state.chernarus_pve ? `<label class="map-intel-layer-row"><input data-intel-layer="chernarusheatmap" type="checkbox" ${layerVisibility.chernarusheatmap ? 'checked' : ''}><span class="map-intel-swatch" style="--intel-colour:#8ad7a9"></span><span><strong>PvE Heatmap</strong><small>Periodic expedition check-ins · last 24 hours</small></span></label>` : '';
     layerControls.innerHTML = `
       <label class="map-intel-layer-row"><input data-intel-layer="private" type="checkbox" ${layerVisibility.private ? 'checked' : ''}><span class="map-intel-swatch private"></span><span><strong>Private</strong><small>This browser only</small></span></label>
       <label class="map-intel-layer-row"><input data-intel-layer="public" type="checkbox" ${layerVisibility.public ? 'checked' : ''}><span class="map-intel-swatch public"></span><span><strong>Public</strong><small>Admin published</small></span></label>

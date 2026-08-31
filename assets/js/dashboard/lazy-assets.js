@@ -180,7 +180,7 @@
     )
   ]))).then(() => loadScriptOnce(
     'dashboard-map-intelligence',
-    'assets/js/pages/dashboard-map-intelligence.js?v=1.25.4&rev=chernarus-pve-1',
+    'assets/js/pages/dashboard-map-intelligence.js?v=1.25.5&rev=console-pve-travel-1',
     () => window.__wwzMapIntelligenceReady === true
   ));
 
@@ -192,7 +192,7 @@
   const ensureZones = () => Promise.all([ensureMapRuntime(), ensureZonesStyles()])
     .then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
       'zones',
-      'assets/js/dashboard/zones.js?v=1.22.93',
+      'assets/js/dashboard/zones.js?v=1.25.5&rev=console-pve-travel-1',
       () => window.__wwzZonesReady === true
     )));
 
@@ -310,7 +310,7 @@
     loadStylesheetOnce('chernarus-pve-css', 'assets/css/dashboard/chernarus-pve.css?v=1.25.4'),
     loadAfterDashboardRuntime(() => loadScriptOnce(
       'chernarus-pve',
-      'assets/js/dashboard/chernarus-pve.js?v=1.25.4',
+      'assets/js/dashboard/chernarus-pve.js?v=1.25.5&rev=console-pve-travel-1',
       () => window.__wwzChernarusPveReady === true
     ))
   ]).then(() => undefined);

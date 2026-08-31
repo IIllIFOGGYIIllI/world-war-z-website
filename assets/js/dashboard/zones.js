@@ -48,7 +48,7 @@
     'ban_on_login', 'ban_on_emote', 'ban_on_dismantle', 'ban_on_build', 'ban_on_place',
     'ban_on_fold', 'ban_on_mount', 'ban_on_unmount', 'ban_on_bury', 'ban_on_unbury',
     'ban_on_pack', 'ban_on_repair', 'ban_on_flag_lower', 'ban_on_flag_raise', 'ban_on_kill',
-    'ban_on_npc_kill', 'ban_on_kill_ignore_bounty_kills', 'ban_on_hit', 'ban_on_bear_death',
+    'ban_on_kill_ignore_bounty_kills', 'ban_on_hit', 'ban_on_bear_death',
     'ban_on_wolf_death', 'ban_on_explosion_death', 'ban_on_trap_death', 'ban_on_vehicle_death',
     'ban_on_explosion_suicide_death', 'ban_on_zombie_death', 'ban_on_bleed_out_death',
     'ban_on_fall_death', 'ban_on_suicide_death', 'ban_on_barbed_wire_death', 'ban_on_fire_death',

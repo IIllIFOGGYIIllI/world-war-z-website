@@ -70,7 +70,7 @@
   const renderLeaderboard = () => {
     if (!leaderboard || !lastPayload) return;
     const rows = lastPayload.competition?.leaderboards?.[period] || [];
-    leaderboard.innerHTML = rows.map((item, index) => `<div class="chernarus-leader-row"><span class="chernarus-rank">${index + 1}</span><strong>${escapeHtml(item.psn)}</strong><b>${Number(item.points || 0)} pts</b><span>${Number(item.kills || 0)} kills</span><span>${Number(item.objective_kills || 0)} objective</span><small>${Number(item.infected_kills || 0)} infected · ${Number(item.predator_kills || 0)} predators · ${Number(item.wildlife_kills || 0)} wildlife</small></div>`).join('') || '<p class="empty-state">No tracked PvE kills have been recorded in this period yet.</p>';
+    leaderboard.innerHTML = rows.map((item, index) => `<div class="chernarus-leader-row"><span class="chernarus-rank">${index + 1}</span><strong>${escapeHtml(item.psn)}</strong><b>${Number(item.points || 0)} pts</b><span>${Number(item.visits || 0)} visits</span><span>${Number(item.checkins || 0)} check-ins</span><small>${Number(item.objectives || 0)} expedition locations covered</small></div>`).join('') || '<p class="empty-state">No periodic expedition participation has been recorded in this period yet.</p>';
   };
 
   const render = (payload) => {
@@ -80,8 +80,8 @@
     if (population) population.textContent = rotation.online_players === null || rotation.online_players === undefined ? 'Player count cache unavailable · safe 1-expedition fallback' : `${Number(rotation.online_players)} players online`;
     if (countdown) countdown.textContent = fmtCountdown(rotation.ends_at);
     if (nextExpeditions) nextExpeditions.textContent = (rotation.next_expeditions || []).map((item) => item.name).join(' · ') || 'Next expedition will be selected automatically.';
-    if (rewardXp) rewardXp.textContent = `+${Number(payload.rewards?.objective_xp || 0)} XP`;
-    if (rewardMoney) rewardMoney.textContent = `+$${Number(payload.rewards?.objective_currency || 0).toLocaleString()}`;
+    if (rewardXp) rewardXp.textContent = `+${Number(payload.rewards?.first_visit_xp || 0)} XP`;
+    if (rewardMoney) rewardMoney.textContent = `+$${Number(payload.rewards?.first_visit_currency || 0).toLocaleString()}`;
 
     if (expeditionList) {
       expeditionList.innerHTML = (payload.expeditions || []).map((item) => `<article class="chernarus-pve-card"><span class="chernarus-pve-tag ${String(item.tier || '').toLowerCase() === 'endgame' ? 'endgame' : ''}">${escapeHtml(item.tier || 'PVE')} EXPEDITION</span><strong>${escapeHtml(item.name)}</strong><small>X ${Number(item.x).toFixed(0)} / Z ${Number(item.z).toFixed(0)} · ${Number(item.radius).toFixed(0)} m radius</small><span>${escapeHtml(item.detail || '')}</span><small>Rotates in ${escapeHtml(fmtCountdown(item.ends_at))}</small></article>`).join('') || '<p class="empty-state">No active expedition data is available.</p>';
@@ -96,7 +96,7 @@
     const day = payload.activity?.day || {};
     const week = payload.activity?.week || {};
     if (activity) {
-      activity.innerHTML = `<div class="chernarus-stat-row"><span>1</span><strong>24-hour activity</strong><b>${Number(day.kills || 0)} kills</b><small>${Number(day.hunters || 0)} hunters · ${Number(day.objective_kills || 0)} expedition kills · ${Number(day.points || 0)} points</small></div><div class="chernarus-stat-row"><span>2</span><strong>7-day activity</strong><b>${Number(week.kills || 0)} kills</b><small>${Number(week.hunters || 0)} hunters · ${Number(week.predator_kills || 0)} predator kills · ${Number(week.points || 0)} points</small></div>`;
+      activity.innerHTML = `<div class="chernarus-stat-row"><span>1</span><strong>24-hour participation</strong><b>${Number(day.visits || 0)} visits</b><small>${Number(day.participants || 0)} survivors · ${Number(day.checkins || 0)} periodic check-ins · ${Number(day.pve_deaths || 0)} PvE deaths</small></div><div class="chernarus-stat-row"><span>2</span><strong>7-day participation</strong><b>${Number(week.visits || 0)} visits</b><small>${Number(week.participants || 0)} survivors · ${Number(week.objectives || 0)} expedition locations · ${Number(week.pve_deaths || 0)} PvE deaths</small></div>`;
     }
 
     renderLeaderboard();
@@ -104,29 +104,31 @@
     const recordData = payload.competition?.records || {};
     const all = recordData.all_time_champion;
     const season = recordData.season_champion;
-    const predator = recordData.season_predator_hunter;
+    const explorer = recordData.season_explorer;
     if (records) {
-      records.innerHTML = `<div><span>All-Time Champion</span><strong>${all ? escapeHtml(all.psn) : '—'}</strong><small>${all ? `${Number(all.points || 0)} points · ${Number(all.kills || 0)} kills` : 'No record yet'}</small></div><div><span>${escapeHtml(payload.competition?.season?.name || 'Current Season')}</span><strong>${season ? escapeHtml(season.psn) : '—'}</strong><small>${season ? `${Number(season.points || 0)} points · ${Number(season.objective_kills || 0)} objective kills` : 'No seasonal record yet'}</small></div><div><span>Predator Hunter</span><strong>${predator ? escapeHtml(predator.psn) : '—'}</strong><small>${predator ? `${Number(predator.kills || 0)} wolf/bear kills this season` : 'No predator record yet'}</small></div>`;
+      records.innerHTML = `<div><span>All-Time Participant</span><strong>${all ? escapeHtml(all.psn) : '—'}</strong><small>${all ? `${Number(all.points || 0)} points · ${Number(all.visits || 0)} visits` : 'No record yet'}</small></div><div><span>${escapeHtml(payload.competition?.season?.name || 'Current Season')}</span><strong>${season ? escapeHtml(season.psn) : '—'}</strong><small>${season ? `${Number(season.points || 0)} points · ${Number(season.objectives || 0)} locations covered` : 'No seasonal record yet'}</small></div><div><span>Season Explorer</span><strong>${explorer ? escapeHtml(explorer.psn) : '—'}</strong><small>${explorer ? `${Number(explorer.visits || 0)} expedition visits this season` : 'No exploration record yet'}</small></div>`;
     }
 
     if (objectiveStats) {
-      objectiveStats.innerHTML = (payload.competition?.objective_stats || []).map((item, index) => `<div class="chernarus-stat-row"><span>${index + 1}</span><strong>${escapeHtml(item.objective_name || item.objective_key)}</strong><b>${Number(item.kills || 0)} kills</b><small>${Number(item.hunters || 0)} hunters · ${Number(item.points || 0)} points · last 30 days</small></div>`).join('') || '<p class="empty-state">No expedition-area activity has been recorded yet.</p>';
+      objectiveStats.innerHTML = (payload.competition?.objective_stats || []).map((item, index) => `<div class="chernarus-stat-row"><span>${index + 1}</span><strong>${escapeHtml(item.objective_name || item.objective_key)}</strong><b>${Number(item.visits || 0)} visits</b><small>${Number(item.participants || 0)} survivors · ${Number(item.checkins || 0)} check-ins · last 30 days</small></div>`).join('') || '<p class="empty-state">No expedition-area participation has been recorded yet.</p>';
     }
 
     if (factionStandings) {
       const factions = payload.competition?.faction_standings || [];
-      factionStandings.innerHTML = factions.map((item, index) => `<div class="chernarus-stat-row"><span>${index + 1}</span><strong>${escapeHtml(item.faction_name || `Faction #${item.faction_id}`)}</strong><b>${Number(item.points || 0)} pts</b><small>${Number(item.kills || 0)} kills · ${Number(item.objective_kills || 0)} expedition kills · ${Number(item.hunters || 0)} hunters · current season</small></div>`).join('') || '<p class="empty-state">No faction-attributed PvE activity has been recorded this season yet.</p>';
+      factionStandings.innerHTML = factions.map((item, index) => `<div class="chernarus-stat-row"><span>${index + 1}</span><strong>${escapeHtml(item.faction_name || `Faction #${item.faction_id}`)}</strong><b>${Number(item.points || 0)} pts</b><small>${Number(item.visits || 0)} expedition visits · ${Number(item.checkins || 0)} check-ins · ${Number(item.participants || 0)} survivors · current season</small></div>`).join('') || '<p class="empty-state">No faction-attributed expedition participation has been recorded this season yet.</p>';
     }
 
     const heat = payload.competition?.heatmap?.day || [];
     if (heatSummary) {
-      const total = heat.reduce((sum, item) => sum + Number(item.kills || 0), 0);
+      const total = heat.reduce((sum, item) => sum + Number(item.checkins || 0), 0);
       const peak = heat[0];
-      heatSummary.innerHTML = `<div><span>Tracked kills</span><strong>${total}</strong><small>Last 24 hours with usable position data</small></div><div><span>Hottest grid</span><strong>${peak ? `${Number(peak.kills || 0)} kills` : '—'}</strong><small>${peak ? `X ${Number(peak.x).toFixed(0)} / Z ${Number(peak.z).toFixed(0)}` : 'No heatmap activity yet'}</small></div><div><span>Map layers</span><strong>PvE Objectives + Heat</strong><small>Toggle independently on the collaborative Chernarus map</small></div>`;
+      heatSummary.innerHTML = `<div><span>Periodic check-ins</span><strong>${total}</strong><small>Last 24 hours inside active expeditions</small></div><div><span>Most active grid</span><strong>${peak ? `${Number(peak.checkins || 0)} check-ins` : '—'}</strong><small>${peak ? `${Number(peak.participants || 0)} survivors · X ${Number(peak.x).toFixed(0)} / Z ${Number(peak.z).toFixed(0)}` : 'No activity yet'}</small></div><div><span>Telemetry source</span><strong>Console ADM positions</strong><small>No NPC-kill inference is used</small></div>`;
     }
 
     if (recentActivity) {
-      recentActivity.innerHTML = (payload.recent_activity || []).map((item) => `<div class="chernarus-activity-row"><div><span class="chernarus-type">${escapeHtml(item.target_type || 'PvE')}</span><strong>${escapeHtml(item.player_psn || 'Survivor')}</strong></div><b>+${Number(item.points || 0)} pts</b><small>${item.faction_name ? `${escapeHtml(item.faction_name)} · ` : ''}${item.objective_name ? `${escapeHtml(item.objective_name)} · ` : ''}${escapeHtml(fmtTime(item.recorded_at))}</small></div>`).join('') || '<p class="empty-state">No recent PvE activity has been recorded.</p>';
+      const checkins = (payload.recent_activity || []).map((item) => `<div class="chernarus-activity-row"><div><span class="chernarus-type">CHECK-IN</span><strong>${escapeHtml(item.player_psn || 'Survivor')}</strong></div><b>${escapeHtml(item.objective_name || 'Expedition')}</b><small>${item.faction_name ? `${escapeHtml(item.faction_name)} · ` : ''}${escapeHtml(fmtTime(item.recorded_at))}</small></div>`);
+      const deaths = (payload.recent_pve_deaths || []).map((item) => `<div class="chernarus-activity-row"><div><span class="chernarus-type">PVE DEATH</span><strong>${escapeHtml(item.player_psn || 'Survivor')}</strong></div><b>${escapeHtml(String(item.death_type || 'pve_death').replaceAll('_', ' '))}</b><small>${item.faction_name ? `${escapeHtml(item.faction_name)} · ` : ''}${escapeHtml(fmtTime(item.recorded_at))}</small></div>`);
+      recentActivity.innerHTML = [...checkins, ...deaths].slice(0, 20).join('') || '<p class="empty-state">No recent expedition participation or PvE deaths have been recorded.</p>';
     }
 
     if (catalogue) {
@@ -136,7 +138,7 @@
     const fps = payload.performance?.server_fps || {};
     if (performance) performance.textContent = Number(fps.samples || 0) > 0 ? `${Number(fps.average_fps || 0).toFixed(1)} avg FPS` : 'Telemetry pending';
     if (performanceDetail) performanceDetail.textContent = Number(fps.samples || 0) > 0 ? `Min ${Number(fps.minimum_fps || 0).toFixed(1)} · Max ${Number(fps.maximum_fps || 0).toFixed(1)} · ${Number(fps.samples || 0)} samples` : 'FPS telemetry appears automatically when DayZ emits it.';
-    setStatus(`Chernarus PvE intelligence refreshed ${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}.`, 'success');
+    setStatus(`Chernarus PvE participation refreshed ${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}.`, 'success');
   };
 
   const refreshCountdown = () => {
