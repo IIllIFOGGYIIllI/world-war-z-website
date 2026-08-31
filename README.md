@@ -1,24 +1,18 @@
-# World War Z Bot Website — v1.26.0
+# World War Z Bot Website — v1.26.1
 
-Website v1.26.0 is the **Chernarus PvE Progression** dashboard release and pairs with Bot v1.20.0 / Chernarus mission v1.1.
+Website v1.26.1 is a small **roadmap and release-status sync** on top of the Chernarus PvE Progression release. It pairs with Bot v1.20.0 / Chernarus mission v1.1.
 
-## Survivor Passport
-- Adds personal Chernarus exploration completion with category progress, badges and all 27 Passport locations.
-- Adds a private **My Survivor Passport** map layer for authenticated linked survivors; undiscovered and discovered locations are visually distinct.
-- Passport state is never exposed as another player's personal map layer.
+## Roadmap Sync
+- Marks Natural XP & Prestige as production verified instead of deferred verification.
+- Adds Chernarus PvE Progression & Survivor Passport as a completed roadmap milestone.
+- Moves Notifications & Community Workflow Enhancements to milestone 08.
+- Removes already-shipped community campaign work from the future-work list.
 
-## Survival & Operations
-- Adds Current Survivor stats for tracked life time, valid distance, discoveries, expedition visits, operation completions and personal records.
-- Adds multi-stage WWZ Operation cards with ordered stages, dwell requirements, active progress and no-death operation streaks.
-- Adds PvE reputation rank/progress and a seasonal reputation leaderboard.
+## Changelog / PWA
+- Adds Website v1.26.1 to the public changelog.
+- Advances the installed PWA/service-worker release to v1.26.1 so cached homepage/changelog content refreshes.
 
-## Community & Seasonal Progression
-- Adds weekly Chernarus community campaign progress.
-- Adds existing-faction PvE campaign standings.
-- Adds seasonal survival/exploration/operation record panels.
-- Adds admin-only adaptive world analytics based on real participation and performance data.
-
-## Console Safety
-- All progression remains based on console-safe coordinate/activity telemetry from Bot v1.20.0.
-- No infected/animal kill totals are inferred.
-- Livonia PvP Operations, map layers and quest behaviour remain isolated and unchanged.
+## Compatibility
+- Bot v1.20.0 remains current.
+- Chernarus mission v1.1 remains current.
+- No bot, database, mission, map geometry or persistent gameplay data is changed.

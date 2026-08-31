@@ -168,19 +168,19 @@
 <div class="section-heading reveal roadmap-heading">
 <div>
 <p class="eyebrow">Development roadmap</p>
-<h2 id="roadmap-title">Chernarus + Livonia Live—WWZ Companion Installed</h2>
-<p>The core WWZ platform, dual-map architecture, multi-server isolation and installable PWA are complete. Chernarus and Livonia are both live again, each retaining its own Discord, Nitrado, map, progression, economy and operational state.</p>
+<h2 id="roadmap-title">Chernarus + Livonia Live—PvE Progression Online</h2>
+<p>The core WWZ platform, dual-map architecture, multi-server isolation and installable PWA are complete. Chernarus now also has its full console-safe PvE progression layer, while Chernarus and Livonia continue to retain isolated Discord, Nitrado, map, progression, economy and operational state.</p>
 </div>
 <div aria-label="Current roadmap release" class="roadmap-release">
 <small>Roadmap updated</small>
-<strong>28 August 2026</strong>
-<span>Website v1.26.0 · Bot v1.20.0</span>
+<strong>1 September 2026</strong>
+<span>Website v1.26.1 · Bot v1.20.0</span>
 </div>
 </div>
 <div aria-label="Roadmap status key" class="roadmap-status-key reveal">
 <span class="complete">Available now</span>
 <span class="complete">Live server</span>
-<span class="verification">Deferred verification</span>
+<span class="complete">Production verified</span>
 <span class="next">Planned expansion</span>
 <span class="future">Later improvements</span>
 </div>
@@ -236,29 +236,40 @@
 <li>Chernarus and Livonia can now operate simultaneously without sharing mutable gameplay or administration state.</li>
 </ul>
 </article>
-<article class="roadmap-card roadmap-card-verification reveal">
-<div class="roadmap-card-heading"><span>06</span><div><small>Deferred verification</small><h3>Natural XP &amp; Prestige QA</h3></div></div>
-<p>The progression system is operational. Natural production verification remains deferred until genuine members reach the relevant milestones.</p>
+<article class="roadmap-card roadmap-card-complete reveal">
+<div class="roadmap-card-heading"><span>06</span><div><small>Production verified</small><h3>Natural XP &amp; Prestige</h3></div></div>
+<p>Natural XP progression and Prestige have been confirmed working in live use and are no longer waiting on production verification.</p>
 <ul>
-<li>Confirm a genuine level crossing updates the correct existing Discord role, economy reward, announcement, <code>/rank</code> and <code>/profile</code> exactly once.</li>
-<li>Confirm a natural Level 100 → Prestige transition preserves Lifetime XP, resets current progression correctly and assigns the expected existing roles.</li>
-<li>Confirm the Prestige economy reward remains duplicate-safe during the natural transition.</li>
-<li>No historical PvP XP backfill is planned.</li>
+<li>Natural level progression updates the existing Discord role, economy reward, announcement, <code>/rank</code> and <code>/profile</code> path as designed.</li>
+<li>The Level 100 → Prestige transition preserves Lifetime XP while resetting the active progression cycle and applying the expected Prestige state.</li>
+<li>Prestige rewards remain protected by the existing duplicate-safe progression ledger.</li>
+<li>No historical PvP XP backfill is planned or required for the verified system.</li>
+</ul>
+</article>
+<article class="roadmap-card roadmap-card-complete reveal">
+<div class="roadmap-card-heading"><span>07</span><div><small>Available now</small><h3>Chernarus PvE Progression &amp; Survivor Passport</h3></div></div>
+<p>Chernarus now has a persistent exploration and survival progression loop built around telemetry that a PlayStation DayZ server can actually verify.</p>
+<ul>
+<li>Survivor Passport discovery across 27 Chernarus locations with categories, completion percentage, badges, milestones and a private personal map layer.</li>
+<li>Per-life survival records, validated distance travelled, PvE reputation ranks and multi-stage no-death WWZ Operations with ordered and dwell-based stages.</li>
+<li>Travel/PvE-heavy daily and weekly quests, weekly community campaigns, existing-faction PvE standings and seasonal survival/exploration records.</li>
+<li>Console-safe tracking uses valid ADM position/activity telemetry only; unsupported infected or animal kill totals are never inferred.</li>
+<li>Livonia PvP Operations remain isolated and unchanged.</li>
 </ul>
 </article>
 <article class="roadmap-card roadmap-card-future reveal">
-<div class="roadmap-card-heading"><span>07</span><div><small>Planned expansion</small><h3>Notifications &amp; Community Workflow Enhancements</h3></div></div>
-<p>Future work should build on the now-stable shared platform rather than replacing it.</p>
+<div class="roadmap-card-heading"><span>08</span><div><small>Planned expansion</small><h3>Notifications &amp; Community Workflow Enhancements</h3></div></div>
+<p>Future work should build on the now-stable shared platform and shipped PvE/PvP progression systems rather than replacing them.</p>
 <ul>
 <li>Opt-in web push for appropriate server status, event and ticket notifications without notification spam.</li>
 <li>Reusable event plans, scheduling and additional operational workflow automation.</li>
-<li>Community challenges and longer-term analytics where existing ledgers/telemetry support them safely.</li>
+<li>Further seasonal, exploration and operational analytics where existing ledgers and console-safe telemetry support them reliably.</li>
 <li>Further mobile/PWA accessibility and map usability improvements driven by real-device use.</li>
 <li>Optional later packaging through Capacitor or a similar wrapper for Google Play / Apple App Store distribution.</li>
 </ul>
 </article>
 </div>
-<div class="roadmap-note reveal"><span aria-hidden="true">✓</span><p><strong>Roadmap rule:</strong> validated Chernarus/Livonia map sources and geometry stay preserved, both live servers retain isolated mutable state, live Railway/API/admin data is never treated as offline-confirmed state, natural XP/Prestige QA remains deferred until genuine milestones occur, and Railway-owned persistent records are never replaced by a website release.</p></div>
+<div class="roadmap-note reveal"><span aria-hidden="true">✓</span><p><strong>Roadmap rule:</strong> validated Chernarus/Livonia map sources and geometry stay preserved, both live servers retain isolated mutable state, live Railway/API/admin data is never treated as offline-confirmed state, XP/Prestige is production-verified, Chernarus PvE progression remains limited to console-safe telemetry, and Railway-owned persistent records are never replaced by a website release.</p></div>
 </div>
 </section>
 <section aria-labelledby="faq-title" class="faq section" id="faq">

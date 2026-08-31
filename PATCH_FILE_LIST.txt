@@ -1,12 +1,12 @@
+World War Z Website v1.26.1 — Updated Files Only
+
 README.md
 PATCH_NOTES.md
 PATCH_FILE_LIST.txt
 changelog.html
-dashboard.html
 index.html
 sw.js
 scripts/validate_site.py
-assets/css/dashboard/chernarus-pve.css
-assets/js/dashboard/chernarus-pve.js
-assets/js/dashboard/lazy-assets.js
-assets/js/pages/dashboard-map-intelligence.js
+
+No files need to be deleted.
+Bot v1.20.0 and Chernarus mission v1.1 remain unchanged.
