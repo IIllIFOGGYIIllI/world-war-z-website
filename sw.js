@@ -1,8 +1,8 @@
 'use strict';
 
-const WWZ_PWA_VERSION = '1.25.2';
+const WWZ_PWA_VERSION = '1.25.3';
 const CACHE_PREFIX = 'wwz-pwa-';
-const WWZ_PWA_CACHE_REVISION = 'livonia-pvp-1';
+const WWZ_PWA_CACHE_REVISION = 'combat-competition-1';
 const CACHE_RELEASE = `${WWZ_PWA_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${CACHE_RELEASE}`;

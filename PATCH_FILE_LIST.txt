@@ -1,8 +1,12 @@
 README.md
+PATCH_NOTES.md
+PATCH_FILE_LIST.txt
 changelog.html
 dashboard.html
 index.html
-PATCH_FILE_LIST.txt
-PATCH_NOTES.md
-scripts/validate_site.py
 sw.js
+scripts/validate_site.py
+assets/css/dashboard/livonia-pvp.css
+assets/js/dashboard/lazy-assets.js
+assets/js/dashboard/livonia-pvp.js
+assets/js/pages/dashboard-map-intelligence.js

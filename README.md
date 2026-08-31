@@ -1,6 +1,6 @@
-# World War Z Bot Website — v1.25.2
+# World War Z Bot Website — v1.25.3
 
-Website v1.25.2 is the PWA cache-sync hotfix for the Livonia PvP Operations release. It preserves the v1.25.1 Livonia-only workspace and advances the installed-app service-worker cache generation so the current dashboard is delivered to installed PWAs.
+Website v1.25.3 extends the Livonia-only PvP Operations workspace with competition analytics, a PvP heatmap, population-scaled hotspot visibility and Admin intelligence while advancing the installed-app cache generation. Chernarus remains unchanged.
 
 ## Livonia only
 - Active rotating PvP hotspot cards and reward summary.

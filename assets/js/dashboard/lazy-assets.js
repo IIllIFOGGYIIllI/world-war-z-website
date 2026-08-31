@@ -168,7 +168,7 @@
 
   const ensureMapIntelligenceStyles = () => loadStylesheetOnce(
     'map-intelligence-css',
-    'assets/css/components/map-intelligence.css?v=1.25.0'
+    'assets/css/components/map-intelligence.css?v=1.25.3'
   );
 
   const ensureDashboardMap = () => ensureMapRuntime().then(() => loadAfterDashboardRuntime(() => Promise.all([
@@ -180,7 +180,7 @@
     )
   ]))).then(() => loadScriptOnce(
     'dashboard-map-intelligence',
-    'assets/js/pages/dashboard-map-intelligence.js?v=1.25.0&rev=1',
+    'assets/js/pages/dashboard-map-intelligence.js?v=1.25.3&rev=combat-competition-1',
     () => window.__wwzMapIntelligenceReady === true
   ));
 
@@ -298,10 +298,10 @@
   )));
 
   const ensureLivoniaPvp = () => Promise.all([
-    loadStylesheetOnce('livonia-pvp-css', 'assets/css/dashboard/livonia-pvp.css?v=1.25.1'),
+    loadStylesheetOnce('livonia-pvp-css', 'assets/css/dashboard/livonia-pvp.css?v=1.25.3'),
     loadAfterDashboardRuntime(() => loadScriptOnce(
       'livonia-pvp',
-      'assets/js/dashboard/livonia-pvp.js?v=1.25.1',
+      'assets/js/dashboard/livonia-pvp.js?v=1.25.3',
       () => window.__wwzLivoniaPvpReady === true
     ))
   ]).then(() => undefined);

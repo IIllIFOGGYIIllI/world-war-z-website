@@ -50,7 +50,8 @@
   let killLabelLayer = null;
   let livoniaHotspotLayer = null;
   let livoniaObjectiveLayer = null;
-  let layerVisibility = { private: true, public: true, faction: true, killzones: true, livoniapvp: true, groups: new Map() };
+  let livoniaHeatmapLayer = null;
+  let layerVisibility = { private: true, public: true, faction: true, killzones: true, livoniapvp: true, livoniaheatmap: false, groups: new Map() };
 
   const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (character) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
@@ -93,11 +94,13 @@
     killLabelLayer?.clearLayers?.();
     livoniaHotspotLayer?.clearLayers?.();
     livoniaObjectiveLayer?.clearLayers?.();
+    livoniaHeatmapLayer?.clearLayers?.();
     factionLayer = null;
     killZoneLayer = null;
     killLabelLayer = null;
     livoniaHotspotLayer = null;
     livoniaObjectiveLayer = null;
+    livoniaHeatmapLayer = null;
   };
 
   const ensureLayer = (scope, id = null) => {
@@ -121,6 +124,10 @@
     if (scope === 'livoniaobjective') {
       if (!livoniaObjectiveLayer) livoniaObjectiveLayer = L.layerGroup();
       return livoniaObjectiveLayer;
+    }
+    if (scope === 'livoniaheatmap') {
+      if (!livoniaHeatmapLayer) livoniaHeatmapLayer = L.layerGroup();
+      return livoniaHeatmapLayer;
     }
     const key = Number(id);
     if (!groupLayers.has(key)) groupLayers.set(key, L.layerGroup());
@@ -184,11 +191,14 @@
   const renderLivoniaPvp = () => {
     const hotspotLayer = ensureLayer('livoniahotspots');
     const objectiveLayer = ensureLayer('livoniaobjective');
+    const heatmapLayer = ensureLayer('livoniaheatmap');
     hotspotLayer?.clearLayers?.();
     objectiveLayer?.clearLayers?.();
-    if (!instance || !hotspotLayer || !objectiveLayer || !state.livonia_pvp) {
+    heatmapLayer?.clearLayers?.();
+    if (!instance || !hotspotLayer || !objectiveLayer || !heatmapLayer || !state.livonia_pvp) {
       syncLayerToMap(hotspotLayer, false);
       syncLayerToMap(objectiveLayer, false);
+      syncLayerToMap(heatmapLayer, false);
       return;
     }
     const makeCircle = (item, colour, label) => {
@@ -209,8 +219,26 @@
       const shape = makeCircle(state.livonia_pvp.faction_objective, '#d52b1e', 'Active Faction Control Objective');
       if (shape) objectiveLayer.addLayer(shape);
     }
+    const heat = Array.isArray(state.livonia_pvp.heatmap_24h) ? state.livonia_pvp.heatmap_24h : [];
+    const peak = Math.max(1, ...heat.map((item) => Number(item.kills || 0)));
+    heat.forEach((item) => {
+      const size = Math.max(200, Number(item.grid_size || 600));
+      const half = size / 2;
+      const corners = [
+        [Number(item.x) - half, Number(item.z) - half],
+        [Number(item.x) + half, Number(item.z) - half],
+        [Number(item.x) + half, Number(item.z) + half],
+        [Number(item.x) - half, Number(item.z) + half]
+      ].map((point) => window.WWZMap?.worldToLeaflet?.(point, instance.mapKey)).filter(Boolean);
+      if (corners.length !== 4) return;
+      const intensity = Math.max(.08, Math.min(.48, .1 + (Number(item.kills || 0) / peak) * .38));
+      const polygon = L.polygon(corners, { color: '#ff5c48', weight: 1, opacity: .35, fillColor: '#ff5c48', fillOpacity: intensity, interactive: true });
+      polygon.bindPopup(`<div class="wwz-map-intel-popup"><strong>PvP Heat</strong><span>${Number(item.kills || 0)} confirmed kills · last 24h</span><small>X ${Number(item.x).toFixed(0)} / Z ${Number(item.z).toFixed(0)} · ${size.toFixed(0)} m grid</small></div>`);
+      heatmapLayer.addLayer(polygon);
+    });
     syncLayerToMap(hotspotLayer, layerVisibility.livoniapvp);
     syncLayerToMap(objectiveLayer, layerVisibility.livoniapvp);
+    syncLayerToMap(heatmapLayer, layerVisibility.livoniaheatmap);
   };
 
   const renderSharedMarkers = () => {
@@ -244,10 +272,11 @@
     }).join('');
     const factionRow = state.faction ? `<label class="map-intel-layer-row"><input data-intel-layer="faction" type="checkbox" ${layerVisibility.faction ? 'checked' : ''}><span class="map-intel-swatch" style="--intel-colour:${cleanColour(state.faction.colour, '#8F1D1D')}"></span><span><strong>${escapeHtml(state.faction.name)}</strong><small>Faction</small></span></label>` : '';
     const livoniaPvpRow = state.livonia_pvp ? `<label class="map-intel-layer-row"><input data-intel-layer="livoniapvp" type="checkbox" ${layerVisibility.livoniapvp ? 'checked' : ''}><span class="map-intel-swatch" style="--intel-colour:#f2a33a"></span><span><strong>Livonia PvP</strong><small>Hotspots &amp; faction objective</small></span></label>` : '';
+    const livoniaHeatRow = state.livonia_pvp ? `<label class="map-intel-layer-row"><input data-intel-layer="livoniaheatmap" type="checkbox" ${layerVisibility.livoniaheatmap ? 'checked' : ''}><span class="map-intel-swatch" style="--intel-colour:#ff5c48"></span><span><strong>PvP Heatmap</strong><small>Confirmed kills · last 24 hours</small></span></label>` : '';
     layerControls.innerHTML = `
       <label class="map-intel-layer-row"><input data-intel-layer="private" type="checkbox" ${layerVisibility.private ? 'checked' : ''}><span class="map-intel-swatch private"></span><span><strong>Private</strong><small>This browser only</small></span></label>
       <label class="map-intel-layer-row"><input data-intel-layer="public" type="checkbox" ${layerVisibility.public ? 'checked' : ''}><span class="map-intel-swatch public"></span><span><strong>Public</strong><small>Admin published</small></span></label>
-      ${groupRows}${factionRow}${livoniaPvpRow}
+      ${groupRows}${factionRow}${livoniaPvpRow}${livoniaHeatRow}
       <label class="map-intel-layer-row"><input data-intel-layer="killzones" type="checkbox" ${layerVisibility.killzones ? 'checked' : ''}><span class="map-intel-swatch killzone"></span><span><strong>Kill Zones</strong><small><span data-inline-kill-count>${state.kill_zones.length}</span> active areas</small></span></label>`;
   };
 
@@ -466,6 +495,9 @@
       layerVisibility.livoniapvp = visible;
       syncLayerToMap(livoniaHotspotLayer, visible);
       syncLayerToMap(livoniaObjectiveLayer, visible);
+    } else if (scope === 'livoniaheatmap') {
+      layerVisibility.livoniaheatmap = visible;
+      syncLayerToMap(livoniaHeatmapLayer, visible);
     }
   });
 
