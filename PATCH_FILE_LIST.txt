@@ -1,12 +1,8 @@
 README.md
 changelog.html
 dashboard.html
+index.html
 PATCH_FILE_LIST.txt
-DELETE_THESE_FILES.txt
 PATCH_NOTES.md
-assets/css/dashboard/livonia-pvp.css
-assets/js/dashboard/livonia-pvp.js
-assets/js/dashboard/lazy-assets.js
-assets/js/dashboard/server-context.js
-assets/js/dashboard/shell.js
-assets/js/pages/dashboard-map-intelligence.js
+scripts/validate_site.py
+sw.js

@@ -1,15 +1,10 @@
-# World War Z Website v1.25.1
+# World War Z Website v1.25.2
 
-## Added
-- Livonia-only PvP Operations workspace for hotspots, faction control, Most Wanted bounties and contested objectives.
-- Livonia-only hotspot/faction-objective overlays on the existing collaborative map.
-- Admin-only possible combat-disconnect intelligence display.
+## PWA cache sync hotfix
 
-## Isolation
-- Livonia navigation is hidden unless the selected server map is Livonia.
-- Direct/deep-link access to the Livonia PvP workspace is blocked while Chernarus is selected.
-- Chernarus map-intelligence payloads receive no Livonia PvP overlay field.
-
-## Preserved
-- Existing Chernarus dashboard/map/pages and all other website workflows remain unchanged.
-- No existing files need deleting.
+- Advances the service-worker PWA version to `1.25.2`.
+- Advances the cache revision to `livonia-pvp-1`, forcing old WWZ PWA shell/static/map caches to rotate on activation.
+- Installed apps will detect the new worker and show the existing **Update Now** flow.
+- Corrects visible website/dashboard release labels to Website v1.25.2 / Bot v1.19.2.
+- Preserves the v1.25.1 Livonia-only PvP Operations workspace and all Chernarus isolation.
+- No backend/API/database changes.
