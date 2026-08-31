@@ -5,3 +5,7 @@ www/
 node_modules/
 android/
 ios/
+
+# Android signing keys
+android-app/*.jks
+android-app/*.jks.base64.txt
