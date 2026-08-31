@@ -47,10 +47,11 @@ jobs:
         run: |
           set -euo pipefail
 
-          SOURCE_SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -path '*/bin/sdkmanager' | sort | tail -n 1)"
+          RUNNER_ANDROID_SDK="$ANDROID_HOME"
+          SOURCE_SDKMANAGER="$(find "$RUNNER_ANDROID_SDK/cmdline-tools" -type f -path '*/bin/sdkmanager' | sort | tail -n 1)"
           if [ -z "$SOURCE_SDKMANAGER" ]; then
-            echo "Could not locate sdkmanager under $ANDROID_HOME/cmdline-tools" >&2
-            find "$ANDROID_HOME" -maxdepth 4 -type f -name sdkmanager -print || true
+            echo "Could not locate sdkmanager under $RUNNER_ANDROID_SDK/cmdline-tools" >&2
+            find "$RUNNER_ANDROID_SDK" -maxdepth 4 -type f -name sdkmanager -print || true
             exit 1
           fi
 
@@ -61,6 +62,7 @@ jobs:
           cp -a "$SOURCE_CMDLINE_ROOT/." "$WWZ_SDK/"
 
           echo "Bubblewrap SDK root: $WWZ_SDK"
+          echo "Runner Android SDK: $RUNNER_ANDROID_SDK"
           echo "Command-line tools: $SOURCE_CMDLINE_ROOT"
 
           { yes || true; } | "$WWZ_SDK/bin/sdkmanager" --licenses --sdk_root="$WWZ_SDK" >/dev/null
@@ -86,15 +88,25 @@ jobs:
           path.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
           print(f"Configured Bubblewrap: {path}")
           print(f"JDK: {config['jdkPath']}")
-          print(f"Android SDK: {config['androidSdkPath']}")
+          print(f"Bubblewrap Android SDK: {config['androidSdkPath']}")
           PY
 
           echo "WWZ_BUBBLEWRAP_SDK=$WWZ_SDK" >> "$GITHUB_ENV"
+          echo "WWZ_RUNNER_ANDROID_SDK=$RUNNER_ANDROID_SDK" >> "$GITHUB_ENV"
           bubblewrap doctor
 
       - name: Generate Android project
         working-directory: android-app
         run: bubblewrap update --skipVersionUpgrade --manifest=twa-manifest.json
+
+      - name: Use runner SDK for Gradle
+        working-directory: android-app
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'sdk.dir=%s\n' "$WWZ_RUNNER_ANDROID_SDK" > local.properties
+          echo "Gradle Android SDK: $WWZ_RUNNER_ANDROID_SDK"
+          cat local.properties
 
       - name: Ensure Gradle wrapper executable
         working-directory: android-app
@@ -104,8 +116,8 @@ jobs:
         if: ${{ env.WWZ_ANDROID_KEYSTORE_BASE64 == '' }}
         working-directory: android-app
         env:
-          ANDROID_HOME: ${{ env.WWZ_BUBBLEWRAP_SDK }}
-          ANDROID_SDK_ROOT: ${{ env.WWZ_BUBBLEWRAP_SDK }}
+          ANDROID_HOME: ${{ env.WWZ_RUNNER_ANDROID_SDK }}
+          ANDROID_SDK_ROOT: ${{ env.WWZ_RUNNER_ANDROID_SDK }}
         run: ./gradlew assembleDebug
 
       - name: Upload debug APK
@@ -130,8 +142,8 @@ jobs:
         working-directory: android-app
         shell: bash
         env:
-          ANDROID_HOME: ${{ env.WWZ_BUBBLEWRAP_SDK }}
-          ANDROID_SDK_ROOT: ${{ env.WWZ_BUBBLEWRAP_SDK }}
+          ANDROID_HOME: ${{ env.WWZ_RUNNER_ANDROID_SDK }}
+          ANDROID_SDK_ROOT: ${{ env.WWZ_RUNNER_ANDROID_SDK }}
         run: |
           if [ -z "$WWZ_ANDROID_KEYSTORE_PASSWORD" ] || [ -z "$WWZ_ANDROID_KEY_PASSWORD" ] || [ -z "$WWZ_ANDROID_KEY_ALIAS" ]; then
             echo "Signing key is configured but one or more signing secrets are missing." >&2
