@@ -42,28 +42,54 @@ jobs:
       - name: Install Bubblewrap
         run: npm install --global "@bubblewrap/cli@${BUBBLEWRAP_VERSION}"
 
-      - name: Configure Bubblewrap toolchain
+      - name: Prepare Bubblewrap Android SDK
         shell: bash
         run: |
+          set -euo pipefail
+
+          SOURCE_SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -path '*/bin/sdkmanager' | sort | tail -n 1)"
+          if [ -z "$SOURCE_SDKMANAGER" ]; then
+            echo "Could not locate sdkmanager under $ANDROID_HOME/cmdline-tools" >&2
+            find "$ANDROID_HOME" -maxdepth 4 -type f -name sdkmanager -print || true
+            exit 1
+          fi
+
+          SOURCE_CMDLINE_ROOT="$(cd "$(dirname "$SOURCE_SDKMANAGER")/.." && pwd)"
+          WWZ_SDK="$RUNNER_TEMP/wwz-bubblewrap-sdk"
+          rm -rf "$WWZ_SDK"
+          mkdir -p "$WWZ_SDK"
+          cp -a "$SOURCE_CMDLINE_ROOT/." "$WWZ_SDK/"
+
+          echo "Bubblewrap SDK root: $WWZ_SDK"
+          echo "Command-line tools: $SOURCE_CMDLINE_ROOT"
+
+          { yes || true; } | "$WWZ_SDK/bin/sdkmanager" --licenses --sdk_root="$WWZ_SDK" >/dev/null
+          "$WWZ_SDK/bin/sdkmanager" \
+            --sdk_root="$WWZ_SDK" \
+            "build-tools;34.0.0" \
+            "platforms;android-36" \
+            "platform-tools"
+
           mkdir -p "$HOME/.bubblewrap"
-          python3 - <<'PY'
+          python3 - "$WWZ_SDK" <<'PY'
           import json
           import os
+          import sys
           from pathlib import Path
 
+          sdk = sys.argv[1]
           config = {
               "jdkPath": os.environ["JAVA_HOME"],
-              "androidSdkPath": os.environ["ANDROID_HOME"],
+              "androidSdkPath": sdk,
           }
-
           path = Path.home() / ".bubblewrap" / "config.json"
           path.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
-
           print(f"Configured Bubblewrap: {path}")
           print(f"JDK: {config['jdkPath']}")
           print(f"Android SDK: {config['androidSdkPath']}")
           PY
 
+          echo "WWZ_BUBBLEWRAP_SDK=$WWZ_SDK" >> "$GITHUB_ENV"
           bubblewrap doctor
 
       - name: Generate Android project
@@ -77,6 +103,9 @@ jobs:
       - name: Build debug APK
         if: ${{ env.WWZ_ANDROID_KEYSTORE_BASE64 == '' }}
         working-directory: android-app
+        env:
+          ANDROID_HOME: ${{ env.WWZ_BUBBLEWRAP_SDK }}
+          ANDROID_SDK_ROOT: ${{ env.WWZ_BUBBLEWRAP_SDK }}
         run: ./gradlew assembleDebug
 
       - name: Upload debug APK
@@ -100,6 +129,9 @@ jobs:
         if: ${{ env.WWZ_ANDROID_KEYSTORE_BASE64 != '' }}
         working-directory: android-app
         shell: bash
+        env:
+          ANDROID_HOME: ${{ env.WWZ_BUBBLEWRAP_SDK }}
+          ANDROID_SDK_ROOT: ${{ env.WWZ_BUBBLEWRAP_SDK }}
         run: |
           if [ -z "$WWZ_ANDROID_KEYSTORE_PASSWORD" ] || [ -z "$WWZ_ANDROID_KEY_PASSWORD" ] || [ -z "$WWZ_ANDROID_KEY_ALIAS" ]; then
             echo "Signing key is configured but one or more signing secrets are missing." >&2
