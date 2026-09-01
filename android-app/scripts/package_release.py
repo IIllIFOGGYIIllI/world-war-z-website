@@ -12,6 +12,7 @@ from urllib.parse import parse_qs, urlsplit
 
 SIGNING_CERT_SHA256 = "79:21:5A:49:A1:B9:5B:9E:A9:B4:63:BF:36:1E:43:87:6B:F6:D6:95:4F:0B:63:48:80:B1:9F:F4:3B:F7:D2:5F"
 LEGACY_FIRST_RELEASE = "1.0.0"
+DEFAULT_RELEASE_BASE = "https://github.com/IIllIFOGGYIIllI/world-war-z-website/releases/download"
 
 
 def sha256_file(path: Path) -> str:
@@ -49,6 +50,7 @@ def main() -> int:
     parser.add_argument('--manifest', type=Path, default=Path('twa-manifest.json'))
     parser.add_argument('--output-root', required=True, type=Path)
     parser.add_argument('--released-at', default='')
+    parser.add_argument('--release-base', default=DEFAULT_RELEASE_BASE)
     args = parser.parse_args()
 
     apk = args.apk.resolve()
@@ -75,8 +77,13 @@ def main() -> int:
     zip_target = downloads / zip_name
     shutil.copy2(apk, apk_target)
 
-    with zipfile.ZipFile(zip_target, 'w', zipfile.ZIP_DEFLATED) as archive:
-        archive.write(apk_target, apk_name)
+    # Build a deterministic ZIP fallback so the same signed APK always produces
+    # the same size/hash even when GitHub Actions rebuild timestamps differ.
+    zip_info = zipfile.ZipInfo(apk_name, date_time=(1980, 1, 1, 0, 0, 0))
+    zip_info.compress_type = zipfile.ZIP_DEFLATED
+    zip_info.external_attr = 0o644 << 16
+    with zipfile.ZipFile(zip_target, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
+        archive.writestr(zip_info, apk_target.read_bytes())
 
     apk_sha = sha256_file(apk_target)
     zip_sha = sha256_file(zip_target)
@@ -92,9 +99,9 @@ def main() -> int:
         'version_code': code,
         'released_at': released_at,
         'minimum_android_api': minimum_sdk,
-        'apk_url': f'downloads/android/{apk_name}',
-        'zip_url': f'downloads/android/{zip_name}',
-        'release_page_url': 'companion.html',
+        'apk_url': f'{args.release_base.rstrip("/")}/companion-v{version}/{apk_name}',
+        'zip_url': f'{args.release_base.rstrip("/")}/companion-v{version}/{zip_name}',
+        'release_page_url': f'https://github.com/IIllIFOGGYIIllI/world-war-z-website/releases/tag/companion-v{version}',
         'apk_size_bytes': apk_target.stat().st_size,
         'zip_size_bytes': zip_target.stat().st_size,
         'apk_sha256': apk_sha,

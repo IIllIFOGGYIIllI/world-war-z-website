@@ -17,6 +17,21 @@
     return new Intl.DateTimeFormat('en-AU', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(date);
   };
 
+  const setDownloadLink = (link, url, fallbackName) => {
+    const value = String(url || '');
+    link.href = value;
+    try {
+      const target = new URL(value, location.href);
+      if (target.origin === location.origin) {
+        link.download = target.pathname.split('/').pop() || fallbackName;
+      } else {
+        link.removeAttribute('download');
+      }
+    } catch {
+      link.removeAttribute('download');
+    }
+  };
+
   const applyRelease = (release) => {
     all('[data-release-version]').forEach((element) => { element.textContent = `v${release.version}`; });
     all('[data-release-size]').forEach((element) => { element.textContent = `${formatBytes(release.apk_size_bytes)} APK · ${formatBytes(release.zip_size_bytes)} ZIP`; });
@@ -27,13 +42,11 @@
     all('[data-apk-sha]').forEach((element) => { element.textContent = release.apk_sha256; });
     all('[data-signing-fingerprint]').forEach((element) => { element.textContent = release.signing_cert_sha256; });
     all('[data-apk-download]').forEach((link) => {
-      link.href = release.apk_url;
-      link.download = release.apk_url.split('/').pop() || 'World-War-Z-Companion.apk';
+      setDownloadLink(link, release.apk_url, 'World-War-Z-Companion.apk');
       link.textContent = `Download APK · ${formatBytes(release.apk_size_bytes)}`;
     });
     all('[data-zip-download]').forEach((link) => {
-      link.href = release.zip_url;
-      link.download = release.zip_url.split('/').pop() || 'World-War-Z-Companion.zip';
+      setDownloadLink(link, release.zip_url, 'World-War-Z-Companion.zip');
       link.textContent = `ZIP fallback · ${formatBytes(release.zip_size_bytes)}`;
     });
 

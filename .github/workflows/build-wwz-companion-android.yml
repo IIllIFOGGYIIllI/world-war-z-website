@@ -10,7 +10,7 @@ on:
       - "companion-v*"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-android:
@@ -176,6 +176,37 @@ jobs:
           cp app-release-bundle.aab "$RELEASE_ROOT/native-artifacts/World-War-Z-Companion-v${WWZ_COMPANION_VERSION}.aab"
           cp assetlinks.json "$RELEASE_ROOT/native-artifacts/assetlinks.json"
           echo "WWZ_RELEASE_ROOT=$RELEASE_ROOT" >> "$GITHUB_ENV"
+
+      - name: Publish stable GitHub release
+        if: ${{ env.WWZ_ANDROID_KEYSTORE_BASE64 != '' }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="companion-v${WWZ_COMPANION_VERSION}"
+          TITLE="WWZ Companion v${WWZ_COMPANION_VERSION}"
+          APK="$WWZ_RELEASE_ROOT/downloads/android/World-War-Z-Companion-v${WWZ_COMPANION_VERSION}.apk"
+          ZIP="$WWZ_RELEASE_ROOT/downloads/android/World-War-Z-Companion-v${WWZ_COMPANION_VERSION}.zip"
+          NOTES="Official signed World War Z Companion Android release. Website/PWA feature updates continue to arrive separately through the live WWZ service worker."
+
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release edit "$TAG" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "$TITLE" \
+              --notes "$NOTES" \
+              --latest
+            gh release upload "$TAG" "$APK" "$ZIP" \
+              --repo "$GITHUB_REPOSITORY" \
+              --clobber
+          else
+            gh release create "$TAG" "$APK" "$ZIP" \
+              --repo "$GITHUB_REPOSITORY" \
+              --target "$GITHUB_SHA" \
+              --title "$TITLE" \
+              --notes "$NOTES" \
+              --latest
+          fi
 
       - name: Upload signed Android release
         if: ${{ env.WWZ_ANDROID_KEYSTORE_BASE64 != '' }}
