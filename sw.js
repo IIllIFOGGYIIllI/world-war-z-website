@@ -5,7 +5,7 @@ const CACHE_PREFIX = 'wwz-pwa-';
 const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-09-01-home-companion-download-1';
+const WWZ_PWA_UPDATE_REVISION = '2026-09-01-ios-home-install-1';
 const CACHE_RELEASE = `${WWZ_PWA_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${CACHE_RELEASE}`;
@@ -42,8 +42,6 @@ const APP_SHELL = [
   './assets/js/ui-system.js?v=1.24.0&rev=ops-ui-1'
 ].map(scopedUrl);
 
-// Targeted invalidations let a small hotfix refresh changed runtime files without
-// throwing away users' bounded satellite/map caches.
 const UPDATE_INVALIDATIONS = [
   './assets/js/dashboard/bootstrap.js?v=1.22.93&rev=auth-restore-fix-1',
   './assets/js/pages/home.js?v=1.22.93',
@@ -134,7 +132,6 @@ const staleWhileRevalidate = async (request) => {
   return (await refresh) || Response.error();
 };
 
-
 const networkFirstStatic = async (request) => {
   try {
     const response = await fetch(request);
@@ -170,15 +167,19 @@ const networkFirstMapData = async (request) => {
 };
 
 const isMapTile = (pathname) =>
-  /\/assets\/maps\/(?:chernarus|livonia)\/tiles\//.test(pathname) ||
-  /\/assets\/chernarus-map\/satellite-corrected\//.test(pathname);
+  pathname.includes('/assets/maps/chernarus/tiles/') ||
+  pathname.includes('/assets/maps/livonia/tiles/') ||
+  pathname.includes('/assets/chernarus-map/satellite-corrected/');
 
 const isMapData = (pathname) =>
-  /\/assets\/maps\/(?:chernarus|livonia)\/(?:roads\.geojson|labels\.json)$/.test(pathname) ||
-  /\/assets\/chernarus-map\/overlays\//.test(pathname);
+  pathname.endsWith('/assets/maps/chernarus/roads.geojson') ||
+  pathname.endsWith('/assets/maps/chernarus/labels.json') ||
+  pathname.endsWith('/assets/maps/livonia/roads.geojson') ||
+  pathname.endsWith('/assets/maps/livonia/labels.json') ||
+  pathname.includes('/assets/chernarus-map/overlays/');
 
 const isStaticAsset = (pathname) =>
-  /\.(?:css|js|png|jpg|jpeg|webp|svg|webmanifest|json)$/i.test(pathname);
+  /[.](?:css|js|png|jpg|jpeg|webp|svg|webmanifest|json)$/i.test(pathname);
 
 self.addEventListener('fetch', (event) => {
   const request = event.request;
@@ -211,7 +212,6 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(staleWhileRevalidate(request));
   }
 });
-
 
 const notificationTarget = (rawUrl = '') => {
   const value = String(rawUrl || '').trim();

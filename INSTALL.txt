@@ -1,15 +1,15 @@
-WWZ Homepage Companion Download Button
+WWZ iPhone / iPad PWA install entry point
 
-Updated files only:
+UPDATED FILES ONLY
 - assets/js/pages/home.js
 - sw.js
 
 What changes:
-- Adds a visible "Download Companion" button to the homepage hero.
-- The button loads the current stable APK URL from assets/data/companion-release.json.
-- If release metadata cannot be loaded, it safely falls back to companion.html.
-- Adds a "Companion App" link to the homepage navigation.
-- Bumps the PWA update revision and invalidates cached home.js so installed PWAs/TWAs receive the update.
+- iPhone/iPad visitors get an Install On iPhone / iPad button in the homepage hero instead of the Android APK download.
+- The button uses the existing data-pwa-install flow. On iPhone/iPad it opens the existing Safari walkthrough: open in Safari, tap Share, Add to Home Screen, then Add.
+- Android visitors keep the direct signed APK download behaviour.
+- Desktop/PWA behaviour remains unchanged.
+- PWA revision is bumped and cached home.js is invalidated.
 
 Suggested commit:
-Add Companion download button
+Add iPhone Companion install

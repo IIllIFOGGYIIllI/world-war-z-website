@@ -19,6 +19,10 @@ navigation?.querySelectorAll('a').forEach((link) => {
   });
 });
 
+const isAppleMobile = () =>
+  /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
 const ensureCompanionDownloadEntryPoints = async () => {
   const closeNavigation = () => {
     menuButton?.setAttribute('aria-expanded', 'false');
@@ -38,7 +42,19 @@ const ensureCompanionDownloadEntryPoints = async () => {
   }
 
   const heroActions = document.querySelector('.hero-actions');
-  if (!heroActions || heroActions.querySelector('[data-companion-home-download]')) return;
+  if (!heroActions || heroActions.querySelector('[data-companion-home-download], [data-companion-ios-install]')) return;
+
+  if (isAppleMobile()) {
+    const installButton = document.createElement('button');
+    installButton.type = 'button';
+    installButton.className = 'button button-primary pwa-install-button';
+    installButton.dataset.pwaInstall = '';
+    installButton.dataset.companionIosInstall = '';
+    installButton.textContent = 'Install On iPhone / iPad';
+    installButton.setAttribute('aria-label', 'Install WWZ Companion on iPhone or iPad');
+    heroActions.append(installButton);
+    return;
+  }
 
   const downloadButton = document.createElement('a');
   downloadButton.className = 'button button-primary';
