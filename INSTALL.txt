@@ -1,40 +1,24 @@
-WORLD WAR Z WEBSITE - MILESTONE 09 MY WWZ TEST
-==================================================
+WORLD WAR Z - M09 MY WWZ LIVONIA PARTIAL-DATA FIX
+===================================================
 
 UPDATED FILES ONLY
-- assets/js/dashboard/bootstrap.js
 - assets/js/dashboard/my-wwz.js
-- assets/css/dashboard/my-wwz.css
 - sw.js
 
-WHAT THIS TEST ADDS
-- New "My WWZ" personal command view injected into Dashboard > Overview.
-- Server-aware presentation:
-  * Chernarus PvE: expeditions, Survivor Passport, PvE reputation,
-    current tracked life, weekly goal and active no-death operation.
-  * Livonia PvP: active hotspots, faction objective, Most Wanted,
-    confirmed PvP snapshot and 24-hour leaderboard context.
-- Survivor profile, wallet, level/prestige and open-order summary.
-- Daily/weekly quest summary and claim-ready state.
-- Community event / "What's Happening Now?" panel.
-- Attention panel for open tickets, open shop orders, scheduled events
-  and degraded/offline server state.
-- Recent legitimate XP and economy activity.
-- Mobile-first quick actions for Map, Shop, Quests, Tickets, Events and Profile.
-- Partial API failures degrade individual cards instead of breaking the dashboard.
-- Refreshes every 60 seconds only while Overview is active and visible.
-- Uses existing server-routed Railway endpoints only. No new backend or DayZ telemetry.
-- Does NOT infer infected/animal kills.
-- PWA revision bump included.
+FIX
+- Stops a single optional/supplemental endpoint failure from producing the large
+  yellow "1 live data source could not refresh" banner when the core Livonia
+  My WWZ data is healthy.
+- Core data sources still produce a visible warning if they fail:
+  survivor account, progression, objectives, server status, or world intelligence.
+- Optional ticket/shop/community failures now appear in the Attention card with
+  an explicit "Refresh unavailable" row instead of being silently treated as zero.
+- Prevents failed account/progression/shop/status requests from rendering fake
+  zero/unlinked values.
+- Writes exact failed source diagnostics to the browser console for debugging.
+- Includes PWA revision bump.
 
-TEST BEFORE PROMOTING TO THE NEXT WEBSITE BASELINE
-1. Sign in and select Chernarus.
-2. Confirm My WWZ appears below the four normal Overview metrics.
-3. Check Passport/reputation/operation cards reflect real Chernarus data.
-4. Switch to Livonia and confirm PvP/hotspot content replaces PvE content.
-5. Check Quests, Tickets, Shop and Events quick actions.
-6. Check mobile/Companion layout.
-7. Confirm PWA Update Now prompt appears on an existing installed client.
+No bot, database, Nitrado, mission or DayZ files changed.
 
 Suggested commit:
-Add My WWZ overview
+Fix My WWZ partial data warning

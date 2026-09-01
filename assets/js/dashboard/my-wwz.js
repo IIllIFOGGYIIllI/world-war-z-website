@@ -30,6 +30,19 @@
   const selectedServer = () => window.WWZServerContext?.getSelectedServer?.() || null;
   const number = (value) => Number(value || 0).toLocaleString('en-AU');
   const money = (value) => `$${Number(value || 0).toLocaleString('en-AU')}`;
+  const CORE_SOURCES = new Set(['account', 'progression', 'objectives', 'status', 'world']);
+  const SOURCE_LABELS = Object.freeze({
+    account: 'survivor account',
+    progression: 'progression',
+    objectives: 'objectives',
+    tickets: 'support tickets',
+    shop: 'shop and orders',
+    community: 'community events',
+    status: 'server status',
+    world: 'live world intelligence',
+  });
+  const failedSource = (snapshot, key) => (snapshot?.failures || []).find((row) => row.key === key) || null;
+  const sourceAvailable = (snapshot, key) => !failedSource(snapshot, key);
 
   const relative = (value) => {
     if (!value) return '—';
@@ -230,12 +243,25 @@
       ? `Restart ${duration(operations.restart_countdown_seconds)}`
       : 'Restart sync pending';
 
+    const statusOk = sourceAvailable(snapshot, 'status');
+    const accountOk = sourceAvailable(snapshot, 'account');
+    const progressionOk = sourceAvailable(snapshot, 'progression');
+    const shopOk = sourceAvailable(snapshot, 'shop');
+
     const metrics = root.querySelector('[data-my-wwz-metrics]');
     metrics.replaceChildren(
-      createMetric('Current server', `${statusLabel} · ${number(players.current)} / ${number(players.maximum)}`, `${server?.map_name || status?.server?.map || 'World'} · ${restart}`),
-      createMetric('My survivor', profile.linked ? String(profile.psn_id || 'Linked survivor') : 'PSN not linked', profile.linked ? (profile.online ? 'Online now' : 'Verified survivor') : 'Use /account link in Discord'),
-      createMetric('Progression', `Level ${Number(member.level || 1)} · P${Number(member.prestige || 0)}`, `${number(member.lifetime_xp)} lifetime XP`),
-      createMetric('Wallet & orders', money(shop?.balance ?? economy.balance), `${openOrders} open order${openOrders === 1 ? '' : 's'}`)
+      statusOk
+        ? createMetric('Current server', `${statusLabel} · ${number(players.current)} / ${number(players.maximum)}`, `${server?.map_name || status?.server?.map || 'World'} · ${restart}`)
+        : createMetric('Current server', 'Temporarily unavailable', server?.map_name || 'Current world'),
+      accountOk
+        ? createMetric('My survivor', profile.linked ? String(profile.psn_id || 'Linked survivor') : 'PSN not linked', profile.linked ? (profile.online ? 'Online now' : 'Verified survivor') : 'Use /account link in Discord')
+        : createMetric('My survivor', 'Temporarily unavailable', 'Your account remains signed in'),
+      progressionOk
+        ? createMetric('Progression', `Level ${Number(member.level || 1)} · P${Number(member.prestige || 0)}`, `${number(member.lifetime_xp)} lifetime XP`)
+        : createMetric('Progression', 'Temporarily unavailable', 'XP data could not refresh'),
+      shopOk
+        ? createMetric('Wallet & orders', money(shop?.balance ?? economy.balance), `${openOrders} open order${openOrders === 1 ? '' : 's'}`)
+        : createMetric('Wallet & orders', accountOk ? money(economy.balance) : 'Temporarily unavailable', 'Order status could not refresh')
     );
   };
 
@@ -371,10 +397,27 @@
     const serverStatus = String(snapshot.status?.status || 'unknown');
 
     const items = [];
-    if (tickets.length) items.push(['Open support tickets', `${tickets.length}`, tickets[0]?.subject || 'A ticket is awaiting attention', '']);
-    if (orders.length) items.push(['Shop / trader orders', `${orders.length}`, `${orders.filter((order) => order.status === 'processing').length} processing`, '']);
-    if (events.length) items.push(['Community events', `${events.length}`, events[0]?.title || 'Upcoming event', '']);
-    if (serverStatus !== 'online') items.push(['Server status', serverStatus.toUpperCase(), 'Check live server status before joining.', 'danger']);
+    if (sourceAvailable(snapshot, 'tickets')) {
+      if (tickets.length) items.push(['Open support tickets', `${tickets.length}`, tickets[0]?.subject || 'A ticket is awaiting attention', '']);
+    } else {
+      items.push(['Support tickets', 'Refresh unavailable', 'Ticket data did not refresh; no ticket state was assumed.', '']);
+    }
+
+    if (sourceAvailable(snapshot, 'shop')) {
+      if (orders.length) items.push(['Shop / trader orders', `${orders.length}`, `${orders.filter((order) => order.status === 'processing').length} processing`, '']);
+    } else {
+      items.push(['Shop / trader orders', 'Refresh unavailable', 'Order data did not refresh; existing orders were not treated as cleared.', '']);
+    }
+
+    if (sourceAvailable(snapshot, 'community')) {
+      if (events.length) items.push(['Community events', `${events.length}`, events[0]?.title || 'Upcoming event', '']);
+    } else {
+      items.push(['Community events', 'Refresh unavailable', 'The event schedule could not refresh for this server.', '']);
+    }
+
+    if (sourceAvailable(snapshot, 'status') && serverStatus !== 'online') {
+      items.push(['Server status', serverStatus.toUpperCase(), 'Check live server status before joining.', 'danger']);
+    }
 
     count.textContent = String(items.length);
     items.forEach(([label, value, detail, tone]) => body.append(createStatusRow(label, value, detail, tone)));
@@ -499,8 +542,15 @@
     try {
       const snapshot = await collectSnapshot();
       renderSnapshot(snapshot);
+
       if (snapshot.failures.length) {
-        setMessage(`${snapshot.failures.length} live data source${snapshot.failures.length === 1 ? '' : 's'} could not refresh. The available My WWZ cards are still current.`, 'warning');
+        console.warn('WWZ My WWZ partial refresh.', snapshot.failures);
+      }
+
+      const coreFailures = snapshot.failures.filter((row) => CORE_SOURCES.has(row.key));
+      if (coreFailures.length) {
+        const labels = coreFailures.map((row) => SOURCE_LABELS[row.key] || row.key).join(', ');
+        setMessage(`My WWZ partially refreshed. Waiting on: ${labels}. Available cards remain usable.`, 'warning');
       } else {
         setMessage(`My WWZ refreshed ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.`, 'success');
       }
