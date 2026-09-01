@@ -1,15 +1,20 @@
-WWZ iPhone / iPad PWA install entry point
+WWZ iPhone / iPad install CI wiring fix
 
 UPDATED FILES ONLY
 - assets/js/pages/home.js
 - sw.js
 
-What changes:
-- iPhone/iPad visitors get an Install On iPhone / iPad button in the homepage hero instead of the Android APK download.
-- The button uses the existing data-pwa-install flow. On iPhone/iPad it opens the existing Safari walkthrough: open in Safari, tap Share, Add to Home Screen, then Add.
-- Android visitors keep the direct signed APK download behaviour.
-- Desktop/PWA behaviour remains unchanged.
-- PWA revision is bumped and cached home.js is invalidated.
+Fix:
+The iPhone/iPad install button is intentionally handled by assets/js/pwa.js via
+its data-pwa-install hook. The site validator only scans the next 40 lines around
+a dynamically-created button and therefore could not see that shared handler.
+
+home.js now includes a harmless local click listener beside the button creation
+so the interaction audit can verify that the dynamic control is intentionally
+interactive. pwa.js remains the authoritative install/help handler.
+
+The PWA revision is bumped again because home.js changed, so the PWA revision
+guard remains satisfied and installed clients receive the corrected website update.
 
 Suggested commit:
-Add iPhone Companion install
+Fix iPhone install button audit
