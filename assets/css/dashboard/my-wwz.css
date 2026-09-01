@@ -1,0 +1,362 @@
+.my-wwz-shell {
+  margin: 18px 0 22px;
+  border: 1px solid rgba(217, 66, 52, 0.25);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top right, rgba(184, 41, 31, 0.16), transparent 34%),
+    linear-gradient(180deg, rgba(17, 19, 23, 0.97), rgba(10, 12, 15, 0.98));
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.22);
+  padding: clamp(16px, 2.4vw, 26px);
+}
+
+.my-wwz-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.my-wwz-heading h2 {
+  margin: 2px 0 6px;
+  font-size: clamp(24px, 3vw, 34px);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.my-wwz-heading p:not(.panel-kicker) {
+  max-width: 760px;
+  margin: 0;
+  color: #a8adb5;
+  line-height: 1.55;
+}
+
+.my-wwz-heading-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.my-wwz-world {
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.035);
+  color: #d9dde3;
+  font-size: 11px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.my-wwz-message {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.035);
+  color: #bbc0c8;
+  font-size: 12px;
+}
+
+.my-wwz-message[data-tone="success"] {
+  border-color: rgba(77, 184, 119, 0.26);
+  color: #a7e1bd;
+}
+
+.my-wwz-message[data-tone="warning"] {
+  border-color: rgba(227, 171, 75, 0.3);
+  color: #e9ca90;
+}
+
+.my-wwz-message[data-tone="error"] {
+  border-color: rgba(228, 74, 64, 0.34);
+  color: #f0a19a;
+}
+
+.my-wwz-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.my-wwz-metric {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.027);
+}
+
+.my-wwz-metric > span {
+  display: block;
+  margin-bottom: 6px;
+  color: #858c96;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.my-wwz-metric > strong {
+  display: block;
+  overflow: hidden;
+  color: #f2f3f5;
+  font-size: 17px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.my-wwz-metric > small {
+  display: block;
+  margin-top: 5px;
+  overflow: hidden;
+  color: #8f959e;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.my-wwz-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.my-wwz-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 14px;
+  background: rgba(6, 8, 11, 0.46);
+}
+
+.my-wwz-card-feature {
+  border-color: rgba(214, 59, 45, 0.24);
+  background:
+    linear-gradient(135deg, rgba(136, 27, 21, 0.14), transparent 58%),
+    rgba(6, 8, 11, 0.54);
+}
+
+.my-wwz-card-wide {
+  grid-column: 1 / -1;
+}
+
+.my-wwz-card > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 70px;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.065);
+}
+
+.my-wwz-card > header span {
+  color: #d7564a;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.my-wwz-card > header h3 {
+  margin: 3px 0 0;
+  color: #edf0f4;
+  font-size: 16px;
+}
+
+.my-wwz-card > header b {
+  color: #979da6;
+  font-size: 10px;
+  font-weight: 750;
+  text-align: right;
+}
+
+.my-wwz-card-body {
+  display: grid;
+  gap: 0;
+  padding: 4px 16px 12px;
+}
+
+.my-wwz-status-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+}
+
+.my-wwz-status-row:last-child {
+  border-bottom: 0;
+}
+
+.my-wwz-status-row > div {
+  min-width: 0;
+}
+
+.my-wwz-status-row strong,
+.my-wwz-status-row small {
+  display: block;
+}
+
+.my-wwz-status-row strong {
+  color: #dfe2e7;
+  font-size: 12px;
+}
+
+.my-wwz-status-row small {
+  margin-top: 3px;
+  color: #858c96;
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.my-wwz-status-row > span {
+  max-width: 170px;
+  color: #c8cdd4;
+  font-size: 11px;
+  font-weight: 800;
+  text-align: right;
+}
+
+.my-wwz-status-row[data-tone="good"] > span {
+  color: #7ed69e;
+}
+
+.my-wwz-status-row[data-tone="danger"] > span {
+  color: #ee796f;
+}
+
+.my-wwz-status-row[data-tone="pve"] > span {
+  color: #8ed39d;
+}
+
+.my-wwz-status-row[data-tone="pvp"] > span {
+  color: #ef8177;
+}
+
+.my-wwz-recent-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  padding: 12px 16px 14px;
+}
+
+.my-wwz-recent-column {
+  min-width: 0;
+}
+
+.my-wwz-recent-column > strong {
+  display: block;
+  padding: 3px 0 5px;
+  color: #9ca2ab;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.my-wwz-actions {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  padding: 14px 16px 16px;
+}
+
+.my-wwz-action {
+  min-height: 46px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.035);
+  color: #e2e5e9;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.my-wwz-action:hover,
+.my-wwz-action:focus-visible {
+  border-color: rgba(219, 65, 52, 0.48);
+  background: rgba(177, 42, 32, 0.11);
+}
+
+html.pwa-standalone .my-wwz-shell {
+  margin-top: 12px;
+}
+
+@media (max-width: 1080px) {
+  .my-wwz-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .my-wwz-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .my-wwz-shell {
+    margin-right: -2px;
+    margin-left: -2px;
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  .my-wwz-heading {
+    flex-direction: column;
+  }
+
+  .my-wwz-heading-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .my-wwz-heading-actions .secondary-action {
+    min-height: 42px;
+  }
+
+  .my-wwz-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .my-wwz-card-wide {
+    grid-column: auto;
+  }
+
+  .my-wwz-recent-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .my-wwz-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .my-wwz-status-row {
+    gap: 10px;
+  }
+
+  .my-wwz-status-row > span {
+    max-width: 120px;
+  }
+}
+
+@media (max-width: 460px) {
+  .my-wwz-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .my-wwz-metric > strong,
+  .my-wwz-metric > small {
+    white-space: normal;
+  }
+
+  .my-wwz-world {
+    max-width: 54vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

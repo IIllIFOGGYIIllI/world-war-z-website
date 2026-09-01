@@ -5,7 +5,7 @@ const CACHE_PREFIX = 'wwz-pwa-';
 const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-09-01-ios-home-install-2';
+const WWZ_PWA_UPDATE_REVISION = '2026-09-01-my-wwz-m09-1';
 const CACHE_RELEASE = `${WWZ_PWA_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${CACHE_RELEASE}`;
@@ -44,6 +44,8 @@ const APP_SHELL = [
 
 const UPDATE_INVALIDATIONS = [
   './assets/js/dashboard/bootstrap.js?v=1.22.93&rev=auth-restore-fix-1',
+  './assets/js/dashboard/my-wwz.js?v=1.27.0&rev=my-wwz-m09-1',
+  './assets/css/dashboard/my-wwz.css?v=1.27.0&rev=my-wwz-m09-1',
   './assets/js/pages/home.js?v=1.22.93',
   './assets/js/pwa.js?v=1.22.93',
   './assets/css/pwa.css?v=1.22.93',

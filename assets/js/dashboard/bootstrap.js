@@ -60,6 +60,32 @@
     }
   };
 
+  const loadMyWwzExperience = () => {
+    if (!document.querySelector('link[data-wwz-my-wwz-style]')) {
+      const style = document.createElement('link');
+      style.rel = 'stylesheet';
+      style.href = 'assets/css/dashboard/my-wwz.css?v=1.27.0&rev=my-wwz-m09-1';
+      style.dataset.wwzMyWwzStyle = '';
+      document.head.append(style);
+    }
+
+    if (window.__wwzMyWwzReady) {
+      window.WWZMyWwz?.activate?.();
+      return;
+    }
+    if (document.querySelector('script[data-wwz-my-wwz-script]')) return;
+
+    const script = document.createElement('script');
+    script.src = 'assets/js/dashboard/my-wwz.js?v=1.27.0&rev=my-wwz-m09-1';
+    script.async = true;
+    script.dataset.wwzMyWwzScript = '';
+    script.addEventListener('load', () => window.WWZMyWwz?.activate?.(), { once: true });
+    script.addEventListener('error', () => {
+      console.warn('WWZ My WWZ overview could not be loaded.');
+    }, { once: true });
+    document.head.append(script);
+  };
+
   const startDashboard = async () => {
     ensureLazyAuthResetFallbacks();
 
@@ -75,6 +101,8 @@
     } catch (error) {
       failDashboardNavigationRestore(error);
     }
+
+    loadMyWwzExperience();
   };
 
   void startDashboard();
