@@ -15,7 +15,7 @@
   "enableSiteSettingsShortcut": true,
   "fallbackType": "customtabs",
   "orientation": "any",
-  "startUrl": "/world-war-z-website/dashboard.html?source=android-app",
+  "startUrl": "/world-war-z-website/dashboard.html?source=android-app&app_version=1.0.0&app_code=10000",
   "webManifestUrl": "https://iillifoggyiilli.github.io/world-war-z-website/manifest.webmanifest",
   "iconUrl": "https://iillifoggyiilli.github.io/world-war-z-website/assets/icons/pwa/icon-512.png",
   "maskableIconUrl": "https://iillifoggyiilli.github.io/world-war-z-website/assets/icons/pwa/icon-maskable-512.png",

@@ -5,7 +5,7 @@ const CACHE_PREFIX = 'wwz-pwa-';
 const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-09-01-auth-false-error-1';
+const WWZ_PWA_UPDATE_REVISION = '2026-09-01-companion-distribution-1';
 const CACHE_RELEASE = `${WWZ_PWA_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${CACHE_RELEASE}`;
@@ -20,6 +20,7 @@ const scopedUrl = (path) => new URL(path, APP_SCOPE).href;
 
 const APP_SHELL = [
   './index.html',
+  './companion.html',
   './offline.html',
   './manifest.webmanifest',
   './assets/icons/pwa/icon-192.png',
@@ -30,10 +31,13 @@ const APP_SHELL = [
   './assets/world-war-z-icon.png',
   './assets/world-war-z-logo.webp',
   './assets/css/pages/home.css?v=1.22.93',
+  './assets/css/pages/companion.css?v=1.22.93',
   './assets/css/site-polish.css?v=1.22.93',
   './assets/css/pwa.css?v=1.22.93',
   './assets/css/ui-system.css?v=1.24.0&rev=ops-ui-1',
   './assets/js/pages/home.js?v=1.22.93',
+  './assets/js/pages/companion.js?v=1.22.93',
+  './assets/data/companion-release.json',
   './assets/js/pwa.js?v=1.22.93',
   './assets/js/ui-system.js?v=1.24.0&rev=ops-ui-1'
 ].map(scopedUrl);
@@ -41,7 +45,10 @@ const APP_SHELL = [
 // Targeted invalidations let a small hotfix refresh changed runtime files without
 // throwing away users' bounded satellite/map caches.
 const UPDATE_INVALIDATIONS = [
-  './assets/js/dashboard/bootstrap.js?v=1.22.93&rev=auth-restore-fix-1'
+  './assets/js/dashboard/bootstrap.js?v=1.22.93&rev=auth-restore-fix-1',
+  './assets/js/pwa.js?v=1.22.93',
+  './assets/css/pwa.css?v=1.22.93',
+  './assets/data/companion-release.json'
 ].map(scopedUrl);
 
 const trimCache = async (cacheName, limit) => {
@@ -195,7 +202,7 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(networkFirstMapData(request));
     return;
   }
-  if (url.pathname.endsWith('/manifest.webmanifest')) {
+  if (url.pathname.endsWith('/manifest.webmanifest') || url.pathname.endsWith('/assets/data/companion-release.json')) {
     event.respondWith(networkFirstStatic(request));
     return;
   }

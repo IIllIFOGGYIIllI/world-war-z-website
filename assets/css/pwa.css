@@ -176,3 +176,36 @@ html.wwz-offline [data-shop-api-state] {
   .pwa-update-banner { align-items: stretch; flex-direction: column; }
   .pwa-update-banner button { width: 100%; }
 }
+
+
+.pwa-companion-sidebar {
+  display: block;
+  width: 100%;
+  margin: 0 0 12px;
+  min-height: 42px;
+  padding: 10px 13px;
+  border: 1px solid rgba(243, 58, 40, 0.34);
+  background: rgba(212, 36, 24, 0.06);
+  color: #f4ece5;
+  text-align: center;
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.pwa-companion-sidebar:hover,
+.pwa-companion-sidebar:focus-visible {
+  border-color: rgba(243, 58, 40, 0.72);
+  background: rgba(212, 36, 24, 0.15);
+}
+
+[data-native-app-update-banner] {
+  bottom: max(82px, calc(var(--wwz-safe-bottom) + 82px));
+}
+
+@media (max-width: 720px) {
+  [data-native-app-update-banner] {
+    bottom: max(132px, calc(var(--wwz-safe-bottom) + 132px));
+  }
+}

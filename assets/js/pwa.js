@@ -12,6 +12,11 @@
   let deferredInstallPrompt = null;
   let reloadingForUpdate = false;
   const UPDATE_RELOAD_KEY = 'wwz_pwa_update_pending';
+  const COMPANION_RELEASE_URL = 'assets/data/companion-release.json';
+  const NATIVE_VERSION_KEY = 'wwz_android_native_version';
+  const NATIVE_VERSION_CODE_KEY = 'wwz_android_native_version_code';
+  const LEGACY_NATIVE_VERSION = '1.0.0';
+  const LEGACY_NATIVE_VERSION_CODE = 10000;
 
   const installButtons = () => [...document.querySelectorAll('[data-pwa-install]')];
 
@@ -30,6 +35,149 @@
       button.disabled = !available;
       button.textContent = isIOS() && !deferredInstallPrompt ? 'Add To Home Screen' : 'Install App';
     });
+  };
+
+  const readLocalValue = (key) => {
+    try { return localStorage.getItem(key); } catch { return null; }
+  };
+
+  const writeLocalValue = (key, value) => {
+    try { localStorage.setItem(key, String(value)); } catch {}
+  };
+
+  const captureNativeRelease = () => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('source') === 'android-app') {
+      const explicitVersion = String(params.get('app_version') || '').trim();
+      const explicitCode = Number(params.get('app_code'));
+      const version = explicitVersion || readLocalValue(NATIVE_VERSION_KEY) || LEGACY_NATIVE_VERSION;
+      const code = Number.isInteger(explicitCode) && explicitCode > 0
+        ? explicitCode
+        : Number(readLocalValue(NATIVE_VERSION_CODE_KEY)) || LEGACY_NATIVE_VERSION_CODE;
+      writeLocalValue(NATIVE_VERSION_KEY, version);
+      writeLocalValue(NATIVE_VERSION_CODE_KEY, code);
+      document.documentElement.dataset.wwzNativeApp = 'android';
+      return { version, version_code: code, platform: 'android' };
+    }
+
+    const storedVersion = String(readLocalValue(NATIVE_VERSION_KEY) || '').trim();
+    const storedCode = Number(readLocalValue(NATIVE_VERSION_CODE_KEY));
+    return storedVersion ? {
+      version: storedVersion,
+      version_code: Number.isInteger(storedCode) && storedCode > 0 ? storedCode : 0,
+      platform: 'android'
+    } : null;
+  };
+
+  const versionParts = (value) => String(value || '')
+    .split('.')
+    .slice(0, 4)
+    .map((part) => Number.parseInt(part, 10) || 0);
+
+  const compareVersions = (left, right) => {
+    const a = versionParts(left);
+    const b = versionParts(right);
+    const length = Math.max(a.length, b.length, 3);
+    for (let index = 0; index < length; index += 1) {
+      const delta = (a[index] || 0) - (b[index] || 0);
+      if (delta !== 0) return delta;
+    }
+    return 0;
+  };
+
+  const isReleaseNewer = (release, installed) => {
+    const latestCode = Number(release?.version_code);
+    const installedCode = Number(installed?.version_code);
+    if (Number.isInteger(latestCode) && latestCode > 0 && Number.isInteger(installedCode) && installedCode > 0) {
+      return latestCode > installedCode;
+    }
+    return compareVersions(release?.version, installed?.version) > 0;
+  };
+
+  const ensureCompanionNavigation = () => {
+    document.querySelectorAll('.site-navigation').forEach((navigation) => {
+      if (navigation.querySelector('[data-companion-link]')) return;
+      const link = document.createElement('a');
+      link.href = 'companion.html';
+      link.textContent = 'Companion';
+      link.dataset.companionLink = '';
+      link.className = 'pwa-companion-nav-link';
+      const dashboard = [...navigation.querySelectorAll('a')].find((item) => item.getAttribute('href') === 'dashboard.html');
+      navigation.insertBefore(link, dashboard || navigation.querySelector('[data-pwa-install]') || navigation.lastChild);
+    });
+
+    document.querySelectorAll('.footer-links').forEach((footer) => {
+      if (footer.querySelector('[data-companion-link]')) return;
+      const link = document.createElement('a');
+      link.href = 'companion.html';
+      link.textContent = 'Companion';
+      link.dataset.companionLink = '';
+      const dashboard = [...footer.querySelectorAll('a')].find((item) => item.getAttribute('href') === 'dashboard.html');
+      if (dashboard?.nextSibling) footer.insertBefore(link, dashboard.nextSibling);
+      else footer.append(link);
+    });
+
+    const heroActions = document.querySelector('.hero-actions');
+    if (heroActions && !heroActions.querySelector('[data-companion-hero-link]')) {
+      const link = document.createElement('a');
+      link.href = 'companion.html';
+      link.className = 'button button-secondary';
+      link.dataset.companionHeroLink = '';
+      link.textContent = 'Android Companion';
+      heroActions.append(link);
+    }
+
+    const sidebar = document.querySelector('.dashboard-sidebar');
+    if (sidebar && !sidebar.querySelector('[data-companion-sidebar-link]')) {
+      const link = document.createElement('a');
+      link.href = 'companion.html';
+      link.className = 'pwa-companion-sidebar';
+      link.dataset.companionSidebarLink = '';
+      link.textContent = 'Companion App';
+      const install = sidebar.querySelector('.pwa-install-sidebar');
+      if (install?.nextSibling) sidebar.insertBefore(link, install.nextSibling);
+      else sidebar.prepend(link);
+    }
+  };
+
+  const ensureNativeReleaseBanner = (release, installed) => {
+    if (!installed || !isReleaseNewer(release, installed)) return;
+    let banner = document.querySelector('[data-native-app-update-banner]');
+    if (!banner) {
+      banner = document.createElement('div');
+      banner.className = 'pwa-update-banner';
+      banner.dataset.nativeAppUpdateBanner = '';
+      const copy = document.createElement('span');
+      copy.dataset.nativeAppUpdateCopy = '';
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = 'Download APK';
+      button.addEventListener('click', () => {
+        window.location.assign(String(release.release_page_url || 'companion.html') + '?from=app-update');
+      });
+      banner.append(copy, button);
+      document.body.append(banner);
+    }
+    const copy = banner.querySelector('[data-native-app-update-copy]');
+    if (copy) copy.textContent = `WWZ Companion v${release.version} is available. You have v${installed.version}.`;
+    banner.hidden = false;
+  };
+
+  const checkNativeRelease = async (installed = captureNativeRelease()) => {
+    if (!installed) return null;
+    try {
+      const response = await fetch(COMPANION_RELEASE_URL, {
+        cache: 'no-store',
+        headers: { Accept: 'application/json' }
+      });
+      if (!response.ok) return null;
+      const release = await response.json();
+      if (!release?.version) return null;
+      ensureNativeReleaseBanner(release, installed);
+      return release;
+    } catch {
+      return null;
+    }
   };
 
   const ensureNetworkBanner = () => {
@@ -192,8 +340,17 @@
   });
 
   document.addEventListener('DOMContentLoaded', () => {
+    const installedRelease = captureNativeRelease();
+    ensureCompanionNavigation();
     wireInstallButtons();
     syncNetworkState();
     registerServiceWorker();
+    void checkNativeRelease(installedRelease);
   }, { once: true });
+
+  window.WWZCompanion = Object.freeze({
+    checkForNativeUpdate: checkNativeRelease,
+    getInstalledRelease: captureNativeRelease,
+    isReleaseNewer
+  });
 })();

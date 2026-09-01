@@ -42,6 +42,19 @@ jobs:
       - name: Install Bubblewrap
         run: npm install --global "@bubblewrap/cli@${BUBBLEWRAP_VERSION}"
 
+      - name: Read Companion version
+        shell: bash
+        run: |
+          python3 - <<'PY' >> "$GITHUB_ENV"
+          import json
+          from pathlib import Path
+          data = json.loads(Path('android-app/twa-manifest.json').read_text(encoding='utf-8'))
+          version = str(data['appVersion'])
+          code = int(data['appVersionCode'])
+          print(f'WWZ_COMPANION_VERSION={version}')
+          print(f'WWZ_COMPANION_VERSION_CODE={code}')
+          PY
+
       - name: Prepare Bubblewrap Android SDK
         shell: bash
         run: |
@@ -61,10 +74,6 @@ jobs:
           mkdir -p "$WWZ_SDK"
           cp -a "$SOURCE_CMDLINE_ROOT/." "$WWZ_SDK/"
 
-          echo "Bubblewrap SDK root: $WWZ_SDK"
-          echo "Runner Android SDK: $RUNNER_ANDROID_SDK"
-          echo "Command-line tools: $SOURCE_CMDLINE_ROOT"
-
           { yes || true; } | "$WWZ_SDK/bin/sdkmanager" --licenses --sdk_root="$WWZ_SDK" >/dev/null
           "$WWZ_SDK/bin/sdkmanager" \
             --sdk_root="$WWZ_SDK" \
@@ -78,17 +87,11 @@ jobs:
           import os
           import sys
           from pathlib import Path
-
           sdk = sys.argv[1]
-          config = {
-              "jdkPath": os.environ["JAVA_HOME"],
-              "androidSdkPath": sdk,
-          }
+          config = {"jdkPath": os.environ["JAVA_HOME"], "androidSdkPath": sdk}
           path = Path.home() / ".bubblewrap" / "config.json"
           path.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
           print(f"Configured Bubblewrap: {path}")
-          print(f"JDK: {config['jdkPath']}")
-          print(f"Bubblewrap Android SDK: {config['androidSdkPath']}")
           PY
 
           echo "WWZ_BUBBLEWRAP_SDK=$WWZ_SDK" >> "$GITHUB_ENV"
@@ -105,8 +108,6 @@ jobs:
         run: |
           set -euo pipefail
           printf 'sdk.dir=%s\n' "$WWZ_RUNNER_ANDROID_SDK" > local.properties
-          echo "Gradle Android SDK: $WWZ_RUNNER_ANDROID_SDK"
-          cat local.properties
 
       - name: Ensure Gradle wrapper executable
         working-directory: android-app
@@ -124,7 +125,7 @@ jobs:
         if: ${{ env.WWZ_ANDROID_KEYSTORE_BASE64 == '' }}
         uses: actions/upload-artifact@v4
         with:
-          name: wwz-companion-debug-apk
+          name: wwz-companion-v${{ env.WWZ_COMPANION_VERSION }}-debug
           path: android-app/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 30
@@ -159,14 +160,28 @@ jobs:
             --signingKeyPath=android-keystore \
             --signingKeyAlias="$WWZ_ANDROID_KEY_ALIAS"
 
+      - name: Prepare direct-download package
+        if: ${{ env.WWZ_ANDROID_KEYSTORE_BASE64 != '' }}
+        working-directory: android-app
+        shell: bash
+        run: |
+          set -euo pipefail
+          RELEASE_ROOT="$RUNNER_TEMP/wwz-companion-release"
+          rm -rf "$RELEASE_ROOT"
+          python3 scripts/package_release.py \
+            --apk app-release-signed.apk \
+            --manifest twa-manifest.json \
+            --output-root "$RELEASE_ROOT"
+          mkdir -p "$RELEASE_ROOT/native-artifacts"
+          cp app-release-bundle.aab "$RELEASE_ROOT/native-artifacts/World-War-Z-Companion-v${WWZ_COMPANION_VERSION}.aab"
+          cp assetlinks.json "$RELEASE_ROOT/native-artifacts/assetlinks.json"
+          echo "WWZ_RELEASE_ROOT=$RELEASE_ROOT" >> "$GITHUB_ENV"
+
       - name: Upload signed Android release
         if: ${{ env.WWZ_ANDROID_KEYSTORE_BASE64 != '' }}
         uses: actions/upload-artifact@v4
         with:
-          name: wwz-companion-v1.0.0-android
-          path: |
-            android-app/app-release-signed.apk
-            android-app/app-release-bundle.aab
-            android-app/assetlinks.json
-          if-no-files-found: warn
+          name: wwz-companion-v${{ env.WWZ_COMPANION_VERSION }}-android
+          path: ${{ env.WWZ_RELEASE_ROOT }}
+          if-no-files-found: error
           retention-days: 90
