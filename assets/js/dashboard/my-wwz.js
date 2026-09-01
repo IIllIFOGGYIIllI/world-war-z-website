@@ -21,6 +21,7 @@
   let active = false;
   let refreshTimer = 0;
   let refreshInProgress = false;
+  let transientMessageTimer = 0;
   let lastSnapshot = null;
 
   const sessionToken = () => {
@@ -145,7 +146,10 @@
           <p data-my-wwz-subtitle>Pulling together your current server, survivor, progression and community activity.</p>
         </div>
         <div class="my-wwz-heading-actions">
-          <span class="my-wwz-world" data-my-wwz-world>Current server</span>
+          <div class="my-wwz-heading-state">
+            <span class="my-wwz-world" data-my-wwz-world>Current server</span>
+            <small data-my-wwz-updated>Waiting for first refresh</small>
+          </div>
           <button class="secondary-action compact-action" data-my-wwz-refresh type="button">Refresh My WWZ</button>
         </div>
       </div>
@@ -172,7 +176,7 @@
           <header><div><span>RECENT PROGRESS</span><h3>Your Latest Activity</h3></div><b>Live account data</b></header>
           <div class="my-wwz-recent-grid" data-my-wwz-recent-body></div>
         </article>
-        <article class="my-wwz-card my-wwz-card-wide">
+        <article class="my-wwz-card my-wwz-card-wide" data-my-wwz-quick>
           <header><div><span>QUICK ACTIONS</span><h3>Jump Straight In</h3></div><b>Companion ready</b></header>
           <div class="my-wwz-actions" data-my-wwz-actions></div>
         </article>
@@ -187,26 +191,45 @@
     return root;
   };
 
-  const setMessage = (message = '', tone = '') => {
+  const setMessage = (message = '', tone = '', { transient = false } = {}) => {
     ensureRoot();
+    window.clearTimeout(transientMessageTimer);
+    transientMessageTimer = 0;
     const target = root.querySelector('[data-my-wwz-message]');
     if (!target) return;
     target.textContent = message;
     target.hidden = !message;
     target.dataset.tone = tone;
+    if (message && transient) {
+      transientMessageTimer = window.setTimeout(() => {
+        if (target.dataset.tone === tone && target.textContent === message) {
+          target.hidden = true;
+          target.textContent = '';
+          target.dataset.tone = '';
+        }
+      }, 4500);
+    }
   };
 
   const renderQuickActions = () => {
     ensureRoot();
     const actions = root.querySelector('[data-my-wwz-actions]');
-    if (!actions || actions.childElementCount) return;
+    if (!actions) return;
+    actions.replaceChildren();
+
+    const server = selectedServer();
+    const worldAction = server?.map_key === 'livonia'
+      ? ['PvP Intel', 'livoniapvp', 'overview']
+      : ['PvE Operations', 'chernaruspve', 'overview'];
+
     [
+      worldAction,
       ['Map', 'map', 'explorer'],
-      ['Shop', 'shop', 'catalogue'],
       ['Quests', 'objectives', 'quests'],
+      ['Shop', 'shop', 'catalogue'],
       ['Tickets', 'tickets', 'member'],
       ['Events', 'community', 'events'],
-      ['Profile', 'players', 'profile'],
+      ['Progression', 'progression', 'overview'],
     ].forEach(([label, view, section]) => actions.append(createNavButton(label, view, section)));
   };
 
@@ -215,7 +238,10 @@
     root.dataset.state = 'guest';
     const server = selectedServer();
     root.querySelector('[data-my-wwz-world]').textContent = server?.map_name || 'Select server';
+    const updated = root.querySelector('[data-my-wwz-updated]');
+    if (updated) updated.textContent = 'Personal data locked';
     root.querySelector('[data-my-wwz-subtitle]').textContent = 'Sign in with Discord to load your personal WWZ dashboard.';
+    renderQuickActions();
     const metrics = root.querySelector('[data-my-wwz-metrics]');
     metrics.replaceChildren(
       createMetric('Server', server?.map_name || '—', server?.name || 'World War Z'),
@@ -468,6 +494,9 @@
     root.dataset.state = 'ready';
     root.dataset.map = snapshot.server?.map_key || '';
     root.querySelector('[data-my-wwz-world]').textContent = `${snapshot.server?.map_name || 'Current server'} · ${snapshot.server?.name || 'World War Z'}`;
+    const updated = root.querySelector('[data-my-wwz-updated]');
+    if (updated) updated.textContent = `Updated ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    renderQuickActions();
     root.querySelector('[data-my-wwz-subtitle]').textContent = snapshot.server?.map_key === 'chernarus'
       ? 'Your Chernarus PvE command view: server state, Survivor Passport, quests, operations, events and account activity.'
       : 'Your Livonia PvP command view: server state, confirmed combat, hotspots, quests, events and account activity.';
@@ -536,7 +565,12 @@
 
     refreshInProgress = true;
     const button = root.querySelector('[data-my-wwz-refresh]');
-    button?.setAttribute('disabled', '');
+    const originalButtonLabel = button?.textContent || 'Refresh My WWZ';
+    if (button) {
+      button.setAttribute('disabled', '');
+      button.textContent = 'Refreshing…';
+      button.dataset.loading = 'true';
+    }
     if (force || !lastSnapshot) setMessage('Refreshing your WWZ command view…', 'info');
 
     try {
@@ -552,13 +586,17 @@
         const labels = coreFailures.map((row) => SOURCE_LABELS[row.key] || row.key).join(', ');
         setMessage(`My WWZ partially refreshed. Waiting on: ${labels}. Available cards remain usable.`, 'warning');
       } else {
-        setMessage(`My WWZ refreshed ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.`, 'success');
+        setMessage('My WWZ is up to date.', 'success', { transient: true });
       }
     } catch (error) {
       setMessage(error.message || 'My WWZ could not be refreshed.', 'error');
     } finally {
       refreshInProgress = false;
-      button?.removeAttribute('disabled');
+      if (button) {
+        button.removeAttribute('disabled');
+        button.textContent = originalButtonLabel;
+        delete button.dataset.loading;
+      }
     }
   };
 
@@ -585,6 +623,7 @@
   });
   window.addEventListener('wwz:serverchange', () => {
     lastSnapshot = null;
+    renderQuickActions();
     if (active) refreshSnapshot({ force: true });
   });
   window.addEventListener('online', () => {

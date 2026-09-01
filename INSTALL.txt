@@ -1,24 +1,27 @@
-WORLD WAR Z - M09 MY WWZ LIVONIA PARTIAL-DATA FIX
-===================================================
+WORLD WAR Z - MILESTONE 09 MY WWZ POLISH
+=========================================
 
 UPDATED FILES ONLY
 - assets/js/dashboard/my-wwz.js
+- assets/css/dashboard/my-wwz.css
 - sw.js
 
-FIX
-- Stops a single optional/supplemental endpoint failure from producing the large
-  yellow "1 live data source could not refresh" banner when the core Livonia
-  My WWZ data is healthy.
-- Core data sources still produce a visible warning if they fail:
-  survivor account, progression, objectives, server status, or world intelligence.
-- Optional ticket/shop/community failures now appear in the Attention card with
-  an explicit "Refresh unavailable" row instead of being silently treated as zero.
-- Prevents failed account/progression/shop/status requests from rendering fake
-  zero/unlinked values.
-- Writes exact failed source diagnostics to the browser console for debugging.
-- Includes PWA revision bump.
+M09 = the player-facing "My WWZ" Companion experience.
 
-No bot, database, Nitrado, mission or DayZ files changed.
+POLISH INCLUDED
+- Server-aware Quick Actions now add PvE Operations on Chernarus or PvP Intel on Livonia.
+- Adds Progression as a direct Companion shortcut.
+- Quick Actions move near the top on phone/Companion layouts.
+- Better phone density: 2-column summary metrics on normal phone widths.
+- Larger touch targets and improved narrow-screen wrapping.
+- Adds a small "Updated HH:MM" indicator beside the selected server.
+- Manual refresh button now displays "Refreshing…" while working.
+- Successful refresh banner automatically clears instead of permanently taking space.
+- Server switch immediately updates the server-specific shortcuts.
+- Improved installed-PWA safe-area spacing.
+- Existing partial-data integrity fix remains intact.
+- No new backend calls and no new telemetry.
+- PWA revision bump included.
 
 Suggested commit:
-Fix My WWZ partial data warning
+Polish My WWZ companion view

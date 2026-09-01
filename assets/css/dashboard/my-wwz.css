@@ -38,6 +38,18 @@
   flex: 0 0 auto;
 }
 
+.my-wwz-heading-state {
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+}
+
+.my-wwz-heading-state > small {
+  color: #7f8690;
+  font-size: 9px;
+  font-weight: 700;
+}
+
 .my-wwz-world {
   padding: 8px 10px;
   border: 1px solid rgba(255, 255, 255, 0.09);
@@ -281,10 +293,25 @@
 .my-wwz-action:focus-visible {
   border-color: rgba(219, 65, 52, 0.48);
   background: rgba(177, 42, 32, 0.11);
+  transform: translateY(-1px);
+}
+
+.my-wwz-action:active {
+  transform: translateY(0);
+}
+
+[data-my-wwz-refresh][data-loading="true"] {
+  cursor: progress;
+  opacity: 0.75;
 }
 
 html.pwa-standalone .my-wwz-shell {
   margin-top: 12px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+html.pwa-standalone .my-wwz-action {
+  min-height: 50px;
 }
 
 @media (max-width: 1080px) {
@@ -311,15 +338,25 @@ html.pwa-standalone .my-wwz-shell {
 
   .my-wwz-heading-actions {
     width: 100%;
+    align-items: end;
     justify-content: space-between;
   }
 
+  .my-wwz-heading-state {
+    justify-items: start;
+    min-width: 0;
+  }
+
   .my-wwz-heading-actions .secondary-action {
-    min-height: 42px;
+    min-height: 44px;
   }
 
   .my-wwz-grid {
     grid-template-columns: 1fr;
+  }
+
+  .my-wwz-card[data-my-wwz-quick] {
+    order: -1;
   }
 
   .my-wwz-card-wide {
@@ -346,7 +383,12 @@ html.pwa-standalone .my-wwz-shell {
 
 @media (max-width: 460px) {
   .my-wwz-metrics {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .my-wwz-metric {
+    padding: 12px;
   }
 
   .my-wwz-metric > strong,
@@ -355,8 +397,52 @@ html.pwa-standalone .my-wwz-shell {
   }
 
   .my-wwz-world {
-    max-width: 54vw;
+    max-width: 48vw;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .my-wwz-card > header {
+    min-height: 62px;
+    padding: 12px 14px;
+  }
+
+  .my-wwz-card-body,
+  .my-wwz-recent-grid {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .my-wwz-actions {
+    gap: 7px;
+    padding: 12px 14px 14px;
+  }
+
+  .my-wwz-action {
+    min-height: 50px;
+  }
+
+  .my-wwz-status-row {
+    align-items: start;
+  }
+
+  .my-wwz-status-row > span {
+    max-width: 104px;
+    white-space: normal;
+  }
+}
+
+@media (max-width: 350px) {
+  .my-wwz-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .my-wwz-heading-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .my-wwz-world {
+    max-width: 100%;
   }
 }
