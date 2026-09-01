@@ -1,27 +1,55 @@
-WORLD WAR Z - MILESTONE 09 MY WWZ POLISH
-=========================================
+WORLD WAR Z - MILESTONE 10 ADMIN AUTOMATION & HEALTH TEST
+==========================================================
 
 UPDATED FILES ONLY
-- assets/js/dashboard/my-wwz.js
-- assets/css/dashboard/my-wwz.css
+- assets/js/dashboard/command-centre.js
+- assets/css/dashboard/command-centre-m10.css
 - sw.js
 
-M09 = the player-facing "My WWZ" Companion experience.
+WHAT M10 MEANS
+Milestone 10 is the Admin-facing operational intelligence pass. It builds on the
+existing protected Command Centre and existing Railway aggregate endpoint instead
+of introducing another polling worker or another database.
 
-POLISH INCLUDED
-- Server-aware Quick Actions now add PvE Operations on Chernarus or PvP Intel on Livonia.
-- Adds Progression as a direct Companion shortcut.
-- Quick Actions move near the top on phone/Companion layouts.
-- Better phone density: 2-column summary metrics on normal phone widths.
-- Larger touch targets and improved narrow-screen wrapping.
-- Adds a small "Updated HH:MM" indicator beside the selected server.
-- Manual refresh button now displays "Refreshing…" while working.
-- Successful refresh banner automatically clears instead of permanently taking space.
-- Server switch immediately updates the server-specific shortcuts.
-- Improved installed-PWA safe-area spacing.
-- Existing partial-data integrity fix remains intact.
-- No new backend calls and no new telemetry.
+THIS TEST ADDS
+- Overall operational-health score (0-100) with Healthy / Watch / Degraded / Critical states.
+- Health deductions use existing real Command Centre data only:
+  DayZ/Nitrado state, Discord readiness, restart sync, delivery failures,
+  moderation deadlines, notification failures, configuration failures and the
+  existing operational failure queue.
+- Automation Watch for:
+  * restart scheduler
+  * Discord gateway
+  * Nitrado link
+  * automatic deliveries
+  * notification routing
+  * moderation deadlines
+  * configuration checks
+  * failure/retry queue
+- Central "Needs Attention" list is upgraded:
+  backend-provided attention signals are kept, and important existing aggregate
+  conditions are added only when not already present.
+- Signals are severity sorted and jump directly to the relevant specialist page.
+- 30-second refresh remains bounded to the active Command Centre view.
+- Stale-data detection after 75 seconds.
+- If a refresh fails after a successful load, the last known snapshot stays on
+  screen and is clearly marked stale instead of blanking the Admin overview.
+- Manual refresh shows Refreshing… feedback.
 - PWA revision bump included.
 
+NO BOT / DB / DAYZ CHANGE
+This phase uses the already-deployed /api/admin/command-centre aggregate. There is
+no new Nitrado loop, no database migration and no DayZ mission change.
+
+TEST
+1. Open Administration Centre > Command Centre on Chernarus.
+2. Check the new M10 health block appears above the existing service cards.
+3. Confirm the health score and Automation Watch values match the existing cards.
+4. Click several Automation Watch rows and Needs Attention rows.
+5. Switch to Livonia and confirm data is server-isolated.
+6. Leave the Command Centre open for at least 30 seconds and confirm it refreshes.
+7. Check narrow/mobile layout if convenient.
+8. Existing PWA/Companion clients should receive Update Now.
+
 Suggested commit:
-Polish My WWZ companion view
+Add M10 admin health
