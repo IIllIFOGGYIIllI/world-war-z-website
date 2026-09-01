@@ -19,6 +19,61 @@ navigation?.querySelectorAll('a').forEach((link) => {
   });
 });
 
+const ensureCompanionDownloadEntryPoints = async () => {
+  const closeNavigation = () => {
+    menuButton?.setAttribute('aria-expanded', 'false');
+    navigation?.classList.remove('open');
+  };
+
+  if (navigation && !navigation.querySelector('[data-companion-home-nav]')) {
+    const companionNav = document.createElement('a');
+    companionNav.href = 'companion.html';
+    companionNav.dataset.companionHomeNav = '';
+    companionNav.textContent = 'Companion App';
+    companionNav.addEventListener('click', closeNavigation);
+
+    const installButton = navigation.querySelector('[data-pwa-install]');
+    const discordLink = navigation.querySelector('.nav-cta');
+    navigation.insertBefore(companionNav, installButton || discordLink || null);
+  }
+
+  const heroActions = document.querySelector('.hero-actions');
+  if (!heroActions || heroActions.querySelector('[data-companion-home-download]')) return;
+
+  const downloadButton = document.createElement('a');
+  downloadButton.className = 'button button-primary';
+  downloadButton.href = 'companion.html';
+  downloadButton.dataset.companionHomeDownload = '';
+  downloadButton.textContent = 'Download Companion';
+  downloadButton.setAttribute('aria-label', 'Download the WWZ Companion Android app');
+  heroActions.append(downloadButton);
+
+  try {
+    const response = await fetch('assets/data/companion-release.json', {
+      headers: { Accept: 'application/json' },
+      cache: 'no-store'
+    });
+    if (!response.ok) return;
+    const release = await response.json();
+    const apkUrl = String(release?.apk_url || '').trim();
+    const version = String(release?.version || '').trim();
+    if (!/^https:\/\//i.test(apkUrl)) return;
+
+    downloadButton.href = apkUrl;
+    downloadButton.rel = 'noreferrer';
+    downloadButton.setAttribute(
+      'aria-label',
+      version
+        ? `Download WWZ Companion v${version} Android APK`
+        : 'Download the latest WWZ Companion Android APK'
+    );
+  } catch (_) {
+    // companion.html remains the safe fallback when release metadata is unavailable.
+  }
+};
+
+void ensureCompanionDownloadEntryPoints();
+
 document.querySelectorAll('[data-year]').forEach((item) => {
   item.textContent = new Date().getFullYear();
 });
