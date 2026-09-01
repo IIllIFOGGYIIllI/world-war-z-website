@@ -1,55 +1,46 @@
-WORLD WAR Z - MILESTONE 10 ADMIN AUTOMATION & HEALTH TEST
-==========================================================
+WORLD WAR Z - M10 PHASE 2 PROACTIVE ADMIN ATTENTION TEST
+=========================================================
 
 UPDATED FILES ONLY
 - assets/js/dashboard/command-centre.js
 - assets/css/dashboard/command-centre-m10.css
 - sw.js
 
-WHAT M10 MEANS
-Milestone 10 is the Admin-facing operational intelligence pass. It builds on the
-existing protected Command Centre and existing Railway aggregate endpoint instead
-of introducing another polling worker or another database.
+WHAT THIS ADDS
+- Change-aware operational monitoring on top of the working M10 100/100 health baseline.
+- First successful snapshot for each selected server becomes a quiet baseline.
+- Stable healthy 100/100 refreshes create NO alerts or history noise.
+- Detects and records:
+  * new health signals
+  * severity escalations
+  * recoveries
+  * overall health state drops/recoveries
+  * growth in delivery failure, moderation overdue, notification failure,
+    configuration failure, operational failure, and unclaimed ticket queues
+- Adds Recent Health Changes to Command Centre with unread count + Mark reviewed.
+- Keeps Chernarus and Livonia history completely separate using the selected server key.
+- Stores only small operational summaries/counters locally; no player/private data is persisted.
+- After an Admin successfully opens Command Centre once in the current dashboard session:
+  * active Command Centre refresh remains every 30 seconds
+  * other dashboard pages get a quiet 60-second background health check
+  * hidden/offline tabs stop polling
+- New warning/critical/recovery changes can surface as a small in-dashboard toast.
+- Clicking a change/toast opens the relevant protected Admin workspace.
+- Authorization failure disarms background monitoring.
+- Existing stale-data and last-good-snapshot handling remains.
+- PWA Update Now revision bump included.
 
-THIS TEST ADDS
-- Overall operational-health score (0-100) with Healthy / Watch / Degraded / Critical states.
-- Health deductions use existing real Command Centre data only:
-  DayZ/Nitrado state, Discord readiness, restart sync, delivery failures,
-  moderation deadlines, notification failures, configuration failures and the
-  existing operational failure queue.
-- Automation Watch for:
-  * restart scheduler
-  * Discord gateway
-  * Nitrado link
-  * automatic deliveries
-  * notification routing
-  * moderation deadlines
-  * configuration checks
-  * failure/retry queue
-- Central "Needs Attention" list is upgraded:
-  backend-provided attention signals are kept, and important existing aggregate
-  conditions are added only when not already present.
-- Signals are severity sorted and jump directly to the relevant specialist page.
-- 30-second refresh remains bounded to the active Command Centre view.
-- Stale-data detection after 75 seconds.
-- If a refresh fails after a successful load, the last known snapshot stays on
-  screen and is clearly marked stale instead of blanking the Admin overview.
-- Manual refresh shows Refreshing… feedback.
-- PWA revision bump included.
-
-NO BOT / DB / DAYZ CHANGE
-This phase uses the already-deployed /api/admin/command-centre aggregate. There is
-no new Nitrado loop, no database migration and no DayZ mission change.
+NO BOT / DB / NITRADO / DAYZ FILE CHANGES.
 
 TEST
-1. Open Administration Centre > Command Centre on Chernarus.
-2. Check the new M10 health block appears above the existing service cards.
-3. Confirm the health score and Automation Watch values match the existing cards.
-4. Click several Automation Watch rows and Needs Attention rows.
-5. Switch to Livonia and confirm data is server-isolated.
-6. Leave the Command Centre open for at least 30 seconds and confirm it refreshes.
-7. Check narrow/mobile layout if convenient.
-8. Existing PWA/Companion clients should receive Update Now.
+1. Open Admin > Command Centre on Chernarus. It should remain 100/100.
+2. Recent Health Changes should initially say Monitoring baseline established.
+3. Leave it open through at least one 30-second refresh: no new change should appear if still healthy.
+4. Navigate elsewhere in the dashboard after opening Command Centre once; background monitor is now armed for this session.
+5. Switch to Livonia and open Command Centre; it gets its own separate baseline/history.
+6. Mark reviewed should disable when no unread history exists.
+7. If a real warning later occurs, it should appear once as a change rather than repeating every refresh.
+8. When the condition clears, a green Recovered entry should be added.
 
 Suggested commit:
-Add M10 admin health
+Add proactive admin attention

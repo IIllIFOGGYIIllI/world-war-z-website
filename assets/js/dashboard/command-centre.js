@@ -9,14 +9,22 @@ const commandCentrePanel = document.querySelector('#dashboard-admin-command-cent
 let commandCentreRequestInProgress = false;
 let commandCentreTimer = 0;
 let commandCentreStaleTimer = 0;
+let commandCentreBackgroundTimer = 0;
 let commandCentreLastPayload = null;
 let commandCentreLastSuccessAt = 0;
+let commandCentreViewActive = false;
+let commandCentreMonitorArmed = false;
+
+const M10_MONITOR_SESSION_KEY = 'wwz_m10_admin_monitor_armed_v1';
+const M10_STATE_STORAGE_PREFIX = 'wwz_m10_health_state_v1';
+const M10_HISTORY_STORAGE_PREFIX = 'wwz_m10_health_history_v1';
+const M10_MAX_HISTORY = 40;
 
 const ensureM10Styles = () => {
   if (document.querySelector('link[data-command-centre-m10-style]')) return;
   const link = document.createElement('link');
   link.rel = 'stylesheet';
-  link.href = 'assets/css/dashboard/command-centre-m10.css?v=1.27.0&rev=m10-admin-health-1';
+  link.href = 'assets/css/dashboard/command-centre-m10.css?v=1.27.0&rev=m10-proactive-1';
   link.dataset.commandCentreM10Style = '';
   document.head.append(link);
 };
@@ -51,6 +59,66 @@ const commandCentreRelative = (value) => {
   if (absolute < 3600) return formatter.format(Math.round(seconds / 60), 'minute');
   if (absolute < 86400) return formatter.format(Math.round(seconds / 3600), 'hour');
   return formatter.format(Math.round(seconds / 86400), 'day');
+};
+
+const m10SelectedServer = () => window.WWZServerContext?.getSelectedServer?.() || null;
+
+const m10ServerKey = () => {
+  const server = m10SelectedServer();
+  const key = String(server?.key || server?.map_key || 'unknown').trim().toLowerCase();
+  return key.replace(/[^a-z0-9-]/g, '-') || 'unknown';
+};
+
+const m10StorageKey = (prefix) => `${prefix}:${m10ServerKey()}`;
+
+const m10ReadJson = (key, fallback) => {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+const m10WriteJson = (key, value) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const m10SetMonitorArmed = (armed) => {
+  commandCentreMonitorArmed = Boolean(armed);
+  try {
+    if (commandCentreMonitorArmed) sessionStorage.setItem(M10_MONITOR_SESSION_KEY, '1');
+    else sessionStorage.removeItem(M10_MONITOR_SESSION_KEY);
+  } catch {}
+};
+
+const m10RestoreMonitorArmed = () => {
+  try {
+    commandCentreMonitorArmed = sessionStorage.getItem(M10_MONITOR_SESSION_KEY) === '1';
+  } catch {
+    commandCentreMonitorArmed = false;
+  }
+};
+
+const m10ReadHistory = () => {
+  const history = m10ReadJson(m10StorageKey(M10_HISTORY_STORAGE_PREFIX), []);
+  return Array.isArray(history) ? history : [];
+};
+
+const m10WriteHistory = (history) => {
+  const clean = Array.isArray(history) ? history.slice(0, M10_MAX_HISTORY) : [];
+  m10WriteJson(m10StorageKey(M10_HISTORY_STORAGE_PREFIX), clean);
+};
+
+const m10MarkHistoryReviewed = () => {
+  const history = m10ReadHistory().map((item) => ({ ...item, unread: false }));
+  m10WriteHistory(history);
+  renderM10ChangeHistory();
 };
 
 const commandCentreJump = (view, section = '') => {
@@ -328,11 +396,25 @@ const ensureM10Panel = () => {
         <header><div><span>HEALTH EXPLAINER</span><h3>Why This Score?</h3></div><b data-m10-health-grade>—</b></header>
         <div class="m10-health-explainer" data-m10-health-explainer></div>
       </article>
+      <article class="m10-health-card m10-change-card">
+        <header>
+          <div><span>PROACTIVE ATTENTION</span><h3>Recent Health Changes</h3></div>
+          <div class="m10-change-actions">
+            <b data-m10-change-count>0 new</b>
+            <button type="button" data-m10-mark-reviewed disabled>Mark reviewed</button>
+          </div>
+        </header>
+        <div class="m10-change-list" data-m10-change-list></div>
+      </article>
     </div>`;
 
   const healthGrid = commandCentrePanel.querySelector('.command-centre-health-grid');
   if (healthGrid) healthGrid.insertAdjacentElement('beforebegin', shell);
   else commandCentrePanel.querySelector('.panel-intro')?.insertAdjacentElement('afterend', shell);
+
+  const markReviewed = shell.querySelector('[data-m10-mark-reviewed]');
+  markReviewed?.addEventListener('click', () => m10MarkHistoryReviewed());
+  renderM10ChangeHistory();
   return shell;
 };
 
@@ -551,6 +633,257 @@ const renderCommandCentreActivity = (payload) => {
   });
 };
 
+const m10SnapshotCounters = (payload = {}) => ({
+  delivery_failures: Number(payload.deliveries?.failed || 0),
+  moderation_overdue: Number(payload.moderation?.summary?.overdue || 0),
+  notification_failures: Number(payload.notifications?.failed || 0),
+  configuration_failures: Array.isArray(payload.configuration_failures) ? payload.configuration_failures.length : 0,
+  operational_failures: Array.isArray(payload.failures) ? payload.failures.length : 0,
+  unclaimed_tickets: Number(payload.tickets?.unclaimed || 0),
+});
+
+const m10BuildState = (payload, signals) => {
+  const health = calculateM10Health(payload, signals);
+  return {
+    captured_at: new Date().toISOString(),
+    health: { score: health.score, state: health.state, label: health.label },
+    signals: Object.fromEntries(signals.map((item) => [m10SignalKey(item), {
+      severity: item.severity,
+      title: item.title,
+      detail: item.detail,
+      target_view: item.target_view,
+      target_section: item.target_section,
+      source: item.source,
+    }])),
+    counters: m10SnapshotCounters(payload),
+  };
+};
+
+const m10CreateChange = ({ type, severity = 'info', title, detail, target_view = 'staff', target_section = 'command-centre' }) => ({
+  id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+  at: new Date().toISOString(),
+  type,
+  severity: normaliseM10Severity(severity),
+  title,
+  detail,
+  target_view,
+  target_section,
+  unread: true,
+});
+
+const m10CounterDefinitions = Object.freeze({
+  delivery_failures: ['Automatic delivery failures increased', 'delivery', 'queue'],
+  moderation_overdue: ['Overdue moderation queue increased', 'staff', 'queue'],
+  notification_failures: ['Notification failures increased', 'configuration', 'notifications'],
+  configuration_failures: ['Configuration failures increased', 'staff', 'failures'],
+  operational_failures: ['Operational failure queue increased', 'staff', 'failures'],
+  unclaimed_tickets: ['Unclaimed ticket queue increased', 'tickets', 'administration'],
+});
+
+const detectM10Changes = (previous, current) => {
+  if (!previous || !previous.signals || !previous.health) return [];
+
+  const changes = [];
+  const previousSignals = previous.signals || {};
+  const currentSignals = current.signals || {};
+
+  Object.entries(currentSignals).forEach(([key, signal]) => {
+    const before = previousSignals[key];
+    if (!before) {
+      if (['critical', 'warning', 'info'].includes(signal.severity)) {
+        changes.push(m10CreateChange({
+          type: 'new',
+          severity: signal.severity,
+          title: `New: ${signal.title}`,
+          detail: signal.detail,
+          target_view: signal.target_view,
+          target_section: signal.target_section,
+        }));
+      }
+      return;
+    }
+
+    const beforeWeight = m10SeverityWeight[normaliseM10Severity(before.severity)] ?? 9;
+    const afterWeight = m10SeverityWeight[normaliseM10Severity(signal.severity)] ?? 9;
+    if (afterWeight < beforeWeight) {
+      changes.push(m10CreateChange({
+        type: 'escalated',
+        severity: signal.severity,
+        title: `Escalated: ${signal.title}`,
+        detail: `${before.severity} → ${signal.severity}. ${signal.detail}`,
+        target_view: signal.target_view,
+        target_section: signal.target_section,
+      }));
+    } else if (afterWeight > beforeWeight) {
+      changes.push(m10CreateChange({
+        type: 'improved',
+        severity: signal.severity === 'info' ? 'good' : signal.severity,
+        title: `Improved: ${signal.title}`,
+        detail: `${before.severity} → ${signal.severity}. ${signal.detail}`,
+        target_view: signal.target_view,
+        target_section: signal.target_section,
+      }));
+    }
+  });
+
+  Object.entries(previousSignals).forEach(([key, signal]) => {
+    if (currentSignals[key]) return;
+    changes.push(m10CreateChange({
+      type: 'recovered',
+      severity: 'good',
+      title: `Recovered: ${signal.title}`,
+      detail: 'The condition is no longer present in the latest Command Centre snapshot.',
+      target_view: signal.target_view,
+      target_section: signal.target_section,
+    }));
+  });
+
+  const previousCounters = previous.counters || {};
+  const currentCounters = current.counters || {};
+  Object.entries(m10CounterDefinitions).forEach(([key, [label, view, section]]) => {
+    const before = Number(previousCounters[key] || 0);
+    const after = Number(currentCounters[key] || 0);
+    if (before > 0 && after > before) {
+      changes.push(m10CreateChange({
+        type: 'increased',
+        severity: key === 'operational_failures' && after >= 3 ? 'critical' : 'warning',
+        title: label,
+        detail: `${before} → ${after} since the previous successful health snapshot.`,
+        target_view: view,
+        target_section: section,
+      }));
+    }
+  });
+
+  const beforeState = String(previous.health?.state || '');
+  const afterState = String(current.health?.state || '');
+  const stateRank = { healthy: 0, watch: 1, degraded: 2, critical: 3 };
+  if (beforeState && afterState && beforeState !== afterState) {
+    const worsened = (stateRank[afterState] ?? 9) > (stateRank[beforeState] ?? 9);
+    changes.push(m10CreateChange({
+      type: worsened ? 'health-drop' : 'health-recovery',
+      severity: worsened ? (afterState === 'critical' ? 'critical' : 'warning') : 'good',
+      title: worsened ? 'Overall operational health dropped' : 'Overall operational health recovered',
+      detail: `${previous.health.label || beforeState} ${previous.health.score}/100 → ${current.health.label || afterState} ${current.health.score}/100.`,
+      target_view: 'staff',
+      target_section: 'command-centre',
+    }));
+  }
+
+  return changes;
+};
+
+const storeM10StateAndChanges = (payload, signals) => {
+  const stateKey = m10StorageKey(M10_STATE_STORAGE_PREFIX);
+  const previous = m10ReadJson(stateKey, null);
+  const current = m10BuildState(payload, signals);
+  const changes = detectM10Changes(previous, current);
+
+  m10WriteJson(stateKey, current);
+
+  if (changes.length) {
+    const history = [...changes, ...m10ReadHistory()].slice(0, M10_MAX_HISTORY);
+    m10WriteHistory(history);
+  }
+
+  return { current, changes, baselineCreated: !previous };
+};
+
+const createM10ChangeRow = (item) => {
+  const row = document.createElement('button');
+  row.type = 'button';
+  row.disabled = false;
+  row.className = 'm10-change-row';
+  row.dataset.state = normaliseM10Severity(item.severity);
+  row.dataset.unread = String(Boolean(item.unread));
+
+  const marker = document.createElement('span');
+  marker.className = 'm10-change-marker';
+  marker.setAttribute('aria-hidden', 'true');
+
+  const copy = document.createElement('div');
+  const strong = document.createElement('strong');
+  const small = document.createElement('small');
+  strong.textContent = item.title || 'Operational change';
+  small.textContent = `${commandCentreRelative(item.at)} · ${item.detail || ''}`.trim();
+  copy.append(strong, small);
+
+  const state = document.createElement('b');
+  state.textContent = String(item.type || 'change').replaceAll('-', ' ');
+
+  row.append(marker, copy, state);
+  row.addEventListener('click', () => commandCentreJump(item.target_view || 'staff', item.target_section || 'command-centre'));
+  return row;
+};
+
+const renderM10ChangeHistory = () => {
+  const shell = ensureM10Panel();
+  if (!shell) return;
+
+  const list = shell.querySelector('[data-m10-change-list]');
+  const count = shell.querySelector('[data-m10-change-count]');
+  const markReviewed = shell.querySelector('[data-m10-mark-reviewed]');
+  if (!list) return;
+
+  const history = m10ReadHistory();
+  const unread = history.filter((item) => item.unread).length;
+  if (count) count.textContent = `${unread} new`;
+  if (markReviewed) markReviewed.disabled = unread === 0;
+
+  list.replaceChildren();
+  if (!history.length) {
+    const empty = document.createElement('div');
+    empty.className = 'm10-change-empty';
+    const strong = document.createElement('strong');
+    const small = document.createElement('small');
+    strong.textContent = 'Monitoring baseline established';
+    small.textContent = 'Stable healthy refreshes stay quiet. New problems, escalations, recoveries and queue growth will appear here.';
+    empty.append(strong, small);
+    list.append(empty);
+    return;
+  }
+
+  history.slice(0, 12).forEach((item) => list.append(createM10ChangeRow(item)));
+};
+
+const ensureM10Toast = () => {
+  let toast = document.querySelector('[data-m10-proactive-toast]');
+  if (toast) return toast;
+
+  toast = document.createElement('button');
+  toast.type = 'button';
+  toast.disabled = false;
+  toast.className = 'm10-proactive-toast';
+  toast.dataset.m10ProactiveToast = '';
+  toast.hidden = true;
+  toast.addEventListener('click', () => {
+    toast.hidden = true;
+    commandCentreJump('staff', 'command-centre');
+  });
+  document.body.append(toast);
+  return toast;
+};
+
+let m10ToastTimer = 0;
+const surfaceM10Changes = (changes = []) => {
+  renderM10ChangeHistory();
+  const actionable = changes.filter((item) => ['critical', 'warning'].includes(normaliseM10Severity(item.severity)));
+  const recovery = changes.filter((item) => normaliseM10Severity(item.severity) === 'good');
+  const chosen = actionable[0] || recovery[0];
+  if (!chosen) return;
+
+  const toast = ensureM10Toast();
+  const extra = changes.length > 1 ? ` +${changes.length - 1} more` : '';
+  toast.textContent = `${chosen.title}${extra}`;
+  toast.dataset.state = normaliseM10Severity(chosen.severity);
+  toast.hidden = false;
+
+  window.clearTimeout(m10ToastTimer);
+  m10ToastTimer = window.setTimeout(() => {
+    toast.hidden = true;
+  }, 9_000);
+};
+
 const renderCommandCentre = (payload) => {
   const server = payload.server || {};
   const operations = server.operations || {};
@@ -596,9 +929,16 @@ const renderCommandCentre = (payload) => {
   commandCentreSet('[data-command-centre-updated]', `Updated ${commandCentreTime(payload.checked_at)}`);
 
   const signals = collectM10Signals(payload);
+  const changeResult = storeM10StateAndChanges(payload, signals);
+
   renderM10Health(payload, signals);
   renderCommandCentreAttention(signals);
   renderCommandCentreActivity(payload);
+  renderM10ChangeHistory();
+
+  if (!changeResult.baselineCreated && changeResult.changes.length) {
+    surfaceM10Changes(changeResult.changes);
+  }
 
   commandCentreLastPayload = payload;
   commandCentreLastSuccessAt = Date.now();
@@ -647,10 +987,16 @@ const loadCommandCentre = async (sessionToken = storageGet(AUTH_SESSION_KEY)) =>
       cache: 'no-store'
     });
     const payload = await response.json().catch(() => ({}));
-    if (typeof handleAdminPlayerAuthorizationResponse === 'function' && handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: false })) return false;
+    if (typeof handleAdminPlayerAuthorizationResponse === 'function' && handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: false })) {
+      m10SetMonitorArmed(false);
+      scheduleM10BackgroundMonitor();
+      return false;
+    }
     if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Command Centre unavailable.');
     renderCommandCentre(payload);
+    m10SetMonitorArmed(true);
     updateCommandCentreFreshness();
+    scheduleM10BackgroundMonitor();
     return true;
   } catch (error) {
     updateCommandCentreFreshness();
@@ -673,6 +1019,22 @@ const loadCommandCentre = async (sessionToken = storageGet(AUTH_SESSION_KEY)) =>
   }
 };
 
+const stopM10BackgroundMonitor = () => {
+  if (commandCentreBackgroundTimer) window.clearInterval(commandCentreBackgroundTimer);
+  commandCentreBackgroundTimer = 0;
+};
+
+const scheduleM10BackgroundMonitor = () => {
+  stopM10BackgroundMonitor();
+  if (!commandCentreMonitorArmed || commandCentreViewActive || document.hidden || navigator.onLine === false) return;
+
+  commandCentreBackgroundTimer = window.setInterval(() => {
+    if (!document.hidden && !commandCentreViewActive && navigator.onLine !== false) {
+      loadCommandCentre();
+    }
+  }, 60_000);
+};
+
 const scheduleCommandCentreRefresh = (active) => {
   if (commandCentreTimer) window.clearInterval(commandCentreTimer);
   commandCentreTimer = 0;
@@ -688,7 +1050,9 @@ const scheduleCommandCentreRefresh = (active) => {
 
 const activateCommandCentreView = ({ view = '', section = '' } = {}) => {
   const active = view === 'staff' && section === 'command-centre';
+  commandCentreViewActive = active;
   scheduleCommandCentreRefresh(active);
+  scheduleM10BackgroundMonitor();
   if (active) {
     ensureM10Panel();
     loadCommandCentre();
@@ -702,6 +1066,7 @@ window.addEventListener('wwz:viewchange', (event) => {
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
     scheduleCommandCentreRefresh(false);
+    stopM10BackgroundMonitor();
     return;
   }
   activateCommandCentreView({
@@ -709,6 +1074,23 @@ document.addEventListener('visibilitychange', () => {
     section: typeof activeDashboardSection === 'string' ? activeDashboardSection : '',
   });
 });
+
+window.addEventListener('online', () => {
+  scheduleM10BackgroundMonitor();
+  if (commandCentreViewActive) loadCommandCentre();
+});
+window.addEventListener('offline', () => {
+  stopM10BackgroundMonitor();
+});
+window.addEventListener('wwz:serverchange', () => {
+  commandCentreLastPayload = null;
+  commandCentreLastSuccessAt = 0;
+  renderM10ChangeHistory();
+  if (commandCentreMonitorArmed && !document.hidden) loadCommandCentre();
+});
+
+m10RestoreMonitorArmed();
+scheduleM10BackgroundMonitor();
 
 window.__wwzCommandCentreReady = true;
 if (document.querySelector('[data-view-panel="staff"].active')) {
