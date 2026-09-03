@@ -44,6 +44,14 @@
     message.dataset.tone = tone;
   };
   const initials = (name) => String(name || 'FLAG').replace(/\([^)]*\)/g, '').split(/\s+/).filter(Boolean).slice(0,2).map((part) => part[0]?.toUpperCase() || '').join('') || 'F';
+  const flagImageUrl = (item) => `assets/flags/${encodeURIComponent(String(item?.image_key || item?.key || 'flag'))}.png?v=1.29.1`;
+  const makeFlagVisual = (item) => {
+    const visual = document.createElement('div'); visual.className = 'flag-claim-card-visual'; visual.title = `${item.name} flag artwork`;
+    const fallback = document.createElement('span'); fallback.className = 'flag-claim-card-fallback'; fallback.textContent = initials(item.name); fallback.hidden = true;
+    const image = document.createElement('img'); image.loading = 'lazy'; image.decoding = 'async'; image.alt = `${item.name} artwork`; image.src = flagImageUrl(item);
+    image.addEventListener('error', () => { image.hidden = true; fallback.hidden = false; }, { once: true });
+    visual.append(image, fallback); return visual;
+  };
   const statusInfo = (item) => {
     if (item.reserved) return ['reserved', 'Reserved'];
     if (item.status === 'available') return ['available', 'Available'];
@@ -77,11 +85,16 @@
     if (!catalogueHost) return; const needle = String(searchInput?.value || '').trim().toLowerCase(); catalogueHost.replaceChildren();
     account.flags.filter((item) => !needle || String(item.name).toLowerCase().includes(needle)).forEach((item) => {
       const card = document.createElement('article'); card.className = 'flag-claim-card';
-      const visual = document.createElement('div'); visual.className = 'flag-claim-card-visual'; visual.textContent = initials(item.name);
-      const copy = document.createElement('div'); const heading = document.createElement('h3'); heading.textContent = item.name;
+      const visual = makeFlagVisual(item);
+      const copy = document.createElement('div'); copy.className = 'flag-claim-card-copy'; const heading = document.createElement('h3'); heading.textContent = item.name;
       const [tone, label] = statusInfo(item); const status = document.createElement('span'); status.className = `flag-claim-status ${tone}`; status.textContent = label;
       const owners = document.createElement('p'); owners.className = 'flag-claim-owner'; const claims = item.claims || []; owners.textContent = claims.length ? claims.map((claim) => claim.claimant_name).join(' · ') : (item.reserved ? item.reserved_label || 'WWZ Admin Team' : `${item.remaining} slot${item.remaining === 1 ? '' : 's'} available`);
       copy.append(heading, status, owners); if (item.special) { const special = document.createElement('p'); special.className = 'flag-claim-special'; special.textContent = item.special; copy.append(special); }
+      if (!item.reserved && Number(item.remaining || 0) > 0) {
+        const actions = document.createElement('div'); actions.className = 'flag-card-actions'; const request = makeButton('Request', 'primary-action');
+        request.addEventListener('click', () => { if (requestSelect) requestSelect.value = String(item.key || ''); requestForm?.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => claimantInput?.focus(), 250); });
+        actions.append(request); copy.append(actions);
+      }
       card.append(visual, copy); catalogueHost.append(card);
     });
   };

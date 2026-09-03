@@ -310,7 +310,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.29.0 · Bot v1.22.0" not in index:
+    if "Website v1.29.1 · Bot v1.22.1" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "Chernarus Live—Livonia Ready To Connect", "Livonia production onboarding", "current single-server setup", "participants", "Owner bulk catalogue controls", "Natural XP &amp; Prestige QA", "natural XP/Prestige QA remains deferred", "Deferred verification"):
         if stale in index:
@@ -549,7 +549,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         errors.append(
             "dashboard.html: command library must be lazy-loaded instead of downloaded on every dashboard visit."
         )
-    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.29.0'
+    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.29.1'
     lazy_index = dashboard.find(lazy_script)
     shell_index = dashboard.find("assets/js/dashboard/shell.js")
     if lazy_index < 0:
@@ -1048,10 +1048,28 @@ def validate_required_files(errors: list[str]) -> None:
         "assets/chernarus-map/satellite-corrected/README.md",
         "assets/chernarus-map/overlays/roads/README.md",
         "assets/world-war-z-banner.webp",
+        "flags.html",
+        "assets/css/pages/flags.css",
+        "assets/js/pages/flags.js",
+        "assets/css/dashboard/flag-claims.css",
+        "assets/js/dashboard/flag-claims.js",
+        "assets/flags/flag-gallery.png",
     )
     for relative_path in required:
         if not (ROOT / relative_path).is_file():
             errors.append(f"Missing required website file: {relative_path}")
+
+    flag_artwork_keys = (
+        "livonia-police", "rooster", "dayz", "white-surrender", "bohemia-interactive",
+        "cannibals", "baby-deer", "refuge", "rsta", "snake", "pirates", "cdf", "chel",
+        "cmc", "chedaki", "chernarus", "napa", "tec", "uec", "wolf", "radio-zenit",
+        "apa", "altis", "bear", "brainz", "hunterz", "crook", "livonia", "livonia-army",
+        "north-sahrani", "rex", "south-sahrani", "zagorky", "sakhal",
+    )
+    for flag_key in flag_artwork_keys:
+        relative_path = f"assets/flags/{flag_key}.png"
+        if not (ROOT / relative_path).is_file():
+            errors.append(f"Missing Flag Claims artwork: {relative_path}")
 
 
 
@@ -1477,7 +1495,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.29.0'",
+        "const WWZ_PWA_VERSION = '1.29.1'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
         "if (request.method !== 'GET') return;",

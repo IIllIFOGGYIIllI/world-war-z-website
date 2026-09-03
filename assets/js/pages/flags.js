@@ -18,6 +18,14 @@
   const requestedServer = () => String(new URLSearchParams(location.search).get('server') || '').trim().toLowerCase();
   const updateAddress = (server) => { if (!server) return; const url = new URL(location.href); url.searchParams.set('server', String(server.map_key || server.key || '').toLowerCase()); history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`); };
   const initials = (name) => String(name || 'FLAG').replace(/\([^)]*\)/g, '').split(/\s+/).filter(Boolean).slice(0,2).map((part) => part[0]?.toUpperCase() || '').join('') || 'F';
+  const flagImageUrl = (item) => `assets/flags/${encodeURIComponent(String(item?.image_key || item?.key || 'flag'))}.png?v=1.29.1`;
+  const makeFlagVisual = (item) => {
+    const visual = document.createElement('div'); visual.className = 'flag-card-visual'; visual.title = `${item.name} flag artwork`;
+    const fallback = document.createElement('span'); fallback.className = 'flag-card-fallback'; fallback.textContent = initials(item.name); fallback.hidden = true;
+    const image = document.createElement('img'); image.loading = 'lazy'; image.decoding = 'async'; image.alt = `${item.name} artwork`; image.src = flagImageUrl(item);
+    image.addEventListener('error', () => { image.hidden = true; fallback.hidden = false; }, { once: true });
+    visual.append(image, fallback); return visual;
+  };
   const setStatus = (message, hidden = false) => { if (!status) return; status.hidden = hidden; if (!hidden) status.textContent = message; };
   const renderServers = () => {
     if (!serverButtons) return; serverButtons.replaceChildren();
@@ -49,7 +57,7 @@
     host.replaceChildren();
     rows.forEach((item) => {
       const card = document.createElement('article'); card.className = 'flag-card';
-      const visual = document.createElement('div'); visual.className = 'flag-card-visual'; visual.textContent = initials(item.name); visual.title = `${item.name} catalogue marker`;
+      const visual = makeFlagVisual(item);
       const copy = document.createElement('div'); copy.className = 'flag-card-copy'; const heading = document.createElement('h2'); heading.textContent = item.name;
       const [tone, label] = statusLabel(item); const badge = document.createElement('span'); badge.className = `flag-status ${tone}`; badge.textContent = label;
       copy.append(heading, badge);
