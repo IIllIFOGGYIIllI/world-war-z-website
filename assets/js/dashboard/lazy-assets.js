@@ -309,6 +309,15 @@
     ))
   ]).then(() => undefined);
 
+  const ensureDeathmatchRotation = () => Promise.all([
+    loadStylesheetOnce('deathmatch-rotation-css', 'assets/css/dashboard/deathmatch-rotation.css?v=1.32.0&rev=livonia-dm-1'),
+    loadAfterDashboardRuntime(() => loadScriptOnce(
+      'deathmatch-rotation',
+      'assets/js/dashboard/deathmatch-rotation.js?v=1.32.0&rev=livonia-dm-1',
+      () => window.__wwzDeathmatchRotationReady === true
+    ))
+  ]).then(() => undefined);
+
   const ensureChernarusPve = () => Promise.all([
     loadStylesheetOnce('chernarus-pve-css', 'assets/css/dashboard/chernarus-pve.css?v=1.26.0&rev=chernarus-progression-1'),
     loadAfterDashboardRuntime(() => loadScriptOnce(
@@ -373,6 +382,7 @@
     if (view === 'objectives') ensureObjectives().catch(() => {});
     if (view === 'factions') ensureFactions().catch(() => {});
     if (view === 'livoniapvp') ensureLivoniaPvp().then(() => window.WWZLivoniaPvp?.activate?.(detail)).catch(() => {});
+    if (view === 'deathmatch') ensureDeathmatchRotation().then(() => window.WWZDeathmatchRotation?.activate?.(detail)).catch(() => {});
     if (view === 'chernaruspve') ensureChernarusPve().then(() => window.WWZChernarusPve?.activate?.(detail)).catch(() => {});
     if (view === 'community') ensureCommunity().then(() => window.WWZCommunity?.activate?.(detail)).catch(() => {});
     if (view === 'flags') ensureFlagClaims().then(() => window.WWZFlagClaims?.activate?.(detail)).catch(() => {});

@@ -28,6 +28,14 @@
   const weapons = root.querySelector('[data-livonia-weapons]');
   const heatSummary = root.querySelector('[data-livonia-heat-summary]');
   const factionMatchups = root.querySelector('[data-livonia-faction-matchups]');
+  const dmPublic = root.querySelector('[data-livonia-dm-public]');
+  const dmCopy = root.querySelector('[data-livonia-dm-copy]');
+  const dmState = root.querySelector('[data-livonia-dm-state]');
+  const dmCurrent = root.querySelector('[data-livonia-dm-current]');
+  const dmNext = root.querySelector('[data-livonia-dm-next]');
+  const dmFollowing = root.querySelector('[data-livonia-dm-following]');
+  const dmRestart = root.querySelector('[data-livonia-dm-restart]');
+  const dmMode = root.querySelector('[data-livonia-dm-mode]');
   let timer = null;
   let countdownTimer = null;
   let active = false;
@@ -135,6 +143,16 @@
     if (factionMatchups) {
       factionMatchups.innerHTML = (payload.competition?.faction_matchups || []).map((item) => `<div class="livonia-matchup-row"><strong>${escapeHtml(item.killer_faction_name || `Faction ${item.killer_faction_id}`)}</strong><span>→</span><strong>${escapeHtml(item.victim_faction_name || `Faction ${item.victim_faction_id}`)}</strong><b>${Number(item.kills || 0)}</b></div>`).join('') || '<p class="empty-state">No cross-faction PvP kills recorded in the last 30 days.</p>';
     }
+
+    const dm = payload.deathmatch_rotation || {};
+    if (dmPublic) dmPublic.hidden = !dm.enabled && Number(dm.profile_count || 0) === 0;
+    if (dmCopy) dmCopy.textContent = dm.enabled ? ((dm.staged || dm.next || dm.current)?.description || 'Restart-driven Deathmatch rotation is active.') : 'Rotation is prepared but currently disabled.';
+    if (dmCurrent) dmCurrent.textContent = dm.current?.name || 'Not live yet';
+    if (dmNext) dmNext.textContent = (dm.staged || dm.next)?.name || 'Not selected';
+    if (dmFollowing) dmFollowing.textContent = dm.following?.name || '—';
+    if (dmRestart) dmRestart.textContent = dm.staged_for_restart_at ? `Staged for ${fmtTime(dm.staged_for_restart_at)}` : 'Selected ahead of the next restart';
+    if (dmMode) dmMode.textContent = `${String(dm.mode || 'sequential').replace(/^./, (c) => c.toUpperCase())} rotation${dm.locked ? ' · locked' : ''}`;
+    if (dmState) { const label = dmState.querySelector('span'); if (label) label.textContent = dm.enabled ? (dm.locked ? 'LOCKED' : 'ACTIVE') : 'DISABLED'; }
 
     const perf = payload.performance || {};
     const fps = perf.server_fps || {};

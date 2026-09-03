@@ -1,18 +1,17 @@
-# World War Z Website v1.31.0 — Player Intelligence Centre
+# World War Z Website v1.32.0 — Livonia Deathmatch Rotation Foundation
 
 ## Added
-- Renames Player Administration to the **Player Intelligence Centre**.
-- Adds a compact top-level intelligence overview for selected server, Admin attention state, registered faction and flag claim.
-- Adds position-free ADM counters: connections, deaths, unconscious events and hit events.
-- Adds registered faction role/member count, active/pending flag ownership, watchlist context and recorded PSN aliases.
-- Adds a filterable unified activity timeline across combat, moderation, Player Admin, progression, economy, events, support, commerce, objectives, factions and Flag Claims.
+- Adds a **Livonia-only Deathmatch Rotation Manager** to the Admin dashboard.
+- Adds a profile library/editor for arena names, descriptions, banners, loadout summaries, announcement copy, explicit rotation order and JSON manifests.
+- Adds sequential/random rotation settings, pre-restart staging lead, announcement routing, persistent-panel routing, manual lock, skip-next, set-next, validation, staging and manual-live controls.
+- Adds clear profile readiness and JSON-file counts plus a rotation audit trail.
 
-## UI
-- Adds a dedicated responsive Player Intelligence stylesheet rather than expanding the global dashboard layout.
-- Desktop uses four compact overview cards and a three-card intelligence row; tablet/mobile collapse cleanly without stretched columns or empty-height coupling.
-- Existing protected player actions and all detailed ledgers remain below the intelligence summary.
+## Livonia PvP integration
+- Adds Current, Up Next and Following Deathmatch state to the Livonia PvP dashboard when profiles exist or rotation is enabled.
+- Keeps the Deathmatch manager hidden from Chernarus and non-Admin users.
+- Uses the same profile state that drives Discord announcements so the website and Discord stay aligned with the selected arena.
 
-## Release / PWA
-- Website version advanced to v1.31.0 with Bot v1.24.0 shown publicly.
-- Dashboard Administration controller and Player Intelligence stylesheet use a new cache revision.
-- PWA update revision advanced for reliable installed-app refresh.
+## PWA / release
+- Website version advanced to **v1.32.0** with **Bot v1.25.0** shown publicly.
+- Adds lazy-loaded Deathmatch JavaScript/CSS and updates the service-worker revision for installed-app refresh.
+- No Deathmatch JSON ships in the website package and the rotation system remains disabled until configured by an Admin.

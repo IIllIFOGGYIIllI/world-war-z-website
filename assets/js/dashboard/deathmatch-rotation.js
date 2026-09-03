@@ -1,0 +1,46 @@
+(() => {
+  'use strict';
+  if (window.__wwzDeathmatchRotationReady) return;
+  const root = document.querySelector('[data-dm-rotation-root]');
+  if (!root) return;
+  const URL = `${DASHBOARD_API_BASE}/api/admin/deathmatch-rotation`;
+  const ACTION = `${DASHBOARD_API_BASE}/api/admin/deathmatch-rotation/action`;
+  const q = (s) => root.querySelector(s);
+  const token = () => { try { return storageGet(AUTH_SESSION_KEY) || ''; } catch { return ''; } };
+  const esc = (v) => String(v ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  const isLivonia = () => window.WWZServerContext?.getSelectedServer?.()?.map_key === 'livonia';
+  const status = q('[data-dm-status]');
+  const form = q('[data-dm-profile-form]');
+  const settings = q('[data-dm-settings]');
+  let payload = null, selectedId = null, active = false;
+  const setStatus = (m='',tone='') => { status.hidden=!m; status.textContent=m; status.dataset.tone=tone; };
+  const request = async (url, options={}) => {
+    const headers = {Accept:'application/json', Authorization:`Bearer ${token()}`, ...(options.headers||{})};
+    const response = await protectedActionFetch(url,{...options,headers});
+    const data = await response.json().catch(()=>({}));
+    if(!response.ok) throw new Error(data.message || `Request failed (${response.status}).`);
+    return data;
+  };
+  const action = (body) => request(ACTION,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const fmt = (v) => { const d=new Date(v); return Number.isNaN(d.getTime())?'—':d.toLocaleString([], {dateStyle:'medium',timeStyle:'short'}); };
+  const channelOptions = (select, selected) => { if(!select)return; select.innerHTML='<option value="">Disabled</option>'+(payload.channels||[]).map(c=>`<option value="${esc(c.key)}" ${c.key===selected?'selected':''}>${esc(c.category?`${c.category} / ${c.name}`:c.name)}</option>`).join(''); };
+  const render = () => {
+    if(!payload)return; const c=payload.config||{}, pub=payload.public||{};
+    q('[data-dm-enabled]').textContent=c.enabled?'Enabled':'Disabled'; q('[data-dm-lock-state]').textContent=c.locked?'Manual rotation lock active':'Automatic rotation unlocked';
+    q('[data-dm-current]').textContent=pub.current?.name||'Not live yet'; q('[data-dm-next]').textContent=(pub.staged||pub.next)?.name||'Not selected'; q('[data-dm-following]').textContent=pub.following?.name||'—'; q('[data-dm-profile-count]').textContent=`${Number(pub.profile_count||0)} enabled profile(s)`;
+    q('[data-dm-next-restart]').textContent=pub.staged_for_restart_at?`Staged for ${fmt(pub.staged_for_restart_at)}`:(payload.restart?.next_restart?`Next restart ${fmt(payload.restart.next_restart)}`:'Restart schedule unavailable');
+    q('[data-dm-config-enabled]').value=String(Boolean(c.enabled)); q('[data-dm-config-mode]').value=c.mode||'sequential'; q('[data-dm-config-lead]').value=Number(c.lead_minutes||20); q('[data-dm-announce-before]').checked=Boolean(c.announce_before); q('[data-dm-announce-after]').checked=Boolean(c.announce_after);
+    channelOptions(q('[data-dm-announcement-channel]'),c.announcement_channel_key); channelOptions(q('[data-dm-panel-channel]'),c.panel_channel_key); q('[data-dm-lock]').textContent=c.locked?'Release Lock':'Lock Rotation';
+    q('[data-dm-state-list]').innerHTML=[['Restart schedule',payload.restart?.next_restart?fmt(payload.restart.next_restart):'Unavailable'],['Staged profile',payload.staged_profile?.name||'None'],['Stage lead',`${Number(c.lead_minutes||20)} minutes`],['Mode',String(c.mode||'sequential')],['Mission root safety','Profile activation requires configured Livonia DAYZ_MISSION_ROOT']].map(([a,b])=>`<div class="dm-state-row"><strong>${esc(a)}</strong><small>${esc(b)}</small></div>`).join('');
+    q('[data-dm-profile-list]').innerHTML=(payload.profiles||[]).map(p=>`<button class="dm-profile-card ${Number(p.id)===Number(selectedId)?'is-active':''}" data-profile-id="${p.id}" type="button"><span><strong>${esc(p.name)}</strong><small>Order ${Number(p.position||0)} · ${p.enabled?'Enabled':'Disabled'} · ${Number(p.validation?.file_count||0)} JSON file(s)</small></span><b data-state="${p.validation?.valid?'ready':'invalid'}">${p.validation?.valid?'READY':'NOT READY'}</b></button>`).join('')||'<p class="empty-state">No Deathmatch profiles yet.</p>';
+    q('[data-dm-history]').innerHTML=(payload.history||[]).map(h=>`<div class="dm-history-row"><span><strong>${esc(String(h.action||'activity').replaceAll('_',' '))}</strong><small>${esc(h.profile_name||h.detail||'Rotation activity')}</small></span><small>${esc(fmt(h.created_at))}</small></div>`).join('')||'<p class="empty-state">No rotation history yet.</p>';
+  };
+  const load = async () => { if(!active||!isLivonia())return; setStatus('Loading Livonia Deathmatch rotation…'); try{payload=await request(URL); render(); setStatus('Deathmatch Rotation Manager is ready.','success');}catch(e){setStatus(e.message,'error');} };
+  const edit = (p=null) => { selectedId=p?.id||null; q('[data-dm-profile-id]').value=p?.id||''; q('[data-dm-name]').value=p?.name||''; q('[data-dm-description]').value=p?.description||''; q('[data-dm-banner]').value=p?.banner_url||''; q('[data-dm-loadout]').value=p?.loadout_text||''; q('[data-dm-announcement]').value=p?.announcement_text||''; q('[data-dm-position]').value=p?.position??''; q('[data-dm-profile-enabled]').checked=p?Boolean(p.enabled):true; q('[data-dm-files]').value=JSON.stringify((p?.files||[]).map(f=>({path:f.path,content:JSON.parse(f.content)})),null,2); q('[data-dm-editor-title]').textContent=p?`Edit ${p.name}`:'New Arena Profile'; render(); };
+  settings?.addEventListener('submit',async e=>{e.preventDefault(); try{await action({action:'save_config',enabled:q('[data-dm-config-enabled]').value==='true',mode:q('[data-dm-config-mode]').value,lead_minutes:Number(q('[data-dm-config-lead]').value),locked:Boolean(payload?.config?.locked),announcement_channel_key:q('[data-dm-announcement-channel]').value,panel_channel_key:q('[data-dm-panel-channel]').value,announce_before:q('[data-dm-announce-before]').checked,announce_after:q('[data-dm-announce-after]').checked});await load();}catch(err){setStatus(err.message,'error');}});
+  form?.addEventListener('submit',async e=>{e.preventDefault(); let files=[]; try{files=JSON.parse(q('[data-dm-files]').value||'[]'); if(!Array.isArray(files))throw new Error('JSON file manifest must be an array.');}catch(err){setStatus(err.message,'error');return;} const body={action:selectedId?'update_profile':'create_profile',profile_id:selectedId,name:q('[data-dm-name]').value,description:q('[data-dm-description]').value,banner_url:q('[data-dm-banner]').value,loadout_text:q('[data-dm-loadout]').value,announcement_text:q('[data-dm-announcement]').value,position:q('[data-dm-position]').value===''?null:Number(q('[data-dm-position]').value),enabled:q('[data-dm-profile-enabled]').checked,files}; try{await action(body);await load(); const p=(payload.profiles||[]).find(x=>x.name===body.name); if(p)edit(p);}catch(err){setStatus(err.message,'error');}});
+  root.addEventListener('click',async e=>{const profileButton=e.target.closest('[data-profile-id]'); if(profileButton){edit((payload.profiles||[]).find(p=>Number(p.id)===Number(profileButton.dataset.profileId)));return;} const profileId=Number(selectedId||0); let body=null; if(e.target.closest('[data-dm-new-profile]')){edit();return;} if(e.target.closest('[data-dm-publish-panel]'))body={action:'publish_panel'}; else if(e.target.closest('[data-dm-skip]'))body={action:'skip_next'}; else if(e.target.closest('[data-dm-lock]'))body={action:'lock',locked:!Boolean(payload?.config?.locked)}; else if(e.target.closest('[data-dm-stage-next]')){const id=payload?.next_profile?.id||payload?.public?.next?.id;if(!id){setStatus('Choose an Up Next profile first.','error');return;}body={action:'stage',profile_id:id};} else if(e.target.closest('[data-dm-mark-live]'))body={action:'mark_active'}; else if(e.target.closest('[data-dm-validate]')){if(!profileId)return;body={action:'validate',profile_id:profileId};} else if(e.target.closest('[data-dm-set-next]')){if(!profileId)return;body={action:'set_next',profile_id:profileId};} else if(e.target.closest('[data-dm-stage-profile]')){if(!profileId)return;body={action:'stage',profile_id:profileId};} else if(e.target.closest('[data-dm-delete]')){if(!profileId||!confirm('Delete this Deathmatch profile?'))return;body={action:'delete_profile',profile_id:profileId};} if(!body)return; try{const result=await action(body);if(result.validation)setStatus(result.validation.valid?'Profile is ready for activation.':result.validation.errors.join(' '),result.validation.valid?'success':'error');else setStatus(result.message||'Action completed.','success');await load();}catch(err){setStatus(err.message,'error');}});
+  const activate=async()=>{active=true;await load();}; const deactivate=()=>{active=false;};
+  window.addEventListener('wwz:viewchange',e=>{if(e.detail?.view==='deathmatch')activate();else deactivate();}); window.addEventListener('wwz:serverchange',()=>{if(!isLivonia())deactivate();});
+  window.WWZDeathmatchRotation=Object.freeze({activate,deactivate,refresh:load}); window.__wwzDeathmatchRotationReady=true;
+})();

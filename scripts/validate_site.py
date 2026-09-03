@@ -310,7 +310,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.31.0 · Bot v1.24.0" not in index:
+    if "Website v1.32.0 · Bot v1.25.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "Chernarus Live—Livonia Ready To Connect", "Livonia production onboarding", "current single-server setup", "participants", "Owner bulk catalogue controls", "Natural XP &amp; Prestige QA", "natural XP/Prestige QA remains deferred", "Deferred verification"):
         if stale in index:
@@ -345,6 +345,34 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     for token in notification_route_tokens:
         if token not in notification_sources:
             errors.append(f"Notifications & Webhooks missing configuration guard: {token}")
+
+    deathmatch_runtime = (ROOT / "assets/js/dashboard/deathmatch-rotation.js").read_text(encoding="utf-8")
+    for token in (
+        'data-view-panel="deathmatch"',
+        'data-dm-rotation-root',
+        'JSON file manifest',
+        'data-dm-position',
+        'data-livonia-dm-public',
+    ):
+        if token not in dashboard:
+            errors.append(f"dashboard.html: missing Livonia Deathmatch Rotation surface: {token}")
+    for token in (
+        'assets/css/dashboard/deathmatch-rotation.css?v=1.32.0',
+        'assets/js/dashboard/deathmatch-rotation.js?v=1.32.0',
+        'const ensureDeathmatchRotation = () =>',
+        "view === 'deathmatch'",
+    ):
+        if token not in player_intelligence_lazy:
+            errors.append(f"lazy-assets.js: missing Livonia Deathmatch Rotation loader: {token}")
+    for token in (
+        '/api/admin/deathmatch-rotation',
+        "action:'stage'",
+        "action:'publish_panel'",
+        "position:q('[data-dm-position]')",
+        '__wwzDeathmatchRotationReady',
+    ):
+        if token not in deathmatch_runtime:
+            errors.append(f"deathmatch-rotation.js: missing management guard: {token}")
 
     onboarding_tokens = (
         'data-nav-label="Discord Onboarding"',
@@ -569,7 +597,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         errors.append(
             "dashboard.html: command library must be lazy-loaded instead of downloaded on every dashboard visit."
         )
-    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.31.0'
+    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.32.0'
     lazy_index = dashboard.find(lazy_script)
     shell_index = dashboard.find("assets/js/dashboard/shell.js")
     if lazy_index < 0:
@@ -1518,7 +1546,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.31.0'",
+        "const WWZ_PWA_VERSION = '1.32.0'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
         "if (request.method !== 'GET') return;",
