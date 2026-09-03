@@ -317,17 +317,17 @@
 
 
   const ensureCommunity = () => Promise.all([
-    loadStylesheetOnce('community-css', 'assets/css/dashboard/community.css?v=1.27.0&rev=community-workflows-1'),
+    loadStylesheetOnce('community-css', 'assets/css/dashboard/community.css?v=1.28.0&rev=community-workflows-1'),
     loadAfterDashboardRuntime(() => loadScriptOnce(
       'community',
-      'assets/js/dashboard/community.js?v=1.27.0&rev=community-workflows-1',
+      'assets/js/dashboard/community.js?v=1.28.0&rev=community-workflows-1',
       () => window.__wwzCommunityReady === true
     ))
   ]).then(() => undefined);
 
   const ensureCommandCentre = () => loadAfterDashboardRuntime(() => loadScriptOnce(
     'command-centre',
-    'assets/js/dashboard/command-centre.js?v=1.22.93',
+    'assets/js/dashboard/command-centre.js?v=1.28.0&rev=m10-admin-push-1',
     () => window.__wwzCommandCentreReady === true
   ));
 

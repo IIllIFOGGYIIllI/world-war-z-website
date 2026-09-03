@@ -1,17 +1,19 @@
-# WWZ Website — M10 Phase 3 Admin Notification Delivery
+# World War Z Website v1.28.0
 
-## Changes
-- Adds `Admin health alerts` to Notification settings for verified Admins/Owners.
-- Regular members do not receive or see the Admin-only topic from the backend.
-- Adds an Admin Push status card to Administration Centre > Command Centre.
-- Shows whether the current selected server/account has the Admin-health topic enabled.
-- Adds **Notification settings** shortcut.
-- Adds **Send test alert** to exercise the real protected Admin-health Web Push path.
-- Existing M10 Phase 1 health scoring and Phase 2 local proactive history remain intact.
-- Browser-side M10 monitoring remains quiet while healthy.
-- Service worker push handling is reused; no second service worker is added.
-- PWA update revision bumped to `2026-09-03-m10-admin-push-1`.
-- PWA cache revision remains `community-workflows-1`; map cache churn is avoided.
+## Formal M09 + M10 release
+- Promotes the completed My WWZ / Companion experience and Admin Automation & Health work to Website v1.28.0.
+- Pairs with the already-deployed Bot v1.21.1 Admin-health Web Push release.
+- Updates the public roadmap release pair and changelog.
+- Gives My WWZ, Community Hub and Command Centre canonical v1.28 cache-bust URLs.
+- Preserves the existing bounded map-cache generation instead of discarding downloaded map tiles merely because the public website version advanced.
+- Keeps the existing PWA Update Now mechanism and bumps `WWZ_PWA_UPDATE_REVISION`.
+- No gameplay, economy, progression, mission, Nitrado, Railway database or server-isolation behaviour is changed.
+
+## Compatibility
+- Website: v1.28.0
+- Bot: v1.21.1
+- Chernarus mission: v1.1
+- Android Companion native wrapper: v1.0.0 (no rebuild required)
 
 ## Files to delete
 NONE

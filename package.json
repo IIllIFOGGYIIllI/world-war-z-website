@@ -1,7 +1,7 @@
 {
   "name": "world-war-z-community-app",
   "private": true,
-  "version": "1.27.0",
+  "version": "1.28.0",
   "description": "Native wrapper foundation for the World War Z dashboard and PWA.",
   "scripts": {
     "native:prepare": "python scripts/prepare_capacitor_web.py",

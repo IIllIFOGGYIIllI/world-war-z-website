@@ -1,35 +1,27 @@
-WORLD WAR Z — M10 PHASE 3 ADMIN NOTIFICATION DELIVERY
-=====================================================
+WORLD WAR Z WEBSITE v1.28.0 — M09 + M10 FORMAL RELEASE
+======================================================
 
-DEPLOYMENT ORDER
-1. Upload/deploy the BOT patch to the World-War-Z-Discord-Bot repository.
-2. Wait for Railway to redeploy and the Discord bot/API to be healthy.
-3. Upload/deploy the WEBSITE patch to world-war-z-website.
-4. Let GitHub Pages finish deploying.
-5. Accept the normal PWA/Companion "Update Now" prompt.
+UPLOAD
+Copy the files in this patch over the matching paths in:
+IIllIFOGGYIIllI/world-war-z-website
 
-LIVE TEST
-1. Select Chernarus.
-2. Open Community Hub > Notifications.
-3. Enable Browser Push if needed.
-4. Tick "Admin health alerts" and Save Topics.
-5. Open Administration Centre > Command Centre.
-6. The new Browser / Companion Push card should report Enabled.
-7. Press "Send test alert".
-8. Confirm an OS/browser/PWA notification arrives and opens Command Centre.
-9. Switch to Livonia and repeat the opt-in/test separately.
+COMMIT
+Release website v1.28.0
 
-IMPORTANT
-- Existing subscriptions are NOT silently opted into the new Admin topic.
-- Real M10 alerts are server-side and continue working when the dashboard is closed,
-  provided the browser/PWA subscription remains valid.
-- Stable healthy 100/100 status stays quiet.
-- First server-side health snapshot is a quiet baseline.
-- Admin access is rechecked at delivery time.
-- No DB file, VAPID secret, .env, cache, or mission file is included.
+EXPECTED
+- GitHub Pages deploys normally.
+- Installed browser/PWA/Android Companion receives the normal Update Now prompt.
+- Public roadmap shows Website v1.28.0 · Bot v1.21.1.
+- My WWZ and M10 Command Centre continue behaving exactly as already live-tested.
+- Existing downloaded map caches are preserved by keeping the current map-cache generation.
 
-BOT COMMIT
-Add M10 admin push alerts
+FILES TO DELETE
+NONE
 
-WEBSITE COMMIT
-Add M10 admin push controls
+NO OTHER DEPLOYMENT
+- Bot remains v1.21.1.
+- No Railway database change.
+- No Nitrado change.
+- No DayZ mission upload.
+- No wipe.
+- No Android native rebuild.

@@ -1,12 +1,15 @@
 'use strict';
 
-const WWZ_PWA_VERSION = '1.27.0';
+const WWZ_PWA_VERSION = '1.28.0';
 const CACHE_PREFIX = 'wwz-pwa-';
 const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
+// Public release versions can advance without discarding the bounded map caches.
+// Keep this cache-generation version until a deliberate cache migration is needed.
+const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-09-03-m10-admin-push-1';
-const CACHE_RELEASE = `${WWZ_PWA_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
+const WWZ_PWA_UPDATE_REVISION = '2026-09-03-website-v1-28-0';
+const CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${CACHE_RELEASE}`;
 const MAP_TILE_CACHE = `${CACHE_PREFIX}map-tiles-${CACHE_RELEASE}`;
@@ -43,12 +46,24 @@ const APP_SHELL = [
 ].map(scopedUrl);
 
 const UPDATE_INVALIDATIONS = [
+  // Remove pre-v1.28 request keys without rotating the map-cache generation.
   './assets/js/dashboard/bootstrap.js?v=1.22.93&rev=auth-restore-fix-1',
   './assets/js/dashboard/my-wwz.js?v=1.27.0&rev=my-wwz-m09-1',
   './assets/css/dashboard/my-wwz.css?v=1.27.0&rev=my-wwz-m09-1',
   './assets/js/dashboard/command-centre.js?v=1.22.93',
   './assets/css/dashboard/command-centre-m10.css?v=1.27.0&rev=m10-admin-push-1',
   './assets/js/dashboard/community.js?v=1.27.0&rev=community-workflows-1',
+  './assets/css/dashboard/community.css?v=1.27.0&rev=community-workflows-1',
+  './assets/js/dashboard/lazy-assets.js?v=1.27.0&rev=community-workflows-1',
+  // Canonical v1.28 request keys are listed as targeted safety invalidations too.
+  './assets/js/dashboard/bootstrap.js?v=1.28.0&rev=website-v1-28-0',
+  './assets/js/dashboard/my-wwz.js?v=1.28.0&rev=my-wwz-m09-polish-1',
+  './assets/css/dashboard/my-wwz.css?v=1.28.0&rev=my-wwz-m09-polish-1',
+  './assets/js/dashboard/command-centre.js?v=1.28.0&rev=m10-admin-push-1',
+  './assets/css/dashboard/command-centre-m10.css?v=1.28.0&rev=m10-admin-push-1',
+  './assets/js/dashboard/community.js?v=1.28.0&rev=community-workflows-1',
+  './assets/css/dashboard/community.css?v=1.28.0&rev=community-workflows-1',
+  './assets/js/dashboard/lazy-assets.js?v=1.28.0&rev=website-v1-28-0',
   './assets/js/pages/home.js?v=1.22.93',
   './assets/js/pwa.js?v=1.22.93',
   './assets/css/pwa.css?v=1.22.93',

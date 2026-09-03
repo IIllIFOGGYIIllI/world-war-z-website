@@ -26,7 +26,7 @@ const ensureM10Styles = () => {
   if (document.querySelector('link[data-command-centre-m10-style]')) return;
   const link = document.createElement('link');
   link.rel = 'stylesheet';
-  link.href = 'assets/css/dashboard/command-centre-m10.css?v=1.27.0&rev=m10-admin-push-1';
+  link.href = 'assets/css/dashboard/command-centre-m10.css?v=1.28.0&rev=m10-admin-push-1';
   link.dataset.commandCentreM10Style = '';
   document.head.append(link);
 };

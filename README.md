@@ -1,27 +1,28 @@
-# World War Z Bot Website — v1.27.0
+# World War Z Bot Website — v1.28.0
 
-Website v1.27.0 completes the **Notifications & Community Workflow Enhancements** milestone and pairs with Bot v1.21.0 / Chernarus mission v1.1.
+Website v1.28.0 is the completed **My WWZ / Companion + Admin Automation & Health** release and pairs with Bot v1.21.1 / Chernarus mission v1.1.
 
-## Community Hub
-- Adds privacy-safe 14-day analytics for the selected Chernarus or Livonia service.
-- Adds active-location trends, participation summaries, scheduled/live Event Calendar and existing server-FPS visibility.
-- Adds a staff Event Planner with reusable Owner-managed plans, scheduling, immediate starts and cancellation.
+## My WWZ / Companion
+- Adds the player-facing My WWZ command view with selected-server summary, survivor/progression/economy context, objectives, current activity and server-aware quick actions.
+- Preserves strict Chernarus PvE / Livonia PvP separation and does not invent unsupported console telemetry.
+- Improves mobile/PWA layout, refresh feedback, partial-data handling and selected-server shortcuts.
 
-## Opt-in browser notifications
-- Adds member-controlled topics for events, server status, ticket replies, PvE/PvP rotations and shop/orders.
-- Uses the installed PWA/service worker for notification display and safe dashboard deep links.
-- No browser is subscribed until the signed-in member grants notification permission and opts in.
+## Admin Automation & Health
+- Adds 0–100 operational-health scoring, Automation Watch and prioritised Needs Attention signals.
+- Tracks meaningful health changes, escalation, queue growth and recoveries while stable healthy snapshots stay quiet.
+- Keeps the last known good Command Centre snapshot visible when a live refresh temporarily fails.
+- Adds protected Admin Web Push delivery for meaningful warnings, critical conditions and recoveries.
+- Admin-health push access is rechecked against current Discord Admin/Owner permissions at delivery time.
+- Adds a real protected test-alert path from Administration Centre > Command Centre.
 
-## Mobile / PWA
-- Adds responsive Community Hub layouts, larger touch targets and safe-area spacing.
-- Advances the service-worker release to v1.27.0.
-
-## Native wrapper foundation
-- Adds Capacitor 8 configuration and a repeatable `native:prepare` / `native:sync` workflow.
-- The website/PWA remains the canonical source; generated native wrappers do not become a separate frontend.
-- Google Play / Apple publication requires administrator-owned signing credentials and store accounts and is intentionally not embedded in the repository.
+## PWA / Companion
+- Advances the public website/PWA release label to v1.28.0.
+- Keeps the existing map-cache generation so this metadata/cache-bust release does not discard downloaded Chernarus/Livonia map tiles.
+- Every deployable website change still advances `WWZ_PWA_UPDATE_REVISION` so installed PWAs/TWAs receive the normal **Update Now** flow.
+- The signed Android Companion remains v1.0.0 and continues to wrap the live PWA; no native rebuild is required for this website release.
 
 ## Compatibility
-- Pairs with Bot v1.21.0.
-- Chernarus mission v1.1 remains current; no mission upload is required.
-- Existing Chernarus PvE / Livonia PvP features and server isolation remain unchanged.
+- Pairs with Bot v1.21.1.
+- Chernarus mission v1.1 remains current; no mission upload or wipe is required.
+- No Railway database replacement or migration is required.
+- Existing Chernarus PvE / Livonia PvP isolation remains unchanged.
