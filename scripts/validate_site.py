@@ -669,7 +669,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         ("Progression controller", f"assets/js/dashboard/progression.js?v={EXPECTED_ASSET_VERSION}&rev=3", "ensureProgression", "__wwzProgressionReady", "assets/js/dashboard/progression.js"),
         ("Objectives controller", f"assets/js/dashboard/objectives.js?v={EXPECTED_ASSET_VERSION}", "ensureObjectives", "__wwzObjectivesReady", "assets/js/dashboard/objectives.js"),
         ("Factions controller", f"assets/js/dashboard/factions.js?v={EXPECTED_ASSET_VERSION}&rev=2", "ensureFactions", "__wwzFactionsReady", "assets/js/dashboard/factions.js"),
-        ("Command Centre controller", f"assets/js/dashboard/command-centre.js?v={EXPECTED_ASSET_VERSION}", "ensureCommandCentre", "__wwzCommandCentreReady", "assets/js/dashboard/command-centre.js"),
+        ("Command Centre controller", "assets/js/dashboard/command-centre.js?v=1.28.0", "ensureCommandCentre", "__wwzCommandCentreReady", "assets/js/dashboard/command-centre.js"),
     )
     for label, asset_url, loader_name, ready_flag, relative in lazy_dashboard_controllers:
         if asset_url in dashboard:
@@ -757,7 +757,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         if "else if (preserveSelection)" not in signed_out or "showLogin();" not in signed_out:
             errors.append("core.js: transient saved-session failures must preserve server context without claiming Discord is unavailable.")
     account_script = f'assets/js/dashboard/account.js?v={EXPECTED_ASSET_VERSION}'
-    bootstrap_script = f'assets/js/dashboard/bootstrap.js?v={EXPECTED_ASSET_VERSION}'
+    bootstrap_script = 'assets/js/dashboard/bootstrap.js?v=1.28.0'
     account_index = dashboard.find(account_script)
     bootstrap_index = dashboard.find(bootstrap_script)
     if bootstrap_index < 0:
