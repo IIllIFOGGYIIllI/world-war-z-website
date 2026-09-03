@@ -1,46 +1,35 @@
-WORLD WAR Z - M10 PHASE 2 PROACTIVE ADMIN ATTENTION TEST
-=========================================================
+WORLD WAR Z — M10 PHASE 3 ADMIN NOTIFICATION DELIVERY
+=====================================================
 
-UPDATED FILES ONLY
-- assets/js/dashboard/command-centre.js
-- assets/css/dashboard/command-centre-m10.css
-- sw.js
+DEPLOYMENT ORDER
+1. Upload/deploy the BOT patch to the World-War-Z-Discord-Bot repository.
+2. Wait for Railway to redeploy and the Discord bot/API to be healthy.
+3. Upload/deploy the WEBSITE patch to world-war-z-website.
+4. Let GitHub Pages finish deploying.
+5. Accept the normal PWA/Companion "Update Now" prompt.
 
-WHAT THIS ADDS
-- Change-aware operational monitoring on top of the working M10 100/100 health baseline.
-- First successful snapshot for each selected server becomes a quiet baseline.
-- Stable healthy 100/100 refreshes create NO alerts or history noise.
-- Detects and records:
-  * new health signals
-  * severity escalations
-  * recoveries
-  * overall health state drops/recoveries
-  * growth in delivery failure, moderation overdue, notification failure,
-    configuration failure, operational failure, and unclaimed ticket queues
-- Adds Recent Health Changes to Command Centre with unread count + Mark reviewed.
-- Keeps Chernarus and Livonia history completely separate using the selected server key.
-- Stores only small operational summaries/counters locally; no player/private data is persisted.
-- After an Admin successfully opens Command Centre once in the current dashboard session:
-  * active Command Centre refresh remains every 30 seconds
-  * other dashboard pages get a quiet 60-second background health check
-  * hidden/offline tabs stop polling
-- New warning/critical/recovery changes can surface as a small in-dashboard toast.
-- Clicking a change/toast opens the relevant protected Admin workspace.
-- Authorization failure disarms background monitoring.
-- Existing stale-data and last-good-snapshot handling remains.
-- PWA Update Now revision bump included.
+LIVE TEST
+1. Select Chernarus.
+2. Open Community Hub > Notifications.
+3. Enable Browser Push if needed.
+4. Tick "Admin health alerts" and Save Topics.
+5. Open Administration Centre > Command Centre.
+6. The new Browser / Companion Push card should report Enabled.
+7. Press "Send test alert".
+8. Confirm an OS/browser/PWA notification arrives and opens Command Centre.
+9. Switch to Livonia and repeat the opt-in/test separately.
 
-NO BOT / DB / NITRADO / DAYZ FILE CHANGES.
+IMPORTANT
+- Existing subscriptions are NOT silently opted into the new Admin topic.
+- Real M10 alerts are server-side and continue working when the dashboard is closed,
+  provided the browser/PWA subscription remains valid.
+- Stable healthy 100/100 status stays quiet.
+- First server-side health snapshot is a quiet baseline.
+- Admin access is rechecked at delivery time.
+- No DB file, VAPID secret, .env, cache, or mission file is included.
 
-TEST
-1. Open Admin > Command Centre on Chernarus. It should remain 100/100.
-2. Recent Health Changes should initially say Monitoring baseline established.
-3. Leave it open through at least one 30-second refresh: no new change should appear if still healthy.
-4. Navigate elsewhere in the dashboard after opening Command Centre once; background monitor is now armed for this session.
-5. Switch to Livonia and open Command Centre; it gets its own separate baseline/history.
-6. Mark reviewed should disable when no unread history exists.
-7. If a real warning later occurs, it should appear once as a change rather than repeating every refresh.
-8. When the condition clears, a green Recovered entry should be added.
+BOT COMMIT
+Add M10 admin push alerts
 
-Suggested commit:
-Add proactive admin attention
+WEBSITE COMMIT
+Add M10 admin push controls

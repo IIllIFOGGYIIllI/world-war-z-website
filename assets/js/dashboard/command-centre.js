@@ -14,6 +14,8 @@ let commandCentreLastPayload = null;
 let commandCentreLastSuccessAt = 0;
 let commandCentreViewActive = false;
 let commandCentreMonitorArmed = false;
+let m10PushStatusCheckedAt = 0;
+let m10PushStatusInProgress = false;
 
 const M10_MONITOR_SESSION_KEY = 'wwz_m10_admin_monitor_armed_v1';
 const M10_STATE_STORAGE_PREFIX = 'wwz_m10_health_state_v1';
@@ -24,7 +26,7 @@ const ensureM10Styles = () => {
   if (document.querySelector('link[data-command-centre-m10-style]')) return;
   const link = document.createElement('link');
   link.rel = 'stylesheet';
-  link.href = 'assets/css/dashboard/command-centre-m10.css?v=1.27.0&rev=m10-proactive-1';
+  link.href = 'assets/css/dashboard/command-centre-m10.css?v=1.27.0&rev=m10-admin-push-1';
   link.dataset.commandCentreM10Style = '';
   document.head.append(link);
 };
@@ -406,6 +408,19 @@ const ensureM10Panel = () => {
         </header>
         <div class="m10-change-list" data-m10-change-list></div>
       </article>
+      <article class="m10-health-card m10-push-card">
+        <header><div><span>ADMIN NOTIFICATION DELIVERY</span><h3>Browser / Companion Push</h3></div><b data-m10-push-badge>Checking</b></header>
+        <div class="m10-push-control">
+          <div>
+            <strong data-m10-push-state>Checking Admin health notifications…</strong>
+            <small data-m10-push-detail>Only warning, critical and recovery transitions are delivered. Stable healthy checks stay quiet.</small>
+          </div>
+          <div class="m10-push-actions">
+            <button type="button" data-m10-push-settings>Notification settings</button>
+            <button type="button" data-m10-push-test disabled>Send test alert</button>
+          </div>
+        </div>
+      </article>
     </div>`;
 
   const healthGrid = commandCentrePanel.querySelector('.command-centre-health-grid');
@@ -414,7 +429,14 @@ const ensureM10Panel = () => {
 
   const markReviewed = shell.querySelector('[data-m10-mark-reviewed]');
   markReviewed?.addEventListener('click', () => m10MarkHistoryReviewed());
+  shell.querySelector('[data-m10-push-settings]')?.addEventListener('click', () => {
+    commandCentreJump('community', 'notifications');
+  });
+  shell.querySelector('[data-m10-push-test]')?.addEventListener('click', () => {
+    void sendM10AdminPushTest();
+  });
   renderM10ChangeHistory();
+  void refreshM10AdminPushStatus({ force: true });
   return shell;
 };
 
@@ -884,6 +906,142 @@ const surfaceM10Changes = (changes = []) => {
   }, 9_000);
 };
 
+const setM10PushStatus = ({ badge = '—', state = 'Unavailable', detail = '', enabled = false } = {}) => {
+  const shell = ensureM10Panel();
+  if (!shell) return;
+  const badgeNode = shell.querySelector('[data-m10-push-badge]');
+  const stateNode = shell.querySelector('[data-m10-push-state]');
+  const detailNode = shell.querySelector('[data-m10-push-detail]');
+  const testButton = shell.querySelector('[data-m10-push-test]');
+  if (badgeNode) badgeNode.textContent = badge;
+  if (stateNode) stateNode.textContent = state;
+  if (detailNode) detailNode.textContent = detail;
+  if (testButton) {
+    testButton.disabled = !enabled || m10PushStatusInProgress;
+    testButton.title = enabled
+      ? 'Queue an Admin-health Web Push test for your subscribed browser devices.'
+      : 'Enable the Admin health alerts topic in Notification settings first.';
+  }
+};
+
+const refreshM10AdminPushStatus = async ({ force = false } = {}) => {
+  if (m10PushStatusInProgress) return false;
+  if (!force && m10PushStatusCheckedAt && Date.now() - m10PushStatusCheckedAt < 60_000) return true;
+
+  const sessionToken = storageGet(AUTH_SESSION_KEY);
+  if (!sessionToken) {
+    setM10PushStatus({
+      badge: 'Sign in', state: 'Discord sign-in required',
+      detail: 'Admin notification preferences require the current authenticated Discord account.'
+    });
+    return false;
+  }
+
+  m10PushStatusInProgress = true;
+  try {
+    const response = await window.WWZHttp.request(`${DASHBOARD_API_BASE}/api/account/notifications`, {
+      headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` },
+      cache: 'no-store'
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Notification preferences unavailable.');
+
+    const push = payload.push || {};
+    const topics = new Set(Array.isArray(push.topics) ? push.topics : []);
+    const available = new Set(Array.isArray(push.available_topics) ? push.available_topics : []);
+    const adminTopicAvailable = available.has('admin_health');
+    const enabled = Boolean(push.server_enabled && push.subscribed && topics.has('admin_health'));
+
+    if (!push.server_enabled) {
+      setM10PushStatus({
+        badge: 'Unavailable', state: 'Web Push is not configured',
+        detail: 'Railway VAPID delivery is currently unavailable.'
+      });
+    } else if (!adminTopicAvailable) {
+      setM10PushStatus({
+        badge: 'Restricted', state: 'Admin health topic unavailable',
+        detail: 'Your current Discord account is not authorised for Admin-health notifications.'
+      });
+    } else if (!push.subscribed) {
+      setM10PushStatus({
+        badge: 'Off', state: 'Browser Push is not enabled on this account',
+        detail: 'Open Notification settings, enable browser notifications, then select Admin health alerts.'
+      });
+    } else if (!topics.has('admin_health')) {
+      setM10PushStatus({
+        badge: 'Topic off', state: 'Admin health alerts are not selected',
+        detail: 'Open Notification settings and enable the Admin health alerts topic for this server.'
+      });
+    } else {
+      setM10PushStatus({
+        badge: 'Enabled', state: `Admin health Push enabled · ${Number(push.devices || 0)} device(s)`,
+        detail: 'Server-side monitoring can now notify you when a new warning/critical condition appears or an alerted condition recovers.',
+        enabled: true,
+      });
+    }
+    m10PushStatusCheckedAt = Date.now();
+    return enabled;
+  } catch (error) {
+    setM10PushStatus({
+      badge: 'Unavailable', state: 'Notification status could not refresh',
+      detail: error instanceof Error ? error.message : 'Try again from Notification settings.'
+    });
+    return false;
+  } finally {
+    m10PushStatusInProgress = false;
+    const testButton = ensureM10Panel()?.querySelector('[data-m10-push-test]');
+    if (testButton && testButton.title.startsWith('Queue an Admin-health')) testButton.disabled = false;
+  }
+};
+
+const sendM10AdminPushTest = async () => {
+  if (m10PushStatusInProgress) return false;
+  const enabled = await refreshM10AdminPushStatus({ force: true });
+  if (!enabled) return false;
+
+  const sessionToken = storageGet(AUTH_SESSION_KEY);
+  const testButton = ensureM10Panel()?.querySelector('[data-m10-push-test]');
+  const originalLabel = testButton?.textContent || 'Send test alert';
+  m10PushStatusInProgress = true;
+  if (testButton) {
+    testButton.disabled = true;
+    testButton.textContent = 'Queuing…';
+  }
+  try {
+    const response = await window.WWZHttp.request(`${DASHBOARD_API_BASE}/api/admin/community/action`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${sessionToken}`,
+      },
+      cache: 'no-store',
+      body: JSON.stringify({ action: 'test_admin_health_push' }),
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Admin notification test could not be queued.');
+    setM10PushStatus({
+      badge: 'Test queued', state: 'Admin health test notification queued',
+      detail: 'The server will deliver the test through the same Admin-only Web Push path used by real M10 alerts.',
+      enabled: true,
+    });
+    return true;
+  } catch (error) {
+    setM10PushStatus({
+      badge: 'Test failed', state: 'Admin health test could not be queued',
+      detail: error instanceof Error ? error.message : 'Try again after refreshing your notification preferences.',
+      enabled: true,
+    });
+    return false;
+  } finally {
+    m10PushStatusInProgress = false;
+    if (testButton) {
+      testButton.textContent = originalLabel;
+      testButton.disabled = false;
+    }
+  }
+};
+
 const renderCommandCentre = (payload) => {
   const server = payload.server || {};
   const operations = server.operations || {};
@@ -997,6 +1155,7 @@ const loadCommandCentre = async (sessionToken = storageGet(AUTH_SESSION_KEY)) =>
     m10SetMonitorArmed(true);
     updateCommandCentreFreshness();
     scheduleM10BackgroundMonitor();
+    void refreshM10AdminPushStatus();
     return true;
   } catch (error) {
     updateCommandCentreFreshness();
@@ -1085,7 +1244,9 @@ window.addEventListener('offline', () => {
 window.addEventListener('wwz:serverchange', () => {
   commandCentreLastPayload = null;
   commandCentreLastSuccessAt = 0;
+  m10PushStatusCheckedAt = 0;
   renderM10ChangeHistory();
+  void refreshM10AdminPushStatus({ force: true });
   if (commandCentreMonitorArmed && !document.hidden) loadCommandCentre();
 });
 

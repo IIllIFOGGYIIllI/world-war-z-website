@@ -1,21 +1,8 @@
-World War Z Website v1.27.0 — Updated Files Only
-
-.gitignore
-PATCH_FILE_LIST.txt
-PATCH_NOTES.md
-README.md
-assets/css/dashboard/community.css
+assets/js/dashboard/command-centre.js
+assets/css/dashboard/command-centre-m10.css
 assets/js/dashboard/community.js
-assets/js/dashboard/lazy-assets.js
-capacitor.config.json
-changelog.html
-dashboard.html
-docs/NATIVE_APP_SETUP.md
-index.html
-package.json
-scripts/prepare_capacitor_web.py
-scripts/validate_site.py
 sw.js
-
-No files need to be deleted.
-Bot v1.21.0 and Chernarus mission v1.1 are the paired/current releases.
+PATCH_NOTES.md
+PATCH_FILE_LIST.txt
+DELETE_THESE_FILES.txt
+INSTALL.txt

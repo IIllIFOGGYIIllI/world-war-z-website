@@ -20,6 +20,7 @@
     tickets:['Ticket replies','Updates to your private support tickets.'],
     operations:['PvE/PvP rotations','Chernarus expeditions and Livonia hotspot rotations.'],
     shop:['Shop and orders','Order, delivery and fulfilment status changes.'],
+    admin_health:['Admin health alerts','Admin-only operational warnings, critical conditions and recoveries.'],
   };
   let active=false, refreshTimer=null, overview=null, preferencePayload=null, adminPayload=null;
 

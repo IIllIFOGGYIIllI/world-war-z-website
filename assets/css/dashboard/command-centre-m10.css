@@ -372,3 +372,63 @@
     width: calc(100vw - 24px);
   }
 }
+
+
+/* M10 Phase 3 — server-side Admin Push delivery */
+.m10-push-card {
+  grid-column: 1 / -1;
+}
+
+.m10-push-control {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+}
+
+.m10-push-control > div:first-child { min-width: 0; }
+.m10-push-control strong,
+.m10-push-control small { display: block; }
+.m10-push-control strong { color: #dfe3e8; font-size: .78rem; }
+.m10-push-control small { margin-top: 4px; color: #7d848e; font-size: .66rem; line-height: 1.45; }
+
+.m10-push-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.m10-push-actions > button {
+  min-height: 38px;
+  padding: 7px 10px;
+  border: 1px solid rgba(255,255,255,.11);
+  border-radius: 7px;
+  background: rgba(255,255,255,.035);
+  color: #d5d9de;
+  cursor: pointer;
+  font: inherit;
+  font-size: .66rem;
+  font-weight: 800;
+}
+
+.m10-push-actions > button:hover,
+.m10-push-actions > button:focus-visible {
+  border-color: rgba(22,136,248,.48);
+  background: rgba(22,136,248,.07);
+}
+
+.m10-push-actions > button:disabled {
+  cursor: default;
+  opacity: .42;
+}
+
+@media (max-width: 700px) {
+  .m10-push-card { grid-column: auto; }
+  .m10-push-control { grid-template-columns: 1fr; }
+  .m10-push-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .m10-push-actions > button { min-height: 44px; }
+}
+
+@media (max-width: 420px) {
+  .m10-push-actions { grid-template-columns: 1fr; }
+}
