@@ -325,6 +325,15 @@
     ))
   ]).then(() => undefined);
 
+  const ensureFlagClaims = () => Promise.all([
+    loadStylesheetOnce('flag-claims-css', 'assets/css/dashboard/flag-claims.css?v=1.29.0&rev=flag-claims-1'),
+    loadAfterDashboardRuntime(() => loadScriptOnce(
+      'flag-claims',
+      'assets/js/dashboard/flag-claims.js?v=1.29.0&rev=flag-claims-1',
+      () => window.__wwzFlagClaimsReady === true
+    ))
+  ]).then(() => undefined);
+
   const ensureCommandCentre = () => loadAfterDashboardRuntime(() => loadScriptOnce(
     'command-centre',
     'assets/js/dashboard/command-centre.js?v=1.28.0&rev=m10-admin-push-1',
@@ -363,6 +372,7 @@
     if (view === 'livoniapvp') ensureLivoniaPvp().then(() => window.WWZLivoniaPvp?.activate?.(detail)).catch(() => {});
     if (view === 'chernaruspve') ensureChernarusPve().then(() => window.WWZChernarusPve?.activate?.(detail)).catch(() => {});
     if (view === 'community') ensureCommunity().then(() => window.WWZCommunity?.activate?.(detail)).catch(() => {});
+    if (view === 'flags') ensureFlagClaims().then(() => window.WWZFlagClaims?.activate?.(detail)).catch(() => {});
     if (view === 'staff' && section === 'command-centre') ensureCommandCentre().catch(() => {});
   };
 
@@ -389,6 +399,7 @@
     ['factions', ensureFactions],
     ['livoniapvp', ensureLivoniaPvp],
     ['community', ensureCommunity],
+    ['flags', ensureFlagClaims],
   ];
   preloads.forEach(([view, load]) => {
     document.querySelectorAll(`[data-view="${view}"]`).forEach((button) => {
@@ -457,6 +468,7 @@
     ensureServerFeedsStyles,
     ensureDeliveryController,
     ensureFactions,
+    ensureFlagClaims,
     ensureLivoniaPvp,
     ensureMapRuntime,
     ensureModerationStyles,

@@ -1,18 +1,12 @@
-World War Z Website v1.28.0 — Updated Files Only
-
-README.md
-changelog.html
-index.html
-dashboard.html
-package.json
+assets/css/dashboard/flag-claims.css
+assets/css/pages/flags.css
+assets/js/dashboard/flag-claims.js
 assets/js/dashboard/lazy-assets.js
-assets/js/dashboard/bootstrap.js
-assets/js/dashboard/command-centre.js
+assets/js/data/command-library.js
+assets/js/pages/flags.js
+dashboard.html
+flags.html
+index.html
+rules.html
 scripts/validate_site.py
 sw.js
-PATCH_NOTES.md
-PATCH_FILE_LIST.txt
-DELETE_THESE_FILES.txt
-INSTALL.txt
-
-Files to delete: NONE

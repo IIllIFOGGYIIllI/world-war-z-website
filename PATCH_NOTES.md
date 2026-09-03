@@ -1,19 +1,22 @@
-# World War Z Website v1.28.0
+# World War Z Website v1.29.0 — Flag Claims
 
-## Formal M09 + M10 release
-- Promotes the completed My WWZ / Companion experience and Admin Automation & Health work to Website v1.28.0.
-- Pairs with the already-deployed Bot v1.21.1 Admin-health Web Push release.
-- Updates the public roadmap release pair and changelog.
-- Gives My WWZ, Community Hub and Command Centre canonical v1.28 cache-bust URLs.
-- Preserves the existing bounded map-cache generation instead of discarding downloaded map tiles merely because the public website version advanced.
-- Keeps the existing PWA Update Now mechanism and bumps `WWZ_PWA_UPDATE_REVISION`.
-- No gameplay, economy, progression, mission, Nitrado, Railway database or server-isolation behaviour is changed.
+## Added
+- Public Flag Claims page with Chernarus/Livonia server switching, availability status, search, and live ownership data.
+- Member Flag Claims controls in the dashboard.
+- Admin Flag Claims Manager for pending requests, approval/rejection, assignments, revocations, transfers, Discord channel routing, publishing, and history.
+- `/flag` added to the website command library.
+- Navigation/rules links updated for Flag Claims.
+- Service worker/PWA revision updated to v1.29.0 for the new static assets.
 
-## Compatibility
-- Website: v1.28.0
-- Bot: v1.21.1
-- Chernarus mission: v1.1
-- Android Companion native wrapper: v1.0.0 (no rebuild required)
+## Validation performed
+- Full production website validator passed.
+- 16 HTML pages and 46 JavaScript files validated.
+- PWA validation passed.
+- Chernarus and Livonia map assets validated.
+- Production road GeoJSON validated.
+
+## Flag artwork
+This release uses the flag catalogue/status presentation without bundling copied third-party DayZ flag artwork. The asset structure can be extended with matching flag imagery later without changing claim ownership data.
 
 ## Files to delete
-NONE
+None.
