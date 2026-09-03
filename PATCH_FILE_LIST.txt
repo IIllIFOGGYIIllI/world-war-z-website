@@ -1,9 +1,11 @@
-flags.html
 dashboard.html
 index.html
 sw.js
-assets/js/pages/flags.js
+assets/css/dashboard/flag-claims.css
 assets/js/dashboard/flag-claims.js
 assets/js/dashboard/lazy-assets.js
 scripts/validate_site.py
-FLAG_IMAGE_SOURCES.md
+PATCH_NOTES.md
+README.md
+PATCH_FILE_LIST.txt
+DELETE_THESE_FILES.txt

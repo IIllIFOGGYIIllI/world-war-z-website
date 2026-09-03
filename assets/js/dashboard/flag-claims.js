@@ -30,6 +30,12 @@
   const assignFlag = root.querySelector('[data-flag-assign-select]');
   const assignName = root.querySelector('[data-flag-assign-name]');
   const adminStateNote = root.querySelector('[data-flag-admin-state]');
+  const adminSpecialFlag = root.querySelector('[data-flag-admin-special]');
+  const adminSpecialLabel = root.querySelector('[data-flag-admin-label]');
+  const nonRaidableSpecialFlag = root.querySelector('[data-flag-nonraidable-special]');
+  const nonRaidableSlots = root.querySelector('[data-flag-nonraidable-slots]');
+  const saveSpecialsButton = root.querySelector('[data-flag-save-specials]');
+  const wipeClaimsButton = root.querySelector('[data-flag-wipe]');
 
   let loading = false;
   let account = { flags: [], mine: { claims: [], pending: [] }, server: {} };
@@ -153,12 +159,28 @@
     if (!admin) return; [reviewChannel, publicChannel].forEach((select) => { if (!select) return; const current = select === reviewChannel ? admin.config?.review_channel_key : admin.config?.public_channel_key; select.replaceChildren(); const blank = document.createElement('option'); blank.value = ''; blank.textContent = 'Not configured'; select.append(blank); (admin.channels || []).forEach((channel) => { const option = document.createElement('option'); option.value = channel.key; option.textContent = `${channel.category ? `${channel.category} / ` : ''}#${channel.name}${channel.can_publish ? '' : ' (permissions missing)'}`; option.disabled = !channel.can_publish; select.append(option); }); select.value = current || ''; });
     if (adminStateNote) adminStateNote.textContent = `${admin.config?.published_message_count || 0} WWZ flag panel message(s) currently tracked.`;
   };
+  const fillSpecialFlagSelect = (select, selected, blankLabel) => {
+    if (!select) return;
+    select.replaceChildren();
+    const blank = document.createElement('option'); blank.value = ''; blank.textContent = blankLabel; select.append(blank);
+    account.flags.forEach((item) => { const option = document.createElement('option'); option.value = item.key; option.textContent = item.name; select.append(option); });
+    select.value = selected || '';
+  };
+  const renderSpecialConfig = () => {
+    if (!admin) return;
+    fillSpecialFlagSelect(adminSpecialFlag, admin.config?.admin_flag_key, 'No Admin flag');
+    fillSpecialFlagSelect(nonRaidableSpecialFlag, admin.config?.non_raidable_flag_key, 'No non-raidable flag');
+    if (adminSpecialLabel) adminSpecialLabel.value = admin.config?.admin_flag_label || 'WWZ Admin Team';
+    if (nonRaidableSlots) nonRaidableSlots.value = String(admin.config?.non_raidable_capacity || 5);
+  };
+
   const renderAdmin = () => {
     if (!adminRoot) return; adminRoot.hidden = !isStaff(); if (!isStaff() || !admin) return;
     if (pendingHost) { pendingHost.replaceChildren(); (admin.pending || []).forEach((request) => { const row = document.createElement('div'); row.className = 'flag-claim-row'; const strong = document.createElement('strong'); strong.textContent = `#${request.id} · ${request.flag_name || request.flag_key}`; const small = document.createElement('small'); small.textContent = `${request.claimant_name} · requested by ${request.requester_name}`; const actions = document.createElement('div'); actions.className = 'flag-claim-row-actions'; const approve = makeButton('Approve', 'primary-action'); const reject = makeButton('Reject'); approve.addEventListener('click', () => runAdminAction({ action: 'approve', request_id: request.id })); reject.addEventListener('click', () => { const reason = prompt('Optional rejection reason:', '') ?? null; if (reason === null) return; runAdminAction({ action: 'reject', request_id: request.id, reason }); }); actions.append(approve, reject); row.append(strong, small, actions); pendingHost.append(row); }); if (!(admin.pending || []).length) { const p = document.createElement('p'); p.className = 'table-note'; p.textContent = 'No requests awaiting review.'; pendingHost.append(p); } }
-    if (activeHost) { activeHost.replaceChildren(); (admin.flags || []).forEach((flag) => (flag.claims || []).forEach((claim) => { const row = document.createElement('div'); row.className = 'flag-claim-row'; const strong = document.createElement('strong'); strong.textContent = flag.name; const small = document.createElement('small'); small.textContent = claim.claimant_name; const actions = document.createElement('div'); actions.className = 'flag-claim-row-actions'; const transfer = makeButton('Transfer'); const revoke = makeButton('Revoke', 'secondary-action'); transfer.addEventListener('click', () => { const name = prompt(`Transfer ${flag.name} from ${claim.claimant_name} to:`, '') ?? ''; if (!name.trim()) return; runAdminAction({ action: 'transfer', flag_key: flag.key, current_claimant: claim.claimant_name, new_claimant_name: name.trim() }); }); revoke.addEventListener('click', () => { if (!confirm(`Revoke ${flag.name} from ${claim.claimant_name}?`)) return; const reason = prompt('Revocation reason:', 'Inactive or revoked by staff') ?? null; if (reason === null) return; runAdminAction({ action: 'revoke', flag_key: flag.key, claimant_name: claim.claimant_name, reason }); }); actions.append(transfer, revoke); row.append(strong, small, actions); activeHost.append(row); })); }
+    if (activeHost) { activeHost.replaceChildren(); let activeCount = 0; (admin.flags || []).forEach((flag) => (flag.claims || []).forEach((claim) => { activeCount += 1; const row = document.createElement('div'); row.className = 'flag-claim-row'; const strong = document.createElement('strong'); strong.textContent = flag.name; const small = document.createElement('small'); small.textContent = claim.claimant_name; const actions = document.createElement('div'); actions.className = 'flag-claim-row-actions'; const transfer = makeButton('Transfer'); const revoke = makeButton('Revoke', 'secondary-action'); transfer.addEventListener('click', () => { const name = prompt(`Transfer ${flag.name} from ${claim.claimant_name} to:`, '') ?? ''; if (!name.trim()) return; runAdminAction({ action: 'transfer', flag_key: flag.key, current_claimant: claim.claimant_name, new_claimant_name: name.trim() }); }); revoke.addEventListener('click', () => { if (!confirm(`Revoke ${flag.name} from ${claim.claimant_name}?`)) return; const reason = prompt('Revocation reason:', 'Inactive or revoked by staff') ?? null; if (reason === null) return; runAdminAction({ action: 'revoke', flag_key: flag.key, claimant_name: claim.claimant_name, reason }); }); actions.append(transfer, revoke); row.append(strong, small, actions); activeHost.append(row); })); if (!activeCount) { const p = document.createElement('p'); p.className = 'table-note'; p.textContent = 'No active flag claims on this server.'; activeHost.append(p); } }
     if (historyHost) { historyHost.replaceChildren(); (admin.history || []).slice(0,60).forEach((event) => { const row = document.createElement('div'); row.className = 'flag-claim-row'; const strong = document.createElement('strong'); strong.textContent = `${String(event.action || '').replace(/_/g,' ')}${event.flag_name ? ` · ${event.flag_name}` : ''}`; const small = document.createElement('small'); small.textContent = `${event.actor_name || 'System'} · ${event.created_at ? formatAccountDate(event.created_at) : ''}`; row.append(strong, small); historyHost.append(row); }); }
     renderChannels();
+    renderSpecialConfig();
   };
   const render = () => { renderSummary(); renderCatalogue(); renderMine(); renderAdmin(); };
 
@@ -178,6 +200,24 @@
   requestForm?.addEventListener('submit', (event) => { event.preventDefault(); if (!requestSelect?.value) { showMessage('Select a flag first.'); return; } runMemberAction({ action: 'request', flag_key: requestSelect.value, claimant_name: claimantInput?.value || '' }); });
   assignForm?.addEventListener('submit', (event) => { event.preventDefault(); if (!assignFlag?.value || !assignName?.value.trim()) { showMessage('Select a flag and enter a player/group name.'); return; } runAdminAction({ action: 'assign', flag_key: assignFlag.value, claimant_name: assignName.value.trim() }); });
   saveChannelsButton?.addEventListener('click', () => runAdminAction({ action: 'config', review_channel_key: reviewChannel?.value || '', public_channel_key: publicChannel?.value || '' }));
+  saveSpecialsButton?.addEventListener('click', () => {
+    const adminKey = adminSpecialFlag?.value || '';
+    const protectedKey = nonRaidableSpecialFlag?.value || '';
+    if (adminKey && protectedKey && adminKey === protectedKey) { showMessage('The Admin flag and non-raidable flag must be different flags.'); return; }
+    runAdminAction({
+      action: 'special_config',
+      admin_flag_key: adminKey,
+      admin_flag_label: adminSpecialLabel?.value?.trim() || 'WWZ Admin Team',
+      non_raidable_flag_key: protectedKey,
+      non_raidable_capacity: Math.max(1, Math.min(Number(nonRaidableSlots?.value || 5), 25)),
+    });
+  });
+  wipeClaimsButton?.addEventListener('click', () => {
+    const serverName = admin?.server?.map_name || account?.server?.map_name || 'this server';
+    const confirmation = prompt(`This will release ALL current flag claims on ${serverName} only. Pending requests will be kept.\n\nType WIPE to continue:`, '');
+    if (String(confirmation || '').trim().toUpperCase() !== 'WIPE') return;
+    runAdminAction({ action: 'wipe', include_pending: false });
+  });
   publishButton?.addEventListener('click', () => runAdminAction({ action: 'publish', public_channel_key: publicChannel?.value || '' }));
   unpublishButton?.addEventListener('click', () => { if (confirm('Remove only the flag-list messages previously published by WWZ? Claims will be kept.')) runAdminAction({ action: 'unpublish' }); });
   refreshButton?.addEventListener('click', load); searchInput?.addEventListener('input', renderCatalogue);

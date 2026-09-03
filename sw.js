@@ -1,6 +1,6 @@
 'use strict';
 
-const WWZ_PWA_VERSION = '1.29.2';
+const WWZ_PWA_VERSION = '1.29.3';
 const CACHE_PREFIX = 'wwz-pwa-';
 const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 // Public release versions can advance without discarding the bounded map caches.
@@ -73,9 +73,9 @@ const UPDATE_INVALIDATIONS = [
   './assets/js/dashboard/lazy-assets.js?v=1.29.0&rev=flag-claims-1',
   './assets/js/pages/flags.js?v=1.29.2&rev=real-dayz-flags-1',
   './assets/css/pages/flags.css?v=1.29.2&rev=real-dayz-flags-1',
-  './assets/js/dashboard/flag-claims.js?v=1.29.2&rev=real-dayz-flags-1',
-  './assets/css/dashboard/flag-claims.css?v=1.29.2&rev=real-dayz-flags-1',
-  './assets/js/dashboard/lazy-assets.js?v=1.29.2&rev=real-dayz-flags-1',
+  './assets/js/dashboard/flag-claims.js?v=1.29.3&rev=flag-admin-ui-1',
+  './assets/css/dashboard/flag-claims.css?v=1.29.3&rev=flag-admin-ui-1',
+  './assets/js/dashboard/lazy-assets.js?v=1.29.3&rev=flag-admin-ui-1',
   './assets/js/pages/home.js?v=1.22.93',
   './assets/js/pwa.js?v=1.22.93',
   './assets/css/pwa.css?v=1.22.93',
