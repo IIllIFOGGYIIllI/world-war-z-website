@@ -326,10 +326,10 @@
   ]).then(() => undefined);
 
   const ensureFlagClaims = () => Promise.all([
-    loadStylesheetOnce('flag-claims-css', 'assets/css/dashboard/flag-claims.css?v=1.29.1&rev=flag-claims-2'),
+    loadStylesheetOnce('flag-claims-css', 'assets/css/dashboard/flag-claims.css?v=1.29.2&rev=real-dayz-flags-1'),
     loadAfterDashboardRuntime(() => loadScriptOnce(
       'flag-claims',
-      'assets/js/dashboard/flag-claims.js?v=1.29.1&rev=flag-claims-2',
+      'assets/js/dashboard/flag-claims.js?v=1.29.2&rev=real-dayz-flags-1',
       () => window.__wwzFlagClaimsReady === true
     ))
   ]).then(() => undefined);

@@ -310,7 +310,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.29.1 · Bot v1.22.1" not in index:
+    if "Website v1.29.2 · Bot v1.22.3" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "Chernarus Live—Livonia Ready To Connect", "Livonia production onboarding", "current single-server setup", "participants", "Owner bulk catalogue controls", "Natural XP &amp; Prestige QA", "natural XP/Prestige QA remains deferred", "Deferred verification"):
         if stale in index:
@@ -549,7 +549,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         errors.append(
             "dashboard.html: command library must be lazy-loaded instead of downloaded on every dashboard visit."
         )
-    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.29.1'
+    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.29.2'
     lazy_index = dashboard.find(lazy_script)
     shell_index = dashboard.find("assets/js/dashboard/shell.js")
     if lazy_index < 0:
@@ -1053,23 +1053,26 @@ def validate_required_files(errors: list[str]) -> None:
         "assets/js/pages/flags.js",
         "assets/css/dashboard/flag-claims.css",
         "assets/js/dashboard/flag-claims.js",
-        "assets/flags/flag-gallery.png",
     )
     for relative_path in required:
         if not (ROOT / relative_path).is_file():
             errors.append(f"Missing required website file: {relative_path}")
 
-    flag_artwork_keys = (
-        "livonia-police", "rooster", "dayz", "white-surrender", "bohemia-interactive",
-        "cannibals", "baby-deer", "refuge", "rsta", "snake", "pirates", "cdf", "chel",
-        "cmc", "chedaki", "chernarus", "napa", "tec", "uec", "wolf", "radio-zenit",
-        "apa", "altis", "bear", "brainz", "hunterz", "crook", "livonia", "livonia-army",
-        "north-sahrani", "rex", "south-sahrani", "zagorky", "sakhal",
+    real_flag_sources = (ROOT / "assets/js/pages/flags.js").read_text(encoding="utf-8") + "\n" + (ROOT / "assets/js/dashboard/flag-claims.js").read_text(encoding="utf-8")
+    required_real_flag_tokens = (
+        "DAYZ_FLAG_IMAGE_BASE",
+        "dayz-store.ru/wp-content/uploads/images/large",
+        "Flag_Altis", "Flag_APA", "Flag_BabyDeer", "Flag_Bear", "Flag_Bohemia",
+        "Flag_BrainZ", "Flag_Cannibals", "Flag_CDF", "Flag_Chedaki", "Flag_CHEL",
+        "Flag_Chernarus", "Flag_CMC", "Flag_Crook", "Flag_DayZ", "Flag_HunterZ",
+        "Flag_LivoniaArmy", "Flag_LivoniaPolice", "Flag_Livonia", "Flag_NAPA",
+        "Flag_NSahrani", "Flag_Pirates", "Flag_Zenit", "Flag_Refuge", "Flag_Rex",
+        "Flag_Rooster", "Flag_RSTA", "Flag_Sakhal", "Flag_Snake", "Flag_SSahrani",
+        "Flag_TEC", "Flag_UEC", "Flag_White", "Flag_Wolf", "Flag_Zagorky",
     )
-    for flag_key in flag_artwork_keys:
-        relative_path = f"assets/flags/{flag_key}.png"
-        if not (ROOT / relative_path).is_file():
-            errors.append(f"Missing Flag Claims artwork: {relative_path}")
+    for token in required_real_flag_tokens:
+        if token not in real_flag_sources:
+            errors.append(f"Flag Claims missing actual DayZ artwork mapping: {token}")
 
 
 
@@ -1495,7 +1498,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.29.1'",
+        "const WWZ_PWA_VERSION = '1.29.2'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
         "if (request.method !== 'GET') return;",

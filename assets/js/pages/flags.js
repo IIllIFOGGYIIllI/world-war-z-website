@@ -18,11 +18,52 @@
   const requestedServer = () => String(new URLSearchParams(location.search).get('server') || '').trim().toLowerCase();
   const updateAddress = (server) => { if (!server) return; const url = new URL(location.href); url.searchParams.set('server', String(server.map_key || server.key || '').toLowerCase()); history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`); };
   const initials = (name) => String(name || 'FLAG').replace(/\([^)]*\)/g, '').split(/\s+/).filter(Boolean).slice(0,2).map((part) => part[0]?.toUpperCase() || '').join('') || 'F';
-  const flagImageUrl = (item) => `assets/flags/${encodeURIComponent(String(item?.image_key || item?.key || 'flag'))}.png?v=1.29.1`;
+  const DAYZ_FLAG_IMAGE_BASE = 'https://dayz-store.ru/wp-content/uploads/images/large';
+  const DAYZ_FLAG_IMAGE_CLASSES = Object.freeze({
+    "altis": "Flag_Altis",
+    "apa": "Flag_APA",
+    "baby-deer": "Flag_BabyDeer",
+    "bear": "Flag_Bear",
+    "bohemia-interactive": "Flag_Bohemia",
+    "brainz": "Flag_BrainZ",
+    "cannibals": "Flag_Cannibals",
+    "cdf": "Flag_CDF",
+    "chedaki": "Flag_Chedaki",
+    "chel": "Flag_CHEL",
+    "chernarus": "Flag_Chernarus",
+    "cmc": "Flag_CMC",
+    "crook": "Flag_Crook",
+    "dayz": "Flag_DayZ",
+    "hunterz": "Flag_HunterZ",
+    "livonia-army": "Flag_LivoniaArmy",
+    "livonia-police": "Flag_LivoniaPolice",
+    "livonia": "Flag_Livonia",
+    "napa": "Flag_NAPA",
+    "north-sahrani": "Flag_NSahrani",
+    "pirates": "Flag_Pirates",
+    "radio-zenit": "Flag_Zenit",
+    "refuge": "Flag_Refuge",
+    "rex": "Flag_Rex",
+    "rooster": "Flag_Rooster",
+    "rsta": "Flag_RSTA",
+    "sakhal": "Flag_Sakhal",
+    "snake": "Flag_Snake",
+    "south-sahrani": "Flag_SSahrani",
+    "tec": "Flag_TEC",
+    "uec": "Flag_UEC",
+    "white-surrender": "Flag_White",
+    "wolf": "Flag_Wolf",
+    "zagorky": "Flag_Zagorky",
+  });
+  const flagImageUrl = (item) => {
+    const key = String(item?.image_key || item?.key || '').trim().toLowerCase();
+    const className = DAYZ_FLAG_IMAGE_CLASSES[key] || 'Flag_White';
+    return `${DAYZ_FLAG_IMAGE_BASE}/${encodeURIComponent(className)}.png`;
+  };
   const makeFlagVisual = (item) => {
     const visual = document.createElement('div'); visual.className = 'flag-card-visual'; visual.title = `${item.name} flag artwork`;
     const fallback = document.createElement('span'); fallback.className = 'flag-card-fallback'; fallback.textContent = initials(item.name); fallback.hidden = true;
-    const image = document.createElement('img'); image.loading = 'lazy'; image.decoding = 'async'; image.alt = `${item.name} artwork`; image.src = flagImageUrl(item);
+    const image = document.createElement('img'); image.loading = 'lazy'; image.decoding = 'async'; image.referrerPolicy = 'no-referrer'; image.alt = `${item.name} artwork`; image.src = flagImageUrl(item);
     image.addEventListener('error', () => { image.hidden = true; fallback.hidden = false; }, { once: true });
     visual.append(image, fallback); return visual;
   };
