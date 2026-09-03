@@ -1,7 +1,9 @@
-# World War Z Website v1.29.3 PWA Revision Hotfix
+# WWZ Website v1.30.0 — Updated Files Only
 
-Base required: Website v1.29.3 Flag Admin/UI update already committed.
+Apply this package over the current **Website v1.29.3** repository while preserving the included folder structure.
 
-Replace only `sw.js` in the website repository with the included file, then commit and push.
+This is Flag Claims Phase 2: optional faction-linked claims, owner transfer requests, Admin transfer review, private Admin notes, inactivity review, recent activity/history improvements, notification settings, and associated responsive UI polish.
 
-This changes `WWZ_PWA_UPDATE_REVISION` from `2026-09-04-website-v1-29-2` to `2026-09-04-website-v1-29-3` so the GitHub Pages PWA revision guard accepts the deployable v1.29.3 update.
+The existing real DayZ flag artwork and v1.29.3 column/layout fixes are preserved. No base-map marker or base-location integration is included.
+
+See `PATCH_FILE_LIST.txt` for the exact updated files.
