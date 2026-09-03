@@ -267,9 +267,12 @@
     () => window.__wwzAppealsReady === true
   )));
 
-  const ensureAdministration = () => ensureModerationStyles().then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
+  const ensureAdministration = () => Promise.all([
+    ensureModerationStyles(),
+    loadStylesheetOnce('player-intelligence-css', 'assets/css/dashboard/player-intelligence.css?v=1.31.0&rev=player-intelligence-1')
+  ]).then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
     'administration',
-    'assets/js/dashboard/administration.js?v=1.22.93&rev=discord-channel-refresh-1',
+    'assets/js/dashboard/administration.js?v=1.31.0&rev=player-intelligence-1',
     () => window.__wwzAdministrationReady === true
   )));
 

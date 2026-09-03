@@ -1,28 +1,18 @@
-# World War Z Website v1.30.0 — Flag Claims Phase 2
+# World War Z Website v1.31.0 — Player Intelligence Centre
 
-## Member experience
-- Flag requests can optionally use the member's registered WWZ faction instead of free-text ownership.
-- Active owners can request a transfer of their flag to another player/group or their registered faction.
-- Members can view and cancel their own pending transfer requests.
-- Public/member flag details show richer ownership/status information without exposing private Admin notes.
+## Added
+- Renames Player Administration to the **Player Intelligence Centre**.
+- Adds a compact top-level intelligence overview for selected server, Admin attention state, registered faction and flag claim.
+- Adds position-free ADM counters: connections, deaths, unconscious events and hit events.
+- Adds registered faction role/member count, active/pending flag ownership, watchlist context and recorded PSN aliases.
+- Adds a filterable unified activity timeline across combat, moderation, Player Admin, progression, economy, events, support, commerce, objectives, factions and Flag Claims.
 
-## Admin Flag Claims Manager
-- Added pending transfer review with Approve / Reject actions.
-- Added private Admin notes on active claims.
-- Added activity review indicators and stale-claim filtering using the configured inactivity threshold.
-- Added recent flag activity and expanded history controls.
-- Added optional faction linking for manual Admin assignments.
-- Added configurable flag-activity notification routing and inactivity threshold.
-- Existing wipe, Admin-reserved flag and non-raidable flag controls remain available.
-
-## Layout / responsive polish
-- Preserves the v1.29.3 Flag Claims Manager layout fix: ownership/history remain bounded and cannot stretch the left settings column.
-- Phase 2 cards, filters, forms and action rows follow the same responsive layout on desktop and narrow screens.
-
-## Server isolation
-- Chernarus and Livonia claims, transfers, notes, notification routing and inactivity review settings are independent.
-- No base coordinates or base-map markers are introduced.
+## UI
+- Adds a dedicated responsive Player Intelligence stylesheet rather than expanding the global dashboard layout.
+- Desktop uses four compact overview cards and a three-card intelligence row; tablet/mobile collapse cleanly without stretched columns or empty-height coupling.
+- Existing protected player actions and all detailed ledgers remain below the intelligence summary.
 
 ## Release / PWA
-- Website/PWA revision bumped to v1.30.0.
-- Flag Claims assets and lazy-loader revision bumped to prevent stale v1.29.3 UI assets.
+- Website version advanced to v1.31.0 with Bot v1.24.0 shown publicly.
+- Dashboard Administration controller and Player Intelligence stylesheet use a new cache revision.
+- PWA update revision advanced for reliable installed-app refresh.

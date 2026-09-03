@@ -310,7 +310,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.30.0 · Bot v1.23.0" not in index:
+    if "Website v1.31.0 · Bot v1.24.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "Chernarus Live—Livonia Ready To Connect", "Livonia production onboarding", "current single-server setup", "participants", "Owner bulk catalogue controls", "Natural XP &amp; Prestige QA", "natural XP/Prestige QA remains deferred", "Deferred verification"):
         if stale in index:
@@ -322,6 +322,26 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         'notification routes cannot be enabled until then',
     )
     notification_sources = dashboard + "\n" + (ROOT / "assets/js/dashboard/administration.js").read_text(encoding="utf-8")
+    player_intelligence = (ROOT / "assets/js/dashboard/administration.js").read_text(encoding="utf-8")
+    player_intelligence_lazy = (ROOT / "assets/js/dashboard/lazy-assets.js").read_text(encoding="utf-8")
+    for token in (
+        'Player Intelligence Centre',
+        'data-player-intel-timeline',
+        'data-player-intel-attention',
+        'data-player-intel-faction',
+        'data-player-intel-flag',
+    ):
+        if token not in dashboard:
+            errors.append(f"dashboard.html: missing Player Intelligence Centre surface: {token}")
+    for token in (
+        'renderPlayerIntelligence',
+        'renderPlayerIntelligenceTimeline',
+        'assets/css/dashboard/player-intelligence.css?v=1.31.0',
+        'assets/js/dashboard/administration.js?v=1.31.0',
+    ):
+        source = player_intelligence_lazy if token.startswith('assets/') else player_intelligence
+        if token not in source:
+            errors.append(f"Player Intelligence Centre missing runtime guard: {token}")
     for token in notification_route_tokens:
         if token not in notification_sources:
             errors.append(f"Notifications & Webhooks missing configuration guard: {token}")
@@ -549,7 +569,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         errors.append(
             "dashboard.html: command library must be lazy-loaded instead of downloaded on every dashboard visit."
         )
-    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.30.0'
+    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.31.0'
     lazy_index = dashboard.find(lazy_script)
     shell_index = dashboard.find("assets/js/dashboard/shell.js")
     if lazy_index < 0:
@@ -663,7 +683,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append(f"dashboard-map-intelligence.js: collaborative Group/Faction data must not be persisted in browser storage: {forbidden}")
 
     lazy_dashboard_controllers = (
-        ("Administration controller", f"assets/js/dashboard/administration.js?v={EXPECTED_ASSET_VERSION}", "ensureAdministration", "__wwzAdministrationReady", "assets/js/dashboard/administration.js"),
+        ("Administration controller", "assets/js/dashboard/administration.js?v=1.31.0", "ensureAdministration", "__wwzAdministrationReady", "assets/js/dashboard/administration.js"),
         ("Appeals controller", f"assets/js/dashboard/appeals.js?v={EXPECTED_ASSET_VERSION}", "ensureAppeals", "__wwzAppealsReady", "assets/js/dashboard/appeals.js"),
         ("Tickets controller", f"assets/js/dashboard/tickets.js?v={EXPECTED_ASSET_VERSION}", "ensureTickets", "__wwzTicketsReady", "assets/js/dashboard/tickets.js"),
         ("Progression controller", f"assets/js/dashboard/progression.js?v={EXPECTED_ASSET_VERSION}&rev=3", "ensureProgression", "__wwzProgressionReady", "assets/js/dashboard/progression.js"),
@@ -1498,7 +1518,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.30.0'",
+        "const WWZ_PWA_VERSION = '1.31.0'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
         "if (request.method !== 'GET') return;",

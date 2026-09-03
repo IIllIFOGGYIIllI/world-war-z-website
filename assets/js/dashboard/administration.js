@@ -234,6 +234,10 @@ const resetAdminPlayerAdministration = () => {
   adminPlayerTicketHistory?.replaceChildren();
   adminPlayerShopHistory?.replaceChildren();
   adminPlayerObjectiveHistory?.replaceChildren();
+  playerIntelTimelineRows = [];
+  playerIntelTimeline?.replaceChildren();
+  if (playerIntelTimelineEmpty) playerIntelTimelineEmpty.hidden = true;
+  if (playerIntelTimelineFilter) playerIntelTimelineFilter.value = 'all';
   discordBanlist?.replaceChildren();
   dayzBanlist?.replaceChildren();
   if (discordBanlistEmpty) discordBanlistEmpty.hidden = true;
@@ -2333,6 +2337,72 @@ const renderAdminObjectiveHistory = (payload) => {
   });
 };
 
+
+const playerIntelTimeline = document.querySelector('[data-player-intel-timeline]');
+const playerIntelTimelineEmpty = document.querySelector('[data-player-intel-timeline-empty]');
+const playerIntelTimelineFilter = document.querySelector('[data-player-intel-timeline-filter]');
+let playerIntelTimelineRows = [];
+
+const playerIntelSymbol = (category) => ({ combat:'☠', moderation:'⚿', administration:'⌕', progression:'XP', economy:'$', events:'🏆', support:'🎟', commerce:'🛒', objectives:'◎', factions:'⚑', flags:'⚑' }[String(category || '')] || '•');
+
+const renderPlayerIntelligenceTimeline = () => {
+  if (!playerIntelTimeline) return;
+  const filter = String(playerIntelTimelineFilter?.value || 'all');
+  const rows = playerIntelTimelineRows.filter((row) => filter === 'all' || String(row?.category) === filter);
+  playerIntelTimeline.replaceChildren();
+  if (playerIntelTimelineEmpty) playerIntelTimelineEmpty.hidden = rows.length !== 0;
+  rows.forEach((row) => {
+    appendAdminActivity(playerIntelTimeline, {
+      symbolText: playerIntelSymbol(row?.category),
+      symbolClass: String(row?.tone || ''),
+      titleText: String(row?.title || 'Player activity'),
+      detailText: `${String(row?.detail || 'No additional detail')} · ${formatAccountDate(row?.created_at)}`
+    });
+    playerIntelTimeline.lastElementChild?.setAttribute('data-category', String(row?.category || 'activity'));
+  });
+};
+
+const renderPlayerIntelligence = (intelligence = {}) => {
+  const server = intelligence?.server || {};
+  const attention = intelligence?.attention || {};
+  const faction = intelligence?.faction || {};
+  const claims = Array.isArray(intelligence?.flag_claims) ? intelligence.flag_claims : [];
+  const pending = Array.isArray(intelligence?.pending_flag_requests) ? intelligence.pending_flag_requests : [];
+  const adm = intelligence?.adm || {};
+  const aliases = Array.isArray(intelligence?.aliases) ? intelligence.aliases : [];
+  const watch = intelligence?.watchlist || {};
+  setText('[data-player-intel-server]', String(server?.name || 'World War Z'));
+  setText('[data-player-intel-map]', String(server?.map_name || 'Selected server'));
+  setText('[data-player-intel-attention]', titleCaseState(attention?.level || 'clear'));
+  setText('[data-player-intel-attention-reasons]', (Array.isArray(attention?.reasons) ? attention.reasons : []).join(' · ') || 'No active markers');
+  const attentionCard = document.querySelector('[data-player-intel-attention]')?.closest('.player-intelligence-status');
+  if (attentionCard) attentionCard.dataset.tone = String(attention?.level || 'clear');
+  setText('[data-player-intel-faction]', faction?.available ? String(faction?.name || 'Faction') : 'None');
+  setText('[data-player-intel-faction-meta]', faction?.available ? `${titleCaseState(faction?.member_role || 'member')} · ${Number(faction?.member_count || 0)} member(s)` : 'No registered membership');
+  setText('[data-player-intel-faction-role]', faction?.available ? titleCaseState(faction?.member_role || 'member') : 'None');
+  setText('[data-player-intel-faction-size]', faction?.available ? `${Number(faction?.member_count || 0)} member(s)` : '—');
+  setText('[data-player-intel-flag]', claims.length ? String(claims[0]?.flag_name || claims[0]?.flag_key || 'Claimed flag') : pending.length ? 'Pending' : 'None');
+  setText('[data-player-intel-flag-meta]', claims.length ? `Claimed by ${String(claims[0]?.claimant_name || 'player/group')}` : pending.length ? `${String(pending[0]?.flag_name || pending[0]?.flag_key || 'Flag')} awaiting review` : 'No active or pending claim');
+  setText('[data-player-intel-flag-detail]', claims.length ? claims.map((claim) => String(claim?.flag_name || claim?.flag_key || 'Flag')).join(', ') : 'None');
+  setText('[data-player-intel-pending-flag]', pending.length ? pending.map((request) => String(request?.flag_name || request?.flag_key || 'Flag')).join(', ') : 'None');
+  setText('[data-player-intel-connections]', new Intl.NumberFormat('en-AU').format(Number(adm?.connections) || 0));
+  setText('[data-player-intel-adm-deaths]', new Intl.NumberFormat('en-AU').format(Number(adm?.deaths) || 0));
+  setText('[data-player-intel-unconscious]', new Intl.NumberFormat('en-AU').format(Number(adm?.unconscious) || 0));
+  setText('[data-player-intel-hits]', new Intl.NumberFormat('en-AU').format(Number(adm?.hits) || 0));
+  setText('[data-player-intel-watch-state]', watch?.active ? 'Watchlisted' : 'Clear');
+  setText('[data-player-intel-watch-reason]', watch?.active ? `${String(watch?.reason || 'Staff review')} · ${String(watch?.added_by || 'Administrator')} · ${formatAccountDate(watch?.created_at)}` : 'No staff watchlist entry.');
+  const aliasBox = document.querySelector('[data-player-intel-aliases]');
+  aliasBox?.replaceChildren();
+  if (aliasBox) {
+    if (!aliases.length) { const item=document.createElement('span'); item.className='muted-label'; item.textContent='No aliases recorded'; aliasBox.append(item); }
+    aliases.forEach((entry) => { const item=document.createElement('span'); item.textContent=String(entry?.alias || 'Alias'); item.title=`Recorded ${formatAccountDate(entry?.created_at)} by ${String(entry?.added_by || 'Administrator')}`; aliasBox.append(item); });
+  }
+  playerIntelTimelineRows = Array.isArray(intelligence?.timeline) ? intelligence.timeline : [];
+  renderPlayerIntelligenceTimeline();
+};
+
+playerIntelTimelineFilter?.addEventListener('change', renderPlayerIntelligenceTimeline);
+
 const renderAdminPlayerDetails = (payload) => {
   const player = payload?.player;
   const identity = player?.identity;
@@ -2342,6 +2412,7 @@ const renderAdminPlayerDetails = (payload) => {
   const pvp = player?.pvp;
   const moderation = player?.moderation;
   const administration = player?.administration;
+  const intelligence = player?.intelligence || {};
   if (!identity || !activity || !pvp || !moderation || !administration) throw new Error('Unexpected player-details response');
 
   selectedAdminPlayer = {
@@ -2385,6 +2456,7 @@ const renderAdminPlayerDetails = (payload) => {
   setText('[data-admin-player-streak]', pvp.available ? new Intl.NumberFormat('en-AU').format(Number(pvp.current_streak) || 0) : 'Unavailable');
   setText('[data-admin-player-longest]', pvp.longest_kill_metres == null ? 'Not recorded' : `${Number(pvp.longest_kill_metres).toFixed(1)} m`);
   setText('[data-admin-player-weapon]', String(pvp.favourite_weapon || 'Not recorded'));
+  renderPlayerIntelligence(intelligence);
   renderAdminProgression(progression);
   renderAdminEventWins(profile?.event_wins || {});
   renderAdminPvpHistory(pvp?.history);
