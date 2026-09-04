@@ -384,11 +384,52 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "section === 'server-audit') loadServerActionHistory()" not in operations_admin:
         errors.append("administration.js: Operations Centre must auto-load the unified audit.")
 
-    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.37.0</strong></div>' not in dashboard:
+    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.38.0</strong></div>' not in dashboard:
         errors.append("dashboard.html: command-centre footer release label is stale.")
 
-    if "Website v1.37.0 · Bot v1.29.0" not in index:
+    if "Website v1.38.0 · Bot v1.30.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
+
+    action_centre_js_path = ROOT / "assets/js/dashboard/action-centre.js"
+    action_centre_css_path = ROOT / "assets/css/dashboard/action-centre.css"
+    action_centre_js = action_centre_js_path.read_text(encoding="utf-8") if action_centre_js_path.is_file() else ""
+    action_centre_css = action_centre_css_path.read_text(encoding="utf-8") if action_centre_css_path.is_file() else ""
+    action_lazy = (ROOT / "assets/js/dashboard/lazy-assets.js").read_text(encoding="utf-8")
+    for token in (
+        'data-view="actioncentre"',
+        'data-view-panel="actioncentre"',
+        'data-action-centre-nav-badge',
+        'data-action-centre-view="active"',
+        'data-action-centre-list',
+    ):
+        if token not in dashboard:
+            errors.append(f"dashboard.html: missing Action Centre surface: {token}")
+    for token in (
+        "/api/account/action-centre",
+        "mark_all_read",
+        "archive_all_read",
+        "window.__wwzActionCentreReady = true",
+        "window.WWZActionCentre",
+        "60_000",
+    ):
+        if token not in action_centre_js:
+            errors.append(f"action-centre.js: missing runtime guard: {token}")
+    for token in (
+        ".action-centre-summary",
+        ".action-centre-item",
+        "@media (max-width:820px)",
+        "@media (max-width:540px)",
+    ):
+        if token not in action_centre_css:
+            errors.append(f"action-centre.css: missing layout guard: {token}")
+    for token in (
+        "ensureActionCentre",
+        "assets/js/dashboard/action-centre.js?v=1.38.0&rev=action-centre-1",
+        "assets/css/dashboard/action-centre.css?v=1.38.0&rev=action-centre-1",
+        "['actioncentre', ensureActionCentre]",
+    ):
+        if token not in action_lazy:
+            errors.append(f"lazy-assets.js: missing Action Centre lazy asset: {token}")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "Chernarus Live—Livonia Ready To Connect", "Livonia production onboarding", "current single-server setup", "participants", "Owner bulk catalogue controls", "Natural XP &amp; Prestige QA", "natural XP/Prestige QA remains deferred", "Deferred verification"):
         if stale in index:
             errors.append(f"index.html: stale roadmap content remains: {stale}")
@@ -674,7 +715,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         errors.append(
             "dashboard.html: command library must be lazy-loaded instead of downloaded on every dashboard visit."
         )
-    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.37.0&amp;rev=quest-commerce-1'
+    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.38.0&amp;rev=action-centre-1'
     lazy_index = dashboard.find(lazy_script)
     shell_index = dashboard.find("assets/js/dashboard/shell.js")
     if lazy_index < 0:
@@ -1689,7 +1730,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.37.0'",
+        "const WWZ_PWA_VERSION = '1.38.0'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
         "if (request.method !== 'GET') return;",

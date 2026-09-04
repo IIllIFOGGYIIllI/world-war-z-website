@@ -83,9 +83,10 @@
 <button class="pwa-install-button pwa-install-sidebar" data-pwa-install="" hidden="" type="button">Install App</button>
 <nav aria-label="Dashboard navigation" class="sidebar-navigation">
 <details class="nav-group" data-nav-group="" open="">
-<summary><span class="nav-group-icon" data-icon="home"><svg aria-hidden="true" viewbox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"></path><path d="M5 10.5V20h5v-6h4v6h5v-9.5"></path></svg></span><strong>Dashboard</strong><small>4</small></summary>
+<summary><span class="nav-group-icon" data-icon="home"><svg aria-hidden="true" viewbox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"></path><path d="M5 10.5V20h5v-6h4v6h5v-9.5"></path></svg></span><strong>Dashboard</strong><small>5</small></summary>
 <div class="nav-group-links">
 <button class="side-link active" data-nav-label="Overview" data-section="summary" data-view="overview" type="button"><span aria-hidden="true" class="side-link-icon" data-icon="home"><svg aria-hidden="true" viewbox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"></path><path d="M5 10.5V20h5v-6h4v6h5v-9.5"></path></svg></span><span class="side-link-copy"><strong>Overview</strong><small>Live Community Summary</small></span></button>
+<button class="side-link" data-nav-label="Action &amp; Notification Centre" data-section="inbox" data-view="actioncentre" type="button"><span aria-hidden="true" class="side-link-icon" data-icon="bell">◉</span><span class="side-link-copy"><strong>Action Centre</strong><small>Actions, Alerts &amp; Notifications</small></span><span class="side-link-badge danger" data-action-centre-nav-badge hidden>0</span></button>
 <button class="side-link" data-nav-label="Quick Actions" data-section="actions" data-view="overview" type="button"><span aria-hidden="true" class="side-link-icon" data-icon="bolt"><svg aria-hidden="true" viewbox="0 0 24 24"><path d="M13 2 5 14h6l-1 8 9-13h-6z"></path></svg></span><span class="side-link-copy"><strong>Quick Actions</strong><small>Common Shortcuts</small></span></button>
 <button class="side-link" data-nav-label="Live Operations" data-section="activity" data-view="overview" type="button"><span aria-hidden="true" class="side-link-icon" data-icon="clock"><svg aria-hidden="true" viewbox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></span><span class="side-link-copy"><strong>Live Operations</strong><small>Current Server Intelligence</small></span></button>
 <button class="side-link" data-nav-label="Development Roadmap" data-section="roadmap" data-view="overview" type="button"><span aria-hidden="true" class="side-link-icon" data-icon="map"><svg aria-hidden="true" viewbox="0 0 24 24"><path d="m3 6 5-2 8 3 5-2v13l-5 2-8-3-5 2z"></path><path d="M8 4v13M16 7v13"></path></svg></span><span class="side-link-copy"><strong>Development Roadmap</strong><small>Live, Current And Next</small></span></button>
@@ -171,7 +172,7 @@
 <span aria-hidden="true" class="access-icon" data-access-icon="">⌁</span>
 <div><strong data-access-card-title="">Guest access</strong><small data-access-card-copy="">Sign in will securely verify your community access.</small></div>
 </div>
-<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.37.0</strong></div>
+<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.38.0</strong></div>
 <div class="sidebar-footer"><a href="index.html">Website</a><a href="legal.html">Policies</a><a href="privacy.html">Privacy</a></div>
 </aside>
 <button aria-label="Close dashboard menu" class="sidebar-scrim" data-sidebar-scrim="" type="button"></button>
@@ -231,6 +232,72 @@
 </article>
 </div>
 </section>
+
+<section aria-labelledby="action-centre-title" class="dashboard-view" data-view-panel="actioncentre" hidden>
+  <div class="action-centre-shell" data-action-centre>
+    <section data-dashboard-section="inbox">
+      <div class="view-heading action-centre-heading">
+        <div>
+          <p class="breadcrumb">Dashboard / Action &amp; Notification Centre</p>
+          <h1 id="action-centre-title">Action &amp; Notification Centre</h1>
+          <p>Your server-scoped inbox for things that need attention, recent workflow updates and important WWZ notifications.</p>
+        </div>
+        <div class="heading-actions">
+          <button class="secondary-action" data-action-centre-notification-settings type="button">Browser Notification Settings</button>
+          <button class="secondary-action" data-action-centre-refresh type="button">Refresh Centre</button>
+        </div>
+      </div>
+
+      <div class="security-notice compact-notice action-centre-scope-note">
+        <span aria-hidden="true">◎</span>
+        <div><strong>One queue, one selected server</strong><p>Everything below is rebuilt from the authoritative WWZ systems for the currently selected server. Chernarus and Livonia remain isolated; read/archive state is private to your account.</p></div>
+      </div>
+
+      <div class="action-centre-guest panel" data-action-centre-guest hidden>
+        <div><p class="panel-kicker">Private account workspace</p><h2>Discord sign-in required</h2><p>Sign in to load your faction, flag, quest, event, order, ticket and notification activity. Admin queues are only included for authorised staff.</p></div>
+        <button class="primary-action" data-action-centre-signin type="button">Sign In With Discord</button>
+      </div>
+
+      <div data-action-centre-authenticated hidden>
+        <div class="action-centre-summary" aria-label="Action Centre summary">
+          <article><span>Needs Action</span><strong data-action-centre-actions>0</strong><small>Active workflow items</small></article>
+          <article><span>Unread</span><strong data-action-centre-unread>0</strong><small>Not yet reviewed</small></article>
+          <article data-priority="urgent"><span>Urgent</span><strong data-action-centre-urgent>0</strong><small>Highest priority</small></article>
+          <article><span>Archived</span><strong data-action-centre-archived>0</strong><small>Private history</small></article>
+          <article class="action-centre-admin-summary" data-action-centre-admin-summary hidden><span>Admin Actions</span><strong data-action-centre-admin-actions>0</strong><small>Staff-only tasks</small></article>
+        </div>
+
+        <div class="panel action-centre-panel">
+          <div class="action-centre-tabs" role="tablist" aria-label="Action Centre view">
+            <button class="active" data-action-centre-view="active" role="tab" aria-selected="true" type="button">Active</button>
+            <button data-action-centre-view="unread" role="tab" aria-selected="false" type="button">Unread</button>
+            <button data-action-centre-view="archived" role="tab" aria-selected="false" type="button">Archived</button>
+          </div>
+
+          <div class="action-centre-toolbar">
+            <label class="command-search action-centre-search"><span aria-hidden="true">⌕</span><span class="sr-only">Search Action Centre</span><input data-action-centre-search placeholder="Search actions, alerts and notifications…" type="search"/></label>
+            <label class="dialog-field compact-select"><span>Source</span><select data-action-centre-source><option value="all">All sources</option></select></label>
+            <label class="dialog-field compact-select"><span>Priority</span><select data-action-centre-priority><option value="all">All priorities</option><option value="urgent">Urgent</option><option value="high">High</option><option value="normal">Normal</option><option value="low">Low</option></select></label>
+            <label class="dialog-field compact-select"><span>Type</span><select data-action-centre-kind><option value="all">All types</option><option value="action">Actions</option><option value="notification">Notifications</option><option value="status">Status updates</option></select></label>
+          </div>
+
+          <div class="action-centre-bulkbar">
+            <div><strong data-action-centre-result-summary>Loading centre…</strong><small data-action-centre-updated>Waiting for a live snapshot</small></div>
+            <div class="action-centre-bulk-actions">
+              <button class="secondary-action compact-action" data-action-centre-mark-all-read type="button">Mark All Read</button>
+              <button class="secondary-action compact-action" data-action-centre-archive-read type="button">Archive Read</button>
+            </div>
+          </div>
+
+          <p class="action-centre-message" data-action-centre-message aria-live="polite" hidden></p>
+          <div class="action-centre-list" data-action-centre-list aria-live="polite"></div>
+          <div class="empty-state action-centre-empty" data-action-centre-empty hidden><strong>Nothing matches this view.</strong><span>Change the filters or refresh the centre. Completed workflows disappear from the active queue automatically unless there is recent notification history to show.</span></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</section>
+
 <section aria-labelledby="server-title" class="dashboard-view" data-view-panel="server" hidden="">
 <div class="view-heading" data-dashboard-section="status" id="dashboard-server-status"><div><p class="breadcrumb">Dashboard / Server status</p><h1 id="server-title">Server Status</h1><p>Live public information supplied by the World War Z Bot on Railway.</p></div><span class="status-badge large" data-server-status-badge=""><i></i><span data-status-label="">Loading live status</span></span></div>
 <div class="dashboard-grid server-detail-grid">
@@ -1403,7 +1470,7 @@ CarBattery,1" rows="6"></textarea></label>
 <dialog class="restart-dialog ticket-dialog" data-ticket-create-dialog=""><form data-ticket-create-form="" method="dialog"><button aria-label="Close ticket form" class="dialog-close" data-ticket-create-cancel="" type="button">×</button><span aria-hidden="true" class="restart-mark">🎟️</span><p class="panel-kicker">Discord + dashboard synchronized</p><h2>Open Support Ticket</h2><p class="dialog-copy">This creates a real private Discord ticket visible only to you, the configured Admin role and the bot, plus the same Railway record shown on the dashboard.</p><label class="dialog-field"><span>Category</span><select data-ticket-create-category="" required=""></select></label><label class="dialog-field"><span>Subject</span><input data-ticket-create-subject="" maxlength="100" minlength="3" required="" type="text"/></label><label class="dialog-field"><span>Details</span><textarea data-ticket-create-description="" maxlength="1500" minlength="10" required="" rows="6"></textarea></label><div class="restart-dialog-message" data-ticket-create-message="" hidden="" role="status"></div><button class="primary-action wide" data-ticket-create-submit="" type="submit">Create Private Ticket</button><button class="dialog-cancel" data-ticket-create-cancel="" type="button">Cancel</button></form></dialog>
 <dialog class="restart-dialog ticket-dialog ticket-member-detail-dialog" data-ticket-detail-dialog=""><form method="dialog"><button aria-label="Close ticket details" class="dialog-close" data-ticket-detail-close="" type="button">×</button><span aria-hidden="true" class="restart-mark">🎟️</span><p class="panel-kicker">Synchronized ticket record</p><h2 data-ticket-detail-title="">Ticket</h2><div class="ticket-detail-meta" data-ticket-detail-meta=""></div><section><h3>Request</h3><p class="ticket-description" data-ticket-detail-description=""></p></section><section class="ticket-thread-section"><div class="ticket-thread-heading"><h3>Live Discord Conversation</h3><span class="muted-label" data-ticket-thread-state="">Synced</span></div><div aria-live="polite" class="ticket-message-thread" data-ticket-message-thread=""></div><label class="dialog-field"><span>Reply <small>Appears immediately in the linked Discord ticket</small></span><textarea data-ticket-member-reply="" maxlength="1500" placeholder="Write a support reply…" rows="3"></textarea></label><button class="primary-action wide" data-ticket-member-reply-send="" type="button">Send Reply To Discord</button></section><section><h3>Activity</h3><div class="ticket-timeline" data-ticket-detail-actions=""></div></section><div class="ticket-member-actions"><label class="dialog-field" data-ticket-close-field=""><span>Close reason</span><textarea data-ticket-close-reason="" maxlength="1000" rows="3">Issue resolved.</textarea></label><button class="danger-action wide" data-ticket-member-close="" type="button">Close Ticket</button><button class="secondary-action wide" data-ticket-member-transcript="" hidden="" type="button">Open Saved Website Transcript</button><div data-ticket-rating-panel="" hidden=""><span>Rate the support you received</span><div class="ticket-rating-buttons"><button data-ticket-rate="1" type="button">1★</button><button data-ticket-rate="2" type="button">2★</button><button data-ticket-rate="3" type="button">3★</button><button data-ticket-rate="4" type="button">4★</button><button data-ticket-rate="5" type="button">5★</button></div></div></div><div class="restart-dialog-message" data-ticket-detail-message="" hidden="" role="status"></div><button class="dialog-cancel" data-ticket-detail-close="" type="button">Done</button></form></dialog>
 <dialog class="restart-dialog ticket-dialog" data-ticket-admin-confirm-dialog=""><form data-ticket-admin-confirm-form="" method="dialog"><button aria-label="Close confirmation" class="dialog-close" data-ticket-admin-confirm-cancel="" type="button">×</button><span aria-hidden="true" class="restart-mark">⚿</span><p class="panel-kicker">Protected synchronized action</p><h2 data-ticket-admin-confirm-title="">Confirm Ticket Action</h2><p class="dialog-copy" data-ticket-admin-confirm-copy="">This updates Railway and the linked Discord ticket.</p><label class="dialog-field" data-ticket-admin-confirm-reason-field=""><span>Reason</span><textarea data-ticket-admin-confirm-reason="" maxlength="1000" rows="4"></textarea></label><div class="restart-dialog-message" data-ticket-admin-confirm-message="" hidden="" role="status"></div><button class="danger-action wide" data-ticket-admin-confirm-submit="" type="submit">Confirm Action</button><button class="dialog-cancel" data-ticket-admin-confirm-cancel="" type="button">Cancel</button></form></dialog>
-<script defer="" src="assets/js/core/http.js?v=1.22.93&amp;rev=2"></script><script defer="" src="assets/js/dashboard/lazy-assets.js?v=1.37.0&amp;rev=quest-commerce-1"></script><script defer="" src="assets/js/dashboard/shell.js?v=1.25.1&amp;rev=livonia-pvp-1"></script><script defer="" src="assets/js/dashboard/core.js?v=1.22.93&amp;rev=auth-restore-fix-1"></script><script defer="" src="assets/js/dashboard/formatters.js?v=1.22.93"></script><script defer="" src="assets/js/dashboard/server-context.js?v=1.25.4&amp;rev=chernarus-pve-1"></script><script defer="" src="assets/js/dashboard/admin-access.js?v=1.22.93"></script><script defer="" src="assets/js/dashboard/account.js?v=1.22.93&amp;rev=auth-restore-fix-1"></script><script defer="" src="assets/js/dashboard/bootstrap.js?v=1.28.0&amp;rev=website-v1-28-0"></script>
+<script defer="" src="assets/js/core/http.js?v=1.22.93&amp;rev=2"></script><script defer="" src="assets/js/dashboard/lazy-assets.js?v=1.38.0&amp;rev=action-centre-1"></script><script defer="" src="assets/js/dashboard/shell.js?v=1.25.1&amp;rev=livonia-pvp-1"></script><script defer="" src="assets/js/dashboard/core.js?v=1.22.93&amp;rev=auth-restore-fix-1"></script><script defer="" src="assets/js/dashboard/formatters.js?v=1.22.93"></script><script defer="" src="assets/js/dashboard/server-context.js?v=1.25.4&amp;rev=chernarus-pve-1"></script><script defer="" src="assets/js/dashboard/admin-access.js?v=1.22.93"></script><script defer="" src="assets/js/dashboard/account.js?v=1.22.93&amp;rev=auth-restore-fix-1"></script><script defer="" src="assets/js/dashboard/bootstrap.js?v=1.28.0&amp;rev=website-v1-28-0"></script>
 <script defer src="assets/js/pwa.js?v=1.22.93"></script>
 <script defer src="assets/js/ui-system.js?v=1.24.0&rev=ops-ui-1"></script>
 <script defer src="assets/js/dashboard/ux-consistency.js?v=1.35.0&rev=dashboard-ux-1"></script>

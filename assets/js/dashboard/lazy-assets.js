@@ -276,6 +276,15 @@
     () => window.__wwzAdministrationReady === true
   )));
 
+  const ensureActionCentre = () => Promise.all([
+    loadStylesheetOnce('action-centre-css', 'assets/css/dashboard/action-centre.css?v=1.38.0&rev=action-centre-1'),
+    loadAfterDashboardRuntime(() => loadScriptOnce(
+      'action-centre',
+      'assets/js/dashboard/action-centre.js?v=1.38.0&rev=action-centre-1',
+      () => window.__wwzActionCentreReady === true
+    ))
+  ]).then(() => undefined);
+
   const ensureOperationsCentre = () => Promise.all([
     loadStylesheetOnce('operations-centre-css', 'assets/css/dashboard/operations-centre.css?v=1.36.0&rev=operations-centre-1'),
     loadAfterDashboardRuntime(() => loadScriptOnce(
@@ -374,6 +383,7 @@
 
   const loadViewAssets = ({ view = '', section = '' } = {}) => {
     const detail = { view, section };
+    if (view === 'actioncentre') ensureActionCentre().then(() => window.WWZActionCentre?.activate?.(detail)).catch(() => {});
     if (view === 'commands') ensureCommandLibrary().catch(() => {});
     if (view === 'map') ensureDashboardMap().catch(() => {});
     if (view === 'zones') ensureZones().then(() => window.WWZZones?.activate?.(detail)).catch(() => {});
@@ -406,6 +416,7 @@
   });
 
   const preloads = [
+    ['actioncentre', ensureActionCentre],
     ['commands', ensureCommandLibrary],
     ['map', ensureDashboardMap],
     ['zones', ensureZones],
@@ -424,6 +435,8 @@
     ['community', ensureCommunity],
     ['flags', ensureFlagClaims],
   ];
+  dashboardRuntimeReadyPromise.then(() => ensureActionCentre().catch(() => {}));
+
   preloads.forEach(([view, load]) => {
     document.querySelectorAll(`[data-view="${view}"]`).forEach((button) => {
       button.addEventListener('pointerenter', () => load().catch(() => {}), { passive: true });

@@ -1,7 +1,7 @@
-# World War Z Website v1.37.0
+# World War Z Website v1.38.0
 
-Updated-files release for the **Quest / Progression Overhaul + Shop / Donation Workflow Polish**.
+Updated-files release for the **Unified Action & Notification Centre**.
 
-Apply these files over the confirmed Website v1.36.0 deployment. It pairs with Bot v1.29.0.
+Apply these files over the confirmed Website v1.37.0 deployment. It pairs with Bot v1.30.0.
 
-This release adds Quest Career and XP-source intelligence, duplicate-safe donation checkout and clearer member/Admin commerce workflow presentation without changing DayZ mission files, Nitrado configuration or map data.
+The new dashboard workspace is server-scoped and account-private, preserves the existing PWA/map cache generation, and does not require a DayZ mission upload, Nitrado configuration change or wipe.
