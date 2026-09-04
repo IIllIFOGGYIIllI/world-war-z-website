@@ -1,20 +1,20 @@
-WORLD WAR Z WEBSITE v1.36.0 - AUDIT / OPERATIONS CENTRE
+WORLD WAR Z WEBSITE v1.37.0 - QUEST / PROGRESSION + COMMERCE WORKFLOW
 
 UPLOAD/REPLACE ONLY THE FILES IN THIS ARCHIVE, PRESERVING THEIR PATHS.
 
-This patch is built directly on Website v1.35.0 and pairs with Bot v1.28.0.
-Upload the matching Bot v1.28.0 updated files to Railway as part of this release.
+This patch is built directly on Website v1.36.0 and pairs with Bot v1.29.0.
 
 What it changes:
-- Converts the existing Audit Centre into the protected Audit / Operations Centre.
-- Adds live DayZ/Nitrado/Railway/Discord/ADM/restart service health.
-- Adds operational health signals, recent errors, restart history and permanent operational history.
-- Adds Operations to the searchable cross-system audit.
-- Advances the website/PWA release to v1.36.0 without rotating bounded map caches.
+- Adds Quest Career, rotation progress/streaks, milestones and Claim All Completed UI.
+- Adds Admin quest rotation-health analytics.
+- Adds real XP-source breakdown and Quest contribution views.
+- Adds duplicate-safe donation checkout guidance and four-stage member/Admin order workflow views.
+- Adds clearer next-action guidance to Shop orders.
 
-What it does NOT change:
-- Chernarus/Livonia server isolation.
-- DayZ mission files, map data, spawns or Nitrado configuration.
-- Existing dashboard permissions or member-facing feature behaviour.
+Compatibility:
+- Chernarus and Livonia remain isolated.
+- Existing Audit / Operations Centre, faction, event, deathmatch and map systems are preserved.
+- No map-cache generation rotation is required for this release.
+- No DayZ mission upload, Nitrado configuration change or wipe is required.
 
-After upload, commit/push to GitHub Pages. Installed PWA users will receive the normal update prompt after the new service worker is detected.
+Upload the files to the website repository, commit/push, and allow GitHub Pages to publish them.

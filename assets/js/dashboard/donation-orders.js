@@ -81,6 +81,15 @@
     const badge = document.createElement('span'); badge.className = 'donation-order-status'; badge.dataset.status = order.status || ''; badge.textContent = titleCase(order.status);
     head.append(identity, badge);
 
+    const workflow = order.workflow || {};
+    const workflowBar = document.createElement('div'); workflowBar.className = `donation-admin-workflow${workflow.action_required ? ' action-required' : ''}`;
+    const workflowCopy = document.createElement('div');
+    const workflowTitle = document.createElement('strong'); workflowTitle.textContent = `${workflow.label || titleCase(order.status)} · step ${Number(workflow.step) || 1} of ${Number(workflow.total_steps) || 4}`;
+    const workflowNext = document.createElement('small'); workflowNext.textContent = workflow.next_action || 'Review the current order state.';
+    workflowCopy.append(workflowTitle, workflowNext);
+    const workflowAge = document.createElement('span'); workflowAge.textContent = `${Number(workflow.age_hours || 0).toLocaleString('en-AU')}h old`;
+    workflowBar.append(workflowCopy, workflowAge);
+
     const body = document.createElement('div'); body.className = 'donation-order-card-body';
     const left = document.createElement('div');
     const meta = document.createElement('div'); meta.className = 'donation-order-meta';
@@ -128,7 +137,7 @@
       const info = actionButton('Need More Info', 'needs_info'); info.addEventListener('click', () => runAction(order.order_id, 'needs_info')); actions.append(info);
       const reject = actionButton('Reject', 'reject', 'danger-action compact-action'); reject.addEventListener('click', () => runAction(order.order_id, 'reject')); actions.append(reject);
     }
-    card.append(head, body, actions); return card;
+    card.append(head, workflowBar, body, actions); return card;
   };
 
   const load = async () => {

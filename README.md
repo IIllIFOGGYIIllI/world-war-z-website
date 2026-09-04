@@ -1,7 +1,7 @@
-# World War Z Website v1.36.0
+# World War Z Website v1.37.0
 
-Updated-files release for the **Audit / Operations Centre**.
+Updated-files release for the **Quest / Progression Overhaul + Shop / Donation Workflow Polish**.
 
-Apply these files over the confirmed Website v1.35.0 deployment. This release pairs with Bot v1.28.0 and preserves the existing Dashboard UX/Consistency layer, Chernarus/Livonia isolation, maps and PWA architecture.
+Apply these files over the confirmed Website v1.36.0 deployment. It pairs with Bot v1.29.0.
 
-The Admin Audit Centre is upgraded into a live Operations Centre with service health, meaningful operational signals, recent errors, restart history and the existing searchable cross-system audit.
+This release adds Quest Career and XP-source intelligence, duplicate-safe donation checkout and clearer member/Admin commerce workflow presentation without changing DayZ mission files, Nitrado configuration or map data.

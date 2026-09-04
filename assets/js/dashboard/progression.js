@@ -203,6 +203,37 @@
   };
 
 
+  const renderSourceBreakdown = (breakdown = {}, career = {}) => {
+    const target = panel.querySelector('[data-progression-source-breakdown]');
+    const empty = panel.querySelector('[data-progression-source-empty]');
+    const lifetime = Array.isArray(breakdown.lifetime) ? breakdown.lifetime : [];
+    const seven = new Map((Array.isArray(breakdown.seven_days) ? breakdown.seven_days : []).map((row) => [String(row.source_type || ''), row]));
+    if (target) {
+      target.replaceChildren();
+      lifetime.forEach((row) => {
+        const [icon, label] = sourceMeta(row.source_type);
+        const recent = seven.get(String(row.source_type || '')) || {};
+        const item = document.createElement('div');
+        item.className = 'progression-source-row';
+        const copy = document.createElement('div');
+        const title = document.createElement('strong'); title.textContent = `${icon} ${label}`;
+        const detail = document.createElement('small'); detail.textContent = `${formatNumber(row.events)} lifetime event${Number(row.events) === 1 ? '' : 's'} · ${formatNumber(recent.xp)} XP in 7 days`;
+        copy.append(title, detail);
+        const value = document.createElement('strong'); value.textContent = `${formatNumber(row.xp)} XP`;
+        item.append(copy, value); target.append(item);
+      });
+    }
+    if (empty) empty.hidden = lifetime.length !== 0;
+    setTextLocal('[data-progression-quest-xp]', `${formatNumber(career.claimed_reward_xp)} XP`);
+    setTextLocal('[data-progression-quest-rewards]', `$${formatNumber(career.claimed_reward_money)}`);
+    setTextLocal('[data-progression-quest-claimed]', formatNumber(career.claimed));
+    setTextLocal('[data-progression-quest-rate]', `${Number(career.completion_rate || 0).toFixed(Number(career.completion_rate || 0) % 1 ? 1 : 0)}%`);
+    const next = career.next_milestone;
+    setTextLocal('[data-progression-quest-next]', next
+      ? `Next Quest Career milestone: ${next.label} at ${formatNumber(next.target)} claimed quests.`
+      : (Number(career.claimed || 0) ? 'All current Quest Career milestones achieved.' : 'Complete your Daily and Weekly quests to build your objective career.'));
+  };
+
   const renderMember = (payload) => {
     memberPayload = payload;
     const member = payload?.member || {};
@@ -253,6 +284,7 @@
           : 'Level 100 complete — prestige ready')
         : `${formatNumber(member.current_level_xp)} / ${formatNumber(member.next_level_xp)} XP to Level ${(Number(member.level) || 1) + 1}`;
     }
+    renderSourceBreakdown(payload?.source_breakdown || {}, payload?.quest_career || {});
     const metric = leaderboardMetric?.value || 'overall';
     renderLeaderboard(payload?.leaderboards?.[metric] || payload?.leaderboard, metric);
     renderHistory(payload?.recent_xp);

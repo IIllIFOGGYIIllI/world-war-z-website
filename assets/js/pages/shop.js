@@ -637,6 +637,23 @@ const appendRentalProgress = (card, order) => {
   const meter = document.createElement('div'); meter.className = 'member-rental-meter'; const fill = document.createElement('i'); fill.style.width = `${percentage}%`; meter.append(fill);
   block.append(head, meter); card.append(block);
 };
+const appendOrderNextAction = (card, order) => {
+  const status = String(order?.status || '').toLowerCase();
+  const deliveryState = orderDeliveryState(order);
+  let label = 'Order received';
+  let detail = 'Railway is preparing the order for automatic delivery.';
+  if (deliveryState === 'restart_pending') { label = 'Next step · DayZ restart'; detail = 'The order is prepared and waiting for the next observed server restart.'; }
+  else if (deliveryState === 'active' && order?.delivery_type === 'event') { label = 'Rental active'; detail = 'This vehicle/event rental remains active for the purchased restart term.'; }
+  else if (status === 'fulfilled') { label = 'Order complete'; detail = 'The tracked delivery has completed successfully.'; }
+  else if (['refunded', 'cancelled'].includes(status)) { label = 'Order closed'; detail = 'This order is closed and no further delivery action is required.'; }
+  else if (status === 'failed' || deliveryState === 'failed') { label = 'Needs Admin review'; detail = 'Automatic delivery reported a failure and the order is waiting for review.'; }
+  else if (status === 'processing') { label = 'Delivery in progress'; detail = 'Railway is actively processing the order through the protected delivery queue.'; }
+  const block = document.createElement('div'); block.className = `member-order-next-step${status === 'failed' || deliveryState === 'failed' ? ' needs-attention' : ''}`;
+  const strong = document.createElement('strong'); strong.textContent = label;
+  const small = document.createElement('small'); small.textContent = detail;
+  block.append(strong, small); card.append(block);
+};
+
 const orderMatchesScope = (order) => {
   const scope = state.orderScope;
   if (scope === 'all') return true;
@@ -690,6 +707,7 @@ const renderOrders = () => {
     factValues.forEach(([label, value]) => { const block = document.createElement('div'); const small = document.createElement('span'); small.textContent = label; const strong = document.createElement('strong'); strong.textContent = value; block.append(small, strong); facts.append(block); });
     card.append(facts);
     appendOrderProgress(card, order);
+    appendOrderNextAction(card, order);
     appendRestartBanner(card, order);
     appendRentalProgress(card, order);
 

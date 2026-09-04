@@ -52,6 +52,8 @@
     catalogue: { categories: [], packages: [], payment: { methods: [] } },
     orders: [],
     selectedPurchase: null,
+    checkoutKey: '',
+    checkoutSignature: '',
     displayCurrency: 'AUD',
     fxRates: { ...FALLBACK_FX_RATES },
     fxDate: FALLBACK_FX_DATE,
@@ -349,6 +351,16 @@
     return preview;
   };
 
+  const newCheckoutKey = () => {
+    try {
+      if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+      const bytes = new Uint8Array(16); window.crypto?.getRandomValues?.(bytes);
+      const hex = [...bytes].map((value) => value.toString(16).padStart(2, '0')).join('');
+      if (hex && !/^0+$/.test(hex)) return `wwz-${hex}`;
+    } catch {}
+    return `wwz-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 14)}`;
+  };
+
   const openCheckout = (purchaseType, entry) => {
     if (!state.user) {
       startLogin();
@@ -368,6 +380,11 @@
       return;
     }
     state.selectedPurchase = { purchaseType, entry };
+    const signature = `${state.server.key || ''}:${purchaseType}:${entry.key || ''}`;
+    if (!state.checkoutKey || state.checkoutSignature !== signature) {
+      state.checkoutKey = newCheckoutKey();
+      state.checkoutSignature = signature;
+    }
     elements.checkoutTitle.textContent = 'Create Donation Order';
     elements.checkoutDescription.textContent = 'This creates a tracked WWZ order and private Discord purchase ticket. Payment remains external.';
     elements.checkoutPurchase.textContent = String(entry.name || 'Donation purchase');
@@ -607,6 +624,23 @@
       status.textContent = statusText(order.status);
       head.append(heading, status);
 
+      const workflow = order.workflow || {};
+      const workflowBlock = document.createElement('div');
+      workflowBlock.className = `donation-order-workflow${workflow.action_required ? ' action-required' : ''}`;
+      const steps = document.createElement('div'); steps.className = 'donation-order-workflow-steps';
+      const activeStep = Math.max(1, Math.min(4, Number(workflow.step) || 1));
+      ['Order', 'Payment', 'Review', 'Fulfilment'].forEach((label, index) => {
+        const step = document.createElement('span');
+        const stepNumber = index + 1;
+        step.className = stepNumber < activeStep || (stepNumber === activeStep && workflow.closed) ? 'complete' : (stepNumber === activeStep ? 'current' : '');
+        step.textContent = `${stepNumber} ${label}`;
+        steps.append(step);
+      });
+      const next = document.createElement('p');
+      const nextStrong = document.createElement('strong'); nextStrong.textContent = workflow.action_required ? 'Action required · ' : `${workflow.label || 'Order status'} · `;
+      const nextText = document.createElement('span'); nextText.textContent = workflow.next_action || 'Review this order for the next step.';
+      next.append(nextStrong, nextText); workflowBlock.append(steps, next);
+
       const body = document.createElement('div');
       body.className = 'donation-member-order-body';
       const meta = document.createElement('div');
@@ -683,7 +717,7 @@
         cancel.addEventListener('click', () => cancelOrder(order, cancel));
         actions.append(cancel);
       }
-      card.append(head, body, actions);
+      card.append(head, workflowBlock, body, actions);
       elements.memberOrders.append(card);
     });
   };
@@ -771,16 +805,20 @@
           action: 'create',
           purchase_type: purchaseType,
           catalogue_key: entry.key,
-          payment_method: paymentMethod
+          payment_method: paymentMethod,
+          checkout_key: state.checkoutKey || newCheckoutKey()
         })
       }, 45_000);
       if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'The donation order could not be created.');
       const warnings = [payload.message || 'Donation order created.'];
+      if (payload.idempotent_replay) warnings.push('Your previous checkout request was found and reopened safely; no duplicate WWZ order was created.');
       if (payload.ticket_warning) warnings.push(payload.ticket_warning);
       if (payload.payment_url) warnings.push('Opening the external payment provider now. Return here afterward to submit the payment reference/proof.');
       else warnings.push('No direct payment URL is configured. Follow the payment instructions shown on this page or in your purchase ticket.');
       showCheckoutMessage(warnings.join(' '), payload.ticket_warning ? 'info' : 'success');
       await loadOrders();
+      state.checkoutKey = '';
+      state.checkoutSignature = '';
       if (String(payload.payment_url || '').startsWith('https://')) {
         window.open(payload.payment_url, '_blank', 'noopener,noreferrer');
       }

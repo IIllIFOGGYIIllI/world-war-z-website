@@ -132,10 +132,10 @@
   ]).then(() => undefined);
 
   const ensureDonationOrders = () => Promise.all([
-    loadStylesheetOnce('donation-orders-css', 'assets/css/dashboard/donation-orders.css?v=1.22.102&rev=donation-orders-1'),
+    loadStylesheetOnce('donation-orders-css', 'assets/css/dashboard/donation-orders.css?v=1.37.0&rev=commerce-workflow-1'),
     loadAfterDashboardRuntime(() => loadScriptOnce(
       'donation-orders',
-      'assets/js/dashboard/donation-orders.js?v=1.22.102&rev=donation-orders-1',
+      'assets/js/dashboard/donation-orders.js?v=1.37.0&rev=commerce-workflow-1',
       () => window.__wwzDonationOrdersReady === true
     ))
   ]).then(() => undefined);
@@ -147,12 +147,12 @@
 
   const ensureProgressionStyles = () => loadStylesheetOnce(
     'progression-css',
-    'assets/css/dashboard/progression.css?v=1.22.93'
+    'assets/css/dashboard/progression.css?v=1.37.0&rev=quest-progression-1'
   );
 
   const ensureObjectivesStyles = () => loadStylesheetOnce(
     'objectives-css',
-    'assets/css/dashboard/objectives.css?v=1.22.93'
+    'assets/css/dashboard/objectives.css?v=1.37.0&rev=quest-progression-1'
   );
 
   const ensureFactionsStyles = () => loadStylesheetOnce(
@@ -293,13 +293,13 @@
 
   const ensureProgression = () => ensureProgressionStyles().then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
     'progression',
-    'assets/js/dashboard/progression.js?v=1.22.93&rev=3',
+    'assets/js/dashboard/progression.js?v=1.37.0&rev=quest-progression-1',
     () => window.__wwzProgressionReady === true
   )));
 
   const ensureObjectives = () => ensureObjectivesStyles().then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
     'objectives',
-    'assets/js/dashboard/objectives.js?v=1.22.93',
+    'assets/js/dashboard/objectives.js?v=1.37.0&rev=quest-progression-1',
     () => window.__wwzObjectivesReady === true
   )));
 

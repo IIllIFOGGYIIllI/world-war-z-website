@@ -213,6 +213,46 @@
     });
   };
 
+  const renderCareer = (career = {}) => {
+    const set = (selector, value) => { const node = panel.querySelector(selector); if (node) node.textContent = String(value); };
+    const pct = (value) => `${Math.max(0, Math.min(100, Number(value) || 0)).toFixed(Number(value) % 1 ? 1 : 0)}%`;
+    set('[data-quest-career-assigned]', number(career.assigned));
+    set('[data-quest-career-completed]', number(career.completed));
+    set('[data-quest-career-claimed]', number(career.claimed));
+    set('[data-quest-career-rate]', pct(career.completion_rate));
+    set('[data-quest-career-rewards]', `${money(career.claimed_reward_money)} + ${number(career.claimed_reward_xp)} XP`);
+    set('[data-quest-career-claimable]', `${money(career.claimable_reward_money)} + ${number(career.claimable_reward_xp)} XP`);
+    set('[data-quest-claim-all-count]', `${number(career.claimable)} ready`);
+    const claimAll = panel.querySelector('[data-objective-action="claim_all_quests"]');
+    if (claimAll) claimAll.disabled = Number(career.claimable || 0) < 1 || working;
+
+    const rotations = [
+      ['daily', career.daily || {}, career.streaks?.daily || {}],
+      ['weekly', career.weekly || {}, career.streaks?.weekly || {}]
+    ];
+    rotations.forEach(([key, rotation, streak]) => {
+      set(`[data-quest-${key}-progress-label]`, `${number(rotation.completed)} / ${number(rotation.total)} complete`);
+      set(`[data-quest-${key}-streak]`, `Perfect streak: ${number(streak.current)} · Best ${number(streak.best)}`);
+      const track = panel.querySelector(`[data-quest-${key}-track]`);
+      if (track) track.style.setProperty('--quest-career-progress', pct(rotation.progress_percent));
+    });
+
+    const milestones = panel.querySelector('[data-quest-milestones]');
+    if (milestones) {
+      milestones.replaceChildren();
+      (career.milestones || []).forEach((entry) => {
+        const badge = document.createElement('span');
+        badge.className = `quest-milestone${entry.achieved ? ' achieved' : ''}`;
+        badge.textContent = `${entry.achieved ? '✓' : '○'} ${entry.label} · ${number(entry.target)}`;
+        milestones.append(badge);
+      });
+    }
+    const next = career.next_milestone;
+    set('[data-quest-next-milestone]', next
+      ? `${next.label}: ${number(career.claimed)} / ${number(next.target)} claimed quests`
+      : (Number(career.claimed || 0) ? 'All current Quest Career milestones achieved.' : 'Complete quests to begin your objective career.'));
+  };
+
   const renderMember = (payload) => {
     memberData = payload;
     const signedIn = Boolean(token());
@@ -221,6 +261,7 @@
     if (unlinked) unlinked.hidden = !signedIn || linked;
     if (content) content.hidden = !linked;
     if (!linked) return;
+    renderCareer(payload.quests?.career || {});
     renderQuestList(dailyList, payload.quests?.daily, '[data-objectives-daily-empty]');
     renderQuestList(weeklyList, payload.quests?.weekly, '[data-objectives-weekly-empty]');
     renderHistory(payload.quests?.history);
@@ -239,6 +280,14 @@
     const enabled = panel.querySelector('[data-quest-enabled]'); if (enabled) enabled.checked = Boolean(settings.enabled);
     const daily = panel.querySelector('[data-quest-daily-count]'); if (daily) daily.value = String(settings.daily_count || 3);
     const weekly = panel.querySelector('[data-quest-weekly-count]'); if (weekly) weekly.value = String(settings.weekly_count || 5);
+    const analytics = payload.quest_analytics || {};
+    const setAdmin = (selector, value) => { const node = panel.querySelector(selector); if (node) node.textContent = String(value); };
+    setAdmin('[data-quest-admin-survivors]', number(analytics.tracked_survivors));
+    setAdmin('[data-quest-admin-lifetime]', number(analytics.assignments_lifetime));
+    setAdmin('[data-quest-admin-current]', `${number(analytics.current_completed)} / ${number(analytics.current_assignments)}`);
+    setAdmin('[data-quest-admin-claimable]', number(analytics.current_claimable));
+    setAdmin('[data-quest-admin-rate]', `${Number(analytics.thirty_day_completion_rate || 0).toFixed(Number(analytics.thirty_day_completion_rate || 0) % 1 ? 1 : 0)}%`);
+    setAdmin('[data-quest-admin-rewards]', `${money(analytics.claimable_reward_money)} + ${number(analytics.claimable_reward_xp)} XP`);
     if (!adminList) return;
     adminList.replaceChildren();
 
@@ -365,16 +414,18 @@
     if (!trigger || working) return;
     const action = trigger.dataset.objectiveAction;
     const id = Number(trigger.dataset.objectiveId || 0);
-    working = true; trigger.disabled = true; setMessage('Processing objective action…');
+    working = true; trigger.disabled = true; setMessage(action === 'claim_all_quests' ? 'Claiming every completed quest reward…' : 'Processing objective action…');
     try {
-      if (action === 'claim_quest') await postMember({ action, quest_id: id });
-      else if (action === 'cancel_bounty') await postMember({ action, bounty_id: id });
-      else if (action === 'accept_contract' || action === 'claim_contract') await postMember({ action, contract_id: id });
-      else if (action === 'admin_cancel_contract') await postAdmin({ action: 'cancel_contract', contract_id: id });
-      else if (action === 'admin_cancel_bounty') await postAdmin({ action: 'cancel_bounty', bounty_id: id });
+      let result = null;
+      if (action === 'claim_all_quests') result = await postMember({ action });
+      else if (action === 'claim_quest') result = await postMember({ action, quest_id: id });
+      else if (action === 'cancel_bounty') result = await postMember({ action, bounty_id: id });
+      else if (action === 'accept_contract' || action === 'claim_contract') result = await postMember({ action, contract_id: id });
+      else if (action === 'admin_cancel_contract') result = await postAdmin({ action: 'cancel_contract', contract_id: id });
+      else if (action === 'admin_cancel_bounty') result = await postAdmin({ action: 'cancel_bounty', bounty_id: id });
       loaded = false; adminLoaded = false;
       await loadMember({ force: true }); await loadAdmin({ force: true });
-      setMessage('Objective action completed.', 'success');
+      setMessage(result?.message || 'Objective action completed.', 'success');
     } catch (error) { setMessage(error.message || 'The objective action failed.', 'error'); }
     finally { working = false; trigger.disabled = false; }
   });

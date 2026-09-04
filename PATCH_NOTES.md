@@ -1,19 +1,19 @@
-# World War Z Website v1.36.0 — Audit / Operations Centre
+# World War Z Website v1.37.0 — Quest / Progression + Commerce Workflow
 
-## Operations Centre
-- Upgrades the existing Admin Audit Centre into one protected Audit / Operations Centre while preserving the existing `staff/server-audit` route.
-- Adds live health cards for DayZ, Nitrado, Railway/API, Discord, the ADM watcher and restart intelligence.
-- Adds the current server-side 0–100 operational health score, active health signals, open-failure count, recent sanitized errors, detected-restart summary and permanent operational history.
-- Refreshes automatically while the view is open and remains compatible with the existing manual Refresh Centre action.
+## Quest / progression overhaul
+- Upgrades Objectives into the Quest & Objectives Centre with lifetime Quest Career statistics, claimable-reward totals, Daily/Weekly rotation progress, perfect-rotation streaks and milestones.
+- Adds one-click **Claim All Completed** using the protected Bot action while preserving the existing per-quest reward path.
+- Adds protected Admin rotation-health analytics for survivor engagement, current completion, ready-to-claim rewards and 30-day completion performance.
+- Adds a real XP-source breakdown to Progression and a dedicated Quest Career contribution summary.
 
-## Searchable audit
-- Adds Operations as a dedicated unified-audit filter.
-- Keeps the existing pagination, text search, subsystem/result/date filters and protected Railway authorization.
-- Continues to exclude secrets, raw Discord IDs and internal metadata from the browser payload.
+## Shop / donation workflow polish
+- Adds a clear four-stage donation-order lifecycle from WWZ order creation through external payment, proof review and fulfilment.
+- Adds duplicate-safe checkout presentation tied to the Bot v1.29.0 checkout idempotency key, so a timed-out retry reopens the same WWZ order instead of creating another one.
+- Adds per-order next-action guidance for donation members and Admins, expanded order-health statistics and oldest-open visibility.
+- Adds clearer next-stage guidance to normal Shop orders while preserving the existing delivery/restart workflow engine.
 
 ## Compatibility
-- Pairs with **Bot v1.28.0**. The new live Operations Centre requires the matching bot/API update.
-- Preserves Website v1.35.0 dashboard UX/accessibility improvements and all existing feature controllers.
-- Chernarus and Livonia remain isolated through the selected-server context.
-- No DayZ mission upload, Nitrado configuration change or wipe is required.
-- The bounded map-cache generation remains unchanged.
+- Pairs with Bot v1.29.0 and preserves the v1.36 Audit / Operations Centre and v1.35 dashboard consistency layer.
+- Chernarus and Livonia remain isolated.
+- The bounded map-cache generation remains unchanged; only changed quest/commerce assets receive update invalidations.
+- No DayZ mission upload, Nitrado configuration change, map-data change or wipe is required.

@@ -384,10 +384,10 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "section === 'server-audit') loadServerActionHistory()" not in operations_admin:
         errors.append("administration.js: Operations Centre must auto-load the unified audit.")
 
-    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.36.0</strong></div>' not in dashboard:
+    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.37.0</strong></div>' not in dashboard:
         errors.append("dashboard.html: command-centre footer release label is stale.")
 
-    if "Website v1.36.0 · Bot v1.28.0" not in index:
+    if "Website v1.37.0 · Bot v1.29.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "Chernarus Live—Livonia Ready To Connect", "Livonia production onboarding", "current single-server setup", "participants", "Owner bulk catalogue controls", "Natural XP &amp; Prestige QA", "natural XP/Prestige QA remains deferred", "Deferred verification"):
         if stale in index:
@@ -674,7 +674,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         errors.append(
             "dashboard.html: command library must be lazy-loaded instead of downloaded on every dashboard visit."
         )
-    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.34.0'
+    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.37.0&amp;rev=quest-commerce-1'
     lazy_index = dashboard.find(lazy_script)
     shell_index = dashboard.find("assets/js/dashboard/shell.js")
     if lazy_index < 0:
@@ -734,8 +734,8 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     lazy_view_styles = (
         ("Tickets styles", f"assets/css/dashboard/tickets.css?v={EXPECTED_ASSET_VERSION}", "ensureTicketsStyles"),
         ("Moderation/appeals styles", f"assets/css/dashboard/moderation.css?v={EXPECTED_ASSET_VERSION}", "ensureModerationStyles"),
-        ("Progression styles", f"assets/css/dashboard/progression.css?v={EXPECTED_ASSET_VERSION}", "ensureProgressionStyles"),
-        ("Objectives styles", f"assets/css/dashboard/objectives.css?v={EXPECTED_ASSET_VERSION}", "ensureObjectivesStyles"),
+        ("Progression styles", "assets/css/dashboard/progression.css?v=1.37.0&rev=quest-progression-1", "ensureProgressionStyles"),
+        ("Objectives styles", "assets/css/dashboard/objectives.css?v=1.37.0&rev=quest-progression-1", "ensureObjectivesStyles"),
         ("Factions styles", "assets/css/dashboard/factions.css?v=1.34.0&rev=faction-upgrade-1", "ensureFactionsStyles"),
     )
     for label, asset_url, loader_name in lazy_view_styles:
@@ -791,8 +791,8 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         ("Administration controller", "assets/js/dashboard/administration.js?v=1.36.0", "ensureAdministration", "__wwzAdministrationReady", "assets/js/dashboard/administration.js"),
         ("Appeals controller", f"assets/js/dashboard/appeals.js?v={EXPECTED_ASSET_VERSION}", "ensureAppeals", "__wwzAppealsReady", "assets/js/dashboard/appeals.js"),
         ("Tickets controller", f"assets/js/dashboard/tickets.js?v={EXPECTED_ASSET_VERSION}", "ensureTickets", "__wwzTicketsReady", "assets/js/dashboard/tickets.js"),
-        ("Progression controller", f"assets/js/dashboard/progression.js?v={EXPECTED_ASSET_VERSION}&rev=3", "ensureProgression", "__wwzProgressionReady", "assets/js/dashboard/progression.js"),
-        ("Objectives controller", f"assets/js/dashboard/objectives.js?v={EXPECTED_ASSET_VERSION}", "ensureObjectives", "__wwzObjectivesReady", "assets/js/dashboard/objectives.js"),
+        ("Progression controller", "assets/js/dashboard/progression.js?v=1.37.0&rev=quest-progression-1", "ensureProgression", "__wwzProgressionReady", "assets/js/dashboard/progression.js"),
+        ("Objectives controller", "assets/js/dashboard/objectives.js?v=1.37.0&rev=quest-progression-1", "ensureObjectives", "__wwzObjectivesReady", "assets/js/dashboard/objectives.js"),
         ("Factions controller", "assets/js/dashboard/factions.js?v=1.34.0&rev=faction-upgrade-1", "ensureFactions", "__wwzFactionsReady", "assets/js/dashboard/factions.js"),
         ("Command Centre controller", "assets/js/dashboard/command-centre.js?v=1.28.0", "ensureCommandCentre", "__wwzCommandCentreReady", "assets/js/dashboard/command-centre.js"),
     )
@@ -996,6 +996,36 @@ def validate_progression_dashboard_controls(errors: list[str]) -> None:
     if '.progression-role-picker' not in css:
         errors.append("Progression role search controls are missing their dashboard styling.")
 
+    quest_html = (
+        'data-progression-source-breakdown',
+        'data-progression-quest-xp',
+        'data-progression-quest-rewards',
+        'data-progression-quest-claimed',
+        'data-progression-quest-rate',
+        'Open Quest Centre',
+    )
+    for token in quest_html:
+        if token not in html:
+            errors.append(f"Progression dashboard is missing v1.37 quest/source surface: {token}")
+    for token in ('renderSourceBreakdown', 'payload?.source_breakdown', 'payload?.quest_career'):
+        if token not in js:
+            errors.append(f"Progression dashboard JavaScript is missing v1.37 source intelligence: {token}")
+
+    objectives_js = (ROOT / "assets/js/dashboard/objectives.js").read_text(encoding="utf-8")
+    for token in (
+        'Quest &amp; Objectives Centre',
+        'data-quest-career-assigned',
+        'data-quest-career-rate',
+        'data-objective-action="claim_all_quests"',
+        'data-quest-admin-survivors',
+        'data-quest-admin-rate',
+    ):
+        if token not in html:
+            errors.append(f"Objectives dashboard is missing v1.37 Quest Career surface: {token}")
+    for token in ('const renderCareer', "action === 'claim_all_quests'", 'payload.quests?.career'):
+        if token not in objectives_js:
+            errors.append(f"Objectives dashboard JavaScript is missing v1.37 Quest Career behaviour: {token}")
+
 
 def validate_checkout_compatibility(errors: list[str]) -> None:
     coordinate_fields = (
@@ -1064,6 +1094,42 @@ def validate_checkout_compatibility(errors: list[str]) -> None:
         errors.append(
             "Dashboard shop must disable hidden manual coordinate inputs when a saved location is selected."
         )
+
+
+    donations_html = (ROOT / "donations.html").read_text(encoding="utf-8")
+    donations_js = (ROOT / "assets/js/pages/donations.js").read_text(encoding="utf-8")
+    donation_admin_js = (ROOT / "assets/js/dashboard/donation-orders.js").read_text(encoding="utf-8")
+    lazy_assets = (ROOT / "assets/js/dashboard/lazy-assets.js").read_text(encoding="utf-8")
+    for token in (
+        'How Donation Orders Work',
+        'Duplicate-safe checkout',
+        'assets/css/pages/donations.css?v=1.37.0&amp;rev=commerce-workflow-1',
+        'assets/js/pages/donations.js?v=1.37.0&amp;rev=commerce-workflow-1',
+    ):
+        if token not in donations_html:
+            errors.append(f"donations.html: missing v1.37 commerce workflow surface: {token}")
+    for token in ('const newCheckoutKey', 'checkout_key:', 'payload.idempotent_replay', 'donation-order-workflow'):
+        if token not in donations_js:
+            errors.append(f"donations.js: missing duplicate-safe workflow behaviour: {token}")
+    for token in ('order.workflow', 'donation-admin-workflow', 'workflow.next_action'):
+        if token not in donation_admin_js:
+            errors.append(f"donation-orders.js: missing Admin workflow behaviour: {token}")
+    for token in (
+        'assets/css/dashboard/donation-orders.css?v=1.37.0&rev=commerce-workflow-1',
+        'assets/js/dashboard/donation-orders.js?v=1.37.0&rev=commerce-workflow-1',
+    ):
+        if token not in lazy_assets:
+            errors.append(f"lazy-assets.js: missing current donation-order workflow asset: {token}")
+    for token in ('appendOrderNextAction', 'member-order-next-step'):
+        source = standalone_shop if token == 'appendOrderNextAction' else (ROOT / "assets/css/pages/shop.css").read_text(encoding="utf-8")
+        if token not in source:
+            errors.append(f"Standalone Shop is missing v1.37 next-action behaviour/style: {token}")
+    for token in (
+        'assets/css/pages/shop.css?v=1.37.0&amp;rev=commerce-workflow-1',
+        'assets/js/pages/shop.js?v=1.37.0&amp;rev=commerce-workflow-1',
+    ):
+        if token not in shop_html:
+            errors.append(f"shop.html: missing current v1.37 commerce asset: {token}")
 
 
 
@@ -1623,7 +1689,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.36.0'",
+        "const WWZ_PWA_VERSION = '1.37.0'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
         "if (request.method !== 'GET') return;",
