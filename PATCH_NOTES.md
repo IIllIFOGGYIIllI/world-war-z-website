@@ -1,19 +1,19 @@
-# World War Z Website v1.33.0 — Community Events Overhaul
+# World War Z Website v1.34.0 — Faction System Upgrade
 
-## Event Hub
-- Upgrades public/member event cards with category, location, signup counts, loadout notes, rules, rewards and optional event banner artwork.
-- Signed-in members can register for or withdraw from scheduled/live events directly from the Community Hub.
-- Adds a Recent Results surface for published event outcomes and winners.
+## Member Faction Centre
+- Adds faction application submission/withdrawal and invitation accept/decline flows.
+- Adds leader/officer recruitment queues, member invitations and roster management.
+- Adds officer promotion/demotion, leadership transfer, managed removals and protected voluntary leave workflows.
+- Adds faction profile/recruitment editing, motto/description presentation and leader rename requests.
+- Adds faction activity history, current flag claims and server-scoped bounty/contract statistics.
 
-## Staff / Owner Event Operations
-- Adds series scheduling with occurrence count and repeat interval.
-- Adds reusable Owner-managed event locations and loadout references per server.
-- Expands reusable plans with category, second early reminder, capacity, attendance/winner rewards, rules, loadout summary, banner URL and schedule-announcement toggle.
-- Adds a live Attendance Manager with going/waitlist/attended/no-show states and configured reward handling.
-- Adds result publishing, winner selection and result re-announcement controls.
-- Adds event audit/history presentation plus manual run announcement and cancellation controls.
+## Admin Faction Operations
+- Adds application and rename-review queues.
+- Adds faction suspend/reactivate controls, private Admin notes and audited faction-bank adjustments.
+- Expands Admin roster controls without exposing private Admin notes to member/public views.
 
-## Isolation / PWA
-- Chernarus and Livonia event configuration and attendance remain independently server-scoped.
-- Website version advances to v1.33.0 with Bot v1.26.0.
-- Community assets and installed-app update revision are advanced so the Event Hub refreshes cleanly after deployment.
+## Isolation / compatibility
+- Chernarus and Livonia faction data remain independently server-scoped.
+- Website advances to v1.34.0 with Bot v1.27.0.
+- Existing legacy map-link fields are retained only for backward compatibility; this upgrade does not add new base-location or map-marker creation.
+- Faction assets and installed-app revision are advanced so the upgraded interface refreshes cleanly after deployment.

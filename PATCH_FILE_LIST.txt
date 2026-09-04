@@ -2,8 +2,8 @@ dashboard.html
 index.html
 changelog.html
 sw.js
-assets/css/dashboard/community.css
-assets/js/dashboard/community.js
+assets/css/dashboard/factions.css
+assets/js/dashboard/factions.js
 assets/js/dashboard/lazy-assets.js
 scripts/validate_site.py
 PATCH_NOTES.md

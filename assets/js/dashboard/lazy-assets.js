@@ -157,7 +157,7 @@
 
   const ensureFactionsStyles = () => loadStylesheetOnce(
     'factions-css',
-    'assets/css/dashboard/factions.css?v=1.22.93'
+    'assets/css/dashboard/factions.css?v=1.34.0&rev=faction-upgrade-1'
   );
 
   const ensureCommandLibrary = () => loadScriptOnce(
@@ -296,7 +296,7 @@
 
   const ensureFactions = () => ensureFactionsStyles().then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
     'factions',
-    'assets/js/dashboard/factions.js?v=1.22.93&rev=2',
+    'assets/js/dashboard/factions.js?v=1.34.0&rev=faction-upgrade-1',
     () => window.__wwzFactionsReady === true
   )));
 
