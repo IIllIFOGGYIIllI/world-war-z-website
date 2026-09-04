@@ -2,10 +2,13 @@ dashboard.html
 index.html
 changelog.html
 sw.js
-assets/css/dashboard/ux-consistency.css
-assets/js/dashboard/ux-consistency.js
+assets/css/dashboard/operations-centre.css
+assets/js/dashboard/administration.js
+assets/js/dashboard/core.js
+assets/js/dashboard/lazy-assets.js
+assets/js/dashboard/operations-centre.js
 scripts/validate_site.py
-PATCH_NOTES.md
 README.md
+PATCH_NOTES.md
 INSTALL_README.txt
 PATCH_FILE_LIST.txt

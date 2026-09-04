@@ -7,7 +7,8 @@ const auditSubsystemLabel = (value) => ({
   tickets: 'Tickets',
   notifications: 'Notifications',
   objectives: 'Objectives',
-  factions: 'Factions'
+  factions: 'Factions',
+  operations: 'Operations'
 }[String(value || '')] || titleCaseState(value));
 
 const auditSymbol = (subsystem, result) => {
@@ -22,7 +23,8 @@ const auditSymbol = (subsystem, result) => {
     tickets: { text: '🎟', tone: '' },
     notifications: { text: '↗', tone: '' },
     objectives: { text: '◎', tone: '' },
-    factions: { text: '⚑', tone: '' }
+    factions: { text: '⚑', tone: '' },
+    operations: { text: '◉', tone: '' }
   }[subsystem] || { text: '✓', tone: 'green' };
 };
 
@@ -1562,6 +1564,7 @@ const activateAdministrationView = ({ view = '', section = '' } = {}) => {
   if (view === 'staff' && section === 'cases') loadModerationCases();
   if (view === 'staff' && section === 'banlists') loadCurrentBanlists();
   if (view === 'staff' && section === 'failures') loadOperationFailures();
+  if (view === 'staff' && section === 'server-audit') loadServerActionHistory();
   if (view === 'configuration' && section === 'discord-onboarding') loadOnboardingConfiguration();
   if (view === 'configuration' && section === 'community-tools') loadCommunityTools();
   if (view === 'configuration' && section === 'discord-logs') loadDiscordLogConfiguration();

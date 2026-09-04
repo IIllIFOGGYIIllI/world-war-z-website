@@ -272,9 +272,18 @@
     loadStylesheetOnce('player-intelligence-css', 'assets/css/dashboard/player-intelligence.css?v=1.31.0&rev=player-intelligence-1')
   ]).then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
     'administration',
-    'assets/js/dashboard/administration.js?v=1.31.0&rev=player-intelligence-1',
+    'assets/js/dashboard/administration.js?v=1.36.0&rev=operations-centre-1',
     () => window.__wwzAdministrationReady === true
   )));
+
+  const ensureOperationsCentre = () => Promise.all([
+    loadStylesheetOnce('operations-centre-css', 'assets/css/dashboard/operations-centre.css?v=1.36.0&rev=operations-centre-1'),
+    loadAfterDashboardRuntime(() => loadScriptOnce(
+      'operations-centre',
+      'assets/js/dashboard/operations-centre.js?v=1.36.0&rev=operations-centre-1',
+      () => window.__wwzOperationsCentreReady === true
+    ))
+  ]).then(() => undefined);
 
   const ensureTickets = () => ensureTicketsStyles().then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
     'tickets',
@@ -373,6 +382,7 @@
     if (view === 'shop' || view === 'shopadmin') ensureShopWikiPreviews().catch(() => {});
     if (commerceView(detail)) activateCommerceView(detail).catch(() => {});
     if (administrationView(detail)) ensureAdministration().catch(() => {});
+    if (view === 'staff' && section === 'server-audit') ensureOperationsCentre().then(() => window.WWZOperationsCentre?.activate?.(detail)).catch(() => {});
     if (view === 'staff' && section === 'rules') ensureRulesManager().catch(() => {});
     if (view === 'staff' && section === 'donations') ensureDonationManager().catch(() => {});
     if (view === 'staff' && section === 'donation-orders') ensureDonationOrders().catch(() => {});
@@ -454,6 +464,11 @@
     });
   });
 
+  document.querySelectorAll('[data-view="staff"][data-section="server-audit"]').forEach((button) => {
+    button.addEventListener('pointerenter', () => ensureOperationsCentre().catch(() => {}), { passive: true });
+    button.addEventListener('focus', () => ensureOperationsCentre().catch(() => {}));
+  });
+
   document.querySelectorAll('[data-view="staff"][data-section="command-centre"]').forEach((button) => {
     button.addEventListener('pointerenter', () => ensureCommandCentre().catch(() => {}), { passive: true });
     button.addEventListener('focus', () => ensureCommandCentre().catch(() => {}));
@@ -485,6 +500,7 @@
     ensureLivoniaPvp,
     ensureMapRuntime,
     ensureModerationStyles,
+    ensureOperationsCentre,
     ensureRulesManager,
     ensureDonationManager,
     ensureDonationOrders,

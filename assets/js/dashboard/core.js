@@ -48,6 +48,7 @@ const ADMIN_BANLISTS_URL = `${DASHBOARD_API_BASE}/api/admin/moderation/banlists`
 const ADMIN_MODERATION_QUEUE_URL = `${DASHBOARD_API_BASE}/api/admin/moderation/queue`;
 const ADMIN_MODERATION_STAFF_URL = `${DASHBOARD_API_BASE}/api/admin/moderation/staff`;
 const ADMIN_MODERATION_ASSIGNMENT_URL = `${DASHBOARD_API_BASE}/api/admin/moderation/assignment`;
+const ADMIN_OPERATIONS_CENTRE_URL = `${DASHBOARD_API_BASE}/api/admin/operations/centre`;
 const ADMIN_OPERATION_FAILURES_URL = `${DASHBOARD_API_BASE}/api/admin/operations/failures`;
 const ADMIN_OPERATION_RETRY_URL = `${DASHBOARD_API_BASE}/api/admin/operations/retry`;
 const OWNER_NOTIFICATION_CONFIG_URL = `${DASHBOARD_API_BASE}/api/owner/notifications/config`;

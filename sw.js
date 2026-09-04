@@ -1,6 +1,6 @@
 'use strict';
 
-const WWZ_PWA_VERSION = '1.35.0';
+const WWZ_PWA_VERSION = '1.36.0';
 const CACHE_PREFIX = 'wwz-pwa-';
 const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 // Public release versions can advance without discarding the bounded map caches.
@@ -8,7 +8,7 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-09-04-website-v1-35-0';
+const WWZ_PWA_UPDATE_REVISION = '2026-09-04-website-v1-36-0';
 const CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${CACHE_RELEASE}`;
@@ -76,6 +76,11 @@ const UPDATE_INVALIDATIONS = [
   './assets/js/dashboard/lazy-assets.js?v=1.30.0&rev=flag-phase2-1',
   './assets/js/dashboard/administration.js?v=1.22.93&rev=discord-channel-refresh-1',
   './assets/js/dashboard/administration.js?v=1.31.0&rev=player-intelligence-1',
+  './assets/js/dashboard/administration.js?v=1.36.0&rev=operations-centre-1',
+  './assets/js/dashboard/lazy-assets.js?v=1.36.0&rev=operations-centre-1',
+  './assets/js/dashboard/core.js?v=1.36.0&rev=operations-centre-1',
+  './assets/js/dashboard/operations-centre.js?v=1.36.0&rev=operations-centre-1',
+  './assets/css/dashboard/operations-centre.css?v=1.36.0&rev=operations-centre-1',
   './assets/css/dashboard/player-intelligence.css?v=1.31.0&rev=player-intelligence-1',
   './assets/js/dashboard/lazy-assets.js?v=1.31.0&rev=player-intelligence-1',
   './assets/js/dashboard/deathmatch-rotation.js?v=1.32.0&rev=livonia-dm-1',

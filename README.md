@@ -1,7 +1,7 @@
-# World War Z Website v1.35.0
+# World War Z Website v1.36.0
 
-Updated-files release for the **Dashboard UX / Consistency Pass**.
+Updated-files release for the **Audit / Operations Centre**.
 
-Apply these files over the confirmed Website v1.34.0 deployment. This release continues to pair with Bot v1.27.0 and preserves the existing Chernarus/Livonia data isolation, maps, dashboard feature controllers and PWA architecture.
+Apply these files over the confirmed Website v1.35.0 deployment. This release pairs with Bot v1.28.0 and preserves the existing Dashboard UX/Consistency layer, Chernarus/Livonia isolation, maps and PWA architecture.
 
-The update is presentation/accessibility focused: it standardises the Command Centre across all workspaces, corrects the stale dashboard version label, improves responsive layouts and table/form/dialog behaviour, and adds a non-invasive dynamic accessibility enhancement layer. No Railway database migration or DayZ mission upload is required.
+The Admin Audit Centre is upgraded into a live Operations Centre with service health, meaningful operational signals, recent errors, restart history and the existing searchable cross-system audit.

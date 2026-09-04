@@ -344,10 +344,50 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     ):
         if token not in ux_js:
             errors.append(f"ux-consistency.js: missing dynamic UX/accessibility guard: {token}")
-    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.35.0</strong></div>' not in dashboard:
+    operations_js_path = ROOT / "assets/js/dashboard/operations-centre.js"
+    operations_css_path = ROOT / "assets/css/dashboard/operations-centre.css"
+    operations_js = operations_js_path.read_text(encoding="utf-8") if operations_js_path.is_file() else ""
+    operations_css = operations_css_path.read_text(encoding="utf-8") if operations_css_path.is_file() else ""
+    operations_lazy = (ROOT / "assets/js/dashboard/lazy-assets.js").read_text(encoding="utf-8")
+    operations_admin = (ROOT / "assets/js/dashboard/administration.js").read_text(encoding="utf-8")
+    for token in (
+        'Audit / Operations Centre',
+        'data-operations-services=""',
+        'data-operations-history=""',
+        '<option value="operations">Operations</option>',
+    ):
+        if token not in dashboard:
+            errors.append(f"dashboard.html: missing Operations Centre surface: {token}")
+    for token in (
+        "ADMIN_OPERATIONS_CENTRE_URL",
+        "window.__wwzOperationsCentreReady = true",
+        "window.WWZOperationsCentre",
+        "60_000",
+    ):
+        if token not in operations_js:
+            errors.append(f"operations-centre.js: missing runtime guard: {token}")
+    for token in (
+        ".operations-health-hero",
+        ".operations-service-grid",
+        ".operations-monitor-grid",
+        "@media (max-width:620px)",
+    ):
+        if token not in operations_css:
+            errors.append(f"operations-centre.css: missing layout guard: {token}")
+    for token in (
+        "ensureOperationsCentre",
+        "assets/js/dashboard/operations-centre.js?v=1.36.0&rev=operations-centre-1",
+        "assets/css/dashboard/operations-centre.css?v=1.36.0&rev=operations-centre-1",
+    ):
+        if token not in operations_lazy:
+            errors.append(f"lazy-assets.js: missing Operations Centre lazy asset: {token}")
+    if "section === 'server-audit') loadServerActionHistory()" not in operations_admin:
+        errors.append("administration.js: Operations Centre must auto-load the unified audit.")
+
+    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.36.0</strong></div>' not in dashboard:
         errors.append("dashboard.html: command-centre footer release label is stale.")
 
-    if "Website v1.35.0 · Bot v1.27.0" not in index:
+    if "Website v1.36.0 · Bot v1.28.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "Chernarus Live—Livonia Ready To Connect", "Livonia production onboarding", "current single-server setup", "participants", "Owner bulk catalogue controls", "Natural XP &amp; Prestige QA", "natural XP/Prestige QA remains deferred", "Deferred verification"):
         if stale in index:
@@ -374,7 +414,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         'renderPlayerIntelligence',
         'renderPlayerIntelligenceTimeline',
         'assets/css/dashboard/player-intelligence.css?v=1.31.0',
-        'assets/js/dashboard/administration.js?v=1.31.0',
+        'assets/js/dashboard/administration.js?v=1.36.0',
     ):
         source = player_intelligence_lazy if token.startswith('assets/') else player_intelligence
         if token not in source:
@@ -748,7 +788,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append(f"dashboard-map-intelligence.js: collaborative Group/Faction data must not be persisted in browser storage: {forbidden}")
 
     lazy_dashboard_controllers = (
-        ("Administration controller", "assets/js/dashboard/administration.js?v=1.31.0", "ensureAdministration", "__wwzAdministrationReady", "assets/js/dashboard/administration.js"),
+        ("Administration controller", "assets/js/dashboard/administration.js?v=1.36.0", "ensureAdministration", "__wwzAdministrationReady", "assets/js/dashboard/administration.js"),
         ("Appeals controller", f"assets/js/dashboard/appeals.js?v={EXPECTED_ASSET_VERSION}", "ensureAppeals", "__wwzAppealsReady", "assets/js/dashboard/appeals.js"),
         ("Tickets controller", f"assets/js/dashboard/tickets.js?v={EXPECTED_ASSET_VERSION}", "ensureTickets", "__wwzTicketsReady", "assets/js/dashboard/tickets.js"),
         ("Progression controller", f"assets/js/dashboard/progression.js?v={EXPECTED_ASSET_VERSION}&rev=3", "ensureProgression", "__wwzProgressionReady", "assets/js/dashboard/progression.js"),
@@ -1583,7 +1623,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.35.0'",
+        "const WWZ_PWA_VERSION = '1.36.0'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
         "if (request.method !== 'GET') return;",
