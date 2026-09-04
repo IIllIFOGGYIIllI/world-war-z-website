@@ -329,10 +329,10 @@
 
 
   const ensureCommunity = () => Promise.all([
-    loadStylesheetOnce('community-css', 'assets/css/dashboard/community.css?v=1.28.0&rev=community-workflows-1'),
+    loadStylesheetOnce('community-css', 'assets/css/dashboard/community.css?v=1.33.0&rev=events-overhaul-1'),
     loadAfterDashboardRuntime(() => loadScriptOnce(
       'community',
-      'assets/js/dashboard/community.js?v=1.28.0&rev=community-workflows-1',
+      'assets/js/dashboard/community.js?v=1.33.0&rev=events-overhaul-1',
       () => window.__wwzCommunityReady === true
     ))
   ]).then(() => undefined);

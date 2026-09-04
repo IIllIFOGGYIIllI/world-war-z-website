@@ -1,7 +1,5 @@
-# WWZ Website v1.32.0 — Updated Files Only
+# World War Z Website v1.33.0
 
-Apply these files over the current **Website v1.31.0** repository, preserving paths, then commit/push and allow GitHub Pages to deploy.
+Updated-files release for the **Community Events Overhaul**.
 
-The new Deathmatch Rotation Manager is Livonia-only and Admin-only. It remains dormant until the matching Bot v1.25.0 rotation system is configured and enabled.
-
-Recommended commit message: `Add Livonia deathmatch rotation`
+Apply these files over the confirmed Website v1.32.0 deployment. This release pairs with Bot v1.26.0 and keeps the existing Chernarus/Livonia map and PWA architecture intact.

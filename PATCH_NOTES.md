@@ -1,17 +1,19 @@
-# World War Z Website v1.32.0 — Livonia Deathmatch Rotation Foundation
+# World War Z Website v1.33.0 — Community Events Overhaul
 
-## Added
-- Adds a **Livonia-only Deathmatch Rotation Manager** to the Admin dashboard.
-- Adds a profile library/editor for arena names, descriptions, banners, loadout summaries, announcement copy, explicit rotation order and JSON manifests.
-- Adds sequential/random rotation settings, pre-restart staging lead, announcement routing, persistent-panel routing, manual lock, skip-next, set-next, validation, staging and manual-live controls.
-- Adds clear profile readiness and JSON-file counts plus a rotation audit trail.
+## Event Hub
+- Upgrades public/member event cards with category, location, signup counts, loadout notes, rules, rewards and optional event banner artwork.
+- Signed-in members can register for or withdraw from scheduled/live events directly from the Community Hub.
+- Adds a Recent Results surface for published event outcomes and winners.
 
-## Livonia PvP integration
-- Adds Current, Up Next and Following Deathmatch state to the Livonia PvP dashboard when profiles exist or rotation is enabled.
-- Keeps the Deathmatch manager hidden from Chernarus and non-Admin users.
-- Uses the same profile state that drives Discord announcements so the website and Discord stay aligned with the selected arena.
+## Staff / Owner Event Operations
+- Adds series scheduling with occurrence count and repeat interval.
+- Adds reusable Owner-managed event locations and loadout references per server.
+- Expands reusable plans with category, second early reminder, capacity, attendance/winner rewards, rules, loadout summary, banner URL and schedule-announcement toggle.
+- Adds a live Attendance Manager with going/waitlist/attended/no-show states and configured reward handling.
+- Adds result publishing, winner selection and result re-announcement controls.
+- Adds event audit/history presentation plus manual run announcement and cancellation controls.
 
-## PWA / release
-- Website version advanced to **v1.32.0** with **Bot v1.25.0** shown publicly.
-- Adds lazy-loaded Deathmatch JavaScript/CSS and updates the service-worker revision for installed-app refresh.
-- No Deathmatch JSON ships in the website package and the rotation system remains disabled until configured by an Admin.
+## Isolation / PWA
+- Chernarus and Livonia event configuration and attendance remain independently server-scoped.
+- Website version advances to v1.33.0 with Bot v1.26.0.
+- Community assets and installed-app update revision are advanced so the Event Hub refreshes cleanly after deployment.

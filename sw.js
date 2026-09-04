@@ -1,6 +1,6 @@
 'use strict';
 
-const WWZ_PWA_VERSION = '1.32.0';
+const WWZ_PWA_VERSION = '1.33.0';
 const CACHE_PREFIX = 'wwz-pwa-';
 const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 // Public release versions can advance without discarding the bounded map caches.
@@ -8,7 +8,7 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-09-04-website-v1-32-0';
+const WWZ_PWA_UPDATE_REVISION = '2026-09-04-website-v1-33-0';
 const CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${CACHE_RELEASE}`;
@@ -52,8 +52,8 @@ const UPDATE_INVALIDATIONS = [
   './assets/css/dashboard/my-wwz.css?v=1.27.0&rev=my-wwz-m09-1',
   './assets/js/dashboard/command-centre.js?v=1.22.93',
   './assets/css/dashboard/command-centre-m10.css?v=1.27.0&rev=m10-admin-push-1',
-  './assets/js/dashboard/community.js?v=1.27.0&rev=community-workflows-1',
-  './assets/css/dashboard/community.css?v=1.27.0&rev=community-workflows-1',
+  './assets/js/dashboard/community.js?v=1.33.0&rev=events-overhaul-1',
+  './assets/css/dashboard/community.css?v=1.33.0&rev=events-overhaul-1',
   './assets/js/dashboard/lazy-assets.js?v=1.27.0&rev=community-workflows-1',
   // Canonical v1.28 request keys are listed as targeted safety invalidations too.
   './assets/js/dashboard/bootstrap.js?v=1.28.0&rev=website-v1-28-0',
@@ -61,8 +61,6 @@ const UPDATE_INVALIDATIONS = [
   './assets/css/dashboard/my-wwz.css?v=1.28.0&rev=my-wwz-m09-polish-1',
   './assets/js/dashboard/command-centre.js?v=1.28.0&rev=m10-admin-push-1',
   './assets/css/dashboard/command-centre-m10.css?v=1.28.0&rev=m10-admin-push-1',
-  './assets/js/dashboard/community.js?v=1.28.0&rev=community-workflows-1',
-  './assets/css/dashboard/community.css?v=1.28.0&rev=community-workflows-1',
   './assets/js/dashboard/lazy-assets.js?v=1.28.0&rev=website-v1-28-0',
   './flags.html',
   // Clear the original v1.29.0 Flag Claims request keys before serving the polished v1.29.1 UI and v1.29.2 actual DayZ flag artwork.
