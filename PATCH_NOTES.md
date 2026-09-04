@@ -1,19 +1,18 @@
-# World War Z Website v1.38.0 — Unified Action & Notification Centre
+# World War Z Website v1.39.0 — Data Management / Backup & Export Centre
 
-## New Action Centre workspace
-- Adds a first-class Action Centre to the main Dashboard navigation for signed-in members and authorised Admins.
-- Combines actionable tasks, workflow statuses and recent WWZ notifications into one server-scoped inbox while retaining deep-links to the specialist workspace that owns each action.
-- Adds Active, Unread and Archived views plus text, source, priority and item-type filtering.
-- Adds clear summary counts for required actions, unread items, urgent items, archived history and Admin-only actions.
+## New Owner workspace
+- Adds Data Management to Owner Configuration with live SQLite integrity, database/WAL size, server-scoped row counts and persistent-storage capacity.
+- Adds a verified whole-database backup builder with an explicit `BACKUP ALL SERVERS` confirmation and clear global backup-scope warning.
+- Adds protected backup downloads, checksum/integrity re-verification, schema-match status, retention visibility and explicit deletion.
 
-## Workflow controls and presentation
-- Supports mark read/unread, archive/restore, Mark All Read and Archive Read without altering the underlying faction, flag, quest, event, ticket or commerce record.
-- Uses priority-aware cards, due/updated timestamps and responsive action controls for desktop, mobile and installed PWA layouts.
-- Adds a live sidebar badge and 60-second refresh while the Action Centre is open; a lightweight authenticated refresh also keeps the badge useful outside the workspace.
-- Links directly to Browser Notification Settings while preserving the existing opt-in browser-push controls.
+## Server-isolated reports
+- Adds Complete, Members/Progression, Economy/Commerce, Community/Factions, Moderation/Support and Operations/Audit export presets.
+- Supports JSON or CSV ZIP bundles, row/table totals, retained download history and server-isolation guidance.
+- Adds recent data-management action history and Data Management as a filter in the existing Audit / Operations Centre.
 
-## Compatibility / safety
-- Pairs with Bot v1.30.0.
-- Chernarus/Livonia isolation, Audit / Operations Centre, quests/progression, commerce, factions, events, Livonia Deathmatch Rotation and map systems are preserved.
-- The bounded PWA map-cache generation is intentionally unchanged.
+## Recovery safeguards / compatibility
+- The dashboard intentionally exposes no live-restore control. Recovery instructions require a verified backup and stopping the Railway service before replacing the persistent SQLite file.
+- Pairs with Bot v1.31.0.
+- Chernarus/Livonia isolation and all existing Action Centre, Audit / Operations, faction, event, quest, commerce and map systems are preserved.
+- The bounded PWA map-cache generation remains unchanged.
 - No DayZ mission upload, Nitrado configuration change, database wipe, map-data change or server wipe is required.

@@ -384,10 +384,10 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "section === 'server-audit') loadServerActionHistory()" not in operations_admin:
         errors.append("administration.js: Operations Centre must auto-load the unified audit.")
 
-    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.38.0</strong></div>' not in dashboard:
+    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.39.0</strong></div>' not in dashboard:
         errors.append("dashboard.html: command-centre footer release label is stale.")
 
-    if "Website v1.38.0 · Bot v1.30.0" not in index:
+    if "Website v1.39.0 · Bot v1.31.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
 
     action_centre_js_path = ROOT / "assets/js/dashboard/action-centre.js"
@@ -430,6 +430,47 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     ):
         if token not in action_lazy:
             errors.append(f"lazy-assets.js: missing Action Centre lazy asset: {token}")
+    data_management_js_path = ROOT / "assets/js/dashboard/data-management.js"
+    data_management_css_path = ROOT / "assets/css/dashboard/data-management.css"
+    data_management_js = data_management_js_path.read_text(encoding="utf-8") if data_management_js_path.is_file() else ""
+    data_management_css = data_management_css_path.read_text(encoding="utf-8") if data_management_css_path.is_file() else ""
+    for token in (
+        'data-section="data-management"',
+        'data-dashboard-section="data-management"',
+        'data-data-create-backup',
+        'data-data-create-export',
+        'data-data-backup-list',
+        'data-data-export-list',
+    ):
+        if token not in dashboard:
+            errors.append(f"dashboard.html: missing Data Management surface: {token}")
+    for token in (
+        "/api/owner/data/centre",
+        "/api/owner/data/action",
+        "BACKUP ALL SERVERS",
+        "window.__wwzDataManagementReady = true",
+        "window.WWZDataManagement",
+    ):
+        if token not in data_management_js:
+            errors.append(f"data-management.js: missing runtime guard: {token}")
+    for token in (
+        ".data-health-grid",
+        ".data-management-grid",
+        ".data-artifact-actions",
+        "@media (max-width:820px)",
+    ):
+        if token not in data_management_css:
+            errors.append(f"data-management.css: missing layout guard: {token}")
+    for token in (
+        "ensureDataManagement",
+        "assets/js/dashboard/data-management.js?v=1.39.0&rev=data-management-1",
+        "assets/css/dashboard/data-management.css?v=1.39.0&rev=data-management-1",
+    ):
+        if token not in action_lazy:
+            errors.append(f"lazy-assets.js: missing Data Management lazy asset: {token}")
+    if '<option value="data">Data Management</option>' not in dashboard:
+        errors.append("dashboard.html: Data Management is missing from the unified audit subsystem filter.")
+
     for stale in ("Website v1.22.52 · Bot v1.18.48", "Chernarus Live—Livonia Ready To Connect", "Livonia production onboarding", "current single-server setup", "participants", "Owner bulk catalogue controls", "Natural XP &amp; Prestige QA", "natural XP/Prestige QA remains deferred", "Deferred verification"):
         if stale in index:
             errors.append(f"index.html: stale roadmap content remains: {stale}")
@@ -715,7 +756,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         errors.append(
             "dashboard.html: command library must be lazy-loaded instead of downloaded on every dashboard visit."
         )
-    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.38.0&amp;rev=action-centre-1'
+    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.39.0&amp;rev=data-management-1'
     lazy_index = dashboard.find(lazy_script)
     shell_index = dashboard.find("assets/js/dashboard/shell.js")
     if lazy_index < 0:
@@ -1730,7 +1771,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.38.0'",
+        "const WWZ_PWA_VERSION = '1.39.0'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
         "if (request.method !== 'GET') return;",

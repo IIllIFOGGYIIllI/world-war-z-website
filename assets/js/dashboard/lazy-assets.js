@@ -294,6 +294,15 @@
     ))
   ]).then(() => undefined);
 
+  const ensureDataManagement = () => Promise.all([
+    loadStylesheetOnce('data-management-css', 'assets/css/dashboard/data-management.css?v=1.39.0&rev=data-management-1'),
+    loadAfterDashboardRuntime(() => loadScriptOnce(
+      'data-management',
+      'assets/js/dashboard/data-management.js?v=1.39.0&rev=data-management-1',
+      () => window.__wwzDataManagementReady === true
+    ))
+  ]).then(() => undefined);
+
   const ensureTickets = () => ensureTicketsStyles().then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
     'tickets',
     'assets/js/dashboard/tickets.js?v=1.22.93',
@@ -393,6 +402,7 @@
     if (commerceView(detail)) activateCommerceView(detail).catch(() => {});
     if (administrationView(detail)) ensureAdministration().catch(() => {});
     if (view === 'staff' && section === 'server-audit') ensureOperationsCentre().then(() => window.WWZOperationsCentre?.activate?.(detail)).catch(() => {});
+    if (view === 'configuration' && section === 'data-management') ensureDataManagement().then(() => window.WWZDataManagement?.activate?.(detail)).catch(() => {});
     if (view === 'staff' && section === 'rules') ensureRulesManager().catch(() => {});
     if (view === 'staff' && section === 'donations') ensureDonationManager().catch(() => {});
     if (view === 'staff' && section === 'donation-orders') ensureDonationOrders().catch(() => {});
@@ -482,6 +492,11 @@
     button.addEventListener('focus', () => ensureOperationsCentre().catch(() => {}));
   });
 
+  document.querySelectorAll('[data-view="configuration"][data-section="data-management"]').forEach((button) => {
+    button.addEventListener('pointerenter', () => ensureDataManagement().catch(() => {}), { passive: true });
+    button.addEventListener('focus', () => ensureDataManagement().catch(() => {}));
+  });
+
   document.querySelectorAll('[data-view="staff"][data-section="command-centre"]').forEach((button) => {
     button.addEventListener('pointerenter', () => ensureCommandCentre().catch(() => {}), { passive: true });
     button.addEventListener('focus', () => ensureCommandCentre().catch(() => {}));
@@ -514,6 +529,7 @@
     ensureMapRuntime,
     ensureModerationStyles,
     ensureOperationsCentre,
+    ensureDataManagement,
     ensureRulesManager,
     ensureDonationManager,
     ensureDonationOrders,
