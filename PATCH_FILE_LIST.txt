@@ -6,7 +6,7 @@ PATCH_NOTES.md
 README.md
 sw.js
 scripts/validate_site.py
-assets/css/dashboard/data-management.css
-assets/js/dashboard/data-management.js
-assets/js/dashboard/lazy-assets.js
+assets/css/dashboard/my-wwz.css
+assets/js/dashboard/bootstrap.js
+assets/js/dashboard/my-wwz.js
 PATCH_FILE_LIST.txt

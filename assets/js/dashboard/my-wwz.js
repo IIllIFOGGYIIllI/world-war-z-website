@@ -5,56 +5,39 @@
   const overviewPanel = document.querySelector('[data-view-panel="overview"]');
   if (!overviewPanel) return;
 
-  const API = {
-    account: ACCOUNT_SUMMARY_URL,
-    progression: ACCOUNT_PROGRESSION_URL,
-    objectives: ACCOUNT_OBJECTIVES_URL,
-    tickets: `${DASHBOARD_API_BASE}/api/account/tickets`,
-    shop: ACCOUNT_SHOP_URL,
-    community: `${DASHBOARD_API_BASE}/api/community/overview?days=14`,
+  const API = Object.freeze({
+    home: `${DASHBOARD_API_BASE}/api/account/home`,
     status: SERVER_STATUS_URL,
     chernarus: `${DASHBOARD_API_BASE}/api/chernarus/pve`,
     livonia: `${DASHBOARD_API_BASE}/api/livonia/pvp`,
-  };
+  });
 
   let root = null;
   let active = false;
   let refreshTimer = 0;
+  let transientTimer = 0;
   let refreshInProgress = false;
-  let transientMessageTimer = 0;
   let lastSnapshot = null;
 
-  const sessionToken = () => {
-    try { return storageGet(AUTH_SESSION_KEY) || ''; } catch { return ''; }
+  const token = () => {
+    try { return storageGet(AUTH_SESSION_KEY) || ''; } catch (_) { return ''; }
   };
-
   const selectedServer = () => window.WWZServerContext?.getSelectedServer?.() || null;
-  const number = (value) => Number(value || 0).toLocaleString('en-AU');
-  const money = (value) => `$${Number(value || 0).toLocaleString('en-AU')}`;
-  const CORE_SOURCES = new Set(['account', 'progression', 'objectives', 'status', 'world']);
-  const SOURCE_LABELS = Object.freeze({
-    account: 'survivor account',
-    progression: 'progression',
-    objectives: 'objectives',
-    tickets: 'support tickets',
-    shop: 'shop and orders',
-    community: 'community events',
-    status: 'server status',
-    world: 'live world intelligence',
-  });
-  const failedSource = (snapshot, key) => (snapshot?.failures || []).find((row) => row.key === key) || null;
-  const sourceAvailable = (snapshot, key) => !failedSource(snapshot, key);
+  const integer = (value) => Math.max(0, Number.parseInt(value || 0, 10) || 0);
+  const formatNumber = (value) => Number(value || 0).toLocaleString('en-AU');
+  const credits = (value) => `${formatNumber(value)} credits`;
+  const titleCase = (value) => String(value || '').replaceAll('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
   const relative = (value) => {
     if (!value) return '—';
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return '—';
     const seconds = Math.round((date.getTime() - Date.now()) / 1000);
-    const absolute = Math.abs(seconds);
+    const abs = Math.abs(seconds);
     const formatter = new Intl.RelativeTimeFormat('en-AU', { numeric: 'auto' });
-    if (absolute < 60) return formatter.format(seconds, 'second');
-    if (absolute < 3600) return formatter.format(Math.round(seconds / 60), 'minute');
-    if (absolute < 86400) return formatter.format(Math.round(seconds / 3600), 'hour');
+    if (abs < 60) return formatter.format(seconds, 'second');
+    if (abs < 3600) return formatter.format(Math.round(seconds / 60), 'minute');
+    if (abs < 86400) return formatter.format(Math.round(seconds / 3600), 'hour');
     return formatter.format(Math.round(seconds / 86400), 'day');
   };
 
@@ -67,18 +50,11 @@
     return `${minutes}m`;
   };
 
-  const countdown = (value) => {
-    const target = new Date(value).getTime();
-    if (!Number.isFinite(target)) return '—';
-    return duration(Math.max(0, Math.floor((target - Date.now()) / 1000)));
-  };
-
   const requestJson = async (url, { auth = false } = {}) => {
     const headers = { Accept: 'application/json' };
-    const token = sessionToken();
-    if (auth && !token) throw new Error('Sign in required.');
-    if (token) headers.Authorization = `Bearer ${token}`;
-
+    const session = token();
+    if (auth && !session) throw new Error('Discord sign-in is required.');
+    if (session) headers.Authorization = `Bearer ${session}`;
     const response = await authFetch(url, { headers, cache: 'no-store' });
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) {
@@ -89,445 +65,516 @@
     return payload;
   };
 
-  const createMetric = (label, value = '—', note = '') => {
+  const nav = (view, section = '') => {
+    if (typeof showView === 'function') showView(view, true, section);
+  };
+
+  const openTarget = (target) => {
+    const fallback = '/dashboard.html#actioncentre/inbox';
+    try {
+      const url = new URL(String(target || fallback), location.href);
+      if (url.origin === location.origin && /\/dashboard\.html$/i.test(url.pathname) && url.hash) {
+        const [view = '', section = ''] = url.hash.replace(/^#/, '').split('/', 2);
+        nav(view || 'overview', section || '');
+        return;
+      }
+      if (url.origin === location.origin) {
+        location.href = `${url.pathname}${url.search}${url.hash}`;
+        return;
+      }
+    } catch (_) {}
+    nav('actioncentre', 'inbox');
+  };
+
+  const button = (label, onClick, className = 'my-wwz-link') => {
+    const node = document.createElement('button');
+    node.type = 'button';
+    node.className = className;
+    node.textContent = label;
+    node.addEventListener('click', onClick);
+    return node;
+  };
+
+  const metric = (label, value, note, tone = '') => {
     const card = document.createElement('article');
     card.className = 'my-wwz-metric';
-    const span = document.createElement('span');
-    const strong = document.createElement('strong');
-    const small = document.createElement('small');
-    span.textContent = label;
-    strong.textContent = value;
-    small.textContent = note;
-    card.append(span, strong, small);
+    if (tone) card.dataset.tone = tone;
+    const labelNode = document.createElement('span');
+    const valueNode = document.createElement('strong');
+    const noteNode = document.createElement('small');
+    labelNode.textContent = label;
+    valueNode.textContent = value;
+    noteNode.textContent = note;
+    card.append(labelNode, valueNode, noteNode);
     return card;
   };
 
-  const createNavButton = (label, view, section = '') => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.disabled = false;
-    button.className = 'my-wwz-action';
-    button.textContent = label;
-    button.addEventListener('click', () => showView(view, true, section));
-    return button;
-  };
-
-  const createStatusRow = (label, value, detail = '', tone = '') => {
-    const row = document.createElement('div');
-    row.className = 'my-wwz-status-row';
-    if (tone) row.dataset.tone = tone;
-    const copy = document.createElement('div');
+  const empty = (title, detail) => {
+    const node = document.createElement('div');
+    node.className = 'my-wwz-empty';
     const strong = document.createElement('strong');
     const small = document.createElement('small');
-    const valueNode = document.createElement('span');
-    strong.textContent = label;
+    strong.textContent = title;
     small.textContent = detail;
-    valueNode.textContent = value;
+    node.append(strong, small);
+    return node;
+  };
+
+  const row = ({ title, value = '', detail = '', tone = '', target = '', meta = '' }) => {
+    const interactive = Boolean(target);
+    const node = document.createElement(interactive ? 'button' : 'div');
+    if (interactive) node.type = 'button';
+    node.className = `my-wwz-row${interactive ? ' is-action' : ''}`;
+    if (tone) node.dataset.tone = tone;
+    const copy = document.createElement('span');
+    copy.className = 'my-wwz-row-copy';
+    const strong = document.createElement('strong');
+    strong.textContent = title;
+    const small = document.createElement('small');
+    small.textContent = detail;
     copy.append(strong, small);
-    row.append(copy, valueNode);
-    return row;
+    const side = document.createElement('span');
+    side.className = 'my-wwz-row-side';
+    const valueNode = document.createElement('b');
+    valueNode.textContent = value;
+    side.append(valueNode);
+    if (meta) {
+      const metaNode = document.createElement('small');
+      metaNode.textContent = meta;
+      side.append(metaNode);
+    }
+    if (interactive) {
+      const arrow = document.createElement('i');
+      arrow.setAttribute('aria-hidden', 'true');
+      arrow.textContent = '→';
+      side.append(arrow);
+      node.addEventListener('click', () => openTarget(target));
+    }
+    node.append(copy, side);
+    return node;
   };
 
   const ensureRoot = () => {
     if (root?.isConnected) return root;
     root = overviewPanel.querySelector('[data-my-wwz-root]');
     if (root) return root;
-
     root = document.createElement('section');
     root.className = 'my-wwz-shell';
     root.dataset.myWwzRoot = '';
     root.dataset.dashboardSection = 'summary';
     root.id = 'dashboard-my-wwz';
     root.innerHTML = `
-      <div class="my-wwz-heading">
-        <div>
-          <p class="panel-kicker">Milestone 09 · Personal command view</p>
-          <h2>My WWZ</h2>
-          <p data-my-wwz-subtitle>Pulling together your current server, survivor, progression and community activity.</p>
-        </div>
-        <div class="my-wwz-heading-actions">
-          <div class="my-wwz-heading-state">
-            <span class="my-wwz-world" data-my-wwz-world>Current server</span>
-            <small data-my-wwz-updated>Waiting for first refresh</small>
+      <header class="my-wwz-hero">
+        <div class="my-wwz-identity">
+          <div class="my-wwz-avatar" data-my-wwz-avatar aria-hidden="true">WZ</div>
+          <div>
+            <p class="panel-kicker">Personal command centre</p>
+            <h1 data-my-wwz-title>Welcome back</h1>
+            <p data-my-wwz-subtitle>Your survivor, objectives, faction, events and account activity in one place.</p>
+            <div class="my-wwz-hero-badges" data-my-wwz-badges></div>
           </div>
-          <button class="secondary-action compact-action" data-my-wwz-refresh type="button">Refresh My WWZ</button>
         </div>
-      </div>
+        <div class="my-wwz-hero-actions">
+          <div class="my-wwz-refresh-state"><strong data-my-wwz-world>Current server</strong><small data-my-wwz-updated>Waiting for refresh</small></div>
+          <button class="secondary-action compact-action" data-my-wwz-actions-open type="button">Action Centre</button>
+          <button class="primary-action compact-action" data-my-wwz-refresh type="button">Refresh Home</button>
+        </div>
+      </header>
       <p class="my-wwz-message" data-my-wwz-message hidden role="status"></p>
-      <div class="my-wwz-metrics" data-my-wwz-metrics></div>
+      <section class="my-wwz-link-callout" data-my-wwz-link-callout hidden>
+        <div><strong>Finish your survivor account</strong><p>Link and verify your PlayStation identity to unlock progression, quests, economy and server activity across this command centre.</p></div>
+        <button class="secondary-action" data-my-wwz-link-account type="button">Open Account Centre</button>
+      </section>
+      <div class="my-wwz-metrics" data-my-wwz-metrics aria-label="Personal WWZ summary"></div>
       <div class="my-wwz-grid">
-        <article class="my-wwz-card my-wwz-card-feature" data-my-wwz-now>
-          <header><div><span>RIGHT NOW</span><h3>What's Happening Now?</h3></div><b data-my-wwz-now-state>Loading</b></header>
-          <div class="my-wwz-card-body" data-my-wwz-now-body></div>
+        <article class="my-wwz-card my-wwz-card-feature" data-my-wwz-next>
+          <header><div><span>NEXT UP</span><h2>Your Priorities</h2></div><b data-my-wwz-next-count>0</b></header>
+          <div class="my-wwz-card-body" data-my-wwz-next-body></div>
+          <footer><button class="my-wwz-link" data-my-wwz-next-open type="button">Open Action Centre →</button></footer>
         </article>
-        <article class="my-wwz-card" data-my-wwz-objectives>
-          <header><div><span>MY OBJECTIVES</span><h3>What To Work On</h3></div><b data-my-wwz-objective-count>—</b></header>
-          <div class="my-wwz-card-body" data-my-wwz-objective-list></div>
+        <article class="my-wwz-card" data-my-wwz-world-card>
+          <header><div><span>CURRENT WORLD</span><h2>Server &amp; Live Intel</h2></div><b data-my-wwz-world-state>—</b></header>
+          <div class="my-wwz-card-body" data-my-wwz-world-body></div>
+          <footer><button class="my-wwz-link" data-my-wwz-world-open type="button">Open World Operations →</button></footer>
         </article>
-        <article class="my-wwz-card" data-my-wwz-survivor>
-          <header><div><span>MY SURVIVOR</span><h3>Current Snapshot</h3></div><b data-my-wwz-survivor-state>—</b></header>
-          <div class="my-wwz-card-body" data-my-wwz-survivor-body></div>
+        <article class="my-wwz-card" data-my-wwz-progress>
+          <header><div><span>QUESTS &amp; PROGRESSION</span><h2>Keep Moving Forward</h2></div><b data-my-wwz-progress-level>Level 1</b></header>
+          <div class="my-wwz-progress-track" aria-hidden="true"><i data-my-wwz-progress-bar></i></div>
+          <div class="my-wwz-card-body" data-my-wwz-progress-body></div>
+          <footer><button class="my-wwz-link" data-my-wwz-quests-open type="button">Open Objectives →</button><button class="my-wwz-link" data-my-wwz-progress-open type="button">Progression →</button></footer>
         </article>
-        <article class="my-wwz-card" data-my-wwz-attention>
-          <header><div><span>ATTENTION</span><h3>Needs Your Eyes</h3></div><b data-my-wwz-attention-count>0</b></header>
-          <div class="my-wwz-card-body" data-my-wwz-attention-body></div>
+        <article class="my-wwz-card" data-my-wwz-faction>
+          <header><div><span>FACTION</span><h2>Your Group</h2></div><b data-my-wwz-faction-state>Independent</b></header>
+          <div class="my-wwz-card-body" data-my-wwz-faction-body></div>
+          <footer><button class="my-wwz-link" data-my-wwz-faction-open type="button">Open Faction Centre →</button></footer>
+        </article>
+        <article class="my-wwz-card" data-my-wwz-events>
+          <header><div><span>COMMUNITY EVENTS</span><h2>Upcoming &amp; Registered</h2></div><b data-my-wwz-event-count>0</b></header>
+          <div class="my-wwz-card-body" data-my-wwz-events-body></div>
+          <footer><button class="my-wwz-link" data-my-wwz-events-open type="button">Open Event Calendar →</button></footer>
+        </article>
+        <article class="my-wwz-card" data-my-wwz-orders>
+          <header><div><span>ORDERS &amp; SUPPORT</span><h2>Things In Progress</h2></div><b data-my-wwz-order-count>0</b></header>
+          <div class="my-wwz-card-body" data-my-wwz-orders-body></div>
+          <footer><button class="my-wwz-link" data-my-wwz-shop-open type="button">Shop →</button><button class="my-wwz-link" data-my-wwz-tickets-open type="button">Tickets →</button></footer>
         </article>
         <article class="my-wwz-card my-wwz-card-wide" data-my-wwz-recent>
-          <header><div><span>RECENT PROGRESS</span><h3>Your Latest Activity</h3></div><b>Live account data</b></header>
-          <div class="my-wwz-recent-grid" data-my-wwz-recent-body></div>
+          <header><div><span>RECENT ACTIVITY</span><h2>Your Latest WWZ Activity</h2></div><b>Selected server only</b></header>
+          <div class="my-wwz-activity" data-my-wwz-recent-body></div>
         </article>
         <article class="my-wwz-card my-wwz-card-wide" data-my-wwz-quick>
-          <header><div><span>QUICK ACTIONS</span><h3>Jump Straight In</h3></div><b>Companion ready</b></header>
-          <div class="my-wwz-actions" data-my-wwz-actions></div>
+          <header><div><span>QUICK LINKS</span><h2>Jump Straight In</h2></div><b>One click away</b></header>
+          <div class="my-wwz-quick-links" data-my-wwz-quick-links></div>
         </article>
       </div>`;
-    const metricGrid = overviewPanel.querySelector('.metric-grid');
-    if (metricGrid) metricGrid.insertAdjacentElement('afterend', root);
-    else overviewPanel.querySelector('.view-heading')?.insertAdjacentElement('afterend', root);
+    overviewPanel.querySelector('.view-heading')?.insertAdjacentElement('afterend', root);
 
-    const refresh = root.querySelector('[data-my-wwz-refresh]');
-    refresh?.addEventListener('click', () => refreshSnapshot({ force: true }));
-    renderQuickActions();
+    root.querySelector('[data-my-wwz-refresh]')?.addEventListener('click', () => refresh({ force: true }));
+    root.querySelector('[data-my-wwz-actions-open]')?.addEventListener('click', () => nav('actioncentre', 'inbox'));
+    root.querySelector('[data-my-wwz-next-open]')?.addEventListener('click', () => nav('actioncentre', 'inbox'));
+    root.querySelector('[data-my-wwz-link-account]')?.addEventListener('click', () => nav('players', 'account'));
+    root.querySelector('[data-my-wwz-quests-open]')?.addEventListener('click', () => nav('objectives', 'quests'));
+    root.querySelector('[data-my-wwz-progress-open]')?.addEventListener('click', () => nav('progression', 'progress'));
+    root.querySelector('[data-my-wwz-faction-open]')?.addEventListener('click', () => nav('factions', 'directory'));
+    root.querySelector('[data-my-wwz-events-open]')?.addEventListener('click', () => nav('community', 'events'));
+    root.querySelector('[data-my-wwz-shop-open]')?.addEventListener('click', () => nav('shop', 'catalogue'));
+    root.querySelector('[data-my-wwz-tickets-open]')?.addEventListener('click', () => nav('tickets', 'support'));
+    root.querySelector('[data-my-wwz-world-open]')?.addEventListener('click', () => openWorld());
+    renderQuickLinks();
     return root;
   };
 
   const setMessage = (message = '', tone = '', { transient = false } = {}) => {
     ensureRoot();
-    window.clearTimeout(transientMessageTimer);
-    transientMessageTimer = 0;
-    const target = root.querySelector('[data-my-wwz-message]');
-    if (!target) return;
-    target.textContent = message;
-    target.hidden = !message;
-    target.dataset.tone = tone;
+    window.clearTimeout(transientTimer);
+    transientTimer = 0;
+    const node = root.querySelector('[data-my-wwz-message]');
+    node.textContent = message;
+    node.dataset.tone = tone;
+    node.hidden = !message;
     if (message && transient) {
-      transientMessageTimer = window.setTimeout(() => {
-        if (target.dataset.tone === tone && target.textContent === message) {
-          target.hidden = true;
-          target.textContent = '';
-          target.dataset.tone = '';
+      transientTimer = window.setTimeout(() => {
+        if (node.textContent === message) {
+          node.hidden = true;
+          node.textContent = '';
+          node.dataset.tone = '';
         }
-      }, 4500);
+      }, 4200);
     }
   };
 
-  const renderQuickActions = () => {
-    ensureRoot();
-    const actions = root.querySelector('[data-my-wwz-actions]');
-    if (!actions) return;
-    actions.replaceChildren();
-
+  const openWorld = () => {
     const server = selectedServer();
-    const worldAction = server?.map_key === 'livonia'
-      ? ['PvP Intel', 'livoniapvp', 'overview']
-      : ['PvE Operations', 'chernaruspve', 'overview'];
-
-    [
-      worldAction,
-      ['Map', 'map', 'explorer'],
-      ['Quests', 'objectives', 'quests'],
-      ['Shop', 'shop', 'catalogue'],
-      ['Tickets', 'tickets', 'member'],
-      ['Events', 'community', 'events'],
-      ['Progression', 'progression', 'overview'],
-    ].forEach(([label, view, section]) => actions.append(createNavButton(label, view, section)));
+    if (server?.map_key === 'livonia') nav('livoniapvp', 'operations');
+    else nav('chernaruspve', 'operations');
   };
 
-  const renderGuest = () => {
+  const renderQuickLinks = () => {
     ensureRoot();
-    root.dataset.state = 'guest';
-    const server = selectedServer();
-    root.querySelector('[data-my-wwz-world]').textContent = server?.map_name || 'Select server';
-    const updated = root.querySelector('[data-my-wwz-updated]');
-    if (updated) updated.textContent = 'Personal data locked';
-    root.querySelector('[data-my-wwz-subtitle]').textContent = 'Sign in with Discord to load your personal WWZ dashboard.';
-    renderQuickActions();
-    const metrics = root.querySelector('[data-my-wwz-metrics]');
-    metrics.replaceChildren(
-      createMetric('Server', server?.map_name || '—', server?.name || 'World War Z'),
-      createMetric('Survivor', 'Sign in required', 'Discord + PSN identity'),
-      createMetric('Progression', '—', 'XP, level and prestige'),
-      createMetric('Wallet', '—', 'Economy and orders')
-    );
-    root.querySelector('[data-my-wwz-now-body]').replaceChildren(createStatusRow('My WWZ is locked', 'Discord sign-in', 'Authenticate to load server-aware personal data.'));
-    root.querySelector('[data-my-wwz-objective-list]').replaceChildren(createStatusRow('Objectives', 'Sign in required', 'Daily and weekly quests appear here.'));
-    root.querySelector('[data-my-wwz-survivor-body]').replaceChildren(createStatusRow('Survivor profile', 'Sign in required', 'PSN, progression and world-specific statistics.'));
-    root.querySelector('[data-my-wwz-attention-body]').replaceChildren(createStatusRow('Attention feed', 'Sign in required', 'Tickets, orders and event notices appear here.'));
-    root.querySelector('[data-my-wwz-recent-body]').replaceChildren(createStatusRow('Recent activity', 'Sign in required', 'XP and economy history appears here.'));
+    const container = root.querySelector('[data-my-wwz-quick-links]');
+    container.replaceChildren();
+    const world = selectedServer()?.map_key === 'livonia'
+      ? ['PvP Intel', () => nav('livoniapvp', 'operations')]
+      : ['PvE Operations', () => nav('chernaruspve', 'operations')];
+    [
+      ['Account', () => nav('players', 'account')],
+      ['Progression', () => nav('progression', 'progress')],
+      ['Quests', () => nav('objectives', 'quests')],
+      ['Factions', () => nav('factions', 'directory')],
+      ['Events', () => nav('community', 'events')],
+      ['Shop', () => nav('shop', 'catalogue')],
+      ['Tickets', () => nav('tickets', 'support')],
+      ['Action Centre', () => nav('actioncentre', 'inbox')],
+      ['Map', () => nav('map', 'explorer')],
+      world,
+    ].forEach(([label, handler]) => container.append(button(label, handler, 'my-wwz-quick-link')));
+  };
+
+  const renderHero = (snapshot) => {
+    const home = snapshot.home || {};
+    const identity = home.identity || {};
+    const profile = home.profile || {};
+    const server = snapshot.server || {};
+    const display = String(identity.display_name || 'Survivor');
+    root.querySelector('[data-my-wwz-title]').textContent = `Welcome back, ${display}`;
+    root.querySelector('[data-my-wwz-subtitle]').textContent = profile.linked
+      ? `Your ${server.map_name || 'WWZ'} survivor command centre — live priorities, progress and community activity.`
+      : 'Your WWZ account is connected. Link your PlayStation survivor to unlock the full command centre.';
+    root.querySelector('[data-my-wwz-world]').textContent = `${server.map_name || 'Current server'} · ${server.name || 'World War Z'}`;
+    root.querySelector('[data-my-wwz-updated]').textContent = `Updated ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+
+    const avatar = root.querySelector('[data-my-wwz-avatar]');
+    avatar.replaceChildren();
+    if (identity.avatar_url) {
+      const image = document.createElement('img');
+      image.src = identity.avatar_url;
+      image.alt = '';
+      avatar.append(image);
+    } else {
+      avatar.textContent = display.split(/\s+/).slice(0, 2).map((part) => part[0] || '').join('').toUpperCase() || 'WZ';
+    }
+
+    const badges = root.querySelector('[data-my-wwz-badges]');
+    badges.replaceChildren();
+    const values = [
+      server.map_name || 'Current world',
+      titleCase(identity.access_level || server.access_level || 'member'),
+      profile.linked ? (profile.online ? 'Online now' : `PSN · ${profile.psn_id || 'Verified'}`) : 'PSN not linked',
+    ];
+    values.forEach((value, index) => {
+      const tag = document.createElement('span');
+      tag.textContent = value;
+      if (index === 2 && profile.online) tag.dataset.tone = 'good';
+      if (index === 2 && !profile.linked) tag.dataset.tone = 'warning';
+      badges.append(tag);
+    });
+
+    root.querySelector('[data-my-wwz-link-callout]').hidden = Boolean(profile.linked);
   };
 
   const renderMetrics = (snapshot) => {
-    const { account, progression, shop, status, server } = snapshot;
-    const profile = account?.profile || {};
-    const economy = account?.economy || {};
-    const member = progression?.member || {};
-    const players = status?.players || {};
-    const operations = status?.operations || {};
-    const openOrders = (shop?.orders || []).filter((order) => ['pending', 'processing'].includes(String(order.status))).length;
-    const statusLabel = String(status?.status || 'unknown').replace(/^./, (letter) => letter.toUpperCase());
-    const restart = operations.restart_countdown_seconds != null
-      ? `Restart ${duration(operations.restart_countdown_seconds)}`
-      : 'Restart sync pending';
-
-    const statusOk = sourceAvailable(snapshot, 'status');
-    const accountOk = sourceAvailable(snapshot, 'account');
-    const progressionOk = sourceAvailable(snapshot, 'progression');
-    const shopOk = sourceAvailable(snapshot, 'shop');
-
+    const home = snapshot.home || {};
+    const progress = home.progression || {};
+    const faction = home.faction || {};
+    const quests = home.quests || {};
+    const actions = home.action_centre?.summary || {};
     const metrics = root.querySelector('[data-my-wwz-metrics]');
+    const progressNote = progress.next_level_xp
+      ? `${formatNumber(progress.current_level_xp)} / ${formatNumber(progress.next_level_xp)} XP`
+      : `${formatNumber(progress.lifetime_xp)} lifetime XP`;
+    const factionValue = faction.member ? (faction.name || 'Faction member') : 'Independent';
+    const factionNote = faction.member
+      ? `${titleCase(faction.role)} · ${formatNumber(faction.member_count)} members`
+      : `${formatNumber(faction.pending_invitations)} invite · ${formatNumber(faction.pending_applications)} application`;
+    const questTone = integer(quests.claimable) > 0 ? 'attention' : '';
+    const actionTone = integer(actions.urgent) > 0 ? 'danger' : integer(actions.actions) > 0 ? 'attention' : '';
     metrics.replaceChildren(
-      statusOk
-        ? createMetric('Current server', `${statusLabel} · ${number(players.current)} / ${number(players.maximum)}`, `${server?.map_name || status?.server?.map || 'World'} · ${restart}`)
-        : createMetric('Current server', 'Temporarily unavailable', server?.map_name || 'Current world'),
-      accountOk
-        ? createMetric('My survivor', profile.linked ? String(profile.psn_id || 'Linked survivor') : 'PSN not linked', profile.linked ? (profile.online ? 'Online now' : 'Verified survivor') : 'Use /account link in Discord')
-        : createMetric('My survivor', 'Temporarily unavailable', 'Your account remains signed in'),
-      progressionOk
-        ? createMetric('Progression', `Level ${Number(member.level || 1)} · P${Number(member.prestige || 0)}`, `${number(member.lifetime_xp)} lifetime XP`)
-        : createMetric('Progression', 'Temporarily unavailable', 'XP data could not refresh'),
-      shopOk
-        ? createMetric('Wallet & orders', money(shop?.balance ?? economy.balance), `${openOrders} open order${openOrders === 1 ? '' : 's'}`)
-        : createMetric('Wallet & orders', accountOk ? money(economy.balance) : 'Temporarily unavailable', 'Order status could not refresh')
+      metric('Progression', `Level ${integer(progress.level) || 1} · P${integer(progress.prestige)}`, progressNote),
+      metric('Wallet', credits(home.economy?.balance), `${integer(home.economy?.daily_streak)} day streak`),
+      metric('Faction', factionValue, factionNote),
+      metric('Quests', `${integer(quests.claimable)} claimable`, `${integer(quests.active_count)} current objectives`, questTone),
+      metric('Action Centre', `${integer(actions.actions)} actions`, `${integer(actions.unread)} unread${integer(actions.admin_actions) ? ` · ${integer(actions.admin_actions)} admin` : ''}`, actionTone),
     );
   };
 
-  const renderNow = (snapshot) => {
-    const { community, world, server } = snapshot;
-    const body = root.querySelector('[data-my-wwz-now-body]');
-    const state = root.querySelector('[data-my-wwz-now-state]');
+  const renderNext = (snapshot) => {
+    const body = root.querySelector('[data-my-wwz-next-body]');
     body.replaceChildren();
-
-    const events = Array.isArray(community?.events) ? community.events : [];
-    const event = events.find((item) => String(item.status) === 'active')
-      || events.find((item) => String(item.status) === 'scheduled')
-      || events[0];
-
-    if (event) {
-      body.append(createStatusRow(
-        event.title || 'Community event',
-        String(event.status || 'scheduled').toUpperCase(),
-        `${event.location_label || 'Server-wide'} · starts ${relative(event.starts_at)}`
-      ));
+    const home = snapshot.home || {};
+    const profile = home.profile || {};
+    const actions = [...(home.action_centre?.top_actions || [])];
+    if (!profile.linked) {
+      body.append(row({ title: 'Link your PlayStation survivor', value: 'SETUP', detail: 'Unlock progression, quests, economy and live survivor data.', target: '/dashboard.html#players/account', tone: 'warning' }));
     }
-
-    if (server?.map_key === 'chernarus') {
-      const expedition = world?.expeditions?.[0];
-      const goal = world?.community_goal || {};
-      const personal = world?.personal || {};
-      const activeJourney = (personal?.journeys?.catalogue || []).find((item) => item.status === 'active');
-      if (expedition) {
-        body.append(createStatusRow('Active PvE expedition', expedition.name || 'Expedition', `${expedition.tier || 'PvE'} · rotates in ${countdown(expedition.ends_at)}`, 'pve'));
-      }
-      if (activeJourney) {
-        const current = Number(activeJourney.current_stage || 0);
-        const stage = activeJourney.stages?.[current];
-        body.append(createStatusRow('No-death operation', activeJourney.name || 'Operation', stage ? `Current stage: ${stage.name}` : 'Operation in progress', 'pve'));
-      }
-      if (goal?.name) {
-        body.append(createStatusRow('Weekly community goal', `${Number(goal.percent || 0).toFixed(0)}%`, goal.name, goal.completed ? 'good' : ''));
-      }
-      state.textContent = 'Chernarus PvE';
-    } else {
-      const hotspot = world?.hotspots?.[0];
-      const objective = world?.faction_objective;
-      const wanted = world?.most_wanted?.[0];
-      if (hotspot) body.append(createStatusRow('Active PvP hotspot', hotspot.name || 'Hotspot', `Rotates in ${countdown(hotspot.ends_at)}`, 'pvp'));
-      if (objective) body.append(createStatusRow('Faction objective', objective.name || 'Control objective', `${Number(objective.points_per_kill || 0)} points per confirmed PvP kill`, 'pvp'));
-      if (wanted) body.append(createStatusRow('Most Wanted', wanted.target_psn || 'Target', `${money(wanted.amount)} bounty`, 'danger'));
-      state.textContent = 'Livonia PvP';
-    }
-
-    if (!body.childElementCount) {
-      body.append(createStatusRow('Current operations', 'Quiet right now', 'No active event or rotation data is available.'));
-    }
-  };
-
-  const questRows = (objectives) => [
-    ...(objectives?.quests?.daily || []).map((quest) => ({ ...quest, cadence: 'Daily' })),
-    ...(objectives?.quests?.weekly || []).map((quest) => ({ ...quest, cadence: 'Weekly' })),
-  ];
-
-  const renderObjectives = (snapshot) => {
-    const body = root.querySelector('[data-my-wwz-objective-list]');
-    const count = root.querySelector('[data-my-wwz-objective-count]');
-    body.replaceChildren();
-
-    const quests = questRows(snapshot.objectives);
-    const active = quests.filter((quest) => ['active', 'completed'].includes(String(quest.status || 'active'))).slice(0, 4);
-    count.textContent = `${active.length} active`;
-
-    active.forEach((quest) => {
-      const objectiveList = Array.isArray(quest.objectives) ? quest.objectives : [];
-      const complete = objectiveList.filter((item) => item.complete).length;
-      const detail = quest.status === 'completed'
-        ? `Reward ready · ${money(quest.reward_money)} + ${number(quest.reward_xp)} XP`
-        : `${complete} / ${objectiveList.length} objectives complete`;
-      body.append(createStatusRow(`${quest.cadence} · ${quest.title}`, String(quest.status || 'active').toUpperCase(), detail, quest.status === 'completed' ? 'good' : ''));
+    actions.slice(0, profile.linked ? 4 : 3).forEach((item) => {
+      body.append(row({
+        title: item.title || 'WWZ action',
+        value: titleCase(item.priority || item.status || 'Action'),
+        detail: item.detail || 'Open the related workspace to continue.',
+        meta: item.due_at ? relative(item.due_at) : (item.created_at ? relative(item.created_at) : ''),
+        target: item.target_url || '/dashboard.html#actioncentre/inbox',
+        tone: String(item.priority || '').toLowerCase(),
+      }));
     });
-
-    if (snapshot.server?.map_key === 'chernarus') {
-      const activeJourney = (snapshot.world?.personal?.journeys?.catalogue || []).find((item) => item.status === 'active');
-      if (activeJourney) {
-        const current = Number(activeJourney.current_stage || 0);
-        const stage = activeJourney.stages?.[current];
-        body.append(createStatusRow('Operation objective', stage?.name || activeJourney.name || 'Current operation', activeJourney.name || 'No-death operation', 'pve'));
+    if (!body.childElementCount) {
+      const event = home.events?.upcoming?.[0];
+      if (event) {
+        body.append(row({ title: event.title || 'Upcoming community event', value: event.status === 'active' ? 'LIVE' : relative(event.starts_at), detail: event.location_label || 'Server-wide', target: '/dashboard.html#community/events', tone: event.status === 'active' ? 'good' : '' }));
+      } else {
+        body.append(empty('Nothing urgent right now', 'Your Action Centre has no active items requiring attention.'));
       }
     }
+    root.querySelector('[data-my-wwz-next-count]').textContent = `${integer(home.action_centre?.summary?.actions)} action${integer(home.action_centre?.summary?.actions) === 1 ? '' : 's'}`;
+  };
 
-    if (!body.childElementCount) {
-      body.append(createStatusRow('Quests', 'No active quests', 'Open Objectives to check the current rotation.'));
+  const renderWorld = (snapshot) => {
+    const body = root.querySelector('[data-my-wwz-world-body]');
+    body.replaceChildren();
+    const status = snapshot.status || {};
+    const server = snapshot.server || {};
+    const world = snapshot.world || {};
+    const players = status.players || {};
+    const operations = status.operations || {};
+    const statusLabel = titleCase(status.status || 'unknown');
+    const tone = String(status.status || '').toLowerCase() === 'online' ? 'good' : 'warning';
+    body.append(row({
+      title: 'DayZ server',
+      value: `${statusLabel} · ${formatNumber(players.current)} / ${formatNumber(players.maximum)}`,
+      detail: operations.restart_countdown_seconds != null ? `Next restart in ${duration(operations.restart_countdown_seconds)}` : 'Restart schedule synchronising',
+      target: '/dashboard.html#server/status',
+      tone,
+    }));
+
+    if (server.map_key === 'chernarus') {
+      const expedition = world.expeditions?.[0];
+      const goal = world.community_goal || {};
+      const passport = world.personal?.passport || {};
+      if (expedition) body.append(row({ title: 'Active PvE expedition', value: expedition.name || 'Expedition', detail: expedition.ends_at ? `Ends ${relative(expedition.ends_at)}` : (expedition.tier || 'PvE operation'), target: '/dashboard.html#chernaruspve/operations', tone: 'pve' }));
+      if (goal?.name) body.append(row({ title: 'Community goal', value: `${Number(goal.percent || 0).toFixed(0)}%`, detail: goal.name, target: '/dashboard.html#chernaruspve/operations', tone: goal.completed ? 'good' : 'pve' }));
+      if (snapshot.home?.profile?.linked && passport.total) body.append(row({ title: 'Survivor Passport', value: `${integer(passport.discovered)} / ${integer(passport.total)}`, detail: `${Number(passport.percent || 0).toFixed(0)}% of Chernarus discovered`, target: '/dashboard.html#chernaruspve/operations', tone: 'pve' }));
+      root.querySelector('[data-my-wwz-world-state]').textContent = 'Chernarus PvE';
+    } else {
+      const hotspot = world.hotspots?.[0];
+      const wanted = world.most_wanted?.[0];
+      if (hotspot) body.append(row({ title: 'Active PvP hotspot', value: hotspot.name || 'Hotspot', detail: hotspot.ends_at ? `Rotates ${relative(hotspot.ends_at)}` : 'Confirmed PvP hotspot', target: '/dashboard.html#livoniapvp/operations', tone: 'pvp' }));
+      if (wanted) body.append(row({ title: 'Most Wanted', value: wanted.target_psn || 'Target', detail: `${formatNumber(wanted.amount)} credit bounty`, target: '/dashboard.html#livoniapvp/operations', tone: 'danger' }));
+      const pvp = snapshot.home?.profile?.pvp || {};
+      if (snapshot.home?.profile?.linked) body.append(row({ title: 'Your confirmed PvP', value: `${integer(pvp.kills)} K · ${integer(pvp.deaths)} D`, detail: `${Number(pvp.kd_ratio || 0).toFixed(2)} K/D · ${integer(pvp.current_streak)} current streak`, target: '/dashboard.html#players/activity', tone: 'pvp' }));
+      root.querySelector('[data-my-wwz-world-state]').textContent = 'Livonia PvP';
+    }
+    if (snapshot.failures.some((item) => item.key === 'world')) body.append(empty('Live world intelligence unavailable', 'Your private account cards remain current; live world data will retry automatically.'));
+  };
+
+  const renderProgress = (snapshot) => {
+    const body = root.querySelector('[data-my-wwz-progress-body]');
+    body.replaceChildren();
+    const progress = snapshot.home?.progression || {};
+    const quests = snapshot.home?.quests || {};
+    root.querySelector('[data-my-wwz-progress-level]').textContent = `Level ${integer(progress.level) || 1} · P${integer(progress.prestige)}`;
+    const percent = Math.max(0, Math.min(100, Number(progress.progress_percent || 0)));
+    root.querySelector('[data-my-wwz-progress-bar]').style.width = `${percent}%`;
+    body.append(row({
+      title: progress.survivor_title?.name || progress.prestige_title || 'Survivor progression',
+      value: `${percent.toFixed(1)}%`,
+      detail: progress.next_level_xp ? `${formatNumber(progress.current_level_xp)} / ${formatNumber(progress.next_level_xp)} XP to next level` : `${formatNumber(progress.lifetime_xp)} lifetime XP`,
+      target: '/dashboard.html#progression/progress',
+    }));
+    (quests.active || []).slice(0, 3).forEach((quest) => {
+      const completed = quest.status === 'completed';
+      body.append(row({
+        title: `${quest.cadence} · ${quest.title}`,
+        value: completed ? 'CLAIM' : `${integer(quest.objectives_complete)} / ${integer(quest.objectives_total)}`,
+        detail: completed ? `${formatNumber(quest.reward_money)} credits + ${formatNumber(quest.reward_xp)} XP ready` : (quest.expires_at ? `Expires ${relative(quest.expires_at)}` : 'Current quest rotation'),
+        target: '/dashboard.html#objectives/quests',
+        tone: completed ? 'good' : '',
+      }));
+    });
+    if (!(quests.active || []).length) body.append(empty(quests.available === false ? 'Quests unavailable' : 'No current quests', quests.message || 'Open Objectives to review your rotation.'));
+  };
+
+  const renderFaction = (snapshot) => {
+    const body = root.querySelector('[data-my-wwz-faction-body]');
+    body.replaceChildren();
+    const faction = snapshot.home?.faction || {};
+    const state = root.querySelector('[data-my-wwz-faction-state]');
+    if (faction.member) {
+      state.textContent = faction.name || 'Faction member';
+      body.append(row({ title: faction.name || 'Your faction', value: titleCase(faction.role || 'member'), detail: faction.motto || `${integer(faction.member_count)} members · ${integer(faction.online_count)} online`, target: '/dashboard.html#factions/directory' }));
+      body.append(row({ title: 'Faction strength', value: `${integer(faction.member_count)} / ${integer(faction.member_limit) || '—'}`, detail: `${integer(faction.online_count)} online · ${formatNumber(faction.bank_balance)} bank credits`, target: '/dashboard.html#factions/directory' }));
+      const stats = faction.stats || {};
+      body.append(row({ title: 'Faction activity', value: `${integer(stats.flag_claims)} flags`, detail: `${integer(stats.bounties_claimed)} bounties · ${integer(stats.contracts_completed)} contracts`, target: '/dashboard.html#factions/directory' }));
+      if (integer(faction.pending_officer_applications)) body.append(row({ title: 'Applications awaiting faction review', value: formatNumber(faction.pending_officer_applications), detail: 'Leader/officer action is available in the Faction Centre.', target: '/dashboard.html#factions/directory', tone: 'attention' }));
+    } else {
+      state.textContent = 'Independent';
+      const invites = integer(faction.pending_invitations);
+      const apps = integer(faction.pending_applications);
+      if (invites) body.append(row({ title: 'Faction invitation waiting', value: `${invites}`, detail: 'Accept or decline from your faction workspace.', target: '/dashboard.html#factions/directory', tone: 'attention' }));
+      if (apps) body.append(row({ title: 'Faction application pending', value: `${apps}`, detail: 'Your application is waiting for faction review.', target: '/dashboard.html#factions/directory' }));
+      if (!invites && !apps) body.append(empty('No faction membership yet', 'Browse open factions, recruitment status and community groups from the Faction Centre.'));
     }
   };
 
-  const renderSurvivor = (snapshot) => {
-    const body = root.querySelector('[data-my-wwz-survivor-body]');
-    const state = root.querySelector('[data-my-wwz-survivor-state]');
+  const renderEvents = (snapshot) => {
+    const body = root.querySelector('[data-my-wwz-events-body]');
     body.replaceChildren();
-
-    const profile = snapshot.account?.profile || {};
-    const member = snapshot.progression?.member || {};
-    state.textContent = profile.psn_id || member.display_name || 'Survivor';
-
-    body.append(createStatusRow(
-      'Progression',
-      `Level ${Number(member.level || 1)} · Prestige ${Number(member.prestige || 0)}`,
-      member.survivor_title?.name || member.prestige_title || 'Survivor'
-    ));
-
-    if (snapshot.server?.map_key === 'chernarus') {
-      const personal = snapshot.world?.personal || {};
-      const passport = personal.passport || {};
-      const reputation = personal.reputation || {};
-      const life = personal.life?.current || null;
-      body.append(createStatusRow('Survivor Passport', `${Number(passport.discovered || 0)} / ${Number(passport.total || 0)}`, `${Number(passport.percent || 0).toFixed(0)}% Chernarus discovered`, 'pve'));
-      body.append(createStatusRow('PvE reputation', reputation.name || 'Survivor', `${number(reputation.points)} reputation`, 'pve'));
-      body.append(createStatusRow('Current tracked life', life ? duration(life.active_seconds) : 'Waiting for position', life ? `${(Number(life.distance_metres || 0) / 1000).toFixed(1)} km validated travel` : 'Starts from the next valid ADM position'));
-    } else {
-      const pvp = profile.pvp || {};
-      const leaderboard = snapshot.world?.competition?.leaderboards?.day || [];
-      const row = leaderboard.find((item) => String(item.psn || '').toLowerCase() === String(profile.psn_id || '').toLowerCase());
-      body.append(createStatusRow('Confirmed PvP', `${number(pvp.kills)} K · ${number(pvp.deaths)} D`, `${Number(pvp.kd_ratio || 0).toFixed(2)} K/D`, 'pvp'));
-      body.append(createStatusRow('Current streak', number(pvp.current_streak), pvp.favourite_weapon ? `Favourite weapon: ${pvp.favourite_weapon}` : 'Confirmed combat activity', 'pvp'));
-      body.append(createStatusRow('24h leaderboard', row ? `${number(row.kills)} kills` : 'No ranked kills', row ? `${Number(row.kd || 0).toFixed(2)} K/D · ${number(row.hotspot_kills)} hotspot` : 'Only confirmed PvP is counted'));
-    }
+    const events = snapshot.home?.events || {};
+    const upcoming = events.upcoming || [];
+    root.querySelector('[data-my-wwz-event-count]').textContent = `${integer(events.registered_count)} registered`;
+    upcoming.slice(0, 4).forEach((event) => {
+      const status = String(event.status || 'scheduled');
+      const myStatus = event.my_status ? titleCase(event.my_status) : '';
+      body.append(row({
+        title: event.title || 'Community event',
+        value: status === 'active' ? 'LIVE' : relative(event.starts_at),
+        detail: `${event.location_label || 'Server-wide'}${myStatus ? ` · You: ${myStatus}` : ''}`,
+        target: '/dashboard.html#community/events',
+        tone: status === 'active' ? 'good' : (event.my_status === 'waitlisted' ? 'attention' : ''),
+      }));
+    });
+    if (!upcoming.length) body.append(empty('No live or scheduled events', 'New community events will appear here automatically.'));
   };
 
-  const renderAttention = (snapshot) => {
-    const body = root.querySelector('[data-my-wwz-attention-body]');
-    const count = root.querySelector('[data-my-wwz-attention-count]');
+  const renderOrders = (snapshot) => {
+    const body = root.querySelector('[data-my-wwz-orders-body]');
     body.replaceChildren();
-
-    const tickets = (snapshot.tickets?.tickets || []).filter((ticket) => ['creating', 'open'].includes(String(ticket.status)));
-    const orders = (snapshot.shop?.orders || []).filter((order) => ['pending', 'processing'].includes(String(order.status)));
-    const events = (snapshot.community?.events || []).filter((event) => ['active', 'scheduled'].includes(String(event.status)));
-    const serverStatus = String(snapshot.status?.status || 'unknown');
-
-    const items = [];
-    if (sourceAvailable(snapshot, 'tickets')) {
-      if (tickets.length) items.push(['Open support tickets', `${tickets.length}`, tickets[0]?.subject || 'A ticket is awaiting attention', '']);
-    } else {
-      items.push(['Support tickets', 'Refresh unavailable', 'Ticket data did not refresh; no ticket state was assumed.', '']);
-    }
-
-    if (sourceAvailable(snapshot, 'shop')) {
-      if (orders.length) items.push(['Shop / trader orders', `${orders.length}`, `${orders.filter((order) => order.status === 'processing').length} processing`, '']);
-    } else {
-      items.push(['Shop / trader orders', 'Refresh unavailable', 'Order data did not refresh; existing orders were not treated as cleared.', '']);
-    }
-
-    if (sourceAvailable(snapshot, 'community')) {
-      if (events.length) items.push(['Community events', `${events.length}`, events[0]?.title || 'Upcoming event', '']);
-    } else {
-      items.push(['Community events', 'Refresh unavailable', 'The event schedule could not refresh for this server.', '']);
-    }
-
-    if (sourceAvailable(snapshot, 'status') && serverStatus !== 'online') {
-      items.push(['Server status', serverStatus.toUpperCase(), 'Check live server status before joining.', 'danger']);
-    }
-
-    count.textContent = String(items.length);
-    items.forEach(([label, value, detail, tone]) => body.append(createStatusRow(label, value, detail, tone)));
-    if (!items.length) body.append(createStatusRow('All clear', '0 items', 'No open tickets, orders, scheduled events or server warnings.', 'good'));
+    const orders = snapshot.home?.orders || {};
+    const support = snapshot.home?.support || {};
+    const openTotal = integer(orders.open_total) + integer(support.open_count);
+    root.querySelector('[data-my-wwz-order-count]').textContent = `${openTotal} open`;
+    (orders.recent || []).slice(0, 3).forEach((orderItem) => {
+      const donation = orderItem.kind === 'donation';
+      body.append(row({
+        title: orderItem.name || (donation ? 'Donation order' : 'Shop order'),
+        value: titleCase(orderItem.status || 'pending'),
+        detail: donation ? `${orderItem.id || 'Donation'} · ${orderItem.price_aud || 'AUD order'}` : `Order #${orderItem.id || '—'} · ${formatNumber(orderItem.total)} credits`,
+        target: donation ? '/donations.html#orders' : '/dashboard.html#shop/orders',
+        meta: relative(orderItem.created_at),
+      }));
+    });
+    (support.recent || []).filter((ticketItem) => ['creating', 'open'].includes(String(ticketItem.status))).slice(0, 2).forEach((ticketItem) => {
+      body.append(row({ title: `Ticket #${ticketItem.ticket_number || ticketItem.ticket_id || '—'} · ${ticketItem.subject || 'Support'}`, value: titleCase(ticketItem.status || 'open'), detail: ticketItem.category || 'Support ticket', target: '/dashboard.html#tickets/support', meta: relative(ticketItem.last_activity_at) }));
+    });
+    if (!body.childElementCount) body.append(empty('Nothing waiting on you', 'No open shop orders, donation orders or support tickets for this server.'));
   };
 
   const renderRecent = (snapshot) => {
     const body = root.querySelector('[data-my-wwz-recent-body]');
     body.replaceChildren();
-
-    const xp = (snapshot.progression?.recent_xp || []).filter((row) => Number(row.amount) !== 0).slice(0, 3);
-    const transactions = (snapshot.account?.recent_transactions || []).slice(0, 3);
-
-    const progression = document.createElement('div');
-    progression.className = 'my-wwz-recent-column';
-    const progressionTitle = document.createElement('strong');
-    progressionTitle.textContent = 'XP / Progression';
-    progression.append(progressionTitle);
-    xp.forEach((row) => progression.append(createStatusRow(
-      String(row.details || String(row.source_type || 'XP').replaceAll('_', ' ')),
-      `${Number(row.amount) > 0 ? '+' : ''}${number(row.amount)} XP`,
-      relative(row.created_at)
-    )));
-    if (!xp.length) progression.append(createStatusRow('Progression activity', 'No recent XP', 'New legitimate XP events will appear here.'));
-
-    const economy = document.createElement('div');
-    economy.className = 'my-wwz-recent-column';
-    const economyTitle = document.createElement('strong');
-    economyTitle.textContent = 'Economy';
-    economy.append(economyTitle);
-    transactions.forEach((row) => {
-      const change = Number(row.change || 0);
-      economy.append(createStatusRow(
-        String(row.details || row.command || 'Economy activity'),
-        `${change >= 0 ? '+' : '−'}${money(Math.abs(change))}`,
-        relative(row.created_at),
-        change >= 0 ? 'good' : ''
-      ));
+    const activity = snapshot.home?.recent_activity || [];
+    activity.slice(0, 8).forEach((item) => {
+      const node = document.createElement('button');
+      node.type = 'button';
+      node.className = 'my-wwz-activity-item';
+      const icon = document.createElement('span');
+      icon.className = 'my-wwz-activity-icon';
+      icon.textContent = item.kind === 'progression' ? 'XP' : item.kind === 'economy' ? '$' : '•';
+      const copy = document.createElement('span');
+      const strong = document.createElement('strong');
+      const small = document.createElement('small');
+      strong.textContent = item.title || 'WWZ activity';
+      small.textContent = item.detail || titleCase(item.kind || 'activity');
+      copy.append(strong, small);
+      const time = document.createElement('time');
+      time.textContent = relative(item.created_at);
+      node.append(icon, copy, time);
+      node.addEventListener('click', () => openTarget(item.target_url));
+      body.append(node);
     });
-    if (!transactions.length) economy.append(createStatusRow('Economy activity', 'No recent transactions', 'Your wallet history will appear here.'));
-
-    body.append(progression, economy);
+    if (!activity.length) body.append(empty('No recent activity yet', 'XP, economy and notification activity will appear here as you use WWZ.'));
   };
 
   const renderSnapshot = (snapshot) => {
     ensureRoot();
+    const home = snapshot.home || {};
+    if (!home || !['ok', 'partial'].includes(String(home.status || ''))) throw new Error(home?.message || 'Your member home is unavailable.');
     lastSnapshot = snapshot;
-    root.dataset.state = 'ready';
+    root.dataset.state = home.status;
     root.dataset.map = snapshot.server?.map_key || '';
-    root.querySelector('[data-my-wwz-world]').textContent = `${snapshot.server?.map_name || 'Current server'} · ${snapshot.server?.name || 'World War Z'}`;
-    const updated = root.querySelector('[data-my-wwz-updated]');
-    if (updated) updated.textContent = `Updated ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-    renderQuickActions();
-    root.querySelector('[data-my-wwz-subtitle]').textContent = snapshot.server?.map_key === 'chernarus'
-      ? 'Your Chernarus PvE command view: server state, Survivor Passport, quests, operations, events and account activity.'
-      : 'Your Livonia PvP command view: server state, confirmed combat, hotspots, quests, events and account activity.';
+    overviewPanel.classList.add('member-home-ready');
+    renderHero(snapshot);
     renderMetrics(snapshot);
-    renderNow(snapshot);
-    renderObjectives(snapshot);
-    renderSurvivor(snapshot);
-    renderAttention(snapshot);
+    renderNext(snapshot);
+    renderWorld(snapshot);
+    renderProgress(snapshot);
+    renderFaction(snapshot);
+    renderEvents(snapshot);
+    renderOrders(snapshot);
     renderRecent(snapshot);
+    renderQuickLinks();
   };
 
-  const collectSnapshot = async () => {
+  const collect = async () => {
     const server = selectedServer();
     if (!server) throw new Error('Select a World War Z server first.');
-
-    const worldUrl = server.map_key === 'livonia' ? API.livonia : API.chernarus;
     const calls = {
-      account: requestJson(API.account, { auth: true }),
-      progression: requestJson(API.progression, { auth: true }),
-      objectives: requestJson(API.objectives, { auth: true }),
-      tickets: requestJson(API.tickets, { auth: true }),
-      shop: requestJson(API.shop, { auth: true }),
-      community: requestJson(API.community, { auth: false }),
-      status: requestJson(API.status, { auth: false }),
-      world: requestJson(worldUrl, { auth: false }),
+      home: requestJson(API.home, { auth: true }),
+      status: requestJson(API.status),
+      world: requestJson(server.map_key === 'livonia' ? API.livonia : API.chernarus),
     };
-
     const keys = Object.keys(calls);
-    const results = await Promise.allSettled(keys.map((key) => calls[key]));
+    const settled = await Promise.allSettled(keys.map((key) => calls[key]));
     const snapshot = { server, failures: [] };
-    results.forEach((result, index) => {
+    settled.forEach((result, index) => {
       const key = keys[index];
       if (result.status === 'fulfilled') snapshot[key] = result.value;
       else {
@@ -535,78 +582,72 @@
         snapshot.failures.push({ key, message: result.reason?.message || 'Unavailable' });
       }
     });
+    if (!snapshot.home) throw new Error(snapshot.failures.find((item) => item.key === 'home')?.message || 'Your member home could not be loaded.');
     return snapshot;
+  };
+
+  const renderGuest = () => {
+    ensureRoot();
+    overviewPanel.classList.remove('member-home-ready');
+    root.dataset.state = 'guest';
+    root.querySelector('[data-my-wwz-title]').textContent = 'Your personal WWZ home';
+    root.querySelector('[data-my-wwz-subtitle]').textContent = 'Sign in with Discord to load your survivor, objectives, faction, events, orders and activity.';
+    setMessage('Discord sign-in is required to load your personal command centre.', 'info');
   };
 
   const schedule = () => {
     window.clearTimeout(refreshTimer);
+    refreshTimer = 0;
     if (!active || document.hidden) return;
     refreshTimer = window.setTimeout(async () => {
-      await refreshSnapshot();
+      await refresh();
       schedule();
     }, 60_000);
   };
 
-  const refreshSnapshot = async ({ force = false } = {}) => {
+  const refresh = async ({ force = false } = {}) => {
     if (refreshInProgress) return;
     ensureRoot();
-
-    if (!sessionToken()) {
-      renderGuest();
-      setMessage('');
-      return;
-    }
-
+    if (!token()) { renderGuest(); return; }
     if (!selectedServer()) {
-      renderGuest();
-      setMessage('Select a World War Z server to load My WWZ.', 'info');
+      overviewPanel.classList.remove('member-home-ready');
+      setMessage('Select a World War Z server to load your personal command centre.', 'info');
       return;
     }
 
     refreshInProgress = true;
-    const button = root.querySelector('[data-my-wwz-refresh]');
-    const originalButtonLabel = button?.textContent || 'Refresh My WWZ';
-    if (button) {
-      button.setAttribute('disabled', '');
-      button.textContent = 'Refreshing…';
-      button.dataset.loading = 'true';
-    }
-    if (force || !lastSnapshot) setMessage('Refreshing your WWZ command view…', 'info');
-
+    const refreshButton = root.querySelector('[data-my-wwz-refresh]');
+    const original = refreshButton.textContent;
+    refreshButton.disabled = true;
+    refreshButton.textContent = 'Refreshing…';
+    root.classList.add('is-loading');
+    if (force || !lastSnapshot) setMessage('Refreshing your personal WWZ command centre…', 'info');
     try {
-      const snapshot = await collectSnapshot();
+      const snapshot = await collect();
       renderSnapshot(snapshot);
-
-      if (snapshot.failures.length) {
-        console.warn('WWZ My WWZ partial refresh.', snapshot.failures);
-      }
-
-      const coreFailures = snapshot.failures.filter((row) => CORE_SOURCES.has(row.key));
-      if (coreFailures.length) {
-        const labels = coreFailures.map((row) => SOURCE_LABELS[row.key] || row.key).join(', ');
-        setMessage(`My WWZ partially refreshed. Waiting on: ${labels}. Available cards remain usable.`, 'warning');
+      const partial = [...(snapshot.failures || []), ...(snapshot.home?.failures || [])];
+      if (partial.length) {
+        setMessage(`Home refreshed with ${partial.length} data source${partial.length === 1 ? '' : 's'} temporarily unavailable. Available cards remain usable.`, 'warning');
       } else {
-        setMessage('My WWZ is up to date.', 'success', { transient: true });
+        setMessage('Your WWZ home is up to date.', 'success', { transient: true });
       }
     } catch (error) {
-      setMessage(error.message || 'My WWZ could not be refreshed.', 'error');
+      if (error?.status === 401 || error?.status === 403) overviewPanel.classList.remove('member-home-ready');
+      setMessage(error?.message || 'Your WWZ home could not be refreshed.', 'error');
     } finally {
       refreshInProgress = false;
-      if (button) {
-        button.removeAttribute('disabled');
-        button.textContent = originalButtonLabel;
-        delete button.dataset.loading;
-      }
+      refreshButton.disabled = false;
+      refreshButton.textContent = original;
+      root.classList.remove('is-loading');
     }
   };
 
   const activate = () => {
     active = true;
     ensureRoot();
-    refreshSnapshot();
+    refresh();
     schedule();
   };
-
   const deactivate = () => {
     active = false;
     window.clearTimeout(refreshTimer);
@@ -619,27 +660,26 @@
   });
   window.addEventListener('wwz:authchange', () => {
     lastSnapshot = null;
-    if (active) refreshSnapshot({ force: true });
+    if (active) refresh({ force: true });
   });
   window.addEventListener('wwz:serverchange', () => {
     lastSnapshot = null;
-    renderQuickActions();
-    if (active) refreshSnapshot({ force: true });
+    renderQuickLinks();
+    if (active) refresh({ force: true });
   });
-  window.addEventListener('online', () => {
-    if (active) refreshSnapshot({ force: true });
-  });
+  window.addEventListener('online', () => { if (active) refresh({ force: true }); });
   document.addEventListener('visibilitychange', () => {
     if (!active) return;
-    if (document.hidden) window.clearTimeout(refreshTimer);
-    else {
-      refreshSnapshot();
+    if (document.hidden) {
+      window.clearTimeout(refreshTimer);
+      refreshTimer = 0;
+    } else {
+      refresh();
       schedule();
     }
   });
 
-  window.WWZMyWwz = Object.freeze({ activate, deactivate, refresh: refreshSnapshot });
+  window.WWZMyWwz = Object.freeze({ activate, deactivate, refresh });
   window.__wwzMyWwzReady = true;
-
   if (overviewPanel.classList.contains('active')) activate();
 })();

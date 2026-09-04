@@ -1,18 +1,18 @@
-# World War Z Website v1.39.0 — Data Management / Backup & Export Centre
+# World War Z Website v1.40.0 — Member Dashboard / Home Overhaul
 
-## New Owner workspace
-- Adds Data Management to Owner Configuration with live SQLite integrity, database/WAL size, server-scoped row counts and persistent-storage capacity.
-- Adds a verified whole-database backup builder with an explicit `BACKUP ALL SERVERS` confirmation and clear global backup-scope warning.
-- Adds protected backup downloads, checksum/integrity re-verification, schema-match status, retention visibility and explicit deletion.
+## Personal command centre
+- Rebuilds the signed-in Overview into a personalised WWZ home instead of a generic collection of dashboard summary cards.
+- Adds survivor identity/server context, progression, wallet, faction, quest and Action Centre metrics at the top of the member experience.
+- Adds focused cards for current Chernarus PvE / Livonia PvP intelligence, current priorities, quests/progression, faction status, upcoming community events, shop/donation orders, support tickets and recent activity.
+- Adds one-click quick links into the existing Account, Progression, Objectives, Factions, Events, Shop, Tickets, Action Centre, Map and selected-world Operations workspaces.
 
-## Server-isolated reports
-- Adds Complete, Members/Progression, Economy/Commerce, Community/Factions, Moderation/Support and Operations/Audit export presets.
-- Supports JSON or CSV ZIP bundles, row/table totals, retained download history and server-isolation guidance.
-- Adds recent data-management action history and Data Management as a filter in the existing Audit / Operations Centre.
+## Resilience / responsive UX
+- Keeps the existing public guest Overview available until Discord sign-in and server selection allow the private member home to load.
+- Handles partial backend source failures without hiding otherwise healthy cards and automatically refreshes while the Overview is active.
+- Improves desktop, tablet and mobile/touch layouts for the personal home while retaining the dashboard-wide v1.35 consistency/accessibility layer.
 
-## Recovery safeguards / compatibility
-- The dashboard intentionally exposes no live-restore control. Recovery instructions require a verified backup and stopping the Railway service before replacing the persistent SQLite file.
-- Pairs with Bot v1.31.0.
-- Chernarus/Livonia isolation and all existing Action Centre, Audit / Operations, faction, event, quest, commerce and map systems are preserved.
-- The bounded PWA map-cache generation remains unchanged.
-- No DayZ mission upload, Nitrado configuration change, database wipe, map-data change or server wipe is required.
+## Compatibility
+- Pairs with Bot v1.32.0 and its protected server-scoped member-home aggregator.
+- Chernarus/Livonia isolation and all existing Action Centre, Data Management, Audit / Operations, faction, event, quest, commerce and map systems are preserved.
+- Advances the public website/PWA label to v1.40.0 without rotating the bounded map-cache generation.
+- No database migration, DayZ mission upload, Nitrado configuration change, map-data change or server wipe is required.

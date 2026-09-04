@@ -384,10 +384,10 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "section === 'server-audit') loadServerActionHistory()" not in operations_admin:
         errors.append("administration.js: Operations Centre must auto-load the unified audit.")
 
-    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.39.0</strong></div>' not in dashboard:
+    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.40.0</strong></div>' not in dashboard:
         errors.append("dashboard.html: command-centre footer release label is stale.")
 
-    if "Website v1.39.0 · Bot v1.31.0" not in index:
+    if "Website v1.40.0 · Bot v1.32.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
 
     action_centre_js_path = ROOT / "assets/js/dashboard/action-centre.js"
@@ -470,6 +470,45 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append(f"lazy-assets.js: missing Data Management lazy asset: {token}")
     if '<option value="data">Data Management</option>' not in dashboard:
         errors.append("dashboard.html: Data Management is missing from the unified audit subsystem filter.")
+
+    member_home_js_path = ROOT / "assets/js/dashboard/my-wwz.js"
+    member_home_css_path = ROOT / "assets/css/dashboard/my-wwz.css"
+    member_home_bootstrap = (ROOT / "assets/js/dashboard/bootstrap.js").read_text(encoding="utf-8")
+    member_home_js = member_home_js_path.read_text(encoding="utf-8") if member_home_js_path.is_file() else ""
+    member_home_css = member_home_css_path.read_text(encoding="utf-8") if member_home_css_path.is_file() else ""
+    for token in (
+        "assets/js/dashboard/bootstrap.js?v=1.40.0&amp;rev=member-home-overhaul-1",
+        'class="dashboard-view active" data-view-panel="overview"',
+        "Your survivor, progression, faction, quests, events, orders and current priorities",
+    ):
+        if token not in dashboard:
+            errors.append(f"dashboard.html: missing Member Home release surface: {token}")
+    for token in (
+        "assets/css/dashboard/my-wwz.css?v=1.40.0&rev=member-home-overhaul-1",
+        "assets/js/dashboard/my-wwz.js?v=1.40.0&rev=member-home-overhaul-1",
+        "loadMyWwzExperience",
+    ):
+        if token not in member_home_bootstrap:
+            errors.append(f"bootstrap.js: missing Member Home loader guard: {token}")
+    for token in (
+        "/api/account/home",
+        "data-my-wwz-root",
+        "Personal command centre",
+        "60_000",
+        "window.WWZMyWwz",
+        "wwz:serverchange",
+    ):
+        if token not in member_home_js:
+            errors.append(f"my-wwz.js: missing Member Home runtime guard: {token}")
+    for token in (
+        ".my-wwz-hero",
+        ".my-wwz-metrics",
+        ".my-wwz-grid",
+        ".my-wwz-activity",
+        "@media (max-width: 720px)",
+    ):
+        if token not in member_home_css:
+            errors.append(f"my-wwz.css: missing Member Home layout guard: {token}")
 
     for stale in ("Website v1.22.52 · Bot v1.18.48", "Chernarus Live—Livonia Ready To Connect", "Livonia production onboarding", "current single-server setup", "participants", "Owner bulk catalogue controls", "Natural XP &amp; Prestige QA", "natural XP/Prestige QA remains deferred", "Deferred verification"):
         if stale in index:
@@ -964,7 +1003,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         if "else if (preserveSelection)" not in signed_out or "showLogin();" not in signed_out:
             errors.append("core.js: transient saved-session failures must preserve server context without claiming Discord is unavailable.")
     account_script = f'assets/js/dashboard/account.js?v={EXPECTED_ASSET_VERSION}'
-    bootstrap_script = 'assets/js/dashboard/bootstrap.js?v=1.28.0'
+    bootstrap_script = 'assets/js/dashboard/bootstrap.js?v=1.40.0&amp;rev=member-home-overhaul-1'
     account_index = dashboard.find(account_script)
     bootstrap_index = dashboard.find(bootstrap_script)
     if bootstrap_index < 0:
@@ -1771,7 +1810,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.39.0'",
+        "const WWZ_PWA_VERSION = '1.40.0'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
         "if (request.method !== 'GET') return;",
