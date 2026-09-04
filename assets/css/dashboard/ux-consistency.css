@@ -1,0 +1,1300 @@
+/* World War Z Website v1.35.0 — Dashboard UX / Consistency Pass
+   Final dashboard-only harmonisation layer. Loaded after the legacy/component
+   styles so existing workspaces keep their behaviour while sharing one visual,
+   responsive and accessibility contract. */
+
+:root {
+  --wwz-dashboard-sidebar: 292px;
+  --wwz-dashboard-content: 1640px;
+  --wwz-dashboard-gap: 14px;
+  --wwz-control-height: 42px;
+  --wwz-touch-height: 44px;
+  --wwz-surface-0: #090b0f;
+  --wwz-surface-1: #10141a;
+  --wwz-surface-2: #151a21;
+  --wwz-surface-3: #1a2028;
+  --wwz-border: rgba(213, 224, 235, .13);
+  --wwz-border-strong: rgba(213, 224, 235, .22);
+  --wwz-copy: #f2f4f6;
+  --wwz-copy-soft: #c0c7ce;
+  --wwz-copy-muted: #818b96;
+  --wwz-copy-faint: #68727d;
+  --wwz-accent: #e23a30;
+  --wwz-accent-hot: #ff594c;
+  --wwz-success: #59c47a;
+  --wwz-warning: #e6a443;
+  --wwz-info: #69b4cc;
+  --wwz-danger: #e23a30;
+  --wwz-radius-control: 6px;
+  --wwz-radius-panel: 6px;
+  --wwz-shadow-panel: 0 16px 44px rgba(0, 0, 0, .24);
+  --wwz-shadow-dialog: 0 32px 100px rgba(0, 0, 0, .68);
+
+  /* Keep the old shell variable and the newer operations variable aligned. */
+  --sidebar: var(--wwz-dashboard-sidebar);
+  --wwz-sidebar: var(--wwz-dashboard-sidebar);
+}
+
+html {
+  scrollbar-gutter: stable;
+}
+
+body.dashboard-ready,
+body.dashboard-gated {
+  min-height: 100dvh;
+  overflow-wrap: anywhere;
+}
+
+body:has(dialog[open]) {
+  overflow: hidden;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Command-centre shell                                                       */
+/* -------------------------------------------------------------------------- */
+
+.dashboard-topbar {
+  min-width: 0;
+  padding-left: max(14px, env(safe-area-inset-left));
+  padding-right: max(14px, env(safe-area-inset-right));
+}
+
+.dashboard-brand,
+.topbar-workspace,
+.dashboard-search-trigger,
+.topbar-spacer,
+.server-switcher,
+.connection-state,
+.account-menu-trigger {
+  min-width: 0;
+}
+
+.topbar-workspace {
+  flex: 0 1 210px;
+}
+
+.topbar-workspace strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-search-trigger {
+  width: clamp(240px, 29vw, 470px);
+  max-width: 470px;
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  padding-inline: 12px !important;
+  text-align: left;
+}
+
+.dashboard-search-trigger > span:nth-child(2) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-sidebar {
+  width: var(--wwz-dashboard-sidebar) !important;
+  padding-bottom: max(14px, env(safe-area-inset-bottom));
+}
+
+.dashboard-shell {
+  grid-template-columns: var(--wwz-dashboard-sidebar) minmax(0, 1fr) !important;
+}
+
+.dashboard-main {
+  min-width: 0;
+  padding: clamp(20px, 2.4vw, 38px) clamp(16px, 2.6vw, 42px) max(34px, env(safe-area-inset-bottom));
+}
+
+.dashboard-view,
+.preview-banner,
+.auth-message,
+.dashboard-footer {
+  width: min(100%, var(--wwz-dashboard-content));
+  max-width: var(--wwz-dashboard-content) !important;
+  margin-inline: auto;
+}
+
+.dashboard-view {
+  min-width: 0;
+}
+
+.sidebar-version {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 10px 0;
+  padding: 11px 9px;
+  border-top: 1px solid var(--wwz-border);
+  color: var(--wwz-copy-faint);
+}
+
+.sidebar-version span {
+  overflow: hidden;
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: .1em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.sidebar-version strong {
+  color: #aeb6be;
+  font-size: 9px;
+  letter-spacing: .06em;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Navigation                                                                 */
+/* -------------------------------------------------------------------------- */
+
+.sidebar-navigation {
+  min-width: 0;
+}
+
+.nav-group,
+.nav-group-links,
+.side-link,
+.side-link-copy {
+  min-width: 0;
+}
+
+.nav-group > summary {
+  position: relative;
+}
+
+.nav-group > summary::after {
+  content: "⌄";
+  margin-left: 4px;
+  color: #59636e;
+  font-size: 10px;
+  transform: rotate(-90deg);
+  transition: transform 140ms ease, color 140ms ease;
+}
+
+.nav-group[open] > summary::after {
+  color: #9ba5af;
+  transform: rotate(0deg);
+}
+
+.nav-group > summary > small {
+  margin-left: auto;
+}
+
+.side-link-copy strong,
+.side-link-copy small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.side-link-badge {
+  flex: 0 0 auto;
+}
+
+.sidebar-footer {
+  flex-wrap: wrap;
+}
+
+.sidebar-footer a {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* -------------------------------------------------------------------------- */
+/* View headings and information hierarchy                                    */
+/* -------------------------------------------------------------------------- */
+
+.view-heading {
+  min-height: 0 !important;
+  align-items: center !important;
+  padding: clamp(18px, 2vw, 26px) !important;
+}
+
+.view-heading > div:first-child {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.view-heading h1 {
+  max-width: 1050px;
+  text-wrap: balance;
+}
+
+.view-heading > div > p:last-child {
+  max-width: 920px !important;
+  margin-top: 8px !important;
+  color: var(--wwz-copy-muted) !important;
+  line-height: 1.6;
+}
+
+.heading-actions,
+.panel-heading-actions,
+.community-actions,
+.community-form-actions,
+.flag-admin-actions,
+.dm-actions,
+.server-feeds-action-bar,
+.shop-management-actions,
+.auth-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px !important;
+  min-width: 0;
+}
+
+.heading-actions {
+  justify-content: flex-end;
+  flex: 0 1 auto;
+}
+
+.panel-heading {
+  align-items: flex-start;
+  gap: 14px !important;
+}
+
+.panel-heading > div:first-child,
+.panel-heading > div:first-child > div {
+  min-width: 0;
+}
+
+.panel-heading h2,
+.panel-heading h3,
+.panel-heading h4,
+.inset-panel h3,
+.inset-panel h4 {
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.panel-heading p:not(.panel-kicker),
+.compact-heading p:not(.panel-kicker) {
+  max-width: 850px;
+  margin: 6px 0 0;
+  color: var(--wwz-copy-muted);
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.panel-intro,
+.table-note,
+.field-help {
+  color: var(--wwz-copy-muted) !important;
+  line-height: 1.62 !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Panels, cards and dashboard grids                                          */
+/* -------------------------------------------------------------------------- */
+
+.panel,
+.inset-panel,
+.metric-card,
+.security-notice,
+.compact-notice,
+.locked-hero,
+.flow-card,
+.shop-setting-card,
+.progression-stat,
+.progression-toggle,
+.progression-role-row,
+.case-editor,
+.appeal-card,
+.owner-builder-notice,
+.owner-builder-event-block,
+.player-intelligence-card,
+.flag-admin-card {
+  min-width: 0;
+}
+
+.panel,
+.inset-panel {
+  border-color: var(--wwz-border) !important;
+}
+
+.inset-panel {
+  padding: clamp(15px, 1.7vw, 20px);
+  border: 1px solid var(--wwz-border);
+  border-radius: var(--wwz-radius-panel) !important;
+  background: rgba(7, 10, 14, .44) !important;
+}
+
+.dashboard-grid,
+.community-grid,
+.flag-admin-grid,
+.chernarus-pve-grid,
+.livonia-pvp-grid,
+.dm-grid,
+.operations-health-grid,
+.ticket-config-grid,
+.objective-column-grid,
+.admin-private-grid,
+.player-dossier-grid,
+.zone-role-grid,
+.zone-toggle-grid,
+.zone-rule-grid {
+  min-width: 0;
+  gap: var(--wwz-dashboard-gap) !important;
+}
+
+.metric-grid {
+  min-width: 0;
+}
+
+.metric-card {
+  min-width: 0;
+  min-height: 126px !important;
+}
+
+.metric-card > strong,
+.metric-card > p,
+.metric-card small {
+  overflow-wrap: anywhere;
+}
+
+.operations-summary-grid,
+.account-data-grid,
+.case-summary-grid,
+.case-detail-grid,
+.admin-private-grid,
+.chernarus-record-grid,
+.livonia-record-grid {
+  min-width: 0;
+}
+
+.operations-summary-grid > div,
+.account-data-grid > div,
+.case-summary-grid > div,
+.case-detail-grid > div,
+.admin-private-grid > div,
+.chernarus-record-grid > div,
+.livonia-record-grid > div {
+  min-width: 0;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Buttons and action states                                                  */
+/* -------------------------------------------------------------------------- */
+
+:where(
+  .primary-action,
+  .secondary-action,
+  .discord-button,
+  .danger-action,
+  .danger-outline,
+  .table-button,
+  .compact-action,
+  .dialog-cancel,
+  .text-action,
+  .server-switcher,
+  .pwa-install-button,
+  .workspace-subnav button,
+  .filter-list button,
+  .quick-grid button,
+  .operation-grid button,
+  .player-action-grid button,
+  .map-layer-button,
+  .activity-row-action
+) {
+  min-width: 0;
+  min-height: var(--wwz-control-height);
+  line-height: 1.2;
+}
+
+.primary-action,
+.secondary-action,
+.discord-button,
+.danger-action,
+.table-button,
+.compact-action,
+.dialog-cancel,
+.server-switcher,
+.pwa-install-button {
+  padding: 9px 13px;
+}
+
+.compact-action,
+.table-button,
+.activity-row-action {
+  min-height: 34px;
+  padding-block: 6px;
+}
+
+.heading-actions > button,
+.heading-actions > a,
+.panel-heading-actions > button {
+  white-space: nowrap;
+}
+
+:where(button, .button, [role="button"]):disabled,
+:where(button, .button, [role="button"])[aria-disabled="true"] {
+  cursor: not-allowed !important;
+  filter: saturate(.55);
+  opacity: .48 !important;
+  transform: none !important;
+}
+
+:where(button, .button)[aria-busy="true"],
+.is-loading button,
+button.is-loading {
+  cursor: wait !important;
+}
+
+:where(button, .button)[aria-busy="true"]::after,
+button.is-loading::after {
+  content: "";
+  width: 12px;
+  height: 12px;
+  flex: 0 0 12px;
+  margin-left: 7px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: wwz-ux-spin .7s linear infinite;
+}
+
+.danger-action,
+.primary-action.danger-action,
+.danger-outline {
+  --wwz-action-accent: var(--wwz-danger);
+}
+
+/* Legacy core.css gives destructive actions an 18px top offset; action bars now own spacing. */
+.danger-action {
+  margin-top: 0;
+}
+
+.text-action {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  margin-top: 0;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Forms                                                                      */
+/* -------------------------------------------------------------------------- */
+
+form,
+fieldset,
+.dialog-field,
+.community-field,
+.zone-field,
+.progression-setting,
+.ticket-setting-toggle,
+.toggle-setting {
+  min-width: 0;
+}
+
+fieldset {
+  border-color: var(--wwz-border) !important;
+}
+
+legend {
+  max-width: 100%;
+  padding-inline: 7px;
+  color: var(--wwz-copy-soft);
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: .08em;
+}
+
+.dialog-field,
+.community-field,
+.zone-field {
+  gap: 7px;
+}
+
+.dialog-field > span,
+.community-field > span,
+.zone-field > span {
+  min-width: 0;
+  align-items: baseline;
+  flex-wrap: wrap;
+  line-height: 1.4;
+}
+
+.dialog-field > span small,
+.community-field > span small,
+.zone-field > span small {
+  margin-left: auto;
+  white-space: normal;
+}
+
+:where(
+  .dashboard-view input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+  .dashboard-view select,
+  .dashboard-view textarea,
+  .login-dialog input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+  .login-dialog select,
+  .login-dialog textarea,
+  .command-palette-dialog input
+) {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: var(--wwz-control-height);
+  padding: 9px 11px;
+  border: 1px solid var(--wwz-border-strong) !important;
+  border-radius: var(--wwz-radius-control) !important;
+  background: rgba(5, 8, 12, .78) !important;
+  color: var(--wwz-copy) !important;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+:where(.dashboard-view textarea, .login-dialog textarea) {
+  min-height: 94px;
+  resize: vertical;
+}
+
+:where(.dashboard-view input, .dashboard-view select, .dashboard-view textarea, .login-dialog input, .login-dialog select, .login-dialog textarea)::placeholder {
+  color: #65717d;
+  opacity: 1;
+}
+
+:where(.dashboard-view input, .dashboard-view select, .dashboard-view textarea, .login-dialog input, .login-dialog select, .login-dialog textarea):hover:not(:disabled):not([readonly]) {
+  border-color: rgba(213, 224, 235, .3) !important;
+}
+
+:where(.dashboard-view input, .dashboard-view select, .dashboard-view textarea, .login-dialog input, .login-dialog select, .login-dialog textarea):focus {
+  border-color: rgba(255, 89, 76, .66) !important;
+  outline: 0 !important;
+  box-shadow: 0 0 0 3px rgba(226, 58, 48, .11) !important;
+}
+
+:where(.dashboard-view input, .dashboard-view textarea, .login-dialog input, .login-dialog textarea)[readonly] {
+  color: #aab2ba !important;
+  background: rgba(255, 255, 255, .025) !important;
+}
+
+:where(.dashboard-view input, .dashboard-view select, .dashboard-view textarea, .login-dialog input, .login-dialog select, .login-dialog textarea):disabled {
+  cursor: not-allowed;
+  opacity: .52;
+}
+
+:where(input[type="checkbox"], input[type="radio"]) {
+  accent-color: var(--wwz-accent-hot);
+}
+
+.toggle-setting,
+.ticket-setting-toggle,
+.progression-toggle,
+.community-checkbox-line,
+.dm-check {
+  align-items: flex-start !important;
+  gap: 10px !important;
+}
+
+.toggle-setting > input,
+.ticket-setting-toggle > input,
+.progression-toggle > input,
+.community-checkbox-line > input,
+.dm-check > input {
+  flex: 0 0 auto;
+  width: 17px;
+  height: 17px;
+  margin-top: 2px;
+}
+
+.toggle-setting span,
+.ticket-setting-toggle span,
+.progression-toggle span,
+.community-checkbox-line span,
+.dm-check span {
+  min-width: 0;
+}
+
+select[multiple],
+select[size]:not([size="1"]) {
+  min-height: 118px !important;
+  padding: 6px !important;
+}
+
+select[multiple] option,
+select[size]:not([size="1"]) option {
+  padding: 7px 8px;
+}
+
+/* Utility toolbars that previously squeezed or overflowed. */
+.flag-history-toolbar,
+.flag-owner-filter,
+.ticket-blacklist-controls,
+.command-bar,
+.shop-toolbar,
+.shop-management-toolbar,
+.admin-player-search,
+.map-toolbar,
+.community-form-grid,
+.flag-admin-config-grid,
+.zone-form-grid,
+.owner-builder-basic-grid,
+.owner-builder-two,
+.coordinate-grid,
+.appeal-evidence-row,
+.player-action-ban-fields,
+.player-action-economy-fields {
+  min-width: 0;
+}
+
+.flag-history-toolbar > *,
+.flag-owner-filter > *,
+.ticket-blacklist-controls > *,
+.command-bar > *,
+.shop-toolbar > *,
+.shop-management-toolbar > *,
+.admin-player-search > *,
+.appeal-evidence-row > * {
+  min-width: 0;
+}
+
+.flag-history-toolbar {
+  gap: 8px !important;
+}
+
+.flag-owner-filter select {
+  min-width: 160px;
+}
+
+.ticket-blacklist-controls select[size] {
+  width: 100%;
+}
+
+.mission-file-editor,
+.config-diff-output,
+.event-code-editor textarea,
+[data-shop-event-xml],
+[data-shop-event-zone] {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important;
+  font-size: 10px !important;
+  line-height: 1.55 !important;
+  tab-size: 2;
+}
+
+.config-diff-output {
+  max-width: 100%;
+  overflow: auto;
+  white-space: pre;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Tables, result lists and dense data                                        */
+/* -------------------------------------------------------------------------- */
+
+.responsive-table,
+.wwz-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border: 1px solid var(--wwz-border) !important;
+  border-radius: var(--wwz-radius-panel) !important;
+  background: rgba(9, 12, 16, .76) !important;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+}
+
+.wwz-table-scroll > table,
+.responsive-table > table,
+.responsive-table table {
+  width: 100%;
+  min-width: 680px;
+}
+
+table {
+  width: 100%;
+  color: var(--wwz-copy-soft);
+  font-size: 10px;
+}
+
+th,
+td {
+  vertical-align: middle;
+  text-align: left;
+}
+
+th {
+  position: relative;
+  color: #8f99a3 !important;
+  background: rgba(255, 255, 255, .035) !important;
+}
+
+td {
+  color: #b8c0c7;
+  overflow-wrap: anywhere;
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.table-note,
+.history-error,
+.empty-state,
+[data-state="empty"] {
+  overflow-wrap: anywhere;
+}
+
+.empty-state {
+  min-height: 112px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 7px;
+  padding: 24px 18px !important;
+  border: 1px dashed rgba(213, 224, 235, .14) !important;
+  border-radius: var(--wwz-radius-panel);
+  background: rgba(255, 255, 255, .012);
+  color: var(--wwz-copy-muted) !important;
+  line-height: 1.55;
+}
+
+.empty-state::before {
+  content: "—";
+  color: #59636d;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.history-error,
+.restart-dialog-message,
+.zone-message,
+.admin-player-state,
+[data-ui-message] {
+  border-radius: var(--wwz-radius-control) !important;
+  line-height: 1.5;
+}
+
+.history-error:not(:empty) {
+  display: block;
+  padding: 10px 12px;
+  border: 1px solid rgba(226, 58, 48, .28);
+  background: rgba(226, 58, 48, .07);
+}
+
+.activity-list li,
+.community-list > *,
+.flag-claims-own-list > *,
+.flag-admin-pending > *,
+.flag-admin-active > *,
+.flag-admin-history > *,
+.faction-queue-list > *,
+.objective-card-list > *,
+.shop-order-list > * {
+  min-width: 0;
+}
+
+.activity-list strong,
+.activity-list small,
+.detail-list strong,
+.detail-list span,
+.detail-list small {
+  overflow-wrap: anywhere;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Sub-navigation and filters                                                 */
+/* -------------------------------------------------------------------------- */
+
+.workspace-subnav {
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)) !important;
+  gap: 8px !important;
+}
+
+.workspace-subnav button {
+  min-height: 64px !important;
+}
+
+.workspace-subnav button strong,
+.workspace-subnav button small {
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.filter-list,
+.shop-mode-tabs,
+.command-filter-list,
+.map-filter-list {
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  overscroll-behavior-inline: contain;
+}
+
+.filter-list button,
+.shop-mode-tabs button,
+.command-filter-list button,
+.map-filter-list button {
+  flex: 0 0 auto;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Dialogs and confirmations                                                  */
+/* -------------------------------------------------------------------------- */
+
+dialog,
+.login-dialog,
+.restart-dialog,
+.command-palette-dialog,
+.catalogue-builder-dialog {
+  max-width: calc(100vw - 24px) !important;
+  max-height: min(92dvh, 940px) !important;
+  border-radius: 8px !important;
+  box-shadow: var(--wwz-shadow-dialog) !important;
+  overscroll-behavior: contain;
+}
+
+.login-dialog {
+  width: min(620px, calc(100vw - 24px));
+}
+
+.catalogue-builder-dialog {
+  width: min(1260px, calc(100vw - 24px)) !important;
+}
+
+dialog[open] {
+  animation: wwz-ux-dialog-in 150ms ease-out both;
+}
+
+.login-dialog > form,
+.restart-dialog > form,
+.catalogue-builder-dialog > form,
+.command-palette-dialog > form,
+dialog > form {
+  max-height: min(92dvh, 940px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.dialog-close {
+  z-index: 5;
+  width: 38px !important;
+  height: 38px !important;
+  display: grid;
+  place-items: center;
+  border-radius: var(--wwz-radius-control) !important;
+}
+
+.dialog-cancel {
+  min-height: 40px;
+  margin-top: 8px;
+  border: 1px solid transparent !important;
+  border-radius: var(--wwz-radius-control) !important;
+}
+
+.dialog-cancel:hover,
+.dialog-cancel:focus-visible {
+  border-color: var(--wwz-border) !important;
+  background: rgba(255, 255, 255, .025) !important;
+  color: #cbd1d6;
+}
+
+.restart-warning,
+.dialog-notice,
+.player-action-target {
+  border-radius: var(--wwz-radius-control) !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Specific dense workspaces                                                  */
+/* -------------------------------------------------------------------------- */
+
+.owner-builder-layout,
+.event-purchase-layout,
+.map-workspace,
+.player-dossier-grid,
+.flag-admin-grid,
+.community-grid {
+  min-width: 0;
+}
+
+.owner-builder-side {
+  position: sticky;
+  top: 12px;
+}
+
+.flag-admin-card .panel-heading,
+.community-panel-heading,
+.ticket-settings-heading,
+.zone-settings-title {
+  min-width: 0;
+}
+
+.flag-admin-card .compact-heading {
+  align-items: center;
+}
+
+.flag-history-toolbar {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(150px, .45fr) minmax(150px, .45fr);
+}
+
+.appeal-evidence-row {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(220px, 1fr);
+  gap: 8px !important;
+}
+
+.progression-custom-role-row {
+  align-items: end;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Loading skeleton utility used by existing and future dashboard modules      */
+/* -------------------------------------------------------------------------- */
+
+.wwz-skeleton,
+[data-loading="true"] .wwz-skeleton-target {
+  position: relative;
+  overflow: hidden;
+  color: transparent !important;
+  pointer-events: none;
+  user-select: none;
+}
+
+.wwz-skeleton::after,
+[data-loading="true"] .wwz-skeleton-target::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, .055) 45%, transparent 70%);
+  transform: translateX(-100%);
+  animation: wwz-ux-shimmer 1.25s ease-in-out infinite;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Responsive                                                                 */
+/* -------------------------------------------------------------------------- */
+
+@media (max-width: 1180px) {
+  :root {
+    --wwz-dashboard-sidebar: 264px;
+  }
+
+  .dashboard-search-trigger {
+    width: clamp(210px, 25vw, 340px);
+  }
+
+  .topbar-workspace {
+    flex-basis: 170px;
+  }
+
+  .owner-builder-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(270px, .58fr) !important;
+  }
+}
+
+@media (max-width: 980px) {
+  :root {
+    --wwz-dashboard-sidebar: 292px;
+  }
+
+  .dashboard-shell {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .dashboard-sidebar {
+    width: min(320px, 88vw) !important;
+  }
+
+  .dashboard-search-trigger {
+    flex: 1 1 260px;
+    width: auto;
+    max-width: 380px;
+  }
+
+  .topbar-workspace {
+    display: none;
+  }
+
+  .owner-builder-layout,
+  .player-dossier-grid,
+  .flag-admin-grid,
+  .community-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .owner-builder-side {
+    position: static;
+  }
+}
+
+@media (max-width: 780px) {
+  .dashboard-topbar {
+    gap: 8px !important;
+  }
+
+  .dashboard-search-trigger {
+    width: 42px;
+    min-width: 42px;
+    max-width: 42px;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    padding: 0 !important;
+  }
+
+  .dashboard-search-trigger > span:nth-child(2),
+  .dashboard-search-trigger kbd {
+    display: none;
+  }
+
+  .server-switcher > span:last-child,
+  .pwa-install-button:not(.pwa-install-sidebar) {
+    display: none;
+  }
+
+  .server-switcher {
+    width: 42px;
+    min-width: 42px;
+    padding: 0 !important;
+    justify-content: center;
+  }
+
+  .view-heading {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .heading-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .heading-actions > * {
+    flex: 1 1 180px;
+  }
+
+  .panel-heading {
+    flex-wrap: wrap;
+  }
+
+  .panel-heading > .heading-actions,
+  .panel-heading > .panel-heading-actions,
+  .panel-heading > .community-actions,
+  .panel-heading > .flag-admin-actions,
+  .panel-heading > .dm-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .flag-history-toolbar,
+  .appeal-evidence-row,
+  .ticket-blacklist-controls,
+  .command-bar,
+  .shop-toolbar,
+  .shop-management-toolbar {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .flag-owner-filter,
+  .flag-owner-filter select {
+    width: 100%;
+  }
+
+  .workspace-subnav {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .responsive-table > table,
+  .responsive-table table,
+  .wwz-table-scroll > table {
+    min-width: 620px;
+  }
+}
+
+@media (max-width: 620px) {
+  :root {
+    --wwz-control-height: var(--wwz-touch-height);
+  }
+
+  .dashboard-main {
+    padding: 16px 11px max(28px, env(safe-area-inset-bottom)) !important;
+  }
+
+  .dashboard-brand-mark {
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+  .account-menu-trigger {
+    min-width: 42px;
+    padding-inline: 8px !important;
+  }
+
+  .account-menu-trigger [data-auth-button-label] {
+    max-width: 94px;
+  }
+
+  .view-heading {
+    padding: 17px !important;
+  }
+
+  .view-heading h1 {
+    font-size: clamp(1.9rem, 11vw, 2.65rem) !important;
+  }
+
+  .panel {
+    padding: 16px !important;
+  }
+
+  .inset-panel {
+    padding: 14px;
+  }
+
+  .metric-grid,
+  .metric-grid.three {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .metric-card {
+    min-height: 112px !important;
+  }
+
+  .workspace-subnav {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .workspace-subnav button {
+    min-height: 60px !important;
+  }
+
+  .heading-actions > *,
+  .panel-heading-actions > * {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .compact-action,
+  .table-button,
+  .activity-row-action {
+    min-height: 38px;
+  }
+
+  .login-dialog > form,
+  .restart-dialog > form,
+  .catalogue-builder-dialog > form,
+  dialog > form {
+    padding: 24px 16px 18px !important;
+  }
+
+  .catalogue-builder-header {
+    padding-inline: 16px !important;
+  }
+
+  .quick-grid,
+  .operation-grid,
+  .player-action-grid,
+  .coordinate-grid,
+  .owner-builder-basic-grid,
+  .owner-builder-two,
+  .community-form-grid,
+  .zone-form-grid,
+  .player-action-ban-fields,
+  .player-action-economy-fields {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .activity-list li.has-row-actions {
+    grid-template-columns: 31px minmax(0, 1fr) !important;
+  }
+
+  .activity-list .activity-row-actions {
+    grid-column: 2;
+    justify-content: flex-start !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .dashboard-topbar {
+    padding-inline: 8px;
+  }
+
+  .dashboard-search-trigger,
+  .server-switcher,
+  .mobile-menu {
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+  }
+
+  .discord-button [data-auth-button-label] {
+    display: none;
+  }
+
+  .account-menu-trigger {
+    width: 40px;
+    min-width: 40px;
+    justify-content: center;
+  }
+
+  .view-heading,
+  .panel,
+  .inset-panel {
+    border-radius: 5px !important;
+  }
+
+  .panel-heading h2,
+  .panel-heading h3 {
+    font-size: clamp(1.35rem, 8vw, 1.75rem) !important;
+  }
+
+  .responsive-table > table,
+  .responsive-table table,
+  .wwz-table-scroll > table {
+    min-width: 560px;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  :where(button, .button, [role="button"], a.side-link) {
+    min-height: var(--wwz-touch-height);
+  }
+
+  .metric-card:hover,
+  .panel:hover,
+  .workspace-subnav button:hover,
+  .quick-grid button:hover,
+  .operation-grid button:hover {
+    transform: none !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --wwz-border: rgba(238, 244, 249, .24);
+    --wwz-border-strong: rgba(238, 244, 249, .4);
+    --wwz-copy-muted: #a9b2bb;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wwz-skeleton::after,
+  [data-loading="true"] .wwz-skeleton-target::after,
+  :where(button, .button)[aria-busy="true"]::after,
+  button.is-loading::after {
+    animation: none !important;
+  }
+}
+
+@keyframes wwz-ux-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes wwz-ux-shimmer {
+  to { transform: translateX(100%); }
+}
+
+@keyframes wwz-ux-dialog-in {
+  from { opacity: 0; transform: translateY(8px) scale(.992); }
+  to { opacity: 1; transform: none; }
+}

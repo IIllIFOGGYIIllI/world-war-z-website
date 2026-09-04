@@ -2,11 +2,10 @@ dashboard.html
 index.html
 changelog.html
 sw.js
-assets/css/dashboard/factions.css
-assets/js/dashboard/factions.js
-assets/js/dashboard/lazy-assets.js
+assets/css/dashboard/ux-consistency.css
+assets/js/dashboard/ux-consistency.js
 scripts/validate_site.py
 PATCH_NOTES.md
 README.md
+INSTALL_README.txt
 PATCH_FILE_LIST.txt
-DELETE_THESE_FILES.txt

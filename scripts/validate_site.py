@@ -310,7 +310,44 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "activeDashboardSection && !sectionTargetFor(activeView, activeDashboardSection)" not in core:
         errors.append("core.js: access changes must leave protected nested sections safely.")
 
-    if "Website v1.34.0 · Bot v1.27.0" not in index:
+    ux_css_path = ROOT / "assets/css/dashboard/ux-consistency.css"
+    ux_js_path = ROOT / "assets/js/dashboard/ux-consistency.js"
+    ux_css = ux_css_path.read_text(encoding="utf-8") if ux_css_path.is_file() else ""
+    ux_js = ux_js_path.read_text(encoding="utf-8") if ux_js_path.is_file() else ""
+    ux_css_url = "assets/css/dashboard/ux-consistency.css?v=1.35.0&rev=dashboard-ux-1"
+    ux_js_url = "assets/js/dashboard/ux-consistency.js?v=1.35.0&rev=dashboard-ux-1"
+    if ux_css_url not in dashboard:
+        errors.append("dashboard.html: missing v1.35.0 final UX/consistency stylesheet.")
+    if ux_js_url not in dashboard:
+        errors.append("dashboard.html: missing v1.35.0 UX/accessibility enhancement script.")
+    if dashboard.find(ux_css_url) < dashboard.find("assets/css/ui-system.css"):
+        errors.append("dashboard.html: v1.35.0 UX stylesheet must load after the shared UI system.")
+    if dashboard.find(ux_js_url) < dashboard.find("assets/js/ui-system.js"):
+        errors.append("dashboard.html: v1.35.0 UX enhancement must load after the shared UI system.")
+    for token in (
+        "--sidebar: var(--wwz-dashboard-sidebar)",
+        ".flag-history-toolbar",
+        ".wwz-table-scroll",
+        "body:has(dialog[open])",
+        "@media (max-width: 620px)",
+        "@media (prefers-contrast: more)",
+    ):
+        if token not in ux_css:
+            errors.append(f"ux-consistency.css: missing dashboard consistency guard: {token}")
+    for token in (
+        "const UX_VERSION = '1.35.0'",
+        "const enhanceControl =",
+        "const enhanceTable =",
+        "const enhanceMessage =",
+        "const enhanceDialog =",
+        "new MutationObserver",
+    ):
+        if token not in ux_js:
+            errors.append(f"ux-consistency.js: missing dynamic UX/accessibility guard: {token}")
+    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.35.0</strong></div>' not in dashboard:
+        errors.append("dashboard.html: command-centre footer release label is stale.")
+
+    if "Website v1.35.0 · Bot v1.27.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for stale in ("Website v1.22.52 · Bot v1.18.48", "Chernarus Live—Livonia Ready To Connect", "Livonia production onboarding", "current single-server setup", "participants", "Owner bulk catalogue controls", "Natural XP &amp; Prestige QA", "natural XP/Prestige QA remains deferred", "Deferred verification"):
         if stale in index:
@@ -1546,7 +1583,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.34.0'",
+        "const WWZ_PWA_VERSION = '1.35.0'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
         "if (request.method !== 'GET') return;",
