@@ -384,10 +384,10 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "section === 'server-audit') loadServerActionHistory()" not in operations_admin:
         errors.append("administration.js: Operations Centre must auto-load the unified audit.")
 
-    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.40.0</strong></div>' not in dashboard:
+    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.41.0</strong></div>' not in dashboard:
         errors.append("dashboard.html: command-centre footer release label is stale.")
 
-    if "Website v1.40.0 · Bot v1.32.0" not in index:
+    if "Website v1.41.0 · Bot v1.33.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
 
     action_centre_js_path = ROOT / "assets/js/dashboard/action-centre.js"
@@ -1810,7 +1810,8 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.40.0'",
+        "const WWZ_PWA_VERSION = '1.41.0'",
+        "const WWZ_PWA_UPDATE_REVISION = '2026-09-05-website-v1-41-0'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
         "if (request.method !== 'GET') return;",
@@ -1859,6 +1860,40 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
     http_source = (ROOT / "assets/js/core/http.js").read_text(encoding="utf-8")
     if "navigator.onLine === false" not in http_source or "WWZOfflineError" not in http_source:
         errors.append("assets/js/core/http.js: live API requests must fail fast with the explicit offline guard.")
+    for token in (
+        "const DASHBOARD_API_ORIGIN = 'https://world-war-z.up.railway.app'",
+        "const BEARER_PATTERN = /^Bearer\\s+\\S{32,256}$/i",
+        "Protected World War Z credentials can only be sent to the trusted dashboard API.",
+        "credentials: 'omit'",
+        "cache: 'no-store'",
+        "referrerPolicy: 'no-referrer'",
+        "redirect: protectedRequest ? 'error'",
+        "fetch(target.href",
+        "const MINIMUM_TIMEOUT_MS = 1_000",
+        "const MAXIMUM_TIMEOUT_MS = 120_000",
+    ):
+        if token not in http_source:
+            errors.append(f"assets/js/core/http.js: missing security/reliability guard: {token}")
+
+    security_http_refs = {
+        "dashboard.html": "assets/js/core/http.js?v=1.41.0&amp;rev=security-hardening-1",
+        "shop.html": "assets/js/core/http.js?v=1.41.0&rev=security-hardening-1",
+        "donations.html": "assets/js/core/http.js?v=1.41.0&rev=security-hardening-1",
+    }
+    for html_name, token in security_http_refs.items():
+        if token not in (ROOT / html_name).read_text(encoding="utf-8"):
+            errors.append(f"{html_name}: shared HTTP security release key is stale.")
+
+    dashboard_security_source = (ROOT / "dashboard.html").read_text(encoding="utf-8")
+    for token in (
+        "font-src 'self'",
+        "media-src 'self'",
+        "frame-src 'none'",
+        "form-action 'self'",
+        "upgrade-insecure-requests",
+    ):
+        if token not in dashboard_security_source:
+            errors.append(f"dashboard.html: missing hardened CSP token: {token}")
 
     expected_manifest_ref = '<link href="manifest.webmanifest" rel="manifest"/>'
     expected_pwa_css = f'assets/css/pwa.css?v={EXPECTED_ASSET_VERSION}'
@@ -1871,6 +1906,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
             ("viewport-fit=cover", "viewport safe-area support"),
             ('name="mobile-web-app-capable"', "mobile web-app metadata"),
             ('name="apple-mobile-web-app-capable"', "Apple web-app metadata"),
+            ('<meta content="no-referrer" name="referrer"/>', "no-referrer security metadata"),
             (expected_pwa_css, "shared PWA stylesheet"),
             (expected_pwa_js, "shared PWA controller"),
             (expected_apple, "Apple touch icon"),

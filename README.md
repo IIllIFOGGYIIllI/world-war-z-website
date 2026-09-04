@@ -1,7 +1,7 @@
-# World War Z Website v1.40.0
+# World War Z Website v1.41.0
 
-Updated-files release for the **Member Dashboard / Home Overhaul**.
+Updated-files release for the **Security / Reliability Hardening Pass**.
 
-Apply these files over the confirmed Website v1.39.0 deployment. It pairs with Bot v1.32.0.
+Apply these files over the confirmed Website v1.40.0 deployment. It pairs with Bot v1.33.0.
 
-The signed-in Overview is now a personalised member command centre for survivor status, progression, quests, factions, events, orders, support, Action Centre priorities and current Chernarus/Livonia intelligence. The bounded PWA/map cache generation remains preserved. No database wipe, DayZ mission upload, Nitrado configuration change or server wipe is required.
+The shared browser HTTP layer now prevents authenticated bearer credentials from being sent anywhere except the trusted WWZ Railway API, enforces no-cookie/no-referrer/no-store requests, clamps request timeouts and blocks protected redirect following. Static pages also adopt a no-referrer policy and the dashboard CSP is tightened. The bounded PWA/map-cache generation remains preserved.

@@ -1,6 +1,6 @@
 'use strict';
 
-const WWZ_PWA_VERSION = '1.40.0';
+const WWZ_PWA_VERSION = '1.41.0';
 const CACHE_PREFIX = 'wwz-pwa-';
 const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 // Public release versions can advance without discarding the bounded map caches.
@@ -8,7 +8,7 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-09-05-website-v1-40-0';
+const WWZ_PWA_UPDATE_REVISION = '2026-09-05-website-v1-41-0';
 const CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${CACHE_RELEASE}`;
@@ -46,6 +46,9 @@ const APP_SHELL = [
 ].map(scopedUrl);
 
 const UPDATE_INVALIDATIONS = [
+  // Clear pre-hardening shared HTTP-client request keys.
+  './assets/js/core/http.js?v=1.22.93&rev=2',
+  './assets/js/core/http.js?v=1.22.102&rev=donation-storefront-1',
   // Remove pre-v1.28 request keys without rotating the map-cache generation.
   './assets/js/dashboard/bootstrap.js?v=1.22.93&rev=auth-restore-fix-1',
   './assets/js/dashboard/my-wwz.js?v=1.27.0&rev=my-wwz-m09-1',
