@@ -359,7 +359,7 @@ const applyLiveStatus = (payload) => {
   currentServerStatus = status;
   const statusLabel = STATUS_LABELS[status];
   const currentPlayers = Math.max(0, Math.trunc(Number(payload.players.current) || 0));
-  const maximumPlayers = Math.max(0, Math.trunc(Number(payload.players.maximum) || 0));
+  const maximumPlayers = Math.max(1, Math.trunc(Number(payload.players.maximum) || Number(payload.server?.player_capacity) || 26));
   const serverName = String(payload.server.name || 'World War Z');
   const serverMap = String(payload.server.map || 'Chernarus');
   const platform = String(payload.server.platform || 'PlayStation 4 & 5');

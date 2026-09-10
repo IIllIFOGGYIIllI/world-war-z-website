@@ -1,6 +1,6 @@
 'use strict';
 
-const WWZ_PWA_VERSION = '1.41.0';
+const WWZ_PWA_VERSION = '1.42.0';
 const CACHE_PREFIX = 'wwz-pwa-';
 const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 // Public release versions can advance without discarding the bounded map caches.
@@ -8,7 +8,7 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-09-05-website-v1-41-0';
+const WWZ_PWA_UPDATE_REVISION = '2026-09-11-website-v1-42-0';
 const CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${CACHE_RELEASE}`;
@@ -109,7 +109,12 @@ const UPDATE_INVALIDATIONS = [
   './assets/js/pages/home.js?v=1.22.93',
   './assets/js/pwa.js?v=1.22.93',
   './assets/css/pwa.css?v=1.22.93',
-  './assets/data/companion-release.json'
+  './assets/data/companion-release.json',
+  './assets/js/dashboard/server-context.js?v=1.25.4&rev=chernarus-pve-1',
+  './assets/js/dashboard/account.js?v=1.22.93&rev=auth-restore-fix-1',
+  './assets/js/dashboard/lazy-assets.js?v=1.39.0&rev=data-management-1',
+  './assets/js/dashboard/livonia-pvp.js?v=1.25.3',
+  './assets/js/dashboard/deathmatch-rotation.js?v=1.32.0&rev=livonia-dm-1'
 ].map(scopedUrl);
 
 const trimCache = async (cacheName, limit) => {

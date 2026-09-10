@@ -98,6 +98,7 @@
       map_name: String(value.map_name || mapName),
       world_size: mapKey === 'livonia' ? 12800 : 15360,
       platform: String(value.platform || 'PlayStation 4 & 5'),
+      player_capacity: Math.max(1, Math.trunc(Number(value.player_capacity) || 26)),
       access_level: String(value.access_level || 'member'),
       available: value.available !== false
     };
@@ -144,7 +145,7 @@
       element.textContent = server.name;
     });
     document.querySelectorAll('[data-selected-server-detail]').forEach((element) => {
-      element.textContent = `${server.platform.replace(' 4 & 5', '')} · ${server.map_name}`;
+      element.textContent = `${server.platform.replace(' 4 & 5', '')} · ${server.map_name} · ${server.player_capacity} slots`;
     });
     document.querySelectorAll('[data-server-map], [data-detail-map]').forEach((element) => {
       element.textContent = server.map_name;
@@ -236,6 +237,7 @@
     [
       ['DayZ world', server.map_name],
       ['Platform', server.platform],
+      ['Capacity', `${server.player_capacity} slots`],
       ['Your access', server.access_level.replace(/^./, (letter) => letter.toUpperCase())]
     ].forEach(([label, value]) => {
       const row = document.createElement('div');

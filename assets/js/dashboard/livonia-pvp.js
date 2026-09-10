@@ -91,7 +91,7 @@
 
     const rotation = payload.hotspot_rotation || {};
     if (hotspotCount) hotspotCount.textContent = `${Number(rotation.active_count || (payload.hotspots || []).length)} active`;
-    if (population) population.textContent = rotation.online_players === null || rotation.online_players === undefined ? 'Player count cache unavailable · safe 2-hotspot fallback' : `${Number(rotation.online_players)} players online`;
+    if (population) { const capacity = Math.max(1, Number(rotation.player_capacity) || Number(selectedServer()?.player_capacity) || 26); population.textContent = rotation.online_players === null || rotation.online_players === undefined ? `${capacity}-slot server · player count cache unavailable` : `${Number(rotation.online_players)} / ${capacity} players online`; }
     if (countdown) countdown.textContent = fmtCountdown(rotation.ends_at);
     if (nextHotspots) nextHotspots.textContent = (rotation.next_hotspots || []).map((item) => item.name).join(' · ') || 'Next rotation will be selected automatically.';
 

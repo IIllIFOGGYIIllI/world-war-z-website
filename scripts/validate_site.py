@@ -384,10 +384,10 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "section === 'server-audit') loadServerActionHistory()" not in operations_admin:
         errors.append("administration.js: Operations Centre must auto-load the unified audit.")
 
-    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.41.0</strong></div>' not in dashboard:
+    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.42.0</strong></div>' not in dashboard:
         errors.append("dashboard.html: command-centre footer release label is stale.")
 
-    if "Website v1.41.0 · Bot v1.33.0" not in index:
+    if "Website v1.42.0 · Bot v1.34.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
 
     action_centre_js_path = ROOT / "assets/js/dashboard/action-centre.js"
@@ -556,7 +556,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append(f"dashboard.html: missing Livonia Deathmatch Rotation surface: {token}")
     for token in (
         'assets/css/dashboard/deathmatch-rotation.css?v=1.32.0',
-        'assets/js/dashboard/deathmatch-rotation.js?v=1.32.0',
+        'assets/js/dashboard/deathmatch-rotation.js?v=1.42.0&rev=livonia-live-1',
         'const ensureDeathmatchRotation = () =>',
         "view === 'deathmatch'",
     ):
@@ -795,7 +795,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         errors.append(
             "dashboard.html: command library must be lazy-loaded instead of downloaded on every dashboard visit."
         )
-    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.39.0&amp;rev=data-management-1'
+    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.42.0&amp;rev=livonia-live-1'
     lazy_index = dashboard.find(lazy_script)
     shell_index = dashboard.find("assets/js/dashboard/shell.js")
     if lazy_index < 0:
@@ -1002,7 +1002,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append("core.js: temporary auth outage must preserve the selected Chernarus/Livonia server context.")
         if "else if (preserveSelection)" not in signed_out or "showLogin();" not in signed_out:
             errors.append("core.js: transient saved-session failures must preserve server context without claiming Discord is unavailable.")
-    account_script = f'assets/js/dashboard/account.js?v={EXPECTED_ASSET_VERSION}'
+    account_script = 'assets/js/dashboard/account.js?v=1.42.0&amp;rev=livonia-live-1'
     bootstrap_script = 'assets/js/dashboard/bootstrap.js?v=1.40.0&amp;rev=member-home-overhaul-1'
     account_index = dashboard.find(account_script)
     bootstrap_index = dashboard.find(bootstrap_script)
@@ -1808,10 +1808,24 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
     if apple_dimensions != (180, 180):
         errors.append(f"Apple touch icon dimensions are {apple_dimensions}; expected (180, 180).")
 
+    launch_requirements = {
+        "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.34.0"),
+        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/server-context.js?v=1.42.0&amp;rev=livonia-live-1", "assets/js/dashboard/lazy-assets.js?v=1.42.0&amp;rev=livonia-live-1"),
+        "assets/js/dashboard/server-context.js": ("player_capacity", "Capacity', `${server.player_capacity} slots`"),
+        "assets/js/dashboard/account.js": ("payload.server?.player_capacity",),
+        "assets/js/dashboard/livonia-pvp.js": ("rotation.player_capacity", "players online"),
+        "assets/js/dashboard/deathmatch-rotation.js": ("activation.ready", "Activation readiness"),
+    }
+    for relative, tokens in launch_requirements.items():
+        source = (ROOT / relative).read_text(encoding="utf-8")
+        for token in tokens:
+            if token not in source:
+                errors.append(f"{relative}: missing Livonia live-launch integration token: {token}")
+
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.41.0'",
-        "const WWZ_PWA_UPDATE_REVISION = '2026-09-05-website-v1-41-0'",
+        "const WWZ_PWA_VERSION = '1.42.0'",
+        "const WWZ_PWA_UPDATE_REVISION = '2026-09-11-website-v1-42-0'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
         "if (request.method !== 'GET') return;",

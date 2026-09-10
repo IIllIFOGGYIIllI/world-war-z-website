@@ -1,7 +1,7 @@
-# World War Z Website v1.41.0
+# World War Z Website v1.42.0
 
-Updated-files release for the **Security / Reliability Hardening Pass**.
+Updated-files release for the **Livonia Live Launch Integration**.
 
-Apply these files over the confirmed Website v1.40.0 deployment. It pairs with Bot v1.33.0.
+Apply these files over the confirmed Website v1.41.0 deployment. It pairs with Bot v1.34.0.
 
-The shared browser HTTP layer now prevents authenticated bearer credentials from being sent anywhere except the trusted WWZ Railway API, enforces no-cookie/no-referrer/no-store requests, clamps request timeouts and blocks protected redirect following. Static pages also adopt a no-referrer policy and the dashboard CSP is tightened. The bounded PWA/map-cache generation remains preserved.
+The public roadmap and Command Centre now present Livonia as the live 26-slot Full PvP server. Server selection carries configured capacity, live status falls back cleanly when Nitrado omits maximum-player data, Livonia PvP shows online population against capacity, and Deathmatch Rotation surfaces activation readiness before automation can be enabled. The existing bounded PWA/map-cache generation remains preserved.

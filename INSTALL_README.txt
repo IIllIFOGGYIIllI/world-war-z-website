@@ -1,20 +1,9 @@
-WORLD WAR Z WEBSITE v1.41.0 - SECURITY / RELIABILITY HARDENING
+WORLD WAR Z WEBSITE v1.42.0 — UPDATED FILES
 
-UPLOAD/REPLACE ONLY THE FILES IN THIS ARCHIVE, PRESERVING THEIR PATHS.
+Apply this package over the confirmed Website v1.41.0 repository.
 
-This patch is built directly on Website v1.40.0 and pairs with Bot v1.33.0.
+This release updates Livonia live-launch presentation, 26-slot server context, Livonia PvP population display and Deathmatch activation-readiness UI.
 
-What it changes:
-- Hardens the shared browser HTTP client against bearer-token egress to untrusted origins.
-- Forces protected API requests to omit cookies, referrers and cached responses and blocks redirect following for authenticated requests.
-- Clamps caller-provided request timeouts to safe bounds while preserving upstream AbortSignal support.
-- Adds a no-referrer policy to every public HTML page.
-- Tightens the dashboard Content Security Policy for fonts, media, frames, forms and insecure subresources.
-- Advances the public website/PWA release to v1.41.0 without rotating the bounded map-cache generation.
+No map dataset replacement, database operation, Nitrado setting change or wipe is required. Existing bounded PWA map caches are preserved.
 
-Compatibility:
-- Upload Bot v1.33.0 as the paired backend release.
-- Chernarus/Livonia isolation and all current dashboard/member/Admin workspaces remain unchanged.
-- No database wipe, DayZ mission upload, Nitrado configuration change, map-data change or server wipe is required.
-
-After upload, commit/push the files and allow GitHub Pages/PWA update delivery to refresh normally.
+Pairs with Bot v1.34.0.

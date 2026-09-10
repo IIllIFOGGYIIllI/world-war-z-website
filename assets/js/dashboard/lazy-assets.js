@@ -331,7 +331,7 @@
     loadStylesheetOnce('livonia-pvp-css', 'assets/css/dashboard/livonia-pvp.css?v=1.25.3'),
     loadAfterDashboardRuntime(() => loadScriptOnce(
       'livonia-pvp',
-      'assets/js/dashboard/livonia-pvp.js?v=1.25.3',
+      'assets/js/dashboard/livonia-pvp.js?v=1.42.0&rev=livonia-live-1',
       () => window.__wwzLivoniaPvpReady === true
     ))
   ]).then(() => undefined);
@@ -340,7 +340,7 @@
     loadStylesheetOnce('deathmatch-rotation-css', 'assets/css/dashboard/deathmatch-rotation.css?v=1.32.0&rev=livonia-dm-1'),
     loadAfterDashboardRuntime(() => loadScriptOnce(
       'deathmatch-rotation',
-      'assets/js/dashboard/deathmatch-rotation.js?v=1.32.0&rev=livonia-dm-1',
+      'assets/js/dashboard/deathmatch-rotation.js?v=1.42.0&rev=livonia-live-1',
       () => window.__wwzDeathmatchRotationReady === true
     ))
   ]).then(() => undefined);
