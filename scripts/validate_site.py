@@ -384,10 +384,10 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "section === 'server-audit') loadServerActionHistory()" not in operations_admin:
         errors.append("administration.js: Operations Centre must auto-load the unified audit.")
 
-    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.47.0</strong></div>' not in dashboard:
+    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.48.0</strong></div>' not in dashboard:
         errors.append("dashboard.html: command-centre footer release label is stale.")
 
-    if "Website v1.47.0 · Bot v1.44.0" not in index:
+    if "Website v1.48.0 · Bot v1.47.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     faction_js = (ROOT / "assets/js/dashboard/factions.js").read_text(encoding="utf-8")
     faction_css = (ROOT / "assets/css/dashboard/factions.css").read_text(encoding="utf-8")
@@ -1331,13 +1331,20 @@ def validate_checkout_compatibility(errors: list[str]) -> None:
         'How Donation Orders Work',
         'Duplicate-safe checkout',
         'assets/css/pages/donations.css?v=1.37.0&amp;rev=commerce-workflow-1',
-        'assets/js/pages/donations.js?v=1.37.0&amp;rev=commerce-workflow-1',
+        'assets/js/pages/donations.js?v=1.48.0&amp;rev=server-payment-link-1',
     ):
         if token not in donations_html:
             errors.append(f"donations.html: missing v1.37 commerce workflow surface: {token}")
     for token in ('const newCheckoutKey', 'checkout_key:', 'payload.idempotent_replay', 'donation-order-workflow'):
         if token not in donations_js:
             errors.append(f"donations.js: missing duplicate-safe workflow behaviour: {token}")
+    for token in ("requestedServerKey", "updateServerQuery", "url.searchParams.set('server'"):
+        if token not in donations_js:
+            errors.append(f"donations.js: missing server-scoped Discord payment hand-off: {token}")
+    if 'id="payment"' not in donations_html:
+        errors.append('donations.html: missing stable Payment Information anchor')
+    if 'assets/js/pages/donations.js?v=1.48.0&amp;rev=server-payment-link-1' not in donations_html:
+        errors.append('donations.html: missing v1.48 donation controller cache-buster')
     for token in ('order.workflow', 'donation-admin-workflow', 'workflow.next_action'):
         if token not in donation_admin_js:
             errors.append(f"donation-orders.js: missing Admin workflow behaviour: {token}")
@@ -1915,7 +1922,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
         errors.append(f"Apple touch icon dimensions are {apple_dimensions}; expected (180, 180).")
 
     launch_requirements = {
-        "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.44.0"),
+        "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.47.0"),
         "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/server-context.js?v=1.42.0&amp;rev=livonia-live-1", "assets/js/dashboard/lazy-assets.js?v=1.47.0&amp;rev=faction-registration-1"),
         "assets/js/dashboard/server-context.js": ("player_capacity", "Capacity', `${server.player_capacity} slots`"),
         "assets/js/dashboard/account.js": ("payload.server?.player_capacity",),
@@ -1930,8 +1937,8 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.47.0'",
-        "const WWZ_PWA_UPDATE_REVISION = '2026-09-13-website-v1-47-0'",
+        "const WWZ_PWA_VERSION = '1.48.0'",
+        "const WWZ_PWA_UPDATE_REVISION = '2026-09-13-website-v1-48-0'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
         "if (request.method !== 'GET') return;",

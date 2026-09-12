@@ -185,6 +185,21 @@
     return value;
   };
 
+  const requestedServerKey = () => {
+    try {
+      return String(new URLSearchParams(location.search).get('server') || '').trim().toLowerCase();
+    } catch { return ''; }
+  };
+
+  const updateServerQuery = (server) => {
+    if (!server) return;
+    try {
+      const url = new URL(location.href);
+      url.searchParams.set('server', String(server.key || server.map_key || '').trim().toLowerCase());
+      history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
+    } catch {}
+  };
+
   const readServer = () => {
     try { return JSON.parse(sessionStorage.getItem(SERVER_KEY) || 'null'); } catch { return null; }
   };
@@ -528,6 +543,7 @@
       control.addEventListener('click', async () => {
         if (state.loading || server.key === state.server?.key) return;
         saveServer(server);
+        updateServerQuery(server);
         renderServers();
         await loadStorefront();
       });
@@ -780,7 +796,12 @@
     if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'World War Z server choices could not be loaded.');
     state.servers = Array.isArray(payload.servers) ? payload.servers : [];
     const stored = readServer();
-    const selected = state.servers.find((entry) => entry.key === stored?.key) || state.servers.find((entry) => !entry.paused) || state.servers[0] || null;
+    const requested = requestedServerKey();
+    const selected = state.servers.find((entry) => requested && (String(entry.key || '').toLowerCase() === requested || String(entry.map_key || '').toLowerCase() === requested))
+      || state.servers.find((entry) => entry.key === stored?.key)
+      || state.servers.find((entry) => !entry.paused)
+      || state.servers[0]
+      || null;
     saveServer(selected);
     renderServers();
   };

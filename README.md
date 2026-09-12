@@ -1,7 +1,7 @@
-# World War Z Website v1.47.0
+# World War Z Website v1.48.0
 
-Current release: **Structured Faction Registration**.
+Current cumulative website/PWA release for the World War Z DayZ console ecosystem.
 
-Pairs with Bot v1.44.0. The Command Centre now provides member faction-registration requests and a full Admin registration-panel workspace for public-channel publishing, review-channel routing, per-server member limits and Approve/Decline review.
+This release improves donation hand-off from Discord: links can open the correct Chernarus/Livonia storefront directly at Payment Information, where members can see the configured payment methods and use the existing live AUD currency converter before creating a tracked order.
 
-Chernarus and Livonia remain isolated, the existing Flag Claims system is unchanged, and the bounded PWA map-cache generation is unchanged.
+Pairs with Bot v1.47.0. Chernarus/Livonia isolation and bounded map caching are preserved.

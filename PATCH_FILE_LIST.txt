@@ -1,12 +1,11 @@
 INSTALL_README.txt
+PATCH_FILE_LIST.txt
 PATCH_NOTES.md
 README.md
-assets/css/dashboard/factions.css
-assets/js/dashboard/factions.js
-assets/js/dashboard/lazy-assets.js
+assets/js/pages/donations.js
 changelog.html
 dashboard.html
+donations.html
 index.html
 scripts/validate_site.py
 sw.js
-PATCH_FILE_LIST.txt
