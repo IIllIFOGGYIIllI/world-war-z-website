@@ -42,6 +42,33 @@
   const adminApplicationsEmpty = q('[data-faction-admin-applications-empty]');
   const adminRenames = q('[data-faction-admin-renames]');
   const adminRenamesEmpty = q('[data-faction-admin-renames-empty]');
+  const adminCreations = q('[data-faction-admin-creations]');
+  const adminCreationsEmpty = q('[data-faction-admin-creations-empty]');
+
+  const registrationCard = q('[data-faction-registration-card]');
+  const registrationLimit = q('[data-faction-registration-limit]');
+  const registrationCopy = q('[data-faction-registration-copy]');
+  const registrationActions = q('[data-faction-registration-actions]');
+  const registrationMessage = q('[data-faction-registration-message]');
+  const requestCreationButton = q('[data-request-faction-creation]');
+
+  const publicChannel = q('[data-faction-public-channel]');
+  const reviewChannel = q('[data-faction-review-channel]');
+  const registrationMemberLimit = q('[data-faction-registration-member-limit]');
+  const saveFactionPanel = q('[data-save-faction-panel]');
+  const publishFactionPanel = q('[data-publish-faction-panel]');
+  const unpublishFactionPanel = q('[data-unpublish-faction-panel]');
+  const factionPanelPublished = q('[data-faction-panel-published]');
+
+  const requestDialog = document.querySelector('[data-faction-request-dialog]');
+  const requestForm = document.querySelector('[data-faction-request-form]');
+  const requestName = document.querySelector('[data-faction-request-name]');
+  const requestMembers = document.querySelector('[data-faction-request-members]');
+  const requestArmband = document.querySelector('[data-faction-request-armband]');
+  const requestFlag = document.querySelector('[data-faction-request-flag]');
+  const requestNotes = document.querySelector('[data-faction-request-notes]');
+  const requestMessage = document.querySelector('[data-faction-request-message]');
+  const requestCancel = qa('[data-faction-request-cancel]');
 
   const editorDialog = document.querySelector('[data-faction-editor-dialog]');
   const editorForm = document.querySelector('[data-faction-editor-form]');
@@ -203,6 +230,86 @@
     return row;
   };
 
+  const openFactionRequestDialog = () => {
+    if (!requestDialog || memberPayload?.my_faction) return;
+    const limit = Math.max(1, Number(memberPayload?.registration?.member_limit || 10));
+    if (requestMembers) {
+      requestMembers.max = String(limit);
+      requestMembers.value = '1';
+    }
+    if (requestName) requestName.value = '';
+    if (requestArmband) requestArmband.value = '';
+    if (requestFlag) requestFlag.value = '';
+    if (requestNotes) requestNotes.value = '';
+    showMessage(requestMessage, '');
+    openDialog(requestDialog);
+    window.setTimeout(() => requestName?.focus(), 0);
+  };
+
+  const submitFactionCreationRequest = async (event) => {
+    event.preventDefault();
+    const payload = await actionAndReload('member', {
+      action: 'creation_request',
+      name: requestName?.value || '',
+      member_count: Number(requestMembers?.value || 1),
+      armband: requestArmband?.value || '',
+      flag: requestFlag?.value || '',
+      notes: requestNotes?.value || ''
+    }, {
+      messageTarget: requestMessage,
+      success: 'Faction creation request submitted for Admin review.'
+    });
+    if (payload) {
+      closeDialog(requestDialog);
+      showMessage(registrationMessage, 'Faction creation request submitted. Admins can review it from Discord or the Command Centre.', 'success');
+    }
+  };
+
+  const renderFactionRegistration = () => {
+    if (!registrationCard) return;
+    const faction = memberPayload?.my_faction || null;
+    const limit = Math.max(1, Number(memberPayload?.registration?.member_limit || 10));
+    const verified = Boolean(memberPayload?.verified);
+    const requests = Array.isArray(memberPayload?.my_creation_requests) ? memberPayload.my_creation_requests : [];
+    const pending = requests.find((item) => item.status === 'pending') || null;
+    const latest = requests[0] || null;
+
+    registrationCard.hidden = Boolean(faction);
+    if (registrationLimit) registrationLimit.textContent = `Up to ${limit} member${limit === 1 ? '' : 's'}`;
+    if (requestMembers) requestMembers.max = String(limit);
+    clear(registrationActions);
+
+    if (faction) return;
+
+    if (!verified) {
+      if (registrationCopy) registrationCopy.textContent = 'Link and verify your PlayStation ID first. Your verified PSN becomes the official faction leader after Admin approval.';
+      registrationActions?.append(pill('Verified PSN link required', 'danger'));
+      return;
+    }
+
+    if (pending) {
+      if (registrationCopy) registrationCopy.textContent = `Request #${pending.request_id} for “${pending.faction_name}” is waiting for Admin review. You can cancel it while it is still pending.`;
+      registrationActions?.append(
+        pill('Pending Admin Review', 'neutral'),
+        button('Cancel Request', async () => {
+          if (!window.confirm(`Cancel your faction request for “${pending.faction_name}”?`)) return;
+          await actionAndReload('member', {
+            action: 'creation_cancel', request_id: pending.request_id
+          }, { messageTarget: registrationMessage, success: 'Faction creation request cancelled.' });
+        }, 'secondary-action compact-action danger-action')
+      );
+      return;
+    }
+
+    if (registrationCopy) {
+      const previous = latest && latest.status !== 'pending'
+        ? ` Your latest request for “${latest.faction_name}” was ${latest.status}${latest.resolution_reason ? `: ${latest.resolution_reason}` : '.'}`
+        : '';
+      registrationCopy.textContent = `Submit a faction request without copying a Discord template. Your verified linked PlayStation ID becomes the faction leader after Admin approval.${previous}`;
+    }
+    registrationActions?.append(button('Request A Faction', openFactionRequestDialog, 'primary-action compact-action'));
+  };
+
   const rosterRow = (member, faction, { selfManage = false, admin = false } = {}) => {
     const row = document.createElement('div'); row.className = 'faction-member-row';
     const identity = document.createElement('div'); identity.className = 'faction-member-identity';
@@ -221,7 +328,7 @@
           actions.append(button('Make Leader', async () => {
             if (!window.confirm(`Transfer leadership of ${faction.name} to ${member.psn_id}?`)) return;
             await actionAndReload(admin ? 'admin' : 'member', {
-              action: 'transfer_leader', faction_id: faction.faction_id, psn_id: member.psn_id
+              action: admin ? 'set_leader' : 'transfer_leader', faction_id: faction.faction_id, psn_id: member.psn_id
             }, { messageTarget: admin ? membersMessage : null, success: `${member.psn_id} is now faction leader.` });
           }));
           const roleTarget = member.role === 'officer' ? 'member' : 'officer';
@@ -515,6 +622,69 @@
     });
   };
 
+  const factionPanelSettingsBody = () => ({
+    action: 'panel_config',
+    public_channel_key: publicChannel?.value || '',
+    review_channel_key: reviewChannel?.value || '',
+    member_limit: Number(registrationMemberLimit?.value || 10)
+  });
+
+  const renderFactionPanelSettings = () => {
+    if (!adminPayload) return;
+    const config = adminPayload.registration_config || {};
+    const channels = adminPayload.channels || [];
+    fillSelect(publicChannel, channels, config.public_channel_key || '');
+    fillSelect(reviewChannel, channels, config.review_channel_key || '');
+    if (registrationMemberLimit) {
+      registrationMemberLimit.value = String(config.member_limit || 10);
+      registrationMemberLimit.max = String(adminPayload.limits?.members_per_faction || 100);
+    }
+    const publishedCount = Number(config.published_message_count || 0);
+    if (factionPanelPublished) {
+      factionPanelPublished.textContent = publishedCount
+        ? `Published · ${publishedCount} panel message${publishedCount === 1 ? '' : 's'}`
+        : 'Not published';
+    }
+    if (unpublishFactionPanel) unpublishFactionPanel.disabled = publishedCount === 0;
+  };
+
+  const saveFactionPanelSettings = async () => {
+    try {
+      showMessage(adminMessage, 'Saving faction registration settings…', 'loading');
+      await postAdmin(factionPanelSettingsBody());
+      showMessage(adminMessage, 'Faction registration settings saved.', 'success');
+      await loadAll({ forceAdmin: true });
+    } catch (error) {
+      showMessage(adminMessage, error.message, 'error');
+    }
+  };
+
+  const publishFactionRegistrationPanel = async () => {
+    try {
+      if (!publicChannel?.value) throw new Error('Select a public faction channel first.');
+      if (!reviewChannel?.value) throw new Error('Select an Admin review channel first.');
+      showMessage(adminMessage, 'Saving settings and publishing the faction panel…', 'loading');
+      await postAdmin(factionPanelSettingsBody());
+      await postAdmin({ action: 'panel_publish', public_channel_key: publicChannel.value });
+      showMessage(adminMessage, 'Faction registration panel published/refreshed in Discord.', 'success');
+      await loadAll({ forceAdmin: true });
+    } catch (error) {
+      showMessage(adminMessage, error.message, 'error');
+    }
+  };
+
+  const unpublishFactionRegistrationPanel = async () => {
+    if (!window.confirm('Remove the published faction registration panel from Discord? Existing factions and requests are not deleted.')) return;
+    try {
+      showMessage(adminMessage, 'Removing the faction registration panel…', 'loading');
+      await postAdmin({ action: 'panel_unpublish' });
+      showMessage(adminMessage, 'Faction registration panel unpublished.', 'success');
+      await loadAll({ forceAdmin: true });
+    } catch (error) {
+      showMessage(adminMessage, error.message, 'error');
+    }
+  };
+
   const openEditor = (faction = null) => {
     const editing = Boolean(faction);
     if (!editorDialog) return;
@@ -616,9 +786,31 @@
   };
 
   const renderAdminQueues = () => {
+    const creations = adminPayload?.creation_requests || [];
     const applications = adminPayload?.applications || [];
     const renames = adminPayload?.rename_requests || [];
-    clear(adminApplications); clear(adminRenames);
+    clear(adminCreations); clear(adminApplications); clear(adminRenames);
+
+    creations.forEach((request) => adminCreations?.append(queueRow({
+      title: request.faction_name,
+      subtitle: `${request.leader_psn_id} · ${request.requested_member_count || 1} current member(s) · requested by ${request.requester_name || 'Discord member'} · ${formatDate(request.requested_at, true)}${request.armband ? ` · ${request.armband}` : ''}${request.flag ? ` · ${request.flag}` : ''}${request.notes ? ` · ${request.notes}` : ''}`,
+      badge: 'Creation request', badgeState: 'active',
+      actions: [
+        button('Approve', async () => {
+          if (!window.confirm(`Approve “${request.faction_name}” and register ${request.leader_psn_id} as its faction leader?`)) return;
+          await actionAndReload('admin', {
+            action: 'creation_review', request_id: request.request_id, approved: true
+          }, { success: `${request.faction_name} registered. ${request.leader_psn_id} is now its leader.` });
+        }, 'primary-action compact-action'),
+        button('Decline', async () => {
+          const reason = window.prompt('Optional decline reason:', '') ?? '';
+          await actionAndReload('admin', {
+            action: 'creation_review', request_id: request.request_id, approved: false, reason
+          }, { success: 'Faction creation request declined.' });
+        }, 'secondary-action compact-action danger-action')
+      ]
+    })));
+
     applications.forEach((application) => adminApplications?.append(queueRow({
       title: `${application.applicant_psn_id} → ${application.faction_name}`,
       subtitle: `${application.message || 'No application message'} · ${formatDate(application.requested_at, true)}`,
@@ -651,8 +843,10 @@
         })
       ]
     })));
+    if (adminCreationsEmpty) adminCreationsEmpty.hidden = creations.length !== 0;
     if (adminApplicationsEmpty) adminApplicationsEmpty.hidden = applications.length !== 0;
     if (adminRenamesEmpty) adminRenamesEmpty.hidden = renames.length !== 0;
+    const creationCount = q('[data-faction-admin-creation-count]'); if (creationCount) creationCount.textContent = String(creations.length);
     const appCount = q('[data-faction-admin-application-count]'); if (appCount) appCount.textContent = String(applications.length);
     const renameCount = q('[data-faction-admin-rename-count]'); if (renameCount) renameCount.textContent = String(renames.length);
   };
@@ -668,6 +862,7 @@
   const renderAdmin = () => {
     clear(adminList);
     if (!adminPayload) return;
+    renderFactionPanelSettings();
     renderAdminQueues();
     const factions = adminPayload.factions || [];
     factions.forEach((faction) => {
@@ -749,7 +944,7 @@
       memberPayload = await apiJson(ACCOUNT_URL);
       adminPayload = (isStaff() || forceAdmin) ? await apiJson(ADMIN_URL) : null;
       if (guest) guest.hidden = true; if (content) content.hidden = false; if (errorBox) errorBox.hidden = true;
-      renderMyFaction(); renderInbox(); renderGovernance(); renderDirectory(); renderAdmin();
+      renderMyFaction(); renderFactionRegistration(); renderInbox(); renderGovernance(); renderDirectory(); renderAdmin();
     } catch (error) {
       if (error.status === 401) { if (guest) guest.hidden = false; if (content) content.hidden = true; }
       else if (errorBox) { errorBox.textContent = error.message; errorBox.hidden = false; }
@@ -758,6 +953,12 @@
 
   refreshButton?.addEventListener('click', () => loadAll({ forceAdmin: isStaff() }));
   adminRefreshButton?.addEventListener('click', () => loadAll({ forceAdmin: true }));
+  requestCreationButton?.addEventListener('click', openFactionRequestDialog);
+  requestForm?.addEventListener('submit', submitFactionCreationRequest);
+  requestCancel.forEach((node) => node.addEventListener('click', () => closeDialog(requestDialog)));
+  saveFactionPanel?.addEventListener('click', saveFactionPanelSettings);
+  publishFactionPanel?.addEventListener('click', publishFactionRegistrationPanel);
+  unpublishFactionPanel?.addEventListener('click', unpublishFactionRegistrationPanel);
   createButton?.addEventListener('click', () => openEditor(null));
   editorForm?.addEventListener('submit', saveFaction);
   editorCancel.forEach((node) => node.addEventListener('click', () => closeDialog(editorDialog)));

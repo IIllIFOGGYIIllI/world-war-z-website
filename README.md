@@ -1,7 +1,7 @@
-# World War Z Website v1.46.0
+# World War Z Website v1.47.0
 
-Current release: **Unified Command Centre & Discord Security**.
+Current release: **Structured Faction Registration**.
 
-Pairs with Bot v1.42.0. The protected Admin Command Centre is now the all-in-one launchpad for the major WWZ management systems and includes a full Discord Security Centre for anti-spam, anti-raid, alert routing, exempt roles and emergency join quarantine.
+Pairs with Bot v1.44.0. The Command Centre now provides member faction-registration requests and a full Admin registration-panel workspace for public-channel publishing, review-channel routing, per-server member limits and Approve/Decline review.
 
-Chernarus and Livonia remain isolated: switching the selected server loads that Discord server's own security settings, event history and resources. The bounded PWA map-cache generation is unchanged.
+Chernarus and Livonia remain isolated, the existing Flag Claims system is unchanged, and the bounded PWA map-cache generation is unchanged.

@@ -1,25 +1,23 @@
-# World War Z Website v1.46.0 — Unified Command Centre & Discord Security
+# World War Z Website v1.47.0 — Structured Faction Registration
 
-## All-in-one Command Centre
-- Expands the protected Command Centre from an operational overview into the primary Admin launchpad.
-- Adds direct one-click navigation to Moderation, Ban Lists, Player Intelligence, Server Feeds, Identity Sync, Flag Claims, Factions, Events, Shop / Orders, Tickets, Backups / Data and Server Controls.
-- Keeps the existing live health, attention queue, player activity, notification health and M10 monitoring surfaces.
+## Faction registration workspace
+- Replaces the old manual copy/paste faction-request process with a protected member **Request A Faction** workflow in the Command Centre.
+- Members submit faction name, current group size, optional armband/flag and request notes from a structured dialog.
+- The member's verified linked PlayStation ID is used as the requested leader identity.
+- Members can see pending registration requests and cancel a still-pending request without contacting an Admin.
 
-## Discord Security Centre
-- Adds selected-server anti-spam and anti-raid configuration directly inside the Command Centre.
-- Admins can configure burst-message thresholds, duplicate-message thresholds, mass-mention limits, timeout duration, join-burst thresholds and suspicious-account age.
-- Adds selectable alert-channel routing and multi-select exempt roles without exposing raw Discord snowflakes to the browser.
-- Adds a protected **Send Test Alert** action for verifying the selected server's Security alert destination.
-- Adds 24-hour spam / raid counters and a recent detection-history panel.
-- Adds **Emergency Join Quarantine** with an explicit browser confirmation before enabling it.
-- Protection is opt-in after upgrade; Bot v1.42.0 does not begin automatic moderation until an Admin explicitly enables the master Security switch.
+## Admin panel management
+- Adds Faction Registration Panel controls to Faction Administration.
+- Admins can select the public faction channel, private review channel and per-server maximum faction size.
+- Adds **Save Panel Settings**, **Publish / Refresh Panel**, and **Unpublish** controls.
+- Adds a dedicated faction-creation review queue with Approve / Decline actions alongside existing faction governance tools.
 
-## Multi-server behaviour
-- The complete Command Centre and Security Centre work independently for **Chernarus and Livonia**.
-- Switching the selected server changes the available channels, roles, thresholds, alert destination and event history.
-- No Discord IDs or settings are copied between the two servers.
+## Discord + website consistency
+- Website approvals/declines resolve the matching Discord review card when it exists.
+- Approved factions immediately appear in the public faction catalogue, and relevant faction changes refresh that catalogue automatically.
+- The public panel remains independently configured for Chernarus and Livonia.
 
 ## Compatibility
-- Pairs with Bot v1.42.0 and preserves the v1.45.0 Server Feed bulk routing / auto setup workflow.
-- Advances the website/PWA release to v1.46.0 while preserving the bounded map-cache generation.
-- No database wipe, manual migration, DayZ mission upload, Nitrado configuration change, map-data change or server wipe is required.
+- Pairs with Bot v1.44.0 and leaves the existing Flag Claims workflow unchanged.
+- Advances the website/PWA release to v1.47.0 while preserving the bounded map-cache generation.
+- No database wipe, manual migration, DayZ mission upload, Nitrado configuration change, map-data replacement or server wipe is required.

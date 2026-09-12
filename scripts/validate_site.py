@@ -384,11 +384,41 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "section === 'server-audit') loadServerActionHistory()" not in operations_admin:
         errors.append("administration.js: Operations Centre must auto-load the unified audit.")
 
-    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.46.0</strong></div>' not in dashboard:
+    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.47.0</strong></div>' not in dashboard:
         errors.append("dashboard.html: command-centre footer release label is stale.")
 
-    if "Website v1.46.0 · Bot v1.42.0" not in index:
+    if "Website v1.47.0 · Bot v1.44.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
+    faction_js = (ROOT / "assets/js/dashboard/factions.js").read_text(encoding="utf-8")
+    faction_css = (ROOT / "assets/css/dashboard/factions.css").read_text(encoding="utf-8")
+    for token in (
+        "data-faction-registration-card",
+        "data-faction-panel-published",
+        "data-faction-admin-creations",
+        "data-faction-request-dialog",
+        "Request A Faction",
+        "Publish / Refresh Panel",
+    ):
+        if token not in dashboard:
+            errors.append(f"dashboard.html: missing faction-registration workflow surface: {token}")
+    for token in (
+        "creation_request",
+        "creation_cancel",
+        "creation_review",
+        "panel_config",
+        "panel_publish",
+        "panel_unpublish",
+    ):
+        if token not in faction_js:
+            errors.append(f"factions.js: missing faction-registration action: {token}")
+    if "action: admin ? 'set_leader' : 'transfer_leader'" not in faction_js:
+        errors.append("factions.js: Admin leadership transfer must use the protected set_leader action.")
+    for token in (
+        ".faction-registration-card",
+        ".faction-registration-admin",
+    ):
+        if token not in faction_css:
+            errors.append(f"factions.css: missing faction-registration layout guard: {token}")
     lazy_assets_js = (ROOT / "assets/js/dashboard/lazy-assets.js").read_text(encoding="utf-8")
     command_centre_js = (ROOT / "assets/js/dashboard/command-centre.js").read_text(encoding="utf-8")
     command_centre_css = (ROOT / "assets/css/dashboard/command-centre-m10.css").read_text(encoding="utf-8")
@@ -871,7 +901,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         errors.append(
             "dashboard.html: command library must be lazy-loaded instead of downloaded on every dashboard visit."
         )
-    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.46.0&amp;rev=command-centre-security-1'
+    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.47.0&amp;rev=faction-registration-1'
     lazy_index = dashboard.find(lazy_script)
     shell_index = dashboard.find("assets/js/dashboard/shell.js")
     if lazy_index < 0:
@@ -933,7 +963,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         ("Moderation/appeals styles", f"assets/css/dashboard/moderation.css?v={EXPECTED_ASSET_VERSION}", "ensureModerationStyles"),
         ("Progression styles", "assets/css/dashboard/progression.css?v=1.37.0&rev=quest-progression-1", "ensureProgressionStyles"),
         ("Objectives styles", "assets/css/dashboard/objectives.css?v=1.37.0&rev=quest-progression-1", "ensureObjectivesStyles"),
-        ("Factions styles", "assets/css/dashboard/factions.css?v=1.34.0&rev=faction-upgrade-1", "ensureFactionsStyles"),
+        ("Factions styles", "assets/css/dashboard/factions.css?v=1.47.0&rev=faction-registration-1", "ensureFactionsStyles"),
     )
     for label, asset_url, loader_name in lazy_view_styles:
         if asset_url in dashboard:
@@ -990,7 +1020,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         ("Tickets controller", f"assets/js/dashboard/tickets.js?v={EXPECTED_ASSET_VERSION}", "ensureTickets", "__wwzTicketsReady", "assets/js/dashboard/tickets.js"),
         ("Progression controller", "assets/js/dashboard/progression.js?v=1.37.0&rev=quest-progression-1", "ensureProgression", "__wwzProgressionReady", "assets/js/dashboard/progression.js"),
         ("Objectives controller", "assets/js/dashboard/objectives.js?v=1.37.0&rev=quest-progression-1", "ensureObjectives", "__wwzObjectivesReady", "assets/js/dashboard/objectives.js"),
-        ("Factions controller", "assets/js/dashboard/factions.js?v=1.34.0&rev=faction-upgrade-1", "ensureFactions", "__wwzFactionsReady", "assets/js/dashboard/factions.js"),
+        ("Factions controller", "assets/js/dashboard/factions.js?v=1.47.0&rev=faction-registration-1", "ensureFactions", "__wwzFactionsReady", "assets/js/dashboard/factions.js"),
         ("Command Centre controller", "assets/js/dashboard/command-centre.js?v=1.46.0&rev=command-centre-security-1", "ensureCommandCentre", "__wwzCommandCentreReady", "assets/js/dashboard/command-centre.js"),
     )
     for label, asset_url, loader_name, ready_flag, relative in lazy_dashboard_controllers:
@@ -1885,8 +1915,8 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
         errors.append(f"Apple touch icon dimensions are {apple_dimensions}; expected (180, 180).")
 
     launch_requirements = {
-        "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.42.0"),
-        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/server-context.js?v=1.42.0&amp;rev=livonia-live-1", "assets/js/dashboard/lazy-assets.js?v=1.46.0&amp;rev=command-centre-security-1"),
+        "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.44.0"),
+        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/server-context.js?v=1.42.0&amp;rev=livonia-live-1", "assets/js/dashboard/lazy-assets.js?v=1.47.0&amp;rev=faction-registration-1"),
         "assets/js/dashboard/server-context.js": ("player_capacity", "Capacity', `${server.player_capacity} slots`"),
         "assets/js/dashboard/account.js": ("payload.server?.player_capacity",),
         "assets/js/dashboard/livonia-pvp.js": ("rotation.player_capacity", "players online"),
@@ -1900,8 +1930,8 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.46.0'",
-        "const WWZ_PWA_UPDATE_REVISION = '2026-09-13-website-v1-46-0'",
+        "const WWZ_PWA_VERSION = '1.47.0'",
+        "const WWZ_PWA_UPDATE_REVISION = '2026-09-13-website-v1-47-0'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
         "if (request.method !== 'GET') return;",

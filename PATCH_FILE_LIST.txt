@@ -1,8 +1,8 @@
 INSTALL_README.txt
 PATCH_NOTES.md
 README.md
-assets/css/dashboard/command-centre-m10.css
-assets/js/dashboard/command-centre.js
+assets/css/dashboard/factions.css
+assets/js/dashboard/factions.js
 assets/js/dashboard/lazy-assets.js
 changelog.html
 dashboard.html

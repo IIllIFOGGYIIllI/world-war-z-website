@@ -560,3 +560,28 @@
     flex-direction: column;
   }
 }
+
+/* v1.47.0 — Flag-claim-style faction registration */
+.faction-registration-card {
+  border-color: rgba(143, 29, 29, .38);
+  background: linear-gradient(145deg, rgba(143, 29, 29, .08), rgba(255,255,255,.018));
+}
+
+.faction-registration-admin {
+  margin: 1rem 0 1.25rem;
+  padding: 1rem;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+  background: rgba(0,0,0,.14);
+}
+
+.faction-registration-admin .heading-actions {
+  margin-top: .85rem;
+  flex-wrap: wrap;
+}
+
+@media (min-width: 1181px) {
+  .faction-admin-queues {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
