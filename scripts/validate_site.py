@@ -384,11 +384,44 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "section === 'server-audit') loadServerActionHistory()" not in operations_admin:
         errors.append("administration.js: Operations Centre must auto-load the unified audit.")
 
-    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.45.0</strong></div>' not in dashboard:
+    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.46.0</strong></div>' not in dashboard:
         errors.append("dashboard.html: command-centre footer release label is stale.")
 
-    if "Website v1.45.0 · Bot v1.41.0" not in index:
+    if "Website v1.46.0 · Bot v1.42.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
+    lazy_assets_js = (ROOT / "assets/js/dashboard/lazy-assets.js").read_text(encoding="utf-8")
+    command_centre_js = (ROOT / "assets/js/dashboard/command-centre.js").read_text(encoding="utf-8")
+    command_centre_css = (ROOT / "assets/css/dashboard/command-centre-m10.css").read_text(encoding="utf-8")
+    for token in (
+        'data-command-centre-launchpad',
+        'data-command-centre-security-panel',
+        'data-security-enabled',
+        'data-security-spam-enabled',
+        'data-security-raid-enabled',
+        'data-security-lockdown',
+        'data-test-security',
+    ):
+        if token not in dashboard:
+            errors.append(f"dashboard.html: missing Unified Command Centre / Security surface: {token}")
+    for token in (
+        "/api/admin/security",
+        "/api/admin/security/action",
+        "loadSecurityCentre",
+        "saveSecurityCentre",
+        "commandCentreSecurityLoaded",
+        "command-centre-m10.css?v=1.46.0&rev=command-centre-security-1",
+    ):
+        if token not in command_centre_js:
+            errors.append(f"command-centre.js: missing Discord Security runtime guard: {token}")
+    for token in (
+        ".command-centre-tool-grid",
+        ".command-centre-security-grid",
+        ".security-event-row",
+    ):
+        if token not in command_centre_css:
+            errors.append(f"command-centre-m10.css: missing Command Centre / Security layout guard: {token}")
+    if "assets/js/dashboard/command-centre.js?v=1.46.0&rev=command-centre-security-1" not in lazy_assets_js:
+        errors.append("lazy-assets.js: missing v1.46.0 Command Centre controller revision.")
     server_feeds_js = (ROOT / "assets/js/dashboard/server-feeds.js").read_text(encoding="utf-8")
     server_feeds_css = (ROOT / "assets/css/dashboard/server-feeds.css").read_text(encoding="utf-8")
     lazy_assets_js = (ROOT / "assets/js/dashboard/lazy-assets.js").read_text(encoding="utf-8")
@@ -838,7 +871,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         errors.append(
             "dashboard.html: command library must be lazy-loaded instead of downloaded on every dashboard visit."
         )
-    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.45.0&amp;rev=bulk-routing-1'
+    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.46.0&amp;rev=command-centre-security-1'
     lazy_index = dashboard.find(lazy_script)
     shell_index = dashboard.find("assets/js/dashboard/shell.js")
     if lazy_index < 0:
@@ -958,7 +991,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         ("Progression controller", "assets/js/dashboard/progression.js?v=1.37.0&rev=quest-progression-1", "ensureProgression", "__wwzProgressionReady", "assets/js/dashboard/progression.js"),
         ("Objectives controller", "assets/js/dashboard/objectives.js?v=1.37.0&rev=quest-progression-1", "ensureObjectives", "__wwzObjectivesReady", "assets/js/dashboard/objectives.js"),
         ("Factions controller", "assets/js/dashboard/factions.js?v=1.34.0&rev=faction-upgrade-1", "ensureFactions", "__wwzFactionsReady", "assets/js/dashboard/factions.js"),
-        ("Command Centre controller", "assets/js/dashboard/command-centre.js?v=1.28.0", "ensureCommandCentre", "__wwzCommandCentreReady", "assets/js/dashboard/command-centre.js"),
+        ("Command Centre controller", "assets/js/dashboard/command-centre.js?v=1.46.0&rev=command-centre-security-1", "ensureCommandCentre", "__wwzCommandCentreReady", "assets/js/dashboard/command-centre.js"),
     )
     for label, asset_url, loader_name, ready_flag, relative in lazy_dashboard_controllers:
         if asset_url in dashboard:
@@ -1852,8 +1885,8 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
         errors.append(f"Apple touch icon dimensions are {apple_dimensions}; expected (180, 180).")
 
     launch_requirements = {
-        "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.41.0"),
-        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/server-context.js?v=1.42.0&amp;rev=livonia-live-1", "assets/js/dashboard/lazy-assets.js?v=1.45.0&amp;rev=bulk-routing-1"),
+        "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.42.0"),
+        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/server-context.js?v=1.42.0&amp;rev=livonia-live-1", "assets/js/dashboard/lazy-assets.js?v=1.46.0&amp;rev=command-centre-security-1"),
         "assets/js/dashboard/server-context.js": ("player_capacity", "Capacity', `${server.player_capacity} slots`"),
         "assets/js/dashboard/account.js": ("payload.server?.player_capacity",),
         "assets/js/dashboard/livonia-pvp.js": ("rotation.player_capacity", "players online"),
@@ -1867,8 +1900,8 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.45.0'",
-        "const WWZ_PWA_UPDATE_REVISION = '2026-09-13-website-v1-45-0'",
+        "const WWZ_PWA_VERSION = '1.46.0'",
+        "const WWZ_PWA_UPDATE_REVISION = '2026-09-13-website-v1-46-0'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
         "if (request.method !== 'GET') return;",

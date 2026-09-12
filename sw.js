@@ -1,6 +1,6 @@
 'use strict';
 
-const WWZ_PWA_VERSION = '1.45.0';
+const WWZ_PWA_VERSION = '1.46.0';
 const CACHE_PREFIX = 'wwz-pwa-';
 const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 // Public release versions can advance without discarding the bounded map caches.
@@ -8,7 +8,7 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-09-13-website-v1-45-0';
+const WWZ_PWA_UPDATE_REVISION = '2026-09-13-website-v1-46-0';
 const CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${CACHE_RELEASE}`;
@@ -65,6 +65,7 @@ const UPDATE_INVALIDATIONS = [
   './assets/js/dashboard/command-centre.js?v=1.28.0&rev=m10-admin-push-1',
   './assets/css/dashboard/command-centre-m10.css?v=1.28.0&rev=m10-admin-push-1',
   './assets/js/dashboard/lazy-assets.js?v=1.28.0&rev=website-v1-28-0',
+  './assets/js/dashboard/lazy-assets.js?v=1.45.0&rev=bulk-routing-1',
   './flags.html',
   // Clear the original v1.29.0 Flag Claims request keys before serving the polished v1.29.1 UI and v1.29.2 actual DayZ flag artwork.
   './assets/js/pages/flags.js?v=1.29.0&rev=flag-claims-1',

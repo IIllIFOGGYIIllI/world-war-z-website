@@ -1,25 +1,25 @@
-# World War Z Website v1.45.0 — Server Feed Bulk Routing & Auto Setup
+# World War Z Website v1.46.0 — Unified Command Centre & Discord Security
 
-## Added
-- Adds **Bulk Assign** to Server Feeds so an Admin can select one Discord channel and assign multiple supported DayZ event types in a single operation.
-- Adds grouped selectors for Connections, PvP / Combat, Player State, Building / Interaction, Flags, **All Hit Logs** and **All Death Logs**, plus Select All / Clear controls.
-- Adds **Auto Setup Channels** with two layouts:
-  - **Grouped (Recommended)** routes all 45 supported events into a small set of logical log channels.
-  - **One Channel Per Event** creates a dedicated channel for each missing event type.
-- Adds Discord category selection for guided setup. When a new `WWZ Logs` category is required, Bot v1.41.0 creates it as a protected staff log area rather than exposing telemetry to `@everyone`.
-- The Server Feeds page now shows category context beside channel choices and accurately states that rich DayZ telemetry can include coordinates/location context.
+## All-in-one Command Centre
+- Expands the protected Command Centre from an operational overview into the primary Admin launchpad.
+- Adds direct one-click navigation to Moderation, Ban Lists, Player Intelligence, Server Feeds, Identity Sync, Flag Claims, Factions, Events, Shop / Orders, Tickets, Backups / Data and Server Controls.
+- Keeps the existing live health, attention queue, player activity, notification health and M10 monitoring surfaces.
 
-## Safe / non-destructive behaviour
-- Automatic setup never removes or rewrites an existing feed route.
-- It creates routes only for event types that are not configured anywhere on the selected server yet.
-- For grouped setup, WWZ first extends a channel already used by that group (for example `#build-logs`, `#death-logs` or `#flag-raise`), then reuses a matching recommended channel, and only creates a new channel if neither exists.
-- Bulk assignment skips exact duplicate event-type/channel routes instead of producing duplicate Discord messages.
+## Discord Security Centre
+- Adds selected-server anti-spam and anti-raid configuration directly inside the Command Centre.
+- Admins can configure burst-message thresholds, duplicate-message thresholds, mass-mention limits, timeout duration, join-burst thresholds and suspicious-account age.
+- Adds selectable alert-channel routing and multi-select exempt roles without exposing raw Discord snowflakes to the browser.
+- Adds a protected **Send Test Alert** action for verifying the selected server's Security alert destination.
+- Adds 24-hour spam / raid counters and a recent detection-history panel.
+- Adds **Emergency Join Quarantine** with an explicit browser confirmation before enabling it.
+- Protection is opt-in after upgrade; Bot v1.42.0 does not begin automatic moderation until an Admin explicitly enables the master Security switch.
 
 ## Multi-server behaviour
-- The complete workflow is available on both **Chernarus and Livonia** through the existing selected-server dashboard context.
-- Feed records, Discord channels, category creation and automatic setup remain isolated to the currently selected server/guild.
+- The complete Command Centre and Security Centre work independently for **Chernarus and Livonia**.
+- Switching the selected server changes the available channels, roles, thresholds, alert destination and event history.
+- No Discord IDs or settings are copied between the two servers.
 
 ## Compatibility
-- Pairs with Bot v1.41.0.
-- Advances the website/PWA release to v1.45.0 while preserving the bounded map-cache generation.
-- No database wipe, DayZ mission upload, Nitrado configuration change, map-data change or server wipe is required.
+- Pairs with Bot v1.42.0 and preserves the v1.45.0 Server Feed bulk routing / auto setup workflow.
+- Advances the website/PWA release to v1.46.0 while preserving the bounded map-cache generation.
+- No database wipe, manual migration, DayZ mission upload, Nitrado configuration change, map-data change or server wipe is required.

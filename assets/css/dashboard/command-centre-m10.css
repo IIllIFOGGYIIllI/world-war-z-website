@@ -432,3 +432,208 @@
 @media (max-width: 420px) {
   .m10-push-actions { grid-template-columns: 1fr; }
 }
+
+/* v1.46.0 — unified Command Centre launchpad + Discord Security Centre */
+.command-centre-launchpad,
+.command-centre-security {
+  margin-top: 14px;
+}
+
+.command-centre-tool-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.command-centre-tool-grid > button {
+  min-width: 0;
+  min-height: 76px;
+  display: grid;
+  align-content: center;
+  gap: 5px;
+  padding: 12px 13px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 9px;
+  background: rgba(6,8,11,.45);
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.command-centre-tool-grid > button:hover,
+.command-centre-tool-grid > button:focus-visible {
+  border-color: rgba(215,86,74,.42);
+  background: rgba(215,86,74,.07);
+}
+
+.command-centre-tool-grid strong {
+  color: #e3e6ea;
+  font-size: .78rem;
+}
+
+.command-centre-tool-grid small {
+  color: #7f8791;
+  font-size: .64rem;
+  line-height: 1.35;
+}
+
+.command-centre-security-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.command-centre-security-stats > div {
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid rgba(255,255,255,.075);
+  border-radius: 8px;
+  background: rgba(4,6,9,.38);
+}
+
+.command-centre-security-stats span,
+.command-centre-security-stats strong,
+.command-centre-security-stats small {
+  display: block;
+}
+
+.command-centre-security-stats span {
+  color: #777f88;
+  font-size: .58rem;
+  font-weight: 850;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.command-centre-security-stats strong {
+  margin-top: 4px;
+  color: #e7eaed;
+  font-size: 1rem;
+}
+
+.command-centre-security-stats small {
+  margin-top: 2px;
+  color: #666e78;
+  font-size: .6rem;
+}
+
+.command-centre-security-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.security-config-block {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 11px;
+  padding: 13px;
+  border: 1px solid rgba(255,255,255,.075);
+  border-radius: 9px;
+  background: rgba(4,6,9,.32);
+}
+
+.security-config-block h4,
+.security-recent h4 {
+  margin: 0;
+  color: #e5e8ec;
+  font-size: .82rem;
+}
+
+.security-config-block .dialog-field {
+  margin: 0;
+}
+
+.security-config-block select[multiple] {
+  min-height: 120px;
+}
+
+.security-config-block > .dialog-field > small {
+  display: block;
+  margin-top: 5px;
+  color: #737b85;
+  font-size: .6rem;
+  line-height: 1.35;
+}
+
+.security-number-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.security-number-grid label {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.security-number-grid span {
+  color: #858c95;
+  font-size: .61rem;
+  font-weight: 800;
+}
+
+.security-number-grid input {
+  width: 100%;
+  min-width: 0;
+  min-height: 36px;
+  padding: 7px 8px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 6px;
+  background: rgba(4,6,9,.72);
+  color: #e8ebee;
+}
+
+.danger-toggle {
+  border-color: rgba(227,75,67,.25) !important;
+  background: rgba(227,75,67,.045) !important;
+}
+
+.security-recent {
+  margin-top: 16px;
+  border-top: 1px solid rgba(255,255,255,.07);
+  padding-top: 14px;
+}
+
+.security-event-row {
+  display: grid;
+  grid-template-columns: 9px minmax(0,1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(255,255,255,.055);
+}
+
+.security-event-row:last-child { border-bottom: 0; }
+.security-event-marker {
+  width: 8px;
+  height: 8px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: #e0a63b;
+}
+.security-event-row[data-severity="critical"] .security-event-marker { background: #e34b43; }
+.security-event-row[data-severity="info"] .security-event-marker { background: #1688f8; }
+.security-event-row strong,
+.security-event-row small { display: block; }
+.security-event-row strong { color: #dce1e6; font-size: .72rem; }
+.security-event-row small { margin-top: 3px; color: #777f89; font-size: .62rem; line-height: 1.4; }
+
+@media (max-width: 1120px) {
+  .command-centre-tool-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .command-centre-security-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 760px) {
+  .command-centre-tool-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .command-centre-security-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 480px) {
+  .command-centre-tool-grid,
+  .command-centre-security-stats,
+  .security-number-grid { grid-template-columns: 1fr; }
+}

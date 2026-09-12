@@ -16,6 +16,8 @@ let commandCentreViewActive = false;
 let commandCentreMonitorArmed = false;
 let m10PushStatusCheckedAt = 0;
 let m10PushStatusInProgress = false;
+let commandCentreSecurityRequestInProgress = false;
+let commandCentreSecurityLoaded = false;
 
 const M10_MONITOR_SESSION_KEY = 'wwz_m10_admin_monitor_armed_v1';
 const M10_STATE_STORAGE_PREFIX = 'wwz_m10_health_state_v1';
@@ -26,7 +28,7 @@ const ensureM10Styles = () => {
   if (document.querySelector('link[data-command-centre-m10-style]')) return;
   const link = document.createElement('link');
   link.rel = 'stylesheet';
-  link.href = 'assets/css/dashboard/command-centre-m10.css?v=1.28.0&rev=m10-admin-push-1';
+  link.href = 'assets/css/dashboard/command-centre-m10.css?v=1.46.0&rev=command-centre-security-1';
   link.dataset.commandCentreM10Style = '';
   document.head.append(link);
 };
@@ -1042,6 +1044,234 @@ const sendM10AdminPushTest = async () => {
   }
 };
 
+const securityField = (selector) => document.querySelector(selector);
+
+const setSecurityMessage = (message = '', tone = '') => {
+  const element = securityField('[data-security-message]');
+  if (!element) return;
+  element.hidden = !message;
+  element.textContent = message;
+  element.dataset.tone = tone;
+};
+
+const securityNumber = (selector, fallback = 0) => {
+  const value = Number(securityField(selector)?.value);
+  return Number.isFinite(value) ? value : fallback;
+};
+
+const renderSecurityEvents = (events = []) => {
+  const list = securityField('[data-security-recent-list]');
+  const empty = securityField('[data-security-recent-empty]');
+  if (!list) return;
+  list.replaceChildren();
+  const threats = (Array.isArray(events) ? events : []).filter((event) => {
+    const type = String(event?.event_type || '');
+    return type.startsWith('spam_') || type.startsWith('raid_');
+  });
+  if (empty) empty.hidden = threats.length > 0;
+  commandCentreSet('[data-security-recent-count]', `${threats.length} shown`);
+  threats.slice(0, 12).forEach((event) => {
+    const row = document.createElement('div');
+    row.className = 'security-event-row';
+    row.dataset.severity = String(event.severity || 'info');
+    const marker = document.createElement('span');
+    marker.className = 'security-event-marker';
+    const copy = document.createElement('div');
+    const title = document.createElement('strong');
+    const type = String(event.event_type || '').replaceAll('_', ' ');
+    title.textContent = `${type.replace(/^./, (c) => c.toUpperCase())}${event.user_name ? ` · ${event.user_name}` : ''}`;
+    const detail = document.createElement('small');
+    detail.textContent = `${event.detail || 'Security event'} · ${event.action || 'alert'} · ${commandCentreTime(event.created_at)}`;
+    copy.append(title, detail);
+    row.append(marker, copy);
+    list.append(row);
+  });
+};
+
+const populateSecurityResources = (payload = {}) => {
+  const settings = payload.settings || {};
+  const channelSelect = securityField('[data-security-alert-channel]');
+  if (channelSelect) {
+    const selected = String(settings.alert_channel_key || '');
+    channelSelect.replaceChildren();
+    const automatic = document.createElement('option');
+    automatic.value = '';
+    automatic.textContent = 'Use existing moderation / alt logs';
+    channelSelect.append(automatic);
+    (payload.channels || []).forEach((channel) => {
+      const option = document.createElement('option');
+      option.value = String(channel.key || '');
+      option.textContent = channel.category ? `${channel.category} / #${channel.name}` : `#${channel.name}`;
+      channelSelect.append(option);
+    });
+    channelSelect.value = selected;
+  }
+  const roleSelect = securityField('[data-security-exempt-roles]');
+  if (roleSelect) {
+    const selected = new Set((settings.exempt_role_keys || []).map(String));
+    roleSelect.replaceChildren();
+    (payload.roles || []).forEach((role) => {
+      const option = document.createElement('option');
+      option.value = String(role.key || '');
+      option.textContent = role.name || 'Role';
+      option.selected = selected.has(option.value);
+      roleSelect.append(option);
+    });
+  }
+};
+
+const renderSecuritySettings = (payload = {}) => {
+  const settings = payload.settings || {};
+  const summary = payload.summary || {};
+  const setCheck = (selector, value) => {
+    const field = securityField(selector);
+    if (field) field.checked = Boolean(value);
+  };
+  const setValue = (selector, value) => {
+    const field = securityField(selector);
+    if (field) field.value = value ?? '';
+  };
+  setCheck('[data-security-enabled]', settings.enabled);
+  setCheck('[data-security-spam-enabled]', settings.anti_spam_enabled);
+  setCheck('[data-security-raid-enabled]', settings.anti_raid_enabled);
+  setCheck('[data-security-lockdown]', settings.emergency_join_quarantine);
+  setValue('[data-security-burst-limit]', settings.burst_message_limit);
+  setValue('[data-security-burst-window]', settings.burst_window_seconds);
+  setValue('[data-security-duplicate-limit]', settings.duplicate_message_limit);
+  setValue('[data-security-duplicate-window]', settings.duplicate_window_seconds);
+  setValue('[data-security-mention-limit]', settings.mention_limit);
+  setValue('[data-security-timeout]', settings.timeout_minutes);
+  setValue('[data-security-spam-action]', settings.spam_action || 'delete_timeout');
+  setValue('[data-security-join-limit]', settings.join_limit);
+  setValue('[data-security-join-window]', settings.join_window_seconds);
+  setValue('[data-security-account-age]', settings.suspicious_account_age_days);
+  setValue('[data-security-raid-action]', settings.raid_action || 'alert');
+  commandCentreSet('[data-security-server-name]', `${payload.server?.name || 'Selected server'} · ${payload.server?.map || ''}`.replace(/ · $/, ''));
+  commandCentreSet('[data-security-events-24h]', Number(summary.events_24h || 0));
+  commandCentreSet('[data-security-spam-24h]', Number(summary.spam_24h || 0));
+  commandCentreSet('[data-security-raid-24h]', Number(summary.raid_24h || 0));
+  commandCentreSet('[data-security-quarantine-state]', settings.emergency_join_quarantine ? 'ACTIVE' : 'Off');
+  commandCentreSet('[data-command-centre-security-events]', Number(summary.events_24h || 0));
+  commandCentreSet(
+    '[data-command-centre-security-state]',
+    settings.emergency_join_quarantine
+      ? 'Emergency quarantine ACTIVE'
+      : (settings.enabled ? 'Protection enabled' : 'Protection disabled')
+  );
+  populateSecurityResources(payload);
+  renderSecurityEvents(payload.recent || []);
+};
+
+const loadSecurityCentre = async (sessionToken = storageGet(AUTH_SESSION_KEY), { quiet = false } = {}) => {
+  if (!sessionToken || commandCentreSecurityRequestInProgress) return false;
+  commandCentreSecurityRequestInProgress = true;
+  const refresh = securityField('[data-refresh-security]');
+  const original = refresh?.textContent || 'Refresh';
+  if (refresh && !quiet) {
+    refresh.disabled = true;
+    refresh.textContent = 'Refreshing…';
+  }
+  try {
+    const response = await window.WWZHttp.request(`${DASHBOARD_API_BASE}/api/admin/security`, {
+      headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` },
+      cache: 'no-store'
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (typeof handleAdminPlayerAuthorizationResponse === 'function' && handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: false })) return false;
+    if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Security Centre unavailable.');
+    renderSecuritySettings(payload);
+    commandCentreSecurityLoaded = true;
+    if (!quiet) setSecurityMessage('Security settings refreshed.', 'success');
+    return true;
+  } catch (error) {
+    if (!quiet) setSecurityMessage(error instanceof Error ? error.message : 'Security Centre unavailable.', 'error');
+    return false;
+  } finally {
+    commandCentreSecurityRequestInProgress = false;
+    if (refresh) {
+      refresh.disabled = false;
+      refresh.textContent = original;
+    }
+  }
+};
+
+const securityActionRequest = async (payload, pendingButton) => {
+  const sessionToken = storageGet(AUTH_SESSION_KEY);
+  if (!sessionToken || commandCentreSecurityRequestInProgress) return false;
+  commandCentreSecurityRequestInProgress = true;
+  const original = pendingButton?.textContent || '';
+  if (pendingButton) {
+    pendingButton.disabled = true;
+    pendingButton.textContent = 'Working…';
+  }
+  setSecurityMessage('');
+  try {
+    const response = await window.WWZHttp.request(`${DASHBOARD_API_BASE}/api/admin/security/action`, {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken}` },
+      body: JSON.stringify(payload)
+    });
+    const result = await response.json().catch(() => ({}));
+    if (typeof handleAdminPlayerAuthorizationResponse === 'function' && handleAdminPlayerAuthorizationResponse(response, result, { actionRequest: true })) return false;
+    if (!response.ok || result.status !== 'ok') throw new Error(result.message || 'Security action failed.');
+    setSecurityMessage(result.message || 'Security action completed.', 'success');
+    return true;
+  } catch (error) {
+    setSecurityMessage(error instanceof Error ? error.message : 'Security action failed.', 'error');
+    return false;
+  } finally {
+    commandCentreSecurityRequestInProgress = false;
+    if (pendingButton) {
+      pendingButton.disabled = false;
+      pendingButton.textContent = original;
+    }
+  }
+};
+
+const saveSecurityCentre = async () => {
+  const roles = securityField('[data-security-exempt-roles]');
+  const payload = {
+    action: 'save',
+    enabled: Boolean(securityField('[data-security-enabled]')?.checked),
+    anti_spam_enabled: Boolean(securityField('[data-security-spam-enabled]')?.checked),
+    burst_message_limit: securityNumber('[data-security-burst-limit]', 6),
+    burst_window_seconds: securityNumber('[data-security-burst-window]', 8),
+    duplicate_message_limit: securityNumber('[data-security-duplicate-limit]', 3),
+    duplicate_window_seconds: securityNumber('[data-security-duplicate-window]', 20),
+    mention_limit: securityNumber('[data-security-mention-limit]', 6),
+    spam_action: securityField('[data-security-spam-action]')?.value || 'delete_timeout',
+    timeout_minutes: securityNumber('[data-security-timeout]', 10),
+    anti_raid_enabled: Boolean(securityField('[data-security-raid-enabled]')?.checked),
+    join_limit: securityNumber('[data-security-join-limit]', 5),
+    join_window_seconds: securityNumber('[data-security-join-window]', 60),
+    suspicious_account_age_days: securityNumber('[data-security-account-age]', 7),
+    raid_action: securityField('[data-security-raid-action]')?.value || 'alert',
+    emergency_join_quarantine: Boolean(securityField('[data-security-lockdown]')?.checked),
+    alert_channel_key: securityField('[data-security-alert-channel]')?.value || '',
+    exempt_role_keys: roles ? Array.from(roles.selectedOptions).map((option) => option.value) : [],
+  };
+  if (payload.emergency_join_quarantine) {
+    const confirmed = window.confirm('Enable Emergency Join Quarantine? Every non-exempt new Discord join will be temporarily timed out until you turn it off.');
+    if (!confirmed) return;
+  }
+  const button = securityField('[data-save-security]');
+  if (await securityActionRequest(payload, button)) {
+    await loadSecurityCentre(storageGet(AUTH_SESSION_KEY), { quiet: true });
+    await loadCommandCentre();
+  }
+};
+
+securityField('[data-refresh-security]')?.addEventListener('click', () => loadSecurityCentre());
+securityField('[data-save-security]')?.addEventListener('click', () => saveSecurityCentre());
+securityField('[data-test-security]')?.addEventListener('click', async (event) => {
+  if (await securityActionRequest({ action: 'test_alert' }, event.currentTarget)) {
+    await loadSecurityCentre(storageGet(AUTH_SESSION_KEY), { quiet: true });
+  }
+});
+securityField('[data-command-centre-security-focus]')?.addEventListener('click', () => {
+  securityField('[data-command-centre-security-panel]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
 const renderCommandCentre = (payload) => {
   const server = payload.server || {};
   const operations = server.operations || {};
@@ -1215,6 +1445,7 @@ const activateCommandCentreView = ({ view = '', section = '' } = {}) => {
   if (active) {
     ensureM10Panel();
     loadCommandCentre();
+    loadSecurityCentre(storageGet(AUTH_SESSION_KEY), { quiet: commandCentreSecurityLoaded });
   }
 };
 
@@ -1244,10 +1475,12 @@ window.addEventListener('offline', () => {
 window.addEventListener('wwz:serverchange', () => {
   commandCentreLastPayload = null;
   commandCentreLastSuccessAt = 0;
+  commandCentreSecurityLoaded = false;
   m10PushStatusCheckedAt = 0;
   renderM10ChangeHistory();
   void refreshM10AdminPushStatus({ force: true });
   if (commandCentreMonitorArmed && !document.hidden) loadCommandCentre();
+  if (commandCentreViewActive && !document.hidden) loadSecurityCentre(storageGet(AUTH_SESSION_KEY), { quiet: true });
 });
 
 m10RestoreMonitorArmed();
