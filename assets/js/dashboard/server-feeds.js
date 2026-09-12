@@ -4,8 +4,12 @@
   const state = {
     feeds: [],
     channels: [],
+    categories: [],
     feedTypes: [],
+    feedGroups: [],
     dynamicLists: [],
+    mapName: '',
+    runtime: {},
     loaded: false,
     loading: false,
     active: false,
@@ -19,23 +23,20 @@
   const feedsUrl = ADMIN_SERVER_FEEDS_URL;
   const actionUrl = ADMIN_SERVER_FEEDS_ACTION_URL;
 
-  const setMessage = (text = '', kind = 'info') => {
-    const element = $('[data-server-feeds-message]');
+  const setStatus = (selector, text = '', kind = 'info') => {
+    const element = $(selector);
     if (!element) return;
     element.hidden = !text;
     element.textContent = text;
     element.dataset.kind = kind;
   };
 
-  const setEditorMessage = (text = '', kind = 'info') => {
-    const element = $('[data-server-feed-editor-message]');
-    if (!element) return;
-    element.hidden = !text;
-    element.textContent = text;
-    element.dataset.kind = kind;
-  };
+  const setMessage = (text = '', kind = 'info') => setStatus('[data-server-feeds-message]', text, kind);
+  const setEditorMessage = (text = '', kind = 'info') => setStatus('[data-server-feed-editor-message]', text, kind);
+  const setBulkMessage = (text = '', kind = 'info') => setStatus('[data-server-feed-bulk-message]', text, kind);
+  const setAutoMessage = (text = '', kind = 'info') => setStatus('[data-server-feed-auto-message]', text, kind);
 
-  const authenticatedJson = async (url, options = {}, timeout = 15_000) => {
+  const authenticatedJson = async (url, options = {}, timeout = 20_000) => {
     const token = sessionToken();
     if (!token) throw new Error('Your dashboard session has expired. Sign in again.');
     const headers = new Headers(options.headers || {});
@@ -45,7 +46,7 @@
     const { response, payload } = await window.WWZHttp.json(url, { ...options, headers }, timeout);
     if (response.status === 401 || response.status === 403) {
       throw new Error(response.status === 403
-        ? 'Your current Discord account does not have Admin access to Server Feeds.'
+        ? (payload?.message || 'Your current Discord account does not have Admin access to Server Feeds.')
         : 'Your dashboard session has expired. Sign in again.');
     }
     if (!response.ok || !['ok', 'accepted'].includes(String(payload?.status || ''))) {
@@ -119,7 +120,9 @@
       status.textContent = feed.active ? 'Active' : 'Inactive';
       heading.append(title, status);
       const channel = document.createElement('p');
-      channel.innerHTML = `<strong>Discord:</strong> #${String(feed.channel_name || 'Unavailable channel')}`;
+      const strong = document.createElement('strong');
+      strong.textContent = 'Discord: ';
+      channel.append(strong, `#${String(feed.channel_name || 'Unavailable channel')}`);
       const options = document.createElement('small');
       options.textContent = optionsSummary(feed);
       main.append(heading, channel, options);
@@ -152,6 +155,19 @@
     renderSummary();
   };
 
+  const channelOptionLabel = (item) => {
+    const category = String(item?.category_name || '').trim();
+    return category ? `#${item.name} — ${category}` : `#${item.name}`;
+  };
+
+  const populateChannelSelect = (select) => {
+    if (!select) return;
+    const current = select.value;
+    select.replaceChildren(new Option('Select Discord channel…', ''));
+    state.channels.forEach((item) => select.add(new Option(channelOptionLabel(item), item.key)));
+    if (state.channels.some((item) => item.key === current)) select.value = current;
+  };
+
   const populateSelects = () => {
     const typeSelect = $('[data-server-feed-type]');
     if (typeSelect) {
@@ -160,12 +176,15 @@
       state.feedTypes.forEach((item) => typeSelect.add(new Option(item.name, item.key)));
       if (state.feedTypes.some((item) => item.key === current)) typeSelect.value = current;
     }
-    const channelSelect = $('[data-server-feed-channel]');
-    if (channelSelect) {
-      const current = channelSelect.value;
-      channelSelect.replaceChildren(new Option('Select Discord channel…', ''));
-      state.channels.forEach((item) => channelSelect.add(new Option(`#${item.name}`, item.key)));
-      if (state.channels.some((item) => item.key === current)) channelSelect.value = current;
+    populateChannelSelect($('[data-server-feed-channel]'));
+    populateChannelSelect($('[data-server-feed-bulk-channel]'));
+
+    const categorySelect = $('[data-server-feed-auto-category]');
+    if (categorySelect) {
+      const current = categorySelect.value;
+      categorySelect.replaceChildren(new Option('Create / reuse protected WWZ Logs', ''));
+      state.categories.forEach((item) => categorySelect.add(new Option(item.name, item.key)));
+      if (state.categories.some((item) => item.key === current)) categorySelect.value = current;
     }
   };
 
@@ -289,6 +308,199 @@
     }
   };
 
+  const updateBulkGroupToggle = (groupElement) => {
+    const toggle = $('[data-server-feed-bulk-group-toggle]', groupElement);
+    const boxes = $$('[data-server-feed-bulk-type]', groupElement);
+    if (!toggle || !boxes.length) return;
+    const checked = boxes.filter((box) => box.checked).length;
+    toggle.checked = checked === boxes.length;
+    toggle.indeterminate = checked > 0 && checked < boxes.length;
+  };
+
+  const renderBulkGroups = () => {
+    const container = $('[data-server-feed-bulk-groups]');
+    if (!container) return;
+    container.replaceChildren();
+    const groups = state.feedGroups.length
+      ? state.feedGroups
+      : [{ key: 'all', name: 'All Server Feeds', feed_types: state.feedTypes.map((item) => item.key) }];
+
+    groups.forEach((group) => {
+      const article = document.createElement('article');
+      article.className = 'server-feed-bulk-group';
+
+      const header = document.createElement('div');
+      header.className = 'server-feed-bulk-group-head';
+      const title = document.createElement('div');
+      const strong = document.createElement('strong');
+      strong.textContent = String(group.name || 'Feed Group');
+      const small = document.createElement('small');
+      small.textContent = `${Array.isArray(group.feed_types) ? group.feed_types.length : 0} event types`;
+      title.append(strong, small);
+      const toggleLabel = document.createElement('label');
+      toggleLabel.className = 'server-feed-bulk-group-toggle';
+      const toggle = document.createElement('input');
+      toggle.type = 'checkbox';
+      toggle.dataset.serverFeedBulkGroupToggle = '';
+      toggleLabel.append(toggle, document.createTextNode(' Select group'));
+      header.append(title, toggleLabel);
+
+      const grid = document.createElement('div');
+      grid.className = 'server-feed-bulk-type-grid';
+      (group.feed_types || []).forEach((feedType) => {
+        const label = document.createElement('label');
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.value = String(feedType);
+        input.dataset.serverFeedBulkType = '';
+        const span = document.createElement('span');
+        span.textContent = feedTypeLabel(feedType);
+        label.append(input, span);
+        input.addEventListener('change', () => updateBulkGroupToggle(article));
+        grid.append(label);
+      });
+
+      toggle.addEventListener('change', () => {
+        $$('[data-server-feed-bulk-type]', article).forEach((box) => { box.checked = toggle.checked; });
+        updateBulkGroupToggle(article);
+      });
+      article.append(header, grid);
+      container.append(article);
+    });
+  };
+
+  const bulkSelectedTypes = () => $$('[data-server-feed-bulk-type]:checked').map((box) => String(box.value || '')).filter(Boolean);
+
+  const openBulk = () => {
+    populateSelects();
+    renderBulkGroups();
+    $('[data-server-feed-bulk-channel]').value = '';
+    $('[data-server-feed-bulk-colour]').value = '#6c5ce7';
+    $('[data-server-feed-bulk-active]').checked = true;
+    $('[data-server-feed-bulk-minimize]').checked = false;
+    $('[data-server-feed-bulk-timestamp]').checked = true;
+    setBulkMessage('');
+    $('[data-server-feed-bulk-dialog]')?.showModal?.();
+  };
+
+  const saveBulk = async (event) => {
+    event.preventDefault();
+    const feedTypes = bulkSelectedTypes();
+    const payload = {
+      action: 'bulk_create',
+      feed_types: feedTypes,
+      channel_key: String($('[data-server-feed-bulk-channel]')?.value || ''),
+      colour: String($('[data-server-feed-bulk-colour]')?.value || '#6c5ce7'),
+      active: Boolean($('[data-server-feed-bulk-active]')?.checked),
+      minimize_output: Boolean($('[data-server-feed-bulk-minimize]')?.checked),
+      footer_timestamp: Boolean($('[data-server-feed-bulk-timestamp]')?.checked),
+      custom_embed: false,
+      note: '',
+      dynamic_lists: [],
+    };
+    if (!payload.channel_key) {
+      setBulkMessage('Select a Discord channel.', 'error');
+      return;
+    }
+    if (!payload.feed_types.length) {
+      setBulkMessage('Select at least one feed type.', 'error');
+      return;
+    }
+
+    setBulkMessage(`Assigning ${payload.feed_types.length} feed types…`);
+    try {
+      const result = await authenticatedJson(actionUrl, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }, 30_000);
+      $('[data-server-feed-bulk-dialog]')?.close?.();
+      await loadFeeds({ force: true });
+      const created = Number(result.created_count || 0);
+      const skipped = Array.isArray(result.skipped_feed_types) ? result.skipped_feed_types.length : 0;
+      setMessage(
+        `${created} feed route${created === 1 ? '' : 's'} assigned${skipped ? ` · ${skipped} identical route${skipped === 1 ? '' : 's'} already existed` : ''}.`,
+        'success',
+      );
+    } catch (error) {
+      setBulkMessage(error?.message || 'The selected feeds could not be assigned.', 'error');
+    }
+  };
+
+  const renderAutoExplainer = () => {
+    const container = $('[data-server-feed-auto-explainer]');
+    if (!container) return;
+    container.replaceChildren();
+    const layout = String($('[data-server-feed-auto-layout]')?.value || 'grouped');
+    const categoryKey = String($('[data-server-feed-auto-category]')?.value || '');
+    const categoryNameField = $('.server-feed-auto-category-name');
+    if (categoryNameField) categoryNameField.hidden = Boolean(categoryKey);
+
+    if (layout === 'detailed') {
+      const paragraph = document.createElement('p');
+      paragraph.innerHTML = `<strong>Detailed layout:</strong> one Discord channel per missing supported event type (up to ${state.feedTypes.length} channels on a completely fresh setup). Existing routes are still preserved.`;
+      container.append(paragraph);
+      return;
+    }
+
+    const intro = document.createElement('p');
+    intro.innerHTML = '<strong>Grouped layout:</strong> related events share a clean log channel. WWZ first extends any channel already used by that group, then reuses a matching channel name, then creates one only if needed.';
+    container.append(intro);
+    const grid = document.createElement('div');
+    grid.className = 'server-feed-auto-groups';
+    state.feedGroups.forEach((group) => {
+      const card = document.createElement('div');
+      const channel = document.createElement('strong');
+      channel.textContent = `#${group.channel_name}`;
+      const detail = document.createElement('span');
+      detail.textContent = `${group.name} · ${(group.feed_types || []).length} event types`;
+      card.append(channel, detail);
+      grid.append(card);
+    });
+    container.append(grid);
+  };
+
+  const openAuto = () => {
+    populateSelects();
+    $('[data-server-feed-auto-layout]').value = 'grouped';
+    const categorySelect = $('[data-server-feed-auto-category]');
+    const existingLogs = state.categories.find((item) => String(item.name || '').trim().toLowerCase() === 'wwz logs');
+    if (categorySelect) categorySelect.value = existingLogs?.key || '';
+    $('[data-server-feed-auto-category-name]').value = 'WWZ Logs';
+    setAutoMessage('');
+    renderAutoExplainer();
+    $('[data-server-feed-auto-dialog]')?.showModal?.();
+  };
+
+  const saveAuto = async (event) => {
+    event.preventDefault();
+    const categoryKey = String($('[data-server-feed-auto-category]')?.value || '');
+    const payload = {
+      action: 'auto_setup',
+      layout: String($('[data-server-feed-auto-layout]')?.value || 'grouped'),
+      category_key: categoryKey,
+      category_name: String($('[data-server-feed-auto-category-name]')?.value || 'WWZ Logs').trim() || 'WWZ Logs',
+    };
+    setAutoMessage(`Checking ${state.mapName || 'the selected server'} and configuring missing feed routes…`);
+    try {
+      const result = await authenticatedJson(actionUrl, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }, 60_000);
+      $('[data-server-feed-auto-dialog]')?.close?.();
+      await loadFeeds({ force: true });
+      const setup = result.setup || {};
+      const routes = Number(setup.created_feed_count || 0);
+      const channels = Array.isArray(setup.created_channels) ? setup.created_channels.length : 0;
+      const reused = Array.isArray(setup.reused_channels) ? setup.reused_channels.length : 0;
+      const message = routes
+        ? `Auto setup complete: ${routes} missing feed route${routes === 1 ? '' : 's'} assigned, ${channels} channel${channels === 1 ? '' : 's'} created${reused ? `, ${reused} existing channel${reused === 1 ? '' : 's'} reused` : ''}.`
+        : 'Auto setup complete: every supported event type was already configured, so nothing was changed.';
+      setMessage(message, 'success');
+    } catch (error) {
+      setAutoMessage(error?.message || 'Automatic server-feed setup could not be completed.', 'error');
+    }
+  };
+
   const loadFeeds = async ({ force = false } = {}) => {
     if (!isAdmin()) return;
     if (state.loading) return;
@@ -302,7 +514,15 @@
       const payload = await authenticatedJson(`${feedsUrl}?t=${Date.now()}`);
       state.feeds = Array.isArray(payload.feeds) ? payload.feeds : [];
       state.channels = Array.isArray(payload.channels) ? payload.channels : [];
+      state.categories = Array.isArray(payload.categories) ? payload.categories : [];
       state.feedTypes = Array.isArray(payload.feed_types) ? payload.feed_types : [];
+      state.feedGroups = Array.isArray(payload.feed_groups) ? payload.feed_groups : [];
+      state.mapName = String(payload.map_name || '');
+      state.runtime = payload.runtime && typeof payload.runtime === 'object' ? payload.runtime : {};
+      const bulkButton = $('[data-server-feed-bulk]');
+      const autoButton = $('[data-server-feed-auto]');
+      if (bulkButton) bulkButton.disabled = state.runtime.bulk_assign === false;
+      if (autoButton) autoButton.disabled = state.runtime.auto_channel_setup === false;
       state.loaded = true;
       populateSelects();
       renderFeeds();
@@ -320,12 +540,33 @@
     await loadFeeds();
   };
 
+  const bindDialogBackdrop = (selector) => {
+    const dialog = $(selector);
+    dialog?.addEventListener('click', (event) => {
+      if (event.target === dialog) dialog.close?.();
+    });
+  };
+
   const bind = () => {
     $('[data-server-feed-create]')?.addEventListener('click', () => openEditor());
+    $('[data-server-feed-bulk]')?.addEventListener('click', openBulk);
+    $('[data-server-feed-auto]')?.addEventListener('click', openAuto);
     $('[data-server-feed-refresh]')?.addEventListener('click', () => loadFeeds({ force: true }));
     $('[data-server-feed-search]')?.addEventListener('input', renderFeeds);
     $('[data-server-feed-filter]')?.addEventListener('change', renderFeeds);
     $('[data-server-feed-editor-form]')?.addEventListener('submit', saveFeed);
+    $('[data-server-feed-bulk-form]')?.addEventListener('submit', saveBulk);
+    $('[data-server-feed-auto-form]')?.addEventListener('submit', saveAuto);
+    $('[data-server-feed-auto-layout]')?.addEventListener('change', renderAutoExplainer);
+    $('[data-server-feed-auto-category]')?.addEventListener('change', renderAutoExplainer);
+    $('[data-server-feed-bulk-all]')?.addEventListener('click', () => {
+      $$('[data-server-feed-bulk-type]').forEach((box) => { box.checked = true; });
+      $$('.server-feed-bulk-group').forEach(updateBulkGroupToggle);
+    });
+    $('[data-server-feed-bulk-none]')?.addEventListener('click', () => {
+      $$('[data-server-feed-bulk-type]').forEach((box) => { box.checked = false; });
+      $$('.server-feed-bulk-group').forEach(updateBulkGroupToggle);
+    });
     $('[data-server-feed-add-list]')?.addEventListener('click', () => {
       if (state.dynamicLists.length >= 20) {
         setEditorMessage('A maximum of 20 dynamic lists can be configured per feed.', 'warning');
@@ -335,9 +576,11 @@
       renderDynamicLists();
     });
     $$('[data-server-feed-editor-cancel]').forEach((button) => button.addEventListener('click', () => $('[data-server-feed-dialog]')?.close?.()));
-    $('[data-server-feed-dialog]')?.addEventListener('click', (event) => {
-      if (event.target === $('[data-server-feed-dialog]')) $('[data-server-feed-dialog]')?.close?.();
-    });
+    $$('[data-server-feed-bulk-cancel]').forEach((button) => button.addEventListener('click', () => $('[data-server-feed-bulk-dialog]')?.close?.()));
+    $$('[data-server-feed-auto-cancel]').forEach((button) => button.addEventListener('click', () => $('[data-server-feed-auto-dialog]')?.close?.()));
+    bindDialogBackdrop('[data-server-feed-dialog]');
+    bindDialogBackdrop('[data-server-feed-bulk-dialog]');
+    bindDialogBackdrop('[data-server-feed-auto-dialog]');
     window.addEventListener('wwz:viewchange', (event) => {
       state.active = String(event.detail?.view || '') === 'feeds';
     });
@@ -345,12 +588,16 @@
       state.loaded = false;
       state.feeds = [];
       state.channels = [];
+      state.categories = [];
       state.feedTypes = [];
+      state.feedGroups = [];
+      state.mapName = '';
+      state.runtime = {};
       if (state.active) loadFeeds({ force: true }).catch(() => {});
     });
   };
 
   bind();
   window.__wwzServerFeedsReady = true;
-  window.WWZServerFeeds = Object.freeze({ activate, loadFeeds, openEditor });
+  window.WWZServerFeeds = Object.freeze({ activate, loadFeeds, openEditor, openBulk, openAuto });
 })();

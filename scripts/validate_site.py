@@ -384,11 +384,46 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "section === 'server-audit') loadServerActionHistory()" not in operations_admin:
         errors.append("administration.js: Operations Centre must auto-load the unified audit.")
 
-    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.44.0</strong></div>' not in dashboard:
+    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.45.0</strong></div>' not in dashboard:
         errors.append("dashboard.html: command-centre footer release label is stale.")
 
-    if "Website v1.44.0 · Bot v1.38.0" not in index:
+    if "Website v1.45.0 · Bot v1.41.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
+    server_feeds_js = (ROOT / "assets/js/dashboard/server-feeds.js").read_text(encoding="utf-8")
+    server_feeds_css = (ROOT / "assets/css/dashboard/server-feeds.css").read_text(encoding="utf-8")
+    lazy_assets_js = (ROOT / "assets/js/dashboard/lazy-assets.js").read_text(encoding="utf-8")
+    for token in (
+        'data-server-feed-bulk',
+        'data-server-feed-auto',
+        'data-server-feed-bulk-dialog',
+        'data-server-feed-auto-dialog',
+        'Bulk Assign Feeds',
+        'Auto Setup Server Feed Channels',
+    ):
+        if token not in dashboard:
+            errors.append(f"dashboard.html: missing Server Feed bulk-routing surface: {token}")
+    for token in (
+        "bulk_create",
+        "auto_setup",
+        "renderBulkGroups",
+        "renderAutoExplainer",
+        "auto_channel_setup",
+    ):
+        if token not in server_feeds_js:
+            errors.append(f"server-feeds.js: missing bulk-routing guard: {token}")
+    for token in (
+        ".server-feed-bulk-group",
+        ".server-feed-auto-groups",
+        ".server-feed-safety-grid",
+    ):
+        if token not in server_feeds_css:
+            errors.append(f"server-feeds.css: missing bulk-routing layout guard: {token}")
+    for token in (
+        "assets/css/dashboard/server-feeds.css?v=1.45.0&rev=bulk-routing-1",
+        "assets/js/dashboard/server-feeds.js?v=1.45.0&rev=bulk-routing-1",
+    ):
+        if token not in lazy_assets_js:
+            errors.append(f"lazy-assets.js: missing Server Feed v1.45.0 asset revision: {token}")
     for token in (
         "DayZ bans are isolated to the selected World War Z server",
         'data-banlist-server-scope',
@@ -803,7 +838,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         errors.append(
             "dashboard.html: command library must be lazy-loaded instead of downloaded on every dashboard visit."
         )
-    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.42.0&amp;rev=livonia-live-1'
+    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.45.0&amp;rev=bulk-routing-1'
     lazy_index = dashboard.find(lazy_script)
     shell_index = dashboard.find("assets/js/dashboard/shell.js")
     if lazy_index < 0:
@@ -1817,8 +1852,8 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
         errors.append(f"Apple touch icon dimensions are {apple_dimensions}; expected (180, 180).")
 
     launch_requirements = {
-        "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.38.0"),
-        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/server-context.js?v=1.42.0&amp;rev=livonia-live-1", "assets/js/dashboard/lazy-assets.js?v=1.42.0&amp;rev=livonia-live-1"),
+        "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.41.0"),
+        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/server-context.js?v=1.42.0&amp;rev=livonia-live-1", "assets/js/dashboard/lazy-assets.js?v=1.45.0&amp;rev=bulk-routing-1"),
         "assets/js/dashboard/server-context.js": ("player_capacity", "Capacity', `${server.player_capacity} slots`"),
         "assets/js/dashboard/account.js": ("payload.server?.player_capacity",),
         "assets/js/dashboard/livonia-pvp.js": ("rotation.player_capacity", "players online"),
@@ -1832,8 +1867,8 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.44.0'",
-        "const WWZ_PWA_UPDATE_REVISION = '2026-09-12-website-v1-44-0'",
+        "const WWZ_PWA_VERSION = '1.45.0'",
+        "const WWZ_PWA_UPDATE_REVISION = '2026-09-13-website-v1-45-0'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
         "if (request.method !== 'GET') return;",

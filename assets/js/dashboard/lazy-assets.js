@@ -198,13 +198,13 @@
 
   const ensureServerFeedsStyles = () => loadStylesheetOnce(
     'server-feeds-css',
-    'assets/css/dashboard/server-feeds.css?v=1.22.93'
+    'assets/css/dashboard/server-feeds.css?v=1.45.0&rev=bulk-routing-1'
   );
 
   const ensureServerFeeds = () => ensureServerFeedsStyles()
     .then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
       'server-feeds',
-      'assets/js/dashboard/server-feeds.js?v=1.22.93',
+      'assets/js/dashboard/server-feeds.js?v=1.45.0&rev=bulk-routing-1',
       () => window.__wwzServerFeedsReady === true
     )));
 
