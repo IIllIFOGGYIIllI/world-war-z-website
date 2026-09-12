@@ -122,6 +122,15 @@
     ))
   ]).then(() => undefined);
 
+  const ensureEconomyPanels = () => Promise.all([
+    loadStylesheetOnce('economy-panels-css', 'assets/css/dashboard/economy-panels.css?v=1.49.0&rev=economy-panels-1'),
+    loadAfterDashboardRuntime(() => loadScriptOnce(
+      'economy-panels',
+      'assets/js/dashboard/economy-panels.js?v=1.49.0&rev=economy-panels-1',
+      () => window.__wwzEconomyPanelsReady === true
+    ))
+  ]).then(() => undefined);
+
   const ensureDonationManager = () => Promise.all([
     loadStylesheetOnce('donation-manager-css', 'assets/css/dashboard/donation-manager.css?v=1.22.101&rev=donation-manager-1'),
     loadAfterDashboardRuntime(() => loadScriptOnce(
@@ -386,7 +395,7 @@
   };
 
   const administrationView = ({ view = '', section = '' } = {}) => (
-    (view === 'staff' && ['queue', 'cases', 'banlists', 'players', 'server-controls', 'server-audit', 'failures', 'rules', 'donations', 'donation-orders'].includes(section))
+    (view === 'staff' && ['queue', 'cases', 'banlists', 'players', 'server-controls', 'server-audit', 'failures', 'rules', 'economy-panels', 'donations', 'donation-orders'].includes(section))
     || (view === 'configuration' && ['discord-onboarding', 'community-tools', 'discord-logs', 'notifications'].includes(section))
   );
 
@@ -404,6 +413,7 @@
     if (view === 'staff' && section === 'server-audit') ensureOperationsCentre().then(() => window.WWZOperationsCentre?.activate?.(detail)).catch(() => {});
     if (view === 'configuration' && section === 'data-management') ensureDataManagement().then(() => window.WWZDataManagement?.activate?.(detail)).catch(() => {});
     if (view === 'staff' && section === 'rules') ensureRulesManager().catch(() => {});
+    if (view === 'staff' && section === 'economy-panels') ensureEconomyPanels().then(() => window.WWZEconomyPanels?.activate?.()).catch(() => {});
     if (view === 'staff' && section === 'donations') ensureDonationManager().catch(() => {});
     if (view === 'staff' && section === 'donation-orders') ensureDonationOrders().catch(() => {});
     if (view === 'appeals' || (view === 'configuration' && section === 'appeals')) ensureAppeals().then(() => window.WWZAppeals?.activate?.(detail)).catch(() => {});
@@ -478,6 +488,7 @@
 
   [
     ['rules', ensureRulesManager],
+    ['economy-panels', ensureEconomyPanels],
     ['donations', ensureDonationManager],
     ['donation-orders', ensureDonationOrders],
   ].forEach(([section, load]) => {
@@ -532,6 +543,7 @@
     ensureDataManagement,
     ensureRulesManager,
     ensureDonationManager,
+    ensureEconomyPanels,
     ensureDonationOrders,
     ensureObjectives,
     ensureObjectivesStyles,

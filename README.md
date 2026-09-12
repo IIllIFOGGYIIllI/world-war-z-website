@@ -1,7 +1,7 @@
-# World War Z Website v1.48.0
+# World War Z Website v1.49.0
 
 Current cumulative website/PWA release for the World War Z DayZ console ecosystem.
 
-This release improves donation hand-off from Discord: links can open the correct Chernarus/Livonia storefront directly at Payment Information, where members can see the configured payment methods and use the existing live AUD currency converter before creating a tracked order.
+This release adds Economy Panels administration to the World War Z Command Centre. Admins can manage the existing Discord Shop/price/income/economy-information channels per server, auto-setup or reuse channels, publish/refresh WWZ-managed panels and edit server-specific pelt/weed guidance. Shop deep links now support direct General Shop, Vehicle/Event and My Orders hand-offs.
 
-Pairs with Bot v1.47.0. Chernarus/Livonia isolation and bounded map caching are preserved.
+Pairs with Bot v1.48.0. Chernarus/Livonia isolation and bounded map caching are preserved.

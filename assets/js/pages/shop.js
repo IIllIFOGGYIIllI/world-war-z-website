@@ -27,7 +27,7 @@ const state = {
   items: [],
   orders: [],
   locations: [],
-  mode: 'manual',
+  mode: String(new URLSearchParams(location.search).get('mode') || '').trim().toLowerCase() === 'event' ? 'event' : 'manual',
   selectedItem: null,
   loading: false,
   purchasing: false,
@@ -764,6 +764,12 @@ const applyPayload = (payload, member = false) => {
       elements.accessNote.textContent = state.settings.enabled ? 'Identity and wallet verified' : 'Purchases are paused';
     }
   }
+  $$('[data-member-shop-mode]').forEach((button) => {
+    const active = (button.dataset.memberShopMode === 'event' ? 'event' : 'manual') === state.mode;
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-selected', String(active));
+  });
+  elements.modeLabel.textContent = state.mode === 'event' ? 'Event items' : 'Items';
   populateCategories(); renderCatalogue(); renderOrders();
 };
 
@@ -1029,6 +1035,9 @@ const initialise = async () => {
   renderServerChoices();
   await loadRestartStatus();
   await loadShop();
+  if (String(new URLSearchParams(location.search).get('section') || '').trim().toLowerCase() === 'orders') {
+    document.getElementById('orders')?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+  }
   window.setInterval(loadRestartStatus, 30_000);
 };
 initialise();

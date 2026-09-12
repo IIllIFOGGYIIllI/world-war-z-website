@@ -1,0 +1,28 @@
+.economy-panels-panel { display: grid; gap: 18px; }
+.economy-panels-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.economy-panels-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.economy-panels-summary > div { border: 1px solid var(--line, rgba(255,255,255,.11)); border-radius: 12px; padding: 12px 14px; background: rgba(255,255,255,.025); }
+.economy-panels-summary span { display: block; font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted, #9ba4b3); }
+.economy-panels-summary strong { display: block; margin-top: 4px; font-size: 1.05rem; }
+.economy-panel-list { display: grid; gap: 12px; }
+.economy-panel-card { border: 1px solid var(--line, rgba(255,255,255,.11)); border-radius: 14px; background: rgba(255,255,255,.018); overflow: hidden; }
+.economy-panel-card-head { display: flex; gap: 14px; align-items: flex-start; justify-content: space-between; padding: 15px 16px; }
+.economy-panel-card-title { display: flex; gap: 12px; align-items: flex-start; min-width: 0; }
+.economy-panel-card-title input { margin-top: 4px; }
+.economy-panel-card-title strong { display: block; font-size: 1rem; }
+.economy-panel-card-title small { display: block; margin-top: 4px; color: var(--muted, #9ba4b3); }
+.economy-panel-state { white-space: nowrap; font-size: .78rem; border: 1px solid var(--line, rgba(255,255,255,.11)); border-radius: 999px; padding: 5px 9px; }
+.economy-panel-state[data-state="published"] { color: #9fe6ad; border-color: rgba(64, 196, 99, .35); }
+.economy-panel-state[data-state="warning"] { color: #ffd38a; border-color: rgba(255, 174, 66, .35); }
+.economy-panel-card-body { display: grid; grid-template-columns: minmax(240px, 1fr) auto; gap: 12px; padding: 0 16px 16px; align-items: end; }
+.economy-panel-card-body .dialog-field { margin: 0; }
+.economy-panel-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+.economy-panel-custom { grid-column: 1 / -1; }
+.economy-panel-custom textarea { min-height: 160px; }
+.economy-panel-permission-warning { grid-column: 1 / -1; color: #ffd38a; font-size: .85rem; }
+@media (max-width: 900px) {
+  .economy-panels-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .economy-panel-card-body { grid-template-columns: 1fr; }
+  .economy-panel-actions { justify-content: flex-start; }
+}
+@media (max-width: 560px) { .economy-panels-summary { grid-template-columns: 1fr; } }
