@@ -1,6 +1,6 @@
 'use strict';
 
-const WWZ_PWA_VERSION = '1.43.0';
+const WWZ_PWA_VERSION = '1.44.0';
 const CACHE_PREFIX = 'wwz-pwa-';
 const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 // Public release versions can advance without discarding the bounded map caches.
@@ -8,7 +8,7 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-09-12-website-v1-43-0';
+const WWZ_PWA_UPDATE_REVISION = '2026-09-12-website-v1-44-0';
 const CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${CACHE_RELEASE}`;
@@ -112,6 +112,10 @@ const UPDATE_INVALIDATIONS = [
   './assets/data/companion-release.json',
   './assets/js/dashboard/server-context.js?v=1.25.4&rev=chernarus-pve-1',
   './assets/js/dashboard/account.js?v=1.22.93&rev=auth-restore-fix-1',
+  // Replace the pre-Identity-Sync dashboard bundles without rotating map caches.
+  './assets/js/dashboard/core.js?v=1.42.0&rev=livonia-live-1',
+  './assets/js/dashboard/account.js?v=1.42.0&rev=livonia-live-1',
+  './assets/css/dashboard/ux-consistency.css?v=1.35.0&rev=dashboard-ux-1',
   './assets/js/dashboard/lazy-assets.js?v=1.39.0&rev=data-management-1',
   './assets/js/dashboard/livonia-pvp.js?v=1.25.3',
   './assets/js/dashboard/deathmatch-rotation.js?v=1.32.0&rev=livonia-dm-1'

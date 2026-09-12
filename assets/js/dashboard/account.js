@@ -561,3 +561,183 @@ document.addEventListener('visibilitychange', () => {
 if (!document.hidden) refreshLiveStatus();
 scheduleLiveStatusPolling();
 
+
+// Admin identity-sync controls. Settings are always scoped by the selected WWZ server.
+(() => {
+  const panel = document.querySelector('[data-dashboard-section="identity-sync"]');
+  if (!panel) return;
+
+  const roleSelect = panel.querySelector('[data-identity-verified-role]');
+  const nicknameToggle = panel.querySelector('[data-identity-nickname-sync]');
+  const roleNote = panel.querySelector('[data-identity-role-note]');
+  const serverName = panel.querySelector('[data-identity-server-name]');
+  const verifiedCount = panel.querySelector('[data-identity-verified-count]');
+  const memberCount = panel.querySelector('[data-identity-member-count]');
+  const activeRole = panel.querySelector('[data-identity-active-role]');
+  const refreshButton = panel.querySelector('[data-refresh-identity-settings]');
+  const saveButton = panel.querySelector('[data-save-identity-settings]');
+  const resyncCurrentButton = panel.querySelector('[data-resync-identity-current]');
+  const resyncAllButton = panel.querySelector('[data-resync-identity-all]');
+  const message = panel.querySelector('[data-identity-message]');
+  const resultWrap = panel.querySelector('[data-identity-results-wrap]');
+  const resultBody = panel.querySelector('[data-identity-results]');
+  let loaded = false;
+
+  const token = () => storageGet(AUTH_SESSION_KEY);
+  const setMessage = (text = '', tone = 'info') => {
+    if (!message) return;
+    message.textContent = text;
+    message.dataset.tone = tone;
+    message.hidden = !text;
+  };
+
+  const setBusy = (busy) => {
+    [refreshButton, saveButton, resyncCurrentButton, resyncAllButton].forEach((button) => {
+      if (button) button.disabled = Boolean(busy);
+    });
+  };
+
+  const fillRoles = (roles, settings) => {
+    if (!roleSelect) return;
+    roleSelect.replaceChildren();
+    const automatic = document.createElement('option');
+    automatic.value = '';
+    automatic.textContent = 'Automatic: Verified / legacy Linked';
+    roleSelect.append(automatic);
+    (Array.isArray(roles) ? roles : []).forEach((role) => {
+      const option = document.createElement('option');
+      option.value = String(role.key || '');
+      option.textContent = String(role.name || 'Discord role');
+      roleSelect.append(option);
+    });
+    roleSelect.value = settings?.auto_detect_role ? '' : String(settings?.verified_role_key || '');
+  };
+
+  const apply = (payload) => {
+    const settings = payload?.settings || {};
+    fillRoles(payload?.roles, settings);
+    if (nicknameToggle) nicknameToggle.checked = Boolean(settings.nickname_sync_enabled);
+    if (serverName) serverName.textContent = String(payload?.server?.name || 'Selected server');
+    if (verifiedCount) verifiedCount.textContent = new Intl.NumberFormat('en-AU').format(Number(payload?.linked?.verified_records) || 0);
+    if (memberCount) memberCount.textContent = new Intl.NumberFormat('en-AU').format(Number(payload?.linked?.members_in_discord) || 0);
+    if (activeRole) activeRole.textContent = settings.verified_role_name || 'Not found';
+    if (roleNote) {
+      roleNote.textContent = settings.auto_detect_role
+        ? `Automatic detection is active${settings.verified_role_name ? ` · currently ${settings.verified_role_name}` : ' · create/choose a safe Verified role'}`
+        : `Explicit role${settings.verified_role_name ? ` · ${settings.verified_role_name}` : ' is unavailable'}`;
+    }
+    loaded = true;
+  };
+
+  const request = async (url, options = {}) => {
+    const sessionToken = token();
+    if (!sessionToken) throw new Error('Sign in with Discord to continue.');
+    const response = await authFetch(url, {
+      ...options,
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${sessionToken}`,
+        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+        ...(options.headers || {})
+      }
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(payload.message || 'Identity Sync request failed.');
+    return payload;
+  };
+
+  const load = async ({ quiet = false } = {}) => {
+    setBusy(true);
+    if (!quiet) setMessage('Loading identity settings…', 'info');
+    try {
+      const payload = await request(ADMIN_IDENTITY_URL, { method: 'GET' });
+      apply(payload);
+      if (!quiet) setMessage(`Identity settings loaded for ${payload?.server?.name || 'the selected server'}.`, 'success');
+    } catch (error) {
+      setMessage(error.message || 'Identity settings are temporarily unavailable.', 'error');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const save = async () => {
+    setBusy(true);
+    setMessage('Saving server-scoped identity settings…', 'info');
+    try {
+      const payload = await request(ADMIN_IDENTITY_ACTION_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'save_settings',
+          verified_role_key: String(roleSelect?.value || ''),
+          auto_detect_role: !String(roleSelect?.value || ''),
+          nickname_sync_enabled: Boolean(nicknameToggle?.checked)
+        })
+      });
+      apply({ ...payload, linked: { verified_records: Number(verifiedCount?.textContent?.replace(/\D/g, '')) || 0, members_in_discord: Number(memberCount?.textContent?.replace(/\D/g, '')) || 0 } });
+      setMessage(payload.message || 'Identity settings saved.', 'success');
+      await load({ quiet: true });
+    } catch (error) {
+      setMessage(error.message || 'Identity settings could not be saved.', 'error');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const renderResults = (results) => {
+    if (!resultBody || !resultWrap) return;
+    resultBody.replaceChildren();
+    (Array.isArray(results) ? results : []).forEach((result) => {
+      const row = document.createElement('tr');
+      const values = [
+        result.server_name || result.map || 'Server',
+        `${Number(result.members_found) || 0} / ${Number(result.total_links) || 0}`,
+        `${Number(result.role_synced) || 0} synced${Number(result.role_failed) ? ` · ${Number(result.role_failed)} failed` : ''}`,
+        result.nickname_enabled
+          ? `${Number(result.nickname_synced) || 0} synced${Number(result.nickname_failed) ? ` · ${Number(result.nickname_failed)} failed` : ''}`
+          : `${Number(result.nickname_skipped) || 0} skipped · disabled`,
+        String(Number(result.members_missing) || 0)
+      ];
+      values.forEach((value) => {
+        const cell = document.createElement('td');
+        cell.textContent = value;
+        row.append(cell);
+      });
+      resultBody.append(row);
+    });
+    resultWrap.hidden = !resultBody.children.length;
+  };
+
+  const resync = async (allServers) => {
+    const scopeLabel = allServers ? 'both configured World War Z servers' : 'the selected server';
+    if (!window.confirm(`Resync the Verified role and PSN nickname for every linked Discord member on ${scopeLabel}?`)) return;
+    setBusy(true);
+    setMessage(`Resynchronising linked members on ${scopeLabel}…`, 'info');
+    try {
+      const payload = await request(ADMIN_IDENTITY_ACTION_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'resync_all', all_servers: Boolean(allServers), confirmation: 'RESYNC' })
+      });
+      renderResults(payload.results);
+      const found = (payload.results || []).reduce((total, result) => total + (Number(result.members_found) || 0), 0);
+      setMessage(`${payload.message || 'Identity resync completed.'} ${found} Discord member${found === 1 ? '' : 's'} processed.`, 'success');
+      await load({ quiet: true });
+    } catch (error) {
+      setMessage(error.message || 'Linked-member resync could not be completed.', 'error');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  refreshButton?.addEventListener('click', () => load());
+  saveButton?.addEventListener('click', save);
+  resyncCurrentButton?.addEventListener('click', () => resync(false));
+  resyncAllButton?.addEventListener('click', () => resync(true));
+  window.addEventListener('wwz:serverchange', () => {
+    loaded = false;
+    resultWrap?.setAttribute('hidden', '');
+    if (token()) load({ quiet: true });
+  });
+  window.addEventListener('wwz:viewchange', (event) => {
+    if (event.detail?.view === 'staff' && event.detail?.section === 'identity-sync' && !loaded) load();
+  });
+})();

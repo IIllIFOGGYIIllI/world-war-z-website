@@ -1298,3 +1298,89 @@ dialog > form {
   from { opacity: 0; transform: translateY(8px) scale(.992); }
   to { opacity: 1; transform: none; }
 }
+
+/* -------------------------------------------------------------------------- */
+/* Identity sync administration                                               */
+/* -------------------------------------------------------------------------- */
+.identity-sync-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.identity-sync-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) minmax(280px, 1fr);
+  gap: 12px;
+  align-items: stretch;
+}
+
+.identity-sync-grid > * {
+  min-width: 0;
+  padding: 13px 14px;
+  border: 1px solid var(--wwz-border);
+  border-radius: var(--wwz-radius-card);
+  background: rgba(255, 255, 255, .025);
+}
+
+.identity-sync-grid .toggle-setting {
+  display: flex;
+  margin: 0;
+}
+
+.identity-sync-grid small {
+  display: block;
+  margin-top: 6px;
+  color: var(--wwz-copy-muted);
+  line-height: 1.45;
+}
+
+.identity-sync-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.identity-sync-stats > div {
+  min-width: 0;
+  padding: 12px 13px;
+  border: 1px solid var(--wwz-border);
+  border-radius: var(--wwz-radius-card);
+  background: rgba(255, 255, 255, .02);
+}
+
+.identity-sync-stats span,
+.identity-sync-stats strong {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.identity-sync-stats span {
+  margin-bottom: 5px;
+  color: var(--wwz-copy-muted);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.identity-sync-stats strong {
+  color: var(--wwz-copy);
+  font-size: 13px;
+}
+
+.identity-sync-results {
+  margin-top: 2px;
+}
+
+@media (max-width: 920px) {
+  .identity-sync-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .identity-sync-grid,
+  .identity-sync-stats {
+    grid-template-columns: 1fr;
+  }
+}

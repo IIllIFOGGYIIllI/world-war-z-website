@@ -314,14 +314,14 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     ux_js_path = ROOT / "assets/js/dashboard/ux-consistency.js"
     ux_css = ux_css_path.read_text(encoding="utf-8") if ux_css_path.is_file() else ""
     ux_js = ux_js_path.read_text(encoding="utf-8") if ux_js_path.is_file() else ""
-    ux_css_url = "assets/css/dashboard/ux-consistency.css?v=1.35.0&rev=dashboard-ux-1"
+    ux_css_url = "assets/css/dashboard/ux-consistency.css?v=1.44.0&rev=identity-sync-1"
     ux_js_url = "assets/js/dashboard/ux-consistency.js?v=1.35.0&rev=dashboard-ux-1"
     if ux_css_url not in dashboard:
-        errors.append("dashboard.html: missing v1.35.0 final UX/consistency stylesheet.")
+        errors.append("dashboard.html: missing current final UX/consistency stylesheet.")
     if ux_js_url not in dashboard:
         errors.append("dashboard.html: missing v1.35.0 UX/accessibility enhancement script.")
     if dashboard.find(ux_css_url) < dashboard.find("assets/css/ui-system.css"):
-        errors.append("dashboard.html: v1.35.0 UX stylesheet must load after the shared UI system.")
+        errors.append("dashboard.html: UX stylesheet must load after the shared UI system.")
     if dashboard.find(ux_js_url) < dashboard.find("assets/js/ui-system.js"):
         errors.append("dashboard.html: v1.35.0 UX enhancement must load after the shared UI system.")
     for token in (
@@ -384,10 +384,10 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "section === 'server-audit') loadServerActionHistory()" not in operations_admin:
         errors.append("administration.js: Operations Centre must auto-load the unified audit.")
 
-    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.43.0</strong></div>' not in dashboard:
+    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.44.0</strong></div>' not in dashboard:
         errors.append("dashboard.html: command-centre footer release label is stale.")
 
-    if "Website v1.43.0 · Bot v1.35.0" not in index:
+    if "Website v1.44.0 · Bot v1.38.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for token in (
         "DayZ bans are isolated to the selected World War Z server",
@@ -1010,7 +1010,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append("core.js: temporary auth outage must preserve the selected Chernarus/Livonia server context.")
         if "else if (preserveSelection)" not in signed_out or "showLogin();" not in signed_out:
             errors.append("core.js: transient saved-session failures must preserve server context without claiming Discord is unavailable.")
-    account_script = 'assets/js/dashboard/account.js?v=1.42.0&amp;rev=livonia-live-1'
+    account_script = 'assets/js/dashboard/account.js?v=1.44.0&amp;rev=identity-sync-1'
     bootstrap_script = 'assets/js/dashboard/bootstrap.js?v=1.40.0&amp;rev=member-home-overhaul-1'
     account_index = dashboard.find(account_script)
     bootstrap_index = dashboard.find(bootstrap_script)
@@ -1817,7 +1817,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
         errors.append(f"Apple touch icon dimensions are {apple_dimensions}; expected (180, 180).")
 
     launch_requirements = {
-        "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.35.0"),
+        "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.38.0"),
         "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/server-context.js?v=1.42.0&amp;rev=livonia-live-1", "assets/js/dashboard/lazy-assets.js?v=1.42.0&amp;rev=livonia-live-1"),
         "assets/js/dashboard/server-context.js": ("player_capacity", "Capacity', `${server.player_capacity} slots`"),
         "assets/js/dashboard/account.js": ("payload.server?.player_capacity",),
@@ -1832,8 +1832,8 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.43.0'",
-        "const WWZ_PWA_UPDATE_REVISION = '2026-09-12-website-v1-43-0'",
+        "const WWZ_PWA_VERSION = '1.44.0'",
+        "const WWZ_PWA_UPDATE_REVISION = '2026-09-12-website-v1-44-0'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
         "if (request.method !== 'GET') return;",

@@ -1,7 +1,7 @@
-# World War Z Website v1.43.0
+# World War Z Website v1.44.0
 
-Updated-files release for the **Livonia Live Launch Integration**.
+Current release: **Identity Sync Administration**.
 
-Apply these files over the confirmed Website v1.42.0 deployment. It pairs with Bot v1.35.0.
+Adds protected dashboard controls for the server-scoped Verified role, PSN nickname syncing and bulk linked-member resynchronisation across Chernarus and Livonia.
 
-The public roadmap and Command Centre now present Livonia as the live 26-slot Full PvP server. Server selection carries configured capacity, live status falls back cleanly when Nitrado omits maximum-player data, Livonia PvP shows online population against capacity, and Deathmatch Rotation surfaces activation readiness before automation can be enabled. The existing bounded PWA/map-cache generation remains preserved.
+See `PATCH_NOTES.md` for details.

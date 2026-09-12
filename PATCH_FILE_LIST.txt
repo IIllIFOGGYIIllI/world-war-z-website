@@ -1,8 +1,9 @@
 INSTALL_README.txt
 PATCH_NOTES.md
 README.md
-assets/js/dashboard/administration.js
-assets/js/dashboard/lazy-assets.js
+assets/css/dashboard/ux-consistency.css
+assets/js/dashboard/account.js
+assets/js/dashboard/core.js
 changelog.html
 dashboard.html
 index.html
