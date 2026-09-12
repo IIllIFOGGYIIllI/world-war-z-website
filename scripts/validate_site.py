@@ -384,11 +384,19 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "section === 'server-audit') loadServerActionHistory()" not in operations_admin:
         errors.append("administration.js: Operations Centre must auto-load the unified audit.")
 
-    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.42.0</strong></div>' not in dashboard:
+    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.43.0</strong></div>' not in dashboard:
         errors.append("dashboard.html: command-centre footer release label is stale.")
 
-    if "Website v1.42.0 · Bot v1.34.0" not in index:
+    if "Website v1.43.0 · Bot v1.35.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
+    for token in (
+        "DayZ bans are isolated to the selected World War Z server",
+        'data-banlist-server-scope',
+    ):
+        if token not in dashboard:
+            errors.append(f"dashboard.html: missing server-isolated ban-list guard: {token}")
+    if "payload?.server?.nitrado_service_id" not in operations_admin:
+        errors.append("administration.js: ban-list view must expose selected Nitrado service scope.")
 
     action_centre_js_path = ROOT / "assets/js/dashboard/action-centre.js"
     action_centre_css_path = ROOT / "assets/css/dashboard/action-centre.css"
@@ -535,7 +543,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         'renderPlayerIntelligence',
         'renderPlayerIntelligenceTimeline',
         'assets/css/dashboard/player-intelligence.css?v=1.31.0',
-        'assets/js/dashboard/administration.js?v=1.36.0',
+        'assets/js/dashboard/administration.js?v=1.43.0',
     ):
         source = player_intelligence_lazy if token.startswith('assets/') else player_intelligence
         if token not in source:
@@ -909,7 +917,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append(f"dashboard-map-intelligence.js: collaborative Group/Faction data must not be persisted in browser storage: {forbidden}")
 
     lazy_dashboard_controllers = (
-        ("Administration controller", "assets/js/dashboard/administration.js?v=1.36.0", "ensureAdministration", "__wwzAdministrationReady", "assets/js/dashboard/administration.js"),
+        ("Administration controller", "assets/js/dashboard/administration.js?v=1.43.0", "ensureAdministration", "__wwzAdministrationReady", "assets/js/dashboard/administration.js"),
         ("Appeals controller", f"assets/js/dashboard/appeals.js?v={EXPECTED_ASSET_VERSION}", "ensureAppeals", "__wwzAppealsReady", "assets/js/dashboard/appeals.js"),
         ("Tickets controller", f"assets/js/dashboard/tickets.js?v={EXPECTED_ASSET_VERSION}", "ensureTickets", "__wwzTicketsReady", "assets/js/dashboard/tickets.js"),
         ("Progression controller", "assets/js/dashboard/progression.js?v=1.37.0&rev=quest-progression-1", "ensureProgression", "__wwzProgressionReady", "assets/js/dashboard/progression.js"),
@@ -1809,7 +1817,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
         errors.append(f"Apple touch icon dimensions are {apple_dimensions}; expected (180, 180).")
 
     launch_requirements = {
-        "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.34.0"),
+        "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.35.0"),
         "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/server-context.js?v=1.42.0&amp;rev=livonia-live-1", "assets/js/dashboard/lazy-assets.js?v=1.42.0&amp;rev=livonia-live-1"),
         "assets/js/dashboard/server-context.js": ("player_capacity", "Capacity', `${server.player_capacity} slots`"),
         "assets/js/dashboard/account.js": ("payload.server?.player_capacity",),
@@ -1824,8 +1832,8 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.42.0'",
-        "const WWZ_PWA_UPDATE_REVISION = '2026-09-11-website-v1-42-0'",
+        "const WWZ_PWA_VERSION = '1.43.0'",
+        "const WWZ_PWA_UPDATE_REVISION = '2026-09-12-website-v1-43-0'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
         "if (request.method !== 'GET') return;",

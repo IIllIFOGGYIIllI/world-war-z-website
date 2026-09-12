@@ -1,11 +1,8 @@
 INSTALL_README.txt
 PATCH_NOTES.md
 README.md
-assets/js/dashboard/account.js
-assets/js/dashboard/deathmatch-rotation.js
+assets/js/dashboard/administration.js
 assets/js/dashboard/lazy-assets.js
-assets/js/dashboard/livonia-pvp.js
-assets/js/dashboard/server-context.js
 changelog.html
 dashboard.html
 index.html

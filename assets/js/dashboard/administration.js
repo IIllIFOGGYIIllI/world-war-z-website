@@ -2009,6 +2009,14 @@ const renderBanlistSource = (source, type) => {
 const renderCurrentBanlists = (payload) => {
   renderBanlistSource(payload?.discord, 'discord');
   renderBanlistSource(payload?.dayz, 'dayz');
+  const scopeLabel = document.querySelector('[data-banlist-server-scope]');
+  if (scopeLabel) {
+    const serverName = String(payload?.server?.name || payload?.server?.map || '').trim();
+    const serviceId = Number(payload?.server?.nitrado_service_id);
+    scopeLabel.textContent = serverName
+      ? `DayZ ban list scope: ${serverName}${Number.isInteger(serviceId) ? ` · Nitrado service ${serviceId}` : ''}. Changes here affect only this selected DayZ server.`
+      : 'DayZ ban list scope: selected server only.';
+  }
   if (banlistChecked) {
     const partial = !payload?.discord?.available || !payload?.dayz?.available || Boolean(payload?.dayz?.partial);
     const sourceNote = String(payload?.dayz?.message || '').trim();

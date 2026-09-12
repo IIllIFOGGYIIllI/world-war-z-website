@@ -1,9 +1,7 @@
-WORLD WAR Z WEBSITE v1.42.0 — UPDATED FILES
+WORLD WAR Z WEBSITE v1.43.0 — UPDATED FILES
 
-Apply this package over the confirmed Website v1.41.0 repository.
+Apply the files in this archive over Website v1.42.0.
 
-This release updates Livonia live-launch presentation, 26-slot server context, Livonia PvP population display and Deathmatch activation-readiness UI.
+This release makes the Current Ban Lists workspace explicitly server-scoped and pairs with Bot v1.35.0.
 
-No map dataset replacement, database operation, Nitrado setting change or wipe is required. Existing bounded PWA map caches are preserved.
-
-Pairs with Bot v1.34.0.
+No database wipe, DayZ mission upload, Nitrado configuration change, map-data change or server wipe is required.
