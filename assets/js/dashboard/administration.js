@@ -162,6 +162,8 @@ const resetPlayerActionDialog = ({ clearSelection = false } = {}) => {
   if (playerActionCustomExpiry) playerActionCustomExpiry.hidden = true;
   if (playerActionBanDuration) playerActionBanDuration.value = 'permanent';
   if (playerActionExpiry) playerActionExpiry.value = '';
+  if (playerActionTimeoutFields) playerActionTimeoutFields.hidden = true;
+  if (playerActionTimeoutDuration) playerActionTimeoutDuration.value = '3600';
   if (playerActionDialogMessage) {
     playerActionDialogMessage.hidden = true;
     playerActionDialogMessage.textContent = '';
@@ -178,8 +180,12 @@ const playerActionIsAllowed = (action) => {
   const specification = PLAYER_ACTIONS[action];
   if (!specification || !selectedAdminPlayer || !hasServerActionAccess() || playerActionRequestInProgress) return false;
   if (action === 'unlink' && dashboardAccessLevel !== 'owner') return false;
-  if (['add_warning', 'discord_kick', 'discord_ban', 'discord_unban', 'unlink'].includes(action) && !selectedAdminPlayer.linked) return false;
+  if (['add_warning', 'discord_kick', 'discord_timeout', 'discord_untimeout', 'discord_ban', 'discord_unban', 'unlink'].includes(action) && !selectedAdminPlayer.linked) return false;
   if (action === 'economy_adjust' && !selectedAdminPlayer.economyAvailable) return false;
+  if (action === 'add_watch' && selectedAdminPlayer.watchlisted) return false;
+  if (action === 'remove_watch' && !selectedAdminPlayer.watchlisted) return false;
+  if (action === 'discord_timeout' && selectedAdminPlayer.discordTimedOut) return false;
+  if (action === 'discord_untimeout' && !selectedAdminPlayer.discordTimedOut) return false;
   if (action === 'discord_ban' && selectedAdminPlayer.discordBanned) return false;
   if (action === 'dayz_ban' && selectedAdminPlayer.dayzBanned) return false;
   if (action === 'dayz_unban' && !selectedAdminPlayer.dayzBanned) return false;
@@ -2431,6 +2437,8 @@ const renderAdminPlayerDetails = (payload) => {
     linked: Boolean(identity.linked),
     verified: Boolean(identity.verified),
     economyAvailable: Boolean(administration?.economy?.available),
+    watchlisted: Boolean(intelligence?.watchlist?.active),
+    discordTimedOut: Boolean(administration?.discord_timeout?.active),
     discordBanned: Boolean(administration?.discord_ban?.active),
     dayzBanned: Boolean(administration?.dayz_ban?.active),
     capabilities: administration?.capabilities || {}
@@ -2543,9 +2551,11 @@ const openPlayerActionDialog = (action, referenceId = null, initialText = '') =>
   }
   if (playerActionEconomyFields) playerActionEconomyFields.hidden = !specification.economy;
   if (playerActionBanFields) playerActionBanFields.hidden = !specification.banSchedule;
+  if (playerActionTimeoutFields) playerActionTimeoutFields.hidden = !specification.timeoutSchedule;
   if (playerActionCustomExpiry) playerActionCustomExpiry.hidden = true;
   if (playerActionBanDuration) playerActionBanDuration.value = 'permanent';
   if (playerActionExpiry) playerActionExpiry.value = '';
+  if (playerActionTimeoutDuration) playerActionTimeoutDuration.value = '3600';
   if (playerActionTarget) playerActionTarget.textContent = selectedAdminPlayer.psnId;
   syncPlayerActionControls();
 
@@ -2644,6 +2654,15 @@ playerActionForm?.addEventListener('submit', async (event) => {
       }
       requestPayload.duration_seconds = durationSeconds;
     }
+  }
+  if (specification.timeoutSchedule) {
+    const timeoutSeconds = Number(playerActionTimeoutDuration?.value);
+    if (!Number.isInteger(timeoutSeconds) || timeoutSeconds < 60 || timeoutSeconds > 2_419_200) {
+      showPlayerActionDialogMessage('Choose a valid Discord timeout duration from 1 minute to 28 days.');
+      playerActionTimeoutDuration?.focus();
+      return;
+    }
+    requestPayload.duration_seconds = timeoutSeconds;
   }
   if (specification.economy) {
     const operation = String(playerActionEconomyOperation?.value || '');
@@ -2771,6 +2790,8 @@ window.WWZAdministration = Object.freeze({
   loadModerationQueue,
   loadServerActionHistory,
   resetAdminPlayerAdministration,
+  openModerationCase,
+  openPlayerDossier: loadAdminPlayerDetails,
 });
 window.__wwzAdministrationReady = true;
 

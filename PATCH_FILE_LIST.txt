@@ -1,14 +1,16 @@
-World War Z Website v1.51.0 - Updated Files
+World War Z Website v1.52.0 — updated files
 
-assets/css/dashboard/operations-centre.css
-assets/js/dashboard/operations-centre.js
+INSTALL_README.txt
+PATCH_FILE_LIST.txt
+PATCH_NOTES.md
+README.md
+assets/css/dashboard/moderation-centre.css
+assets/js/dashboard/administration.js
+assets/js/dashboard/core.js
 assets/js/dashboard/lazy-assets.js
+assets/js/dashboard/moderation-centre.js
 changelog.html
 dashboard.html
 index.html
-sw.js
 scripts/validate_site.py
-README.md
-PATCH_NOTES.md
-INSTALL_README.txt
-PATCH_FILE_LIST.txt
+sw.js

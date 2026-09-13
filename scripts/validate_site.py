@@ -390,11 +390,48 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "section === 'server-audit') loadServerActionHistory()" not in operations_admin:
         errors.append("administration.js: Operations Centre must auto-load the unified audit.")
 
-    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.51.0</strong></div>' not in dashboard:
+    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.52.0</strong></div>' not in dashboard:
         errors.append("dashboard.html: command-centre footer release label is stale.")
 
-    if "Website v1.51.0 · Bot v1.52.0" not in index:
+    if "Website v1.52.0 · Bot v1.53.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
+
+    moderation_centre_js = (ROOT / "assets/js/dashboard/moderation-centre.js").read_text(encoding="utf-8")
+    moderation_centre_css = (ROOT / "assets/css/dashboard/moderation-centre.css").read_text(encoding="utf-8")
+    for token in (
+        'data-nav-label="Moderation Centre"',
+        'data-dashboard-section="moderation-centre"',
+        'data-player-action="discord_timeout"',
+        'data-player-action="add_watch"',
+        'data-player-action-timeout-fields',
+    ):
+        if token not in dashboard:
+            errors.append(f"dashboard.html: missing Moderation Centre surface: {token}")
+    for token in (
+        "ADMIN_MODERATION_CENTRE_URL",
+        "window.__wwzModerationCentreReady = true",
+        "window.WWZModerationCentre",
+        "openPlayerDossier",
+        "openModerationCase",
+    ):
+        source = moderation_centre_js if token not in {"openPlayerDossier", "openModerationCase"} else operations_admin
+        if token not in source:
+            errors.append(f"Moderation Centre missing runtime guard: {token}")
+    for token in (
+        ".moderation-centre-summary",
+        ".moderation-centre-grid",
+        ".moderation-centre-row",
+        ".moderation-centre-shortcuts",
+    ):
+        if token not in moderation_centre_css:
+            errors.append(f"moderation-centre.css: missing layout guard: {token}")
+    for token in (
+        "ensureModerationCentre",
+        "assets/js/dashboard/moderation-centre.js?v=1.52.0&rev=moderation-centre-1",
+        "assets/css/dashboard/moderation-centre.css?v=1.52.0&rev=moderation-centre-1",
+    ):
+        if token not in operations_lazy:
+            errors.append(f"lazy-assets.js: missing Moderation Centre lazy asset: {token}")
 
     economy_panels_js = (ROOT / "assets/js/dashboard/economy-panels.js").read_text(encoding="utf-8")
     economy_panels_css = (ROOT / "assets/css/dashboard/economy-panels.css").read_text(encoding="utf-8")
@@ -681,7 +718,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         'renderPlayerIntelligence',
         'renderPlayerIntelligenceTimeline',
         'assets/css/dashboard/player-intelligence.css?v=1.31.0',
-        'assets/js/dashboard/administration.js?v=1.43.0',
+        'assets/js/dashboard/administration.js?v=1.52.0&rev=moderation-centre-1',
     ):
         source = player_intelligence_lazy if token.startswith('assets/') else player_intelligence
         if token not in source:
@@ -941,7 +978,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         errors.append(
             "dashboard.html: command library must be lazy-loaded instead of downloaded on every dashboard visit."
         )
-    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.51.0&amp;rev=admin-operations-1'
+    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.52.0&amp;rev=moderation-centre-1'
     lazy_index = dashboard.find(lazy_script)
     shell_index = dashboard.find("assets/js/dashboard/shell.js")
     if lazy_index < 0:
@@ -1055,7 +1092,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append(f"dashboard-map-intelligence.js: collaborative Group/Faction data must not be persisted in browser storage: {forbidden}")
 
     lazy_dashboard_controllers = (
-        ("Administration controller", "assets/js/dashboard/administration.js?v=1.43.0", "ensureAdministration", "__wwzAdministrationReady", "assets/js/dashboard/administration.js"),
+        ("Administration controller", "assets/js/dashboard/administration.js?v=1.52.0&rev=moderation-centre-1", "ensureAdministration", "__wwzAdministrationReady", "assets/js/dashboard/administration.js"),
         ("Appeals controller", f"assets/js/dashboard/appeals.js?v={EXPECTED_ASSET_VERSION}", "ensureAppeals", "__wwzAppealsReady", "assets/js/dashboard/appeals.js"),
         ("Tickets controller", f"assets/js/dashboard/tickets.js?v={EXPECTED_ASSET_VERSION}", "ensureTickets", "__wwzTicketsReady", "assets/js/dashboard/tickets.js"),
         ("Progression controller", "assets/js/dashboard/progression.js?v=1.37.0&rev=quest-progression-1", "ensureProgression", "__wwzProgressionReady", "assets/js/dashboard/progression.js"),
@@ -1974,8 +2011,8 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
         errors.append(f"Apple touch icon dimensions are {apple_dimensions}; expected (180, 180).")
 
     launch_requirements = {
-        "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.52.0"),
-        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/server-context.js?v=1.42.0&amp;rev=livonia-live-1", "assets/js/dashboard/lazy-assets.js?v=1.51.0&amp;rev=admin-operations-1"),
+        "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.53.0"),
+        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/server-context.js?v=1.42.0&amp;rev=livonia-live-1", "assets/js/dashboard/lazy-assets.js?v=1.52.0&amp;rev=moderation-centre-1"),
         "assets/js/dashboard/server-context.js": ("player_capacity", "Capacity', `${server.player_capacity} slots`"),
         "assets/js/dashboard/account.js": ("payload.server?.player_capacity",),
         "assets/js/dashboard/livonia-pvp.js": ("rotation.player_capacity", "players online"),
@@ -1989,8 +2026,8 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.51.0'",
-        "const WWZ_PWA_UPDATE_REVISION = '2026-09-14-website-v1-51-0'",
+        "const WWZ_PWA_VERSION = '1.52.0'",
+        "const WWZ_PWA_UPDATE_REVISION = '2026-09-14-website-v1-52-0'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
         "if (request.method !== 'GET') return;",

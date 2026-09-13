@@ -281,7 +281,7 @@
     loadStylesheetOnce('player-intelligence-css', 'assets/css/dashboard/player-intelligence.css?v=1.31.0&rev=player-intelligence-1')
   ]).then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
     'administration',
-    'assets/js/dashboard/administration.js?v=1.43.0&rev=banlist-isolation-1',
+    'assets/js/dashboard/administration.js?v=1.52.0&rev=moderation-centre-1',
     () => window.__wwzAdministrationReady === true
   )));
 
@@ -302,6 +302,15 @@
       () => window.__wwzOperationsCentreReady === true
     ))
   ]).then(() => undefined);
+
+  const ensureModerationCentre = () => ensureAdministration().then(() => Promise.all([
+    loadStylesheetOnce('moderation-centre-css', 'assets/css/dashboard/moderation-centre.css?v=1.52.0&rev=moderation-centre-1'),
+    loadAfterDashboardRuntime(() => loadScriptOnce(
+      'moderation-centre',
+      'assets/js/dashboard/moderation-centre.js?v=1.52.0&rev=moderation-centre-1',
+      () => window.__wwzModerationCentreReady === true
+    ))
+  ])).then(() => undefined);
 
   const ensureDataManagement = () => Promise.all([
     loadStylesheetOnce('data-management-css', 'assets/css/dashboard/data-management.css?v=1.39.0&rev=data-management-1'),
@@ -395,7 +404,7 @@
   };
 
   const administrationView = ({ view = '', section = '' } = {}) => (
-    (view === 'staff' && ['queue', 'cases', 'banlists', 'players', 'server-controls', 'server-audit', 'failures', 'rules', 'economy-panels', 'donations', 'donation-orders'].includes(section))
+    (view === 'staff' && ['moderation-centre', 'queue', 'cases', 'banlists', 'players', 'server-controls', 'server-audit', 'failures', 'rules', 'economy-panels', 'donations', 'donation-orders'].includes(section))
     || (view === 'configuration' && ['discord-onboarding', 'community-tools', 'discord-logs', 'notifications'].includes(section))
   );
 
@@ -410,6 +419,7 @@
     if (view === 'shop' || view === 'shopadmin') ensureShopWikiPreviews().catch(() => {});
     if (commerceView(detail)) activateCommerceView(detail).catch(() => {});
     if (administrationView(detail)) ensureAdministration().catch(() => {});
+    if (view === 'staff' && section === 'moderation-centre') ensureModerationCentre().then(() => window.WWZModerationCentre?.activate?.(detail)).catch(() => {});
     if (view === 'staff' && section === 'server-audit') ensureOperationsCentre().then(() => window.WWZOperationsCentre?.activate?.(detail)).catch(() => {});
     if (view === 'configuration' && section === 'data-management') ensureDataManagement().then(() => window.WWZDataManagement?.activate?.(detail)).catch(() => {});
     if (view === 'staff' && section === 'rules') ensureRulesManager().catch(() => {});
@@ -496,6 +506,11 @@
       button.addEventListener('pointerenter', () => load().catch(() => {}), { passive: true });
       button.addEventListener('focus', () => load().catch(() => {}));
     });
+  });
+
+  document.querySelectorAll('[data-view="staff"][data-section="moderation-centre"]').forEach((button) => {
+    button.addEventListener('pointerenter', () => ensureModerationCentre().catch(() => {}), { passive: true });
+    button.addEventListener('focus', () => ensureModerationCentre().catch(() => {}));
   });
 
   document.querySelectorAll('[data-view="staff"][data-section="server-audit"]').forEach((button) => {
