@@ -34,6 +34,7 @@
     shop: 'Current shop guidance with direct General Shop, Vehicle/Event Shop and My Orders links.',
     item_prices: 'Live standard-item prices generated from the current server catalogue.',
     vehicle_prices: 'Live restart-bound vehicle/Event Item prices and configured restart ranges.',
+    rentals: 'Vehicle and Event Item rental workflow with live storefront, My Rentals and saved-location links.',
     weed_operations: 'Server-scoped editable weed-operation and licence guidance.',
     pelt_info: 'Server-scoped editable Trader pelt drop-off instructions and payout list.',
     earn_income: 'Live daily/work/nightlife/crime/rob/pay values generated from the deployed economy configuration.',

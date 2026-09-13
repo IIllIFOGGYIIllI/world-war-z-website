@@ -384,10 +384,10 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "section === 'server-audit') loadServerActionHistory()" not in operations_admin:
         errors.append("administration.js: Operations Centre must auto-load the unified audit.")
 
-    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.49.0</strong></div>' not in dashboard:
+    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.50.0</strong></div>' not in dashboard:
         errors.append("dashboard.html: command-centre footer release label is stale.")
 
-    if "Website v1.49.0 · Bot v1.48.0" not in index:
+    if "Website v1.50.0 · Bot v1.51.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
 
     economy_panels_js = (ROOT / "assets/js/dashboard/economy-panels.js").read_text(encoding="utf-8")
@@ -403,8 +403,8 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append(f"dashboard.html: missing Economy Panels administration surface: {token}")
     for token in (
         "ensureEconomyPanels",
-        "assets/css/dashboard/economy-panels.css?v=1.49.0&rev=economy-panels-1",
-        "assets/js/dashboard/economy-panels.js?v=1.49.0&rev=economy-panels-1",
+        "assets/css/dashboard/economy-panels.css?v=1.50.0&rev=events-rentals-polish-1",
+        "assets/js/dashboard/economy-panels.js?v=1.50.0&rev=events-rentals-polish-1",
         "['economy-panels', ensureEconomyPanels]",
     ):
         if token not in economy_lazy_assets:
@@ -416,6 +416,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         "pelt_info",
         "weed_operations",
         "await action('save', button)",
+        "rentals",
     ):
         if token not in economy_panels_js and token not in dashboard:
             errors.append(f"Economy Panels workspace is missing behaviour/surface token: {token}")
@@ -934,7 +935,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         errors.append(
             "dashboard.html: command library must be lazy-loaded instead of downloaded on every dashboard visit."
         )
-    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.49.0&amp;rev=economy-panels-1'
+    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.50.0&amp;rev=events-rentals-polish-1'
     lazy_index = dashboard.find(lazy_script)
     shell_index = dashboard.find("assets/js/dashboard/shell.js")
     if lazy_index < 0:
@@ -1392,11 +1393,23 @@ def validate_checkout_compatibility(errors: list[str]) -> None:
         if token not in source:
             errors.append(f"Standalone Shop is missing v1.37 next-action behaviour/style: {token}")
     for token in (
-        'assets/css/pages/shop.css?v=1.37.0&amp;rev=commerce-workflow-1',
-        'assets/js/pages/shop.js?v=1.49.0&amp;rev=economy-panels-1',
+        'assets/css/pages/shop.css?v=1.50.0&amp;rev=events-rentals-polish-1',
+        'assets/js/pages/shop.js?v=1.50.0&amp;rev=events-rentals-polish-1',
     ):
         if token not in shop_html:
             errors.append(f"shop.html: missing current v1.37 commerce asset: {token}")
+
+
+    for token in (
+        '/api/account/shop/order/action',
+        'rentalActionState',
+        'Cancel & Refund',
+        "state.orderScope = 'rentals'",
+    ):
+        if token not in standalone_shop:
+            errors.append(f"Standalone Shop is missing v1.50 rental workflow token: {token}")
+    if '<option value="rentals">My rentals</option>' not in shop_html:
+        errors.append('shop.html: missing My rentals order filter')
 
 
 
@@ -1955,8 +1968,8 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
         errors.append(f"Apple touch icon dimensions are {apple_dimensions}; expected (180, 180).")
 
     launch_requirements = {
-        "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.48.0"),
-        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/server-context.js?v=1.42.0&amp;rev=livonia-live-1", "assets/js/dashboard/lazy-assets.js?v=1.49.0&amp;rev=economy-panels-1"),
+        "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.51.0"),
+        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/server-context.js?v=1.42.0&amp;rev=livonia-live-1", "assets/js/dashboard/lazy-assets.js?v=1.50.0&amp;rev=events-rentals-polish-1"),
         "assets/js/dashboard/server-context.js": ("player_capacity", "Capacity', `${server.player_capacity} slots`"),
         "assets/js/dashboard/account.js": ("payload.server?.player_capacity",),
         "assets/js/dashboard/livonia-pvp.js": ("rotation.player_capacity", "players online"),
@@ -1970,8 +1983,8 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.49.0'",
-        "const WWZ_PWA_UPDATE_REVISION = '2026-09-13-website-v1-49-0'",
+        "const WWZ_PWA_VERSION = '1.50.0'",
+        "const WWZ_PWA_UPDATE_REVISION = '2026-09-13-website-v1-50-0'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
         "if (request.method !== 'GET') return;",

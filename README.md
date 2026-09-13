@@ -1,7 +1,7 @@
-# World War Z Website v1.49.0
+# World War Z Website v1.50.0
 
 Current cumulative website/PWA release for the World War Z DayZ console ecosystem.
 
-This release adds Economy Panels administration to the World War Z Command Centre. Admins can manage the existing Discord Shop/price/income/economy-information channels per server, auto-setup or reuse channels, publish/refresh WWZ-managed panels and edit server-specific pelt/weed guidance. Shop deep links now support direct General Shop, Vehicle/Event and My Orders hand-offs.
+This release polishes Community Events, Rentals and the Action Centre integration paired with Bot v1.51.0. Event Planner exposes the managed Discord-card lifecycle, the Survivor Shop adds a dedicated My Rentals view plus protected member cancellation/end-rental controls, and the Economy Panels workspace recognises the new managed Rentals panel.
 
-Pairs with Bot v1.48.0. Chernarus/Livonia isolation and bounded map caching are preserved.
+Chernarus/Livonia isolation is preserved. Livonia remains trader-free, and the bounded map-cache generation is unchanged.

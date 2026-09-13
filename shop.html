@@ -19,7 +19,7 @@
 <title>Survivor Shop | World War Z</title>
 <link href="assets/favicon.png?v=1.22.93" rel="icon"/>
 <link href="assets/css/dashboard/core.css?v=1.22.93" rel="stylesheet"/><link href="assets/css/dashboard/moderation.css?v=1.22.93" rel="stylesheet"/><link href="assets/css/dashboard/workspace.css?v=1.22.93" rel="stylesheet"/><link href="assets/css/dashboard/catalogue.css?v=1.22.93" rel="stylesheet"/>
-<link href="assets/css/pages/shop.css?v=1.37.0&amp;rev=commerce-workflow-1" rel="stylesheet"/>
+<link href="assets/css/pages/shop.css?v=1.50.0&amp;rev=events-rentals-polish-1" rel="stylesheet"/>
 <link href="https://iillifoggyiilli.github.io/world-war-z-website/shop.html" rel="canonical"/><meta content="https://iillifoggyiilli.github.io/world-war-z-website/shop.html" property="og:url"/><link href="assets/css/site-polish.css?v=1.22.93" rel="stylesheet"/><link href="assets/icons/pwa/apple-touch-icon-180.png?v=1.22.93" rel="apple-touch-icon" sizes="180x180"/>
 <link href="assets/css/pwa.css?v=1.22.93" rel="stylesheet"/>
 <link href="assets/css/ui-system.css?v=1.24.0&rev=ops-ui-1" rel="stylesheet"/>
@@ -120,7 +120,7 @@
 <div><span>Completed</span><strong data-member-orders-completed="">0</strong><small>Fulfilled orders</small></div>
 </div>
 <div class="member-orders-toolbar">
-<label class="dialog-field compact-select"><span>Show</span><select data-member-orders-scope=""><option value="all">All recent orders</option><option value="open">Open orders</option><option value="waiting">Waiting for restart</option><option value="active">Active rentals</option><option value="history">Completed / closed</option></select></label>
+<label class="dialog-field compact-select"><span>Show</span><select data-member-orders-scope=""><option value="all">All recent orders</option><option value="open">Open orders</option><option value="waiting">Waiting for restart</option><option value="active">Active rentals</option><option value="rentals">My rentals</option><option value="history">Completed / closed</option></select></label>
 <div class="toolbar-view-note"><span>LIVE</span><strong data-member-orders-result-summary="">0 orders</strong><small>Newest first</small></div>
 </div>
 </div>
@@ -168,6 +168,19 @@
 </div>
 </form>
 </dialog>
+<dialog aria-labelledby="member-rental-cancel-title" class="login-dialog member-rental-cancel-dialog" data-member-rental-cancel-dialog="">
+<form data-member-rental-cancel-form="" method="dialog">
+<button aria-label="Close rental cancellation" class="dialog-close" data-member-rental-cancel-close="" type="button">×</button>
+<p class="panel-kicker">Protected rental action</p>
+<h2 data-member-rental-cancel-title="" id="member-rental-cancel-title">Cancel Rental?</h2>
+<div class="shop-purchase-summary"><strong data-member-rental-cancel-summary="">Rental order</strong><span>Member controlled</span></div>
+<div class="dialog-notice member-rental-cancel-policy"><strong>Cancellation policy</strong><span data-member-rental-cancel-policy="">—</span></div>
+<label class="dialog-field"><span>Reason</span><textarea data-member-rental-cancel-reason="" maxlength="500" minlength="3" placeholder="Why are you cancelling this rental?" required="" rows="3"></textarea><small>This note is saved to the order history for you and Admin.</small></label>
+<div class="restart-dialog-message" data-member-rental-cancel-message="" hidden="" role="status"></div>
+<button class="danger-action wide" data-member-rental-cancel-confirm="" type="submit">Cancel Rental</button>
+<button class="dialog-cancel" data-member-rental-cancel-close="" type="button">Keep Rental</button>
+</form>
+</dialog>
 <dialog aria-labelledby="member-purchase-title" class="login-dialog shop-purchase-dialog member-purchase-dialog" data-member-purchase-dialog="">
 <form data-member-purchase-form="" method="dialog">
 <button aria-label="Close purchase" class="dialog-close" data-member-purchase-cancel="" type="button">×</button>
@@ -203,7 +216,7 @@
 <button class="dialog-cancel" data-member-purchase-cancel="" type="button">Cancel</button>
 </form>
 </dialog>
-<script defer="" src="assets/js/core/http.js?v=1.41.0&rev=security-hardening-1"></script><script defer="" src="assets/js/shop-wiki-previews.js?v=1.22.93"></script><script defer="" src="assets/js/pages/shop.js?v=1.49.0&amp;rev=economy-panels-1"></script>
+<script defer="" src="assets/js/core/http.js?v=1.41.0&rev=security-hardening-1"></script><script defer="" src="assets/js/shop-wiki-previews.js?v=1.22.93"></script><script defer="" src="assets/js/pages/shop.js?v=1.50.0&amp;rev=events-rentals-polish-1"></script>
 <script defer src="assets/js/pwa.js?v=1.22.93"></script>
 <script defer src="assets/js/ui-system.js?v=1.24.0&rev=ops-ui-1"></script>
 </body>

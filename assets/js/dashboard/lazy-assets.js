@@ -123,10 +123,10 @@
   ]).then(() => undefined);
 
   const ensureEconomyPanels = () => Promise.all([
-    loadStylesheetOnce('economy-panels-css', 'assets/css/dashboard/economy-panels.css?v=1.49.0&rev=economy-panels-1'),
+    loadStylesheetOnce('economy-panels-css', 'assets/css/dashboard/economy-panels.css?v=1.50.0&rev=events-rentals-polish-1'),
     loadAfterDashboardRuntime(() => loadScriptOnce(
       'economy-panels',
-      'assets/js/dashboard/economy-panels.js?v=1.49.0&rev=economy-panels-1',
+      'assets/js/dashboard/economy-panels.js?v=1.50.0&rev=events-rentals-polish-1',
       () => window.__wwzEconomyPanelsReady === true
     ))
   ]).then(() => undefined);
@@ -365,10 +365,10 @@
 
 
   const ensureCommunity = () => Promise.all([
-    loadStylesheetOnce('community-css', 'assets/css/dashboard/community.css?v=1.33.0&rev=events-overhaul-1'),
+    loadStylesheetOnce('community-css', 'assets/css/dashboard/community.css?v=1.50.0&rev=events-rentals-polish-1'),
     loadAfterDashboardRuntime(() => loadScriptOnce(
       'community',
-      'assets/js/dashboard/community.js?v=1.33.0&rev=events-overhaul-1',
+      'assets/js/dashboard/community.js?v=1.50.0&rev=events-rentals-polish-1',
       () => window.__wwzCommunityReady === true
     ))
   ]).then(() => undefined);

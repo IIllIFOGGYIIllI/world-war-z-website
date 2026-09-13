@@ -1,8 +1,9 @@
-WORLD WAR Z WEBSITE v1.49.0 — UPDATED FILES
+World War Z Website v1.50.0 - Events, Rentals & Action Centre Polish
 
-Apply these files over Website v1.48.0, preserving paths.
-Commit/push normally to the existing GitHub Pages repository.
+1. Copy every file in this ZIP over the matching path in your website repository.
+2. Commit/push the changes and let GitHub Pages redeploy.
+3. Deploy the matching Bot v1.51.0 updated-files package to Railway.
+4. Installed PWA users will receive the normal website update prompt after the new service worker is detected.
+5. The bounded map-cache generation is intentionally unchanged.
 
-Open Command Centre → Economy Panels after deployment. Existing manual Discord messages are intentionally left alone; publish the managed replacements and remove legacy posts only after you are happy with the new layout.
-
-Pairs with World War Z Bot v1.48.0. Installed PWA clients advance to v1.49.0 while the bounded map cache remains unchanged.
+No DayZ mission, Nitrado, map-data, player-data or server-wipe changes are required.

@@ -9,6 +9,7 @@ const URLS = {
   catalogue: `${API_BASE}/api/shop/catalogue`,
   account: `${API_BASE}/api/account/shop`,
   purchase: `${API_BASE}/api/account/shop/purchase`,
+  orderAction: `${API_BASE}/api/account/shop/order/action`,
   locations: `${API_BASE}/api/account/delivery/locations`,
   serverStatus: `${API_BASE}/api/server/status`
 };
@@ -36,6 +37,8 @@ const state = {
   cataloguePageSize: 24,
   catalogueSort: 'name-asc',
   detailItem: null,
+  selectedRental: null,
+  rentalActionBusy: false,
   orderScope: 'all'
 };
 
@@ -171,6 +174,10 @@ const elements = {
   detailDialog: $('[data-member-item-detail-dialog]'), detailPreview: $('[data-member-item-detail-preview]'),
   detailCategory: $('[data-member-item-detail-category]'), detailTitle: $('[data-member-item-detail-title]'),
   detailPrice: $('[data-member-item-detail-price]'), detailSku: $('[data-member-item-detail-sku]'),
+  cancelDialog: $('[data-member-rental-cancel-dialog]'), cancelForm: $('[data-member-rental-cancel-form]'),
+  cancelTitle: $('[data-member-rental-cancel-title]'), cancelSummary: $('[data-member-rental-cancel-summary]'),
+  cancelPolicy: $('[data-member-rental-cancel-policy]'), cancelReason: $('[data-member-rental-cancel-reason]'),
+  cancelMessage: $('[data-member-rental-cancel-message]'), cancelConfirm: $('[data-member-rental-cancel-confirm]'),
   detailDescription: $('[data-member-item-detail-description]'), detailMeta: $('[data-member-item-detail-meta]'),
   detailTypes: $('[data-member-item-detail-types]'), detailClassname: $('[data-member-item-detail-classname]'),
   detailBuy: $('[data-member-item-detail-buy]'),
@@ -654,12 +661,74 @@ const appendOrderNextAction = (card, order) => {
   block.append(strong, small); card.append(block);
 };
 
+const rentalActionState = (order) => {
+  if (order?.delivery_type !== 'event') return { eligible: false, started: false };
+  const status = String(order?.status || '').toLowerCase();
+  if (!['pending', 'processing'].includes(status)) return { eligible: false, started: false };
+  const deliveryState = orderDeliveryState(order);
+  if (['cancelled', 'cancelled_cleaned', 'fulfilled', 'rolled_back'].includes(deliveryState)) return { eligible: false, started: false };
+  const purchased = Math.max(1, Number(order?.delivery?.purchased_restarts ?? order.event_restarts ?? 1));
+  const remainingValue = order?.delivery?.remaining_restarts;
+  const remaining = remainingValue == null ? purchased : Math.max(0, Number(remainingValue));
+  const started = remaining < purchased || ['active', 'cleanup_due', 'fulfilled'].includes(deliveryState);
+  return { eligible: true, started, purchased, remaining };
+};
+const setRentalCancelMessage = (message = '', type = 'error') => {
+  if (!elements.cancelMessage) return;
+  elements.cancelMessage.textContent = message;
+  elements.cancelMessage.hidden = !message;
+  elements.cancelMessage.dataset.type = type;
+};
+const openRentalCancellation = (order) => {
+  const action = rentalActionState(order);
+  if (!action.eligible || !elements.cancelDialog) return;
+  state.selectedRental = order;
+  if (elements.cancelTitle) elements.cancelTitle.textContent = action.started ? 'End Active Rental?' : 'Cancel Rental?';
+  if (elements.cancelSummary) elements.cancelSummary.textContent = `${order.item?.name || 'Rental'} · Order #${order.order_id}`;
+  if (elements.cancelPolicy) elements.cancelPolicy.textContent = action.started
+    ? 'This rental has already started. Ending it schedules protected cleanup and does not issue an automatic refund.'
+    : 'This rental has not started. Cancelling it returns the full purchase price and removes it from the automatic delivery queue.';
+  if (elements.cancelReason) elements.cancelReason.value = '';
+  if (elements.cancelConfirm) elements.cancelConfirm.textContent = action.started ? 'End Rental' : 'Cancel & Refund';
+  setRentalCancelMessage('', 'info');
+  elements.cancelDialog.showModal?.();
+  window.setTimeout(() => elements.cancelReason?.focus(), 0);
+};
+const submitRentalCancellation = async (event) => {
+  event.preventDefault();
+  const order = state.selectedRental;
+  if (!order || state.rentalActionBusy) return;
+  const action = rentalActionState(order);
+  if (!action.eligible) { setRentalCancelMessage('This rental can no longer be cancelled from the member workflow.'); return; }
+  const reason = String(elements.cancelReason?.value || '').trim();
+  if (reason.length < 3 || reason.length > 500) { setRentalCancelMessage('Enter a cancellation reason between 3 and 500 characters.'); return; }
+  state.rentalActionBusy = true;
+  if (elements.cancelConfirm) elements.cancelConfirm.disabled = true;
+  setRentalCancelMessage('Railway is closing the rental safely…', 'info');
+  try {
+    const { response, payload } = await fetchJson(URLS.orderAction, {
+      method: 'POST', headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ action: 'cancel_rental', order_id: Number(order.order_id), reason })
+    }, 60_000);
+    if (!response.ok) throw new Error(payload.message || 'The rental could not be cancelled.');
+    setRentalCancelMessage(payload.message || 'Rental cancelled.', 'success');
+    await loadShop();
+    window.setTimeout(() => { elements.cancelDialog?.close(); state.selectedRental = null; }, 1100);
+  } catch (error) {
+    setRentalCancelMessage(error.message || 'The rental could not be cancelled.');
+  } finally {
+    state.rentalActionBusy = false;
+    if (elements.cancelConfirm) elements.cancelConfirm.disabled = false;
+  }
+};
+
 const orderMatchesScope = (order) => {
   const scope = state.orderScope;
   if (scope === 'all') return true;
   if (scope === 'open') return ['pending', 'processing'].includes(String(order?.status || '').toLowerCase());
   if (scope === 'waiting') return orderDeliveryState(order) === 'restart_pending';
   if (scope === 'active') return order?.delivery_type === 'event' && orderDeliveryState(order) === 'active';
+  if (scope === 'rentals') return order?.delivery_type === 'event' && !orderClosed(order);
   if (scope === 'history') return orderClosed(order);
   return true;
 };
@@ -723,6 +792,15 @@ const renderOrders = () => {
     if (order.fulfilment_note) { const line = document.createElement('div'); line.className = 'member-order-note update'; line.textContent = `Order update · ${order.fulfilment_note}`; card.append(line); }
     const latestEvent = Array.isArray(order.delivery?.events) && order.delivery.events.length ? order.delivery.events[0] : (Array.isArray(order.events) ? order.events[0] : null);
     if (latestEvent?.note) { const line = document.createElement('div'); line.className = 'member-order-note automation'; line.textContent = `Latest automation · ${latestEvent.note}`; card.append(line); }
+    const rentalAction = rentalActionState(order);
+    if (rentalAction.eligible) {
+      const actions = document.createElement('div'); actions.className = 'member-order-actions';
+      const policy = document.createElement('span'); policy.textContent = rentalAction.started ? 'Started rentals end without an automatic refund.' : 'Not started · full automatic refund available.';
+      const cancel = document.createElement('button'); cancel.type = 'button'; cancel.className = 'danger-action compact-action';
+      cancel.textContent = rentalAction.started ? 'End Rental' : 'Cancel & Refund';
+      cancel.addEventListener('click', () => openRentalCancellation(order));
+      actions.append(policy, cancel); card.append(actions);
+    }
     const footer = document.createElement('div'); footer.className = 'member-order-footer'; footer.innerHTML = `<span>Last updated</span><strong>${dateText(order.updated_at || order.created_at)}</strong>`; card.append(footer);
     elements.orderList.append(card);
   });
@@ -969,6 +1047,8 @@ const submitPurchase = async (event) => {
   finally { state.purchasing = false; elements.purchaseConfirm.disabled = false; }
 };
 
+elements.cancelForm?.addEventListener('submit', submitRentalCancellation);
+$$('[data-member-rental-cancel-close]').forEach((button) => button.addEventListener('click', () => { if (!state.rentalActionBusy) { elements.cancelDialog?.close(); state.selectedRental = null; } }));
 $$('[data-member-shop-mode]').forEach((button) => button.addEventListener('click', () => {
   state.mode = button.dataset.memberShopMode === 'event' ? 'event' : 'manual';
   $$('[data-member-shop-mode]').forEach((entry) => { const active = entry === button; entry.classList.toggle('active', active); entry.setAttribute('aria-selected', String(active)); });
@@ -1035,7 +1115,13 @@ const initialise = async () => {
   renderServerChoices();
   await loadRestartStatus();
   await loadShop();
-  if (String(new URLSearchParams(location.search).get('section') || '').trim().toLowerCase() === 'orders') {
+  const requestedSection = String(new URLSearchParams(location.search).get('section') || '').trim().toLowerCase();
+  if (requestedSection === 'rentals') {
+    state.orderScope = 'rentals';
+    if (elements.ordersScope) elements.ordersScope.value = 'rentals';
+    renderOrders();
+    document.getElementById('orders')?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+  } else if (requestedSection === 'orders') {
     document.getElementById('orders')?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
   }
   window.setInterval(loadRestartStatus, 30_000);
