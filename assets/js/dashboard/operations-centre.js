@@ -8,7 +8,9 @@
   }
 
   const select = (query) => root.querySelector(query);
+  const selectAll = (query) => [...root.querySelectorAll(query)];
   const servicesRoot = select('[data-operations-services]');
+  const workersRoot = select('[data-operations-workers]');
   const signalsRoot = select('[data-operations-signals]');
   const errorsRoot = select('[data-operations-errors-list]');
   const historyRoot = select('[data-operations-history]');
@@ -36,13 +38,28 @@
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 
   const timeLabel = (value) => {
-    if (!value) return 'No timestamp yet';
+    if (!value) return 'Not available';
     try {
       return typeof formatUpdatedAt === 'function' ? formatUpdatedAt(value) : new Date(value).toLocaleString();
     } catch (_) {
       return String(value);
     }
   };
+
+  const compactDuration = (value) => {
+    const total = Math.max(0, Number(value) || 0);
+    if (!total) return '0m';
+    const minutes = Math.floor(total / 60);
+    const days = Math.floor(minutes / 1440);
+    const hours = Math.floor((minutes % 1440) / 60);
+    const mins = minutes % 60;
+    if (days > 0) return `${days}d ${hours}h ${mins}m`;
+    if (hours > 0) return `${hours}h ${mins}m`;
+    if (minutes > 0) return `${minutes}m`;
+    return `${Math.floor(total)}s`;
+  };
+
+  const stateLabel = (value) => friendly(value || 'unknown');
 
   const appendActivity = (target, { severity = 'info', title = 'Operational event', detail = '', meta = '' } = {}) => {
     const item = document.createElement('li');
@@ -60,27 +77,41 @@
     target.append(item);
   };
 
-  const renderServices = (services) => {
-    if (!servicesRoot) return;
-    servicesRoot.replaceChildren();
-    (Array.isArray(services) ? services : []).forEach((service) => {
+  const renderStateCards = (target, items, className) => {
+    if (!target) return;
+    target.replaceChildren();
+    (Array.isArray(items) ? items : []).forEach((item) => {
       const card = document.createElement('article');
       const header = document.createElement('header');
       const title = document.createElement('strong');
       const state = document.createElement('span');
       const detail = document.createElement('p');
-      const updated = document.createElement('small');
-      card.className = 'operations-service-card';
-      card.dataset.state = safeState(service?.state);
-      title.textContent = String(service?.label || 'Service');
+      card.className = className;
+      card.dataset.state = safeState(item?.state);
+      title.textContent = String(item?.label || 'Service');
       state.className = 'operations-service-state';
-      state.textContent = String(service?.status || 'Unknown');
-      detail.textContent = String(service?.detail || 'No operational detail reported.');
-      updated.textContent = `Updated ${timeLabel(service?.updated_at)}`;
+      state.textContent = String(item?.status || 'Unknown');
+      detail.textContent = String(item?.detail || 'No operational detail reported.');
       header.append(title, state);
-      card.append(header, detail, updated);
-      servicesRoot.append(card);
+      card.append(header, detail);
+      if (item?.updated_at) {
+        const updated = document.createElement('small');
+        updated.textContent = `Updated ${timeLabel(item.updated_at)}`;
+        card.append(updated);
+      }
+      target.append(card);
     });
+  };
+
+  const renderServices = (services) => renderStateCards(servicesRoot, services, 'operations-service-card');
+
+  const renderWorkers = (workers, summary = {}) => {
+    renderStateCards(workersRoot, workers, 'operations-worker-card');
+    const total = Math.max(0, Number(summary.total) || 0);
+    const running = Math.max(0, Number(summary.running) || 0);
+    const attention = Math.max(0, Number(summary.attention) || 0);
+    set('[data-operations-worker-summary]', total ? `${running}/${total} running cleanly` : 'No worker data');
+    set('[data-operations-worker-attention]', attention);
   };
 
   const renderSignals = (signals) => {
@@ -125,6 +156,39 @@
     if (empty) empty.hidden = items.length !== 0;
   };
 
+  const renderRuntime = (payload) => {
+    const runtime = payload?.runtime || {};
+    const scope = payload?.scope || {};
+    const restart = payload?.restart_summary || {};
+    const adm = payload?.adm || {};
+
+    set('[data-operations-context-world]', scope.map_name || 'Selected server');
+    set('[data-operations-context-server]', [scope.server_name || 'World War Z', scope.platform].filter(Boolean).join(' · '));
+    set('[data-operations-population]', `${Math.max(0, Number(runtime.players_current) || 0)}/${Math.max(0, Number(runtime.players_maximum) || 0)}`);
+    set('[data-operations-population-note]', 'Live DayZ population');
+    set('[data-operations-live-state]', stateLabel(runtime.dayz_status));
+    set('[data-operations-nitrado-state]', `Nitrado: ${stateLabel(runtime.nitrado_status)}`);
+    set('[data-operations-next-restart]', restart.next_scheduled_restart ? timeLabel(restart.next_scheduled_restart) : 'Not scheduled');
+    set('[data-operations-restart-countdown]', restart.countdown_seconds == null ? 'No synchronized countdown' : `${compactDuration(restart.countdown_seconds)} remaining`);
+    set('[data-operations-control-state]', runtime.server_actions_enabled ? 'Admin verified · controls connected' : 'Protected writes disabled');
+
+    set('[data-operations-restart-next-detail]', restart.next_scheduled_restart ? timeLabel(restart.next_scheduled_restart) : 'Not scheduled');
+    set('[data-operations-restart-countdown-detail]', restart.countdown_seconds == null ? 'Unavailable' : compactDuration(restart.countdown_seconds));
+    set('[data-operations-restart-interval]', Number(restart.interval_minutes) > 0 ? `${Number(restart.interval_minutes)} minutes` : 'Not configured');
+    set('[data-operations-restart-last]', restart.last_detected_at ? timeLabel(restart.last_detected_at) : 'No detected restart yet');
+    set('[data-operations-restarts-7d]', Math.max(0, Number(restart.last_7d) || 0));
+    set('[data-operations-restart-source]', restart.source || 'Unavailable');
+    set('[data-operations-restart-sync]', restart.synchronised ? 'Synchronised' : (restart.configured ? 'Waiting for sync' : 'Not configured'));
+
+    set('[data-operations-adm-state]', adm.task_running ? stateLabel(adm.status || 'running') : 'Worker stopped');
+    set('[data-operations-adm-poll-interval]', Number(adm.poll_interval_seconds) > 0 ? `${Number(adm.poll_interval_seconds)} seconds` : 'Default cadence');
+    set('[data-operations-adm-last-poll]', timeLabel(adm.last_poll_at));
+    set('[data-operations-adm-last-success]', timeLabel(adm.last_success_at));
+    set('[data-operations-adm-last-log]', timeLabel(adm.last_log_seen_at));
+    set('[data-operations-adm-reconcile]', timeLabel(adm.last_session_reconcile_at));
+    set('[data-operations-adm-last-error]', adm.last_error_kind ? friendly(adm.last_error_kind) : 'None recorded');
+  };
+
   const render = (payload) => {
     const health = payload?.health || {};
     const score = Math.max(0, Math.min(100, Number(health.score) || 0));
@@ -133,15 +197,18 @@
     set('[data-operations-health-score]', score);
     set('[data-operations-health-label]', health.label || friendly(healthState));
     const signalCount = Array.isArray(payload?.signals) ? payload.signals.length : 0;
-    set('[data-operations-health-summary]', signalCount
-      ? `${signalCount} active health signal${signalCount === 1 ? '' : 's'} need review for ${payload?.scope?.map_name || 'this server'}.`
-      : `${payload?.scope?.map_name || 'The selected server'} has no active operational health signals.`);
+    const workerAttention = Math.max(0, Number(payload?.worker_summary?.attention) || 0);
+    const attentionTotal = signalCount + workerAttention;
+    set('[data-operations-health-summary]', attentionTotal
+      ? `${attentionTotal} operational item${attentionTotal === 1 ? '' : 's'} need review for ${payload?.scope?.map_name || 'this server'}.`
+      : `${payload?.scope?.map_name || 'The selected server'} has no active operational health signals or stopped background workers.`);
     set('[data-operations-failures]', Math.max(0, Number(payload?.failure_count) || 0));
-    set('[data-operations-errors]', Array.isArray(payload?.recent_errors) ? payload.recent_errors.length : 0);
     set('[data-operations-restarts-24h]', Math.max(0, Number(payload?.restart_summary?.last_24h) || 0));
     set('[data-operations-audit-failures]', Math.max(0, Number(payload?.audit?.failures_24h) || 0));
     set('[data-operations-updated]', `Updated ${timeLabel(payload?.checked_at)}`);
+    renderRuntime(payload);
     renderServices(payload?.services);
+    renderWorkers(payload?.workers, payload?.worker_summary);
     renderSignals(payload?.signals);
     renderErrors(payload?.recent_errors);
     renderHistory(payload?.history);
@@ -176,6 +243,17 @@
       refreshButton?.removeAttribute('disabled');
     }
   };
+
+  const navigate = (button) => {
+    const view = String(button.dataset.operationsNavView || '').trim();
+    const section = String(button.dataset.operationsNavSection || '').trim();
+    if (!view) return;
+    location.hash = section ? `#${view}/${section}` : `#${view}`;
+  };
+
+  selectAll('[data-operations-nav-view]').forEach((button) => {
+    button.addEventListener('click', () => navigate(button));
+  });
 
   const active = ({ view = '', section = '' } = {}) => view === 'staff' && section === 'server-audit';
   const schedule = (detail) => {

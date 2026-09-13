@@ -1,16 +1,14 @@
-assets/css/dashboard/community.css
-assets/css/pages/shop.css
-assets/js/dashboard/community.js
-assets/js/dashboard/economy-panels.js
+World War Z Website v1.51.0 - Updated Files
+
+assets/css/dashboard/operations-centre.css
+assets/js/dashboard/operations-centre.js
 assets/js/dashboard/lazy-assets.js
-assets/js/pages/shop.js
 changelog.html
 dashboard.html
 index.html
-shop.html
 sw.js
 scripts/validate_site.py
-PATCH_NOTES.md
-PATCH_FILE_LIST.txt
-INSTALL_README.txt
 README.md
+PATCH_NOTES.md
+INSTALL_README.txt
+PATCH_FILE_LIST.txt

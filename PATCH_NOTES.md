@@ -1,22 +1,17 @@
-# World War Z Website v1.50.0 — Events, Rentals & Action Centre Polish
+# World War Z Website v1.51.0 — Admin Operations Centre Overhaul
 
-## Event Planner
-- Shows the managed Discord-card state for each scheduled/live event.
-- Admin can **Publish Discord Card** when missing or **Refresh Discord Card** when already tracked.
-- The website now reflects Bot v1.51.0's single-card event lifecycle instead of encouraging repeated announcement posts.
-
-## Rentals / Member Shop
-- Adds a dedicated **My Rentals** order filter and supports direct `?section=rentals` links from Discord.
-- Rental order cards show a protected **Cancel & Refund** action before the first counted restart.
-- Once a rental has started, the same workflow becomes **End Rental** and clearly states that no automatic refund is issued.
-- Cancellation requires a reason, is revalidated by Railway against the signed-in member/order state, and refreshes the private order history after completion.
-- The Shop now points at the new protected `/api/account/shop/order/action` endpoint supplied by Bot v1.51.0.
-
-## Economy Panels
-- Adds a description for the new managed **Rentals** Discord panel available on both Chernarus and Livonia.
-- Livonia still omits the Trader-only Pelt Information and Weed Operations panels.
+## Admin Operations Centre
+- Rebuilds the existing Audit / Operations page into a consolidated Admin Operations Centre.
+- Adds selected-world context, live current/max population, DayZ/Nitrado state and next-restart visibility at the top of the workspace.
+- Adds the existing protected Restart / Stop / Start controls directly to the centre; the normal confirmation, permission recheck and permanent audit remain unchanged.
+- Adds background-worker cards for server status, ADM, automatic deliveries, moderation expiry, moderation notifications and community engagement; Livonia additionally shows its existing Deathmatch Rotation worker.
+- Adds detailed restart-schedule and ADM-watcher diagnostics without exposing raw log paths or private identifiers.
+- Adds direct Admin shortcuts to Online Players, Player Intelligence, Ban Lists, Moderation Queue, Server Feeds, Automatic Deliveries, Ticket Administration and Operational Failures.
+- Keeps Health Signals, Recent Errors, Operational History and the searchable cross-system audit in the same workspace.
 
 ## Compatibility
-- Pairs with Bot v1.51.0.
-- Advances the PWA release to v1.50.0 without rotating the bounded map-cache generation.
-- No DayZ mission, Nitrado, map-data, player-data or server-wipe changes are required.
+- Pairs with Bot v1.52.0.
+- Chernarus/Livonia isolation is unchanged.
+- Livonia Deathmatch Rotation configuration/behaviour is unchanged.
+- PWA advances to v1.51.0 without rotating the bounded map-cache generation.
+- No DayZ mission, Nitrado configuration, database wipe or manual migration is required.

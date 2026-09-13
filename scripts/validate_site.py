@@ -351,7 +351,11 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     operations_lazy = (ROOT / "assets/js/dashboard/lazy-assets.js").read_text(encoding="utf-8")
     operations_admin = (ROOT / "assets/js/dashboard/administration.js").read_text(encoding="utf-8")
     for token in (
-        'Audit / Operations Centre',
+        'Admin Operations Centre',
+        'data-operations-population=""',
+        'data-operations-workers=""',
+        'data-operations-adm-last-success=""',
+        'data-operations-nav-section="banlists"',
         'data-operations-services=""',
         'data-operations-history=""',
         '<option value="operations">Operations</option>',
@@ -370,24 +374,26 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         ".operations-health-hero",
         ".operations-service-grid",
         ".operations-monitor-grid",
+        ".operations-worker-grid",
+        ".operations-shortcut-grid",
         "@media (max-width:620px)",
     ):
         if token not in operations_css:
             errors.append(f"operations-centre.css: missing layout guard: {token}")
     for token in (
         "ensureOperationsCentre",
-        "assets/js/dashboard/operations-centre.js?v=1.36.0&rev=operations-centre-1",
-        "assets/css/dashboard/operations-centre.css?v=1.36.0&rev=operations-centre-1",
+        "assets/js/dashboard/operations-centre.js?v=1.51.0&rev=admin-operations-1",
+        "assets/css/dashboard/operations-centre.css?v=1.51.0&rev=admin-operations-1",
     ):
         if token not in operations_lazy:
             errors.append(f"lazy-assets.js: missing Operations Centre lazy asset: {token}")
     if "section === 'server-audit') loadServerActionHistory()" not in operations_admin:
         errors.append("administration.js: Operations Centre must auto-load the unified audit.")
 
-    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.50.0</strong></div>' not in dashboard:
+    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.51.0</strong></div>' not in dashboard:
         errors.append("dashboard.html: command-centre footer release label is stale.")
 
-    if "Website v1.50.0 · Bot v1.51.0" not in index:
+    if "Website v1.51.0 · Bot v1.52.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
 
     economy_panels_js = (ROOT / "assets/js/dashboard/economy-panels.js").read_text(encoding="utf-8")
@@ -935,7 +941,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         errors.append(
             "dashboard.html: command library must be lazy-loaded instead of downloaded on every dashboard visit."
         )
-    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.50.0&amp;rev=events-rentals-polish-1'
+    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.51.0&amp;rev=admin-operations-1'
     lazy_index = dashboard.find(lazy_script)
     shell_index = dashboard.find("assets/js/dashboard/shell.js")
     if lazy_index < 0:
@@ -1968,8 +1974,8 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
         errors.append(f"Apple touch icon dimensions are {apple_dimensions}; expected (180, 180).")
 
     launch_requirements = {
-        "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.51.0"),
-        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/server-context.js?v=1.42.0&amp;rev=livonia-live-1", "assets/js/dashboard/lazy-assets.js?v=1.50.0&amp;rev=events-rentals-polish-1"),
+        "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.52.0"),
+        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/server-context.js?v=1.42.0&amp;rev=livonia-live-1", "assets/js/dashboard/lazy-assets.js?v=1.51.0&amp;rev=admin-operations-1"),
         "assets/js/dashboard/server-context.js": ("player_capacity", "Capacity', `${server.player_capacity} slots`"),
         "assets/js/dashboard/account.js": ("payload.server?.player_capacity",),
         "assets/js/dashboard/livonia-pvp.js": ("rotation.player_capacity", "players online"),
@@ -1983,8 +1989,8 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.50.0'",
-        "const WWZ_PWA_UPDATE_REVISION = '2026-09-13-website-v1-50-0'",
+        "const WWZ_PWA_VERSION = '1.51.0'",
+        "const WWZ_PWA_UPDATE_REVISION = '2026-09-14-website-v1-51-0'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
         "if (request.method !== 'GET') return;",
