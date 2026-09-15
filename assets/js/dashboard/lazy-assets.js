@@ -201,7 +201,7 @@
   const ensureZones = () => Promise.all([ensureMapRuntime(), ensureZonesStyles()])
     .then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
       'zones',
-      'assets/js/dashboard/zones.js?v=1.25.5&rev=console-pve-travel-1',
+      'assets/js/dashboard/zones.js?v=1.54.0&rev=chernarus-pvp-zones-1',
       () => window.__wwzZonesReady === true
     )));
 

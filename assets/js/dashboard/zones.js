@@ -191,7 +191,7 @@
             const z = $('[data-zone-center-z]');
             if (x) x.value = formatCoordinate(point.x);
             if (z) z.value = formatCoordinate(point.z);
-          } else if (state.editorPoints.length < 64) {
+          } else if (state.editorPoints.length < 256) {
             state.editorPoints.push({ x: Number(point.x.toFixed(1)), z: Number(point.z.toFixed(1)) });
           }
           renderEditorGeometry();
@@ -475,7 +475,7 @@
   const renderPolygonPointList = () => {
     const list = $('[data-zone-point-list]');
     const count = $('[data-zone-point-count]');
-    if (count) count.textContent = `${state.editorPoints.length} / 64 points`;
+    if (count) count.textContent = `${state.editorPoints.length} / 256 points`;
     if (!list) return;
     list.replaceChildren();
     state.editorPoints.forEach((point, index) => {
