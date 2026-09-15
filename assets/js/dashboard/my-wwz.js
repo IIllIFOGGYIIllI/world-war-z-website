@@ -412,7 +412,7 @@
       if (expedition) body.append(row({ title: 'Active PvE expedition', value: expedition.name || 'Expedition', detail: expedition.ends_at ? `Ends ${relative(expedition.ends_at)}` : (expedition.tier || 'PvE operation'), target: '/dashboard.html#chernaruspve/operations', tone: 'pve' }));
       if (goal?.name) body.append(row({ title: 'Community goal', value: `${Number(goal.percent || 0).toFixed(0)}%`, detail: goal.name, target: '/dashboard.html#chernaruspve/operations', tone: goal.completed ? 'good' : 'pve' }));
       if (snapshot.home?.profile?.linked && passport.total) body.append(row({ title: 'Survivor Passport', value: `${integer(passport.discovered)} / ${integer(passport.total)}`, detail: `${Number(passport.percent || 0).toFixed(0)}% of Chernarus discovered`, target: '/dashboard.html#chernaruspve/operations', tone: 'pve' }));
-      root.querySelector('[data-my-wwz-world-state]').textContent = 'Chernarus PvE';
+      root.querySelector('[data-my-wwz-world-state]').textContent = 'Chernarus PvE · Military PvP Zones';
     } else {
       const hotspot = world.hotspots?.[0];
       const wanted = world.most_wanted?.[0];

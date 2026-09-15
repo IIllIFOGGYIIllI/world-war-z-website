@@ -73,9 +73,14 @@ def main() -> int:
 
     apk_name = f'World-War-Z-Companion-v{version}.apk'
     zip_name = f'World-War-Z-Companion-v{version}.zip'
+    stable_apk_name = 'World-War-Z-Companion.apk'
+    stable_zip_name = 'World-War-Z-Companion.zip'
     apk_target = downloads / apk_name
     zip_target = downloads / zip_name
+    stable_apk_target = downloads / stable_apk_name
+    stable_zip_target = downloads / stable_zip_name
     shutil.copy2(apk, apk_target)
+    shutil.copy2(apk, stable_apk_target)
 
     # Build a deterministic ZIP fallback so the same signed APK always produces
     # the same size/hash even when GitHub Actions rebuild timestamps differ.
@@ -84,6 +89,7 @@ def main() -> int:
     zip_info.external_attr = 0o644 << 16
     with zipfile.ZipFile(zip_target, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
         archive.writestr(zip_info, apk_target.read_bytes())
+    shutil.copy2(zip_target, stable_zip_target)
 
     apk_sha = sha256_file(apk_target)
     zip_sha = sha256_file(zip_target)
@@ -99,9 +105,10 @@ def main() -> int:
         'version_code': code,
         'released_at': released_at,
         'minimum_android_api': minimum_sdk,
-        'apk_url': f'{args.release_base.rstrip("/")}/companion-v{version}/{apk_name}',
-        'zip_url': f'{args.release_base.rstrip("/")}/companion-v{version}/{zip_name}',
+        'apk_url': f'{args.release_base.rstrip("/")}/companion-v{version}/{stable_apk_name}',
+        'zip_url': f'{args.release_base.rstrip("/")}/companion-v{version}/{stable_zip_name}',
         'release_page_url': f'https://github.com/IIllIFOGGYIIllI/world-war-z-website/releases/tag/companion-v{version}',
+        'release_api_url': f'https://api.github.com/repos/IIllIFOGGYIIllI/world-war-z-website/releases/tags/companion-v{version}',
         'apk_size_bytes': apk_target.stat().st_size,
         'zip_size_bytes': zip_target.stat().st_size,
         'apk_sha256': apk_sha,
@@ -119,6 +126,7 @@ def main() -> int:
     print(f'WWZ Companion v{version} ({code})')
     print(f'APK: {apk_target} [{apk_sha}]')
     print(f'ZIP fallback: {zip_target} [{zip_sha}]')
+    print(f'Stable aliases: {stable_apk_target.name}, {stable_zip_target.name}')
     print(f'Metadata: {data_dir / "companion-release.json"}')
     return 0
 

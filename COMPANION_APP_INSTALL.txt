@@ -4,8 +4,8 @@ WORLD WAR Z COMPANION - ANDROID DIRECT DISTRIBUTION
 CURRENT APP
 Name: World War Z Companion
 Package: com.worldwarz.companion
-Stable version: 1.0.0
-Version code: 10000
+Stable version: 1.0.1
+Version code: 10001
 
 DISTRIBUTION MODEL
 Signed APK and ZIP fallback files are published as durable GitHub Release assets:
@@ -20,8 +20,9 @@ AUTOMATIC RELEASE PUBLISHING
 1. builds the signed APK/AAB,
 2. packages the APK + ZIP fallback,
 3. creates or updates the matching GitHub Release,
-4. uploads the APK and ZIP as permanent release assets,
-5. keeps the AAB and assetlinks.json in the workflow artifact for later use.
+4. uploads versioned APK/ZIP files plus stable World-War-Z-Companion.apk/.zip aliases,
+5. writes the exact release size/hash metadata back to assets/data/companion-release.json,
+6. keeps the AAB and assetlinks.json in the workflow artifact for later use.
 
 The workflow uses the existing WWZ_ANDROID_* signing secrets and the permanent
 production signing key. Never commit the JKS, Base64 key or passwords.

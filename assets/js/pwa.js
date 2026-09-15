@@ -29,7 +29,7 @@
 
   const syncInstallButtons = () => {
     const standalone = setStandaloneState();
-    const available = !standalone && (Boolean(deferredInstallPrompt) || isIOS());
+    const available = !standalone;
     installButtons().forEach((button) => {
       button.hidden = !available;
       button.disabled = !available;
@@ -153,7 +153,7 @@
       button.type = 'button';
       button.textContent = 'Download APK';
       button.addEventListener('click', () => {
-        window.location.assign(String(release.release_page_url || 'companion.html') + '?from=app-update');
+        window.location.assign('companion.html?from=app-update');
       });
       banner.append(copy, button);
       document.body.append(banner);
@@ -212,17 +212,21 @@
     dialog = document.createElement('dialog');
     dialog.className = 'pwa-dialog';
     dialog.dataset.pwaInstallHelp = '';
+    const mobileApple = isIOS();
+    const mobileAndroid = /android/i.test(navigator.userAgent);
+    const heading = mobileApple ? 'Install On iPhone Or iPad' : (mobileAndroid ? 'Install On Android' : 'Install WWZ App');
+    const steps = mobileApple
+      ? '<li>Open this page in Safari.</li><li>Tap the Share button.</li><li>Choose <strong>Add to Home Screen</strong>, then tap <strong>Add</strong>.</li>'
+      : mobileAndroid
+        ? '<li>Open this page in Chrome, Edge, Samsung Internet or another PWA-capable browser.</li><li>Open the browser menu and choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.</li><li>If the option is missing, reload the page once and check the browser menu again.</li>'
+        : '<li>Use the install icon in your browser address bar when available.</li><li>Otherwise open the browser menu and choose <strong>Install World War Z</strong>, <strong>Install app</strong> or <strong>Apps → Install this site as an app</strong>.</li><li>If your browser does not support web-app installation, use the normal dashboard in the browser.</li>';
     dialog.innerHTML = `
       <form method="dialog">
         <button aria-label="Close install instructions" class="pwa-dialog-close" value="close">×</button>
         <img alt="" aria-hidden="true" class="pwa-dialog-icon" src="assets/icons/pwa/icon-192.png" />
         <p class="pwa-dialog-kicker">WWZ Server Companion</p>
-        <h2>Install On iPhone Or iPad</h2>
-        <ol>
-          <li>Open this page in Safari.</li>
-          <li>Tap the Share button.</li>
-          <li>Choose <strong>Add to Home Screen</strong>, then tap <strong>Add</strong>.</li>
-        </ol>
+        <h2>${heading}</h2>
+        <ol>${steps}</ol>
         <p>The installed app uses this same website, Discord sign-in and Railway backend.</p>
         <button class="pwa-dialog-action" value="close">Got It</button>
       </form>`;
@@ -239,7 +243,7 @@
   const promptInstall = async () => {
     if (isStandalone()) return;
     if (!deferredInstallPrompt) {
-      if (isIOS()) showInstallHelp();
+      showInstallHelp();
       return;
     }
     const prompt = deferredInstallPrompt;

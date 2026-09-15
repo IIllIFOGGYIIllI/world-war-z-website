@@ -130,6 +130,13 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+      - name: Require signing key for main release
+        if: ${{ github.ref == 'refs/heads/main' && env.WWZ_ANDROID_KEYSTORE_BASE64 == '' }}
+        shell: bash
+        run: |
+          echo "WWZ Android signing secrets are required to publish the public Companion release from main." >&2
+          exit 1
+
       - name: Restore release signing key
         if: ${{ env.WWZ_ANDROID_KEYSTORE_BASE64 != '' }}
         working-directory: android-app
@@ -188,6 +195,8 @@ jobs:
           TITLE="WWZ Companion v${WWZ_COMPANION_VERSION}"
           APK="$WWZ_RELEASE_ROOT/downloads/android/World-War-Z-Companion-v${WWZ_COMPANION_VERSION}.apk"
           ZIP="$WWZ_RELEASE_ROOT/downloads/android/World-War-Z-Companion-v${WWZ_COMPANION_VERSION}.zip"
+          STABLE_APK="$WWZ_RELEASE_ROOT/downloads/android/World-War-Z-Companion.apk"
+          STABLE_ZIP="$WWZ_RELEASE_ROOT/downloads/android/World-War-Z-Companion.zip"
           NOTES="Official signed World War Z Companion Android release. Website/PWA feature updates continue to arrive separately through the live WWZ service worker."
 
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
@@ -196,16 +205,32 @@ jobs:
               --title "$TITLE" \
               --notes "$NOTES" \
               --latest
-            gh release upload "$TAG" "$APK" "$ZIP" \
+            gh release upload "$TAG" "$APK" "$ZIP" "$STABLE_APK" "$STABLE_ZIP" \
               --repo "$GITHUB_REPOSITORY" \
               --clobber
           else
-            gh release create "$TAG" "$APK" "$ZIP" \
+            gh release create "$TAG" "$APK" "$ZIP" "$STABLE_APK" "$STABLE_ZIP" \
               --repo "$GITHUB_REPOSITORY" \
               --target "$GITHUB_SHA" \
               --title "$TITLE" \
               --notes "$NOTES" \
               --latest
+          fi
+
+      - name: Publish release metadata to website
+        if: ${{ env.WWZ_ANDROID_KEYSTORE_BASE64 != '' && github.ref == 'refs/heads/main' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp "$WWZ_RELEASE_ROOT/assets/data/companion-release.json" assets/data/companion-release.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/data/companion-release.json
+          if git diff --cached --quiet; then
+            echo "Companion release metadata is already current."
+          else
+            git commit -m "Update Companion release metadata"
+            git push origin HEAD:main
           fi
 
       - name: Upload signed Android release

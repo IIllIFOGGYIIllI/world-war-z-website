@@ -1,22 +1,26 @@
-# World War Z Website v1.52.0 — Moderation & Case Management Centre
+# World War Z Website v1.53.0 — Companion Distribution & Chernarus PvE Alignment
 
-## Moderation Centre
-- Adds a new Admin navigation workspace that summarizes active cases, warnings, timeouts, Discord/DayZ bans, reviews, appeals, watchlist state, overdue work, assignments, evidence gaps and failed operations for the selected server.
-- Adds prioritised case work, active-enforcement cards, watchlist entries, recent private notes and recent case history with direct protected hand-offs into the existing case dialog or Player Intelligence dossier.
-- Adds a fast protected PlayStation/Discord player search directly inside the centre.
-- Keeps Moderation Queue, Moderation Cases, Current Ban Lists and Player Intelligence as specialist workspaces rather than replacing them.
+## Companion / App Download Repair
+- Repairs the Android Companion distribution path after the old `companion-v1.0.0` GitHub Release disappeared and left direct APK/ZIP links returning 404.
+- Advances the signed Android wrapper to **v1.0.1 / version code 10001** and triggers a fresh signed build when this update is pushed.
+- The Android workflow now publishes both versioned files and stable `World-War-Z-Companion.apk` / `.zip` aliases to the matching GitHub Release.
+- Exact APK/ZIP size and SHA-256 metadata is written back to `assets/data/companion-release.json` automatically after the signed release is published, eliminating manually stale release metadata.
+- Companion buttons verify the GitHub Release and actual APK asset before exposing a direct download; a missing release is shown as temporarily unavailable instead of sending players to a dead link.
+- Homepage Android downloads only switch from the Companion page to a direct APK after the GitHub asset is confirmed live.
 
-## Player Intelligence
-- Adds Add/Remove Watchlist actions.
-- Adds Discord Timeout/Remove Timeout actions with preset durations from 1 minute through 28 days.
-- Buttons react to the selected player's current watchlist and timeout state, while Railway remains authoritative for permissions and target protection.
+## Installable Web App
+- `Install App` controls remain available whenever the site is not already installed instead of disappearing when a browser does not expose `beforeinstallprompt`.
+- Browsers without a programmatic install prompt now receive platform-appropriate Android, iPhone/iPad or desktop installation instructions.
+- Native app-update prompts return to the Companion page, where release availability is verified before download.
 
-## Navigation & PWA
-- Command Centre and Operations Centre moderation shortcuts now lead to the unified Moderation Centre.
-- PWA advances to v1.52.0 without rotating the bounded map-cache generation.
+## Chernarus PvE Alignment
+- Public Chernarus copy now states that the world is PvE outside designated fenced military PvP areas or explicitly announced temporary event zones.
+- My WWZ identifies the selected world as `Chernarus PvE · Military PvP Zones`.
+- The public home command count is corrected to 100.
+- Live rules remain sourced from Bot v1.54.0, which safely migrates untouched stock Chernarus rules to the new PvE / fenced military PvP model.
 
-## Compatibility
-- Pairs with Bot v1.53.0.
-- Chernarus/Livonia isolation is unchanged.
-- Livonia Deathmatch Rotation remains intentionally deferred and unchanged.
-- No DayZ mission, Nitrado configuration, database wipe or manual migration is required.
+## PWA / Compatibility
+- PWA advances to v1.53.0 without rotating the bounded map-cache generation.
+- Pairs with Bot v1.54.0.
+- No map tile/data replacement, Railway database wipe, DayZ mission upload or Nitrado configuration change is required.
+- DayZ++ fenced military zone definitions are not modified by the website release.

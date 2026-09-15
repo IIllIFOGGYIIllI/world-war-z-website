@@ -76,8 +76,21 @@ const ensureCompanionDownloadEntryPoints = async () => {
     });
     if (!response.ok) return;
     const release = await response.json();
-    const apkUrl = String(release?.apk_url || '').trim();
     const version = String(release?.version || '').trim();
+    const apiUrl = String(release?.release_api_url || '').trim() || (
+      version ? `https://api.github.com/repos/IIllIFOGGYIIllI/world-war-z-website/releases/tags/companion-v${encodeURIComponent(version)}` : ''
+    );
+    if (!apiUrl) return;
+    const releaseResponse = await fetch(apiUrl, {
+      headers: { Accept: 'application/vnd.github+json' },
+      cache: 'no-store'
+    });
+    if (!releaseResponse.ok) return;
+    const hostedRelease = await releaseResponse.json();
+    const wanted = new Set(['World-War-Z-Companion.apk', `World-War-Z-Companion-v${version}.apk`]);
+    const apkAsset = (Array.isArray(hostedRelease?.assets) ? hostedRelease.assets : [])
+      .find((asset) => wanted.has(String(asset?.name || '')));
+    const apkUrl = String(apkAsset?.browser_download_url || '').trim();
     if (!/^https:\/\//i.test(apkUrl)) return;
 
     downloadButton.href = apkUrl;

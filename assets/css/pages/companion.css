@@ -53,3 +53,11 @@
 .companion-checks li::before { content:"✓"; position:absolute; left:0; color:#5bc78b; font-weight:900; }
 @media (max-width:900px) { .companion-hero { padding-top:130px; } .companion-hero-layout,.companion-grid { grid-template-columns:1fr; } .companion-device-card { max-width:520px; } .companion-panel-featured { grid-row:auto; } }
 @media (max-width:620px) { .companion-hero { min-height:0; padding:116px 0 70px; } .companion-hero-copy h1 { font-size:clamp(50px,16vw,78px); } .companion-actions { display:grid; grid-template-columns:1fr; } .companion-actions .button { width:100%; text-align:center; } .companion-device-card { padding:28px; } .companion-section { padding:60px 0 90px; } .companion-integrity dl { grid-template-columns:1fr; } }
+
+.companion-actions .button.is-disabled,
+.companion-actions .button[aria-disabled="true"] {
+  opacity: .52;
+  cursor: not-allowed;
+  pointer-events: none;
+  filter: saturate(.45);
+}
