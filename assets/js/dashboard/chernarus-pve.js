@@ -121,7 +121,11 @@
     if (rewardMoney) rewardMoney.textContent = `+$${Number(payload.rewards?.first_visit_currency || 0).toLocaleString()}`;
 
     if (expeditionList) {
-      expeditionList.innerHTML = (payload.expeditions || []).map((item) => `<article class="chernarus-pve-card"><span class="chernarus-pve-tag ${String(item.tier || '').toLowerCase() === 'endgame' ? 'endgame' : ''}">${escapeHtml(item.tier || 'PVE')} EXPEDITION</span><strong>${escapeHtml(item.name)}</strong><small>X ${Number(item.x).toFixed(0)} / Z ${Number(item.z).toFixed(0)} · ${Number(item.radius).toFixed(0)} m radius</small><span>${escapeHtml(item.detail || '')}</span><small>Rotates in ${escapeHtml(fmtCountdown(item.ends_at))}</small></article>`).join('') || '<p class="empty-state">No active expedition data is available.</p>';
+      expeditionList.innerHTML = (payload.expeditions || []).map((item) => {
+        const pointCount = Array.isArray(item.points) ? item.points.length : 0;
+        const boundary = pointCount >= 3 ? `Exact fenced polygon · ${pointCount} boundary points` : 'Managed fenced military PvP area';
+        return `<article class="chernarus-pve-card"><span class="chernarus-pve-tag endgame">PVP EXPEDITION</span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(boundary)}</small><span>${escapeHtml(item.detail || '')}</span><small>Rotates in ${escapeHtml(fmtCountdown(item.ends_at))}</small></article>`;
+      }).join('') || '<p class="empty-state">No active expedition data is available.</p>';
     }
 
     const community = payload.community_goal || {};

@@ -189,7 +189,7 @@
     )
   ]))).then(() => loadScriptOnce(
     'dashboard-map-intelligence',
-    'assets/js/pages/dashboard-map-intelligence.js?v=1.26.0&rev=chernarus-progression-1',
+    'assets/js/pages/dashboard-map-intelligence.js?v=1.54.1&rev=pvp-expedition-sync-1',
     () => window.__wwzMapIntelligenceReady === true
   ));
 
@@ -367,7 +367,7 @@
     loadStylesheetOnce('chernarus-pve-css', 'assets/css/dashboard/chernarus-pve.css?v=1.26.0&rev=chernarus-progression-1'),
     loadAfterDashboardRuntime(() => loadScriptOnce(
       'chernarus-pve',
-      'assets/js/dashboard/chernarus-pve.js?v=1.26.0&rev=chernarus-progression-1',
+      'assets/js/dashboard/chernarus-pve.js?v=1.54.1&rev=pvp-expedition-sync-1',
       () => window.__wwzChernarusPveReady === true
     ))
   ]).then(() => undefined);

@@ -1,7 +1,7 @@
-# World War Z Website v1.54.0
+# World War Z Website v1.54.1
 
-Current cumulative website/PWA release for the World War Z DayZ console ecosystem.
+Companion website for the World War Z PlayStation DayZ community.
 
-This release extends the protected Zones editor to support the exact Chernarus DayZ++ military PvP polygons used by Bot v1.55.0. Polygon editing now supports up to 256 vertices, allowing the 151-point NWAF fenced boundary to display and round-trip without simplification.
+This hotfix pairs with Bot v1.55.1 and aligns Chernarus rotating expedition presentation with the exact seven managed fenced military PvP areas. Active expedition map overlays now use the same polygon geometry as the Kill Zone system rather than approximate circles, and expedition cards identify the managed PvP-area boundary directly.
 
-The existing public Kill Zone map layer automatically renders the newly managed Chernarus military polygons once the bot provisions them. Chernarus/Livonia isolation is preserved, Livonia Deathmatch Rotation remains intentionally unchanged, and the bounded map-cache generation remains unchanged. Pairs with Bot v1.55.0.
+The bounded map-cache generation remains unchanged. Livonia remains isolated and unchanged.

@@ -276,17 +276,24 @@
       syncLayerToMap(passportLayer, false);
       return;
     }
-    const makeCircle = (item) => {
-      const zone = { center_x: Number(item.x), center_z: Number(item.z), radius: Number(item.radius) };
-      const latLngs = circleWorldPoints(zone).map((point) => window.WWZMap?.worldToLeaflet?.([point.x, point.z], instance.mapKey)).filter(Boolean);
+    const makeExpeditionShape = (item) => {
+      let latLngs = [];
+      const points = Array.isArray(item.points) ? item.points : [];
+      if (String(item.shape || '').toLowerCase() === 'polygon' && points.length >= 3) {
+        latLngs = points.map((point) => window.WWZMap?.worldToLeaflet?.([Number(point.x), Number(point.z)], instance.mapKey)).filter(Boolean);
+      } else {
+        const zone = { center_x: Number(item.x), center_z: Number(item.z), radius: Number(item.radius) };
+        latLngs = circleWorldPoints(zone).map((point) => window.WWZMap?.worldToLeaflet?.([point.x, point.z], instance.mapKey)).filter(Boolean);
+      }
       if (latLngs.length < 3) return null;
-      const colour = String(item.tier || '').toLowerCase() === 'endgame' ? '#d52b1e' : '#4caf78';
+      const colour = '#d52b1e';
       const polygon = L.polygon(latLngs, { color: colour, weight: 2.5, opacity: .95, fillColor: colour, fillOpacity: .12, interactive: true });
-      polygon.bindPopup(`<div class="wwz-map-intel-popup"><strong>${escapeHtml(item.name)}</strong><span>Active Chernarus PvE Expedition · ${escapeHtml(item.tier || 'PvE')}</span><small>${Number(item.radius).toFixed(0)} m radius</small></div>`);
+      const geometry = points.length >= 3 ? `${points.length} boundary points` : `${Number(item.radius).toFixed(0)} m compatibility radius`;
+      polygon.bindPopup(`<div class="wwz-map-intel-popup"><strong>${escapeHtml(item.name)}</strong><span>Active Chernarus PvP Expedition</span><small>${escapeHtml(geometry)}</small></div>`);
       return polygon;
     };
     (state.chernarus_pve.expeditions || []).forEach((item) => {
-      const shape = makeCircle(item);
+      const shape = makeExpeditionShape(item);
       if (shape) expeditionLayer.addLayer(shape);
     });
     const heat = Array.isArray(state.chernarus_pve.heatmap_24h) ? state.chernarus_pve.heatmap_24h : [];
@@ -362,8 +369,8 @@
     const factionRow = state.faction ? `<label class="map-intel-layer-row"><input data-intel-layer="faction" type="checkbox" ${layerVisibility.faction ? 'checked' : ''}><span class="map-intel-swatch" style="--intel-colour:${cleanColour(state.faction.colour, '#8F1D1D')}"></span><span><strong>${escapeHtml(state.faction.name)}</strong><small>Faction</small></span></label>` : '';
     const livoniaPvpRow = state.livonia_pvp ? `<label class="map-intel-layer-row"><input data-intel-layer="livoniapvp" type="checkbox" ${layerVisibility.livoniapvp ? 'checked' : ''}><span class="map-intel-swatch" style="--intel-colour:#f2a33a"></span><span><strong>Livonia PvP</strong><small>Hotspots &amp; faction objective</small></span></label>` : '';
     const livoniaHeatRow = state.livonia_pvp ? `<label class="map-intel-layer-row"><input data-intel-layer="livoniaheatmap" type="checkbox" ${layerVisibility.livoniaheatmap ? 'checked' : ''}><span class="map-intel-swatch" style="--intel-colour:#ff5c48"></span><span><strong>PvP Heatmap</strong><small>Confirmed kills · last 24 hours</small></span></label>` : '';
-    const chernarusPveRow = state.chernarus_pve ? `<label class="map-intel-layer-row"><input data-intel-layer="chernaruspve" type="checkbox" ${layerVisibility.chernaruspve ? 'checked' : ''}><span class="map-intel-swatch" style="--intel-colour:#4caf78"></span><span><strong>Chernarus PvE</strong><small>Active expedition areas</small></span></label>` : '';
-    const chernarusHeatRow = state.chernarus_pve ? `<label class="map-intel-layer-row"><input data-intel-layer="chernarusheatmap" type="checkbox" ${layerVisibility.chernarusheatmap ? 'checked' : ''}><span class="map-intel-swatch" style="--intel-colour:#8ad7a9"></span><span><strong>PvE Heatmap</strong><small>Periodic expedition check-ins · last 24 hours</small></span></label>` : '';
+    const chernarusPveRow = state.chernarus_pve ? `<label class="map-intel-layer-row"><input data-intel-layer="chernaruspve" type="checkbox" ${layerVisibility.chernaruspve ? 'checked' : ''}><span class="map-intel-swatch" style="--intel-colour:#4caf78"></span><span><strong>Chernarus PvP Expeditions</strong><small>Active fenced military areas</small></span></label>` : '';
+    const chernarusHeatRow = state.chernarus_pve ? `<label class="map-intel-layer-row"><input data-intel-layer="chernarusheatmap" type="checkbox" ${layerVisibility.chernarusheatmap ? 'checked' : ''}><span class="map-intel-swatch" style="--intel-colour:#8ad7a9"></span><span><strong>Expedition Heatmap</strong><small>Periodic PvP-area expedition check-ins · last 24 hours</small></span></label>` : '';
     const chernarusPassportRow = state.chernarus_pve?.passport ? `<label class="map-intel-layer-row"><input data-intel-layer="chernaruspassport" type="checkbox" ${layerVisibility.chernaruspassport ? 'checked' : ''}><span class="map-intel-swatch" style="--intel-colour:#9ce0b9"></span><span><strong>My Survivor Passport</strong><small>${Number(state.chernarus_pve.passport.discovered || 0)} / ${Number(state.chernarus_pve.passport.total || 0)} discovered</small></span></label>` : '';
     layerControls.innerHTML = `
       <label class="map-intel-layer-row"><input data-intel-layer="private" type="checkbox" ${layerVisibility.private ? 'checked' : ''}><span class="map-intel-swatch private"></span><span><strong>Private</strong><small>This browser only</small></span></label>

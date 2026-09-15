@@ -1,8 +1,9 @@
 404.html
 PATCH_NOTES.md
 README.md
+assets/js/dashboard/chernarus-pve.js
 assets/js/dashboard/lazy-assets.js
-assets/js/dashboard/zones.js
+assets/js/pages/dashboard-map-intelligence.js
 changelog.html
 community-guidelines.html
 companion.html
@@ -20,3 +21,4 @@ scripts/validate_site.py
 shop.html
 sw.js
 terms.html
+PATCH_FILE_LIST.txt
