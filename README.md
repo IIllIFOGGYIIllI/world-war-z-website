@@ -1,9 +1,9 @@
-# World War Z Website v1.54.2
+# World War Z Website v1.54.3
 
 Companion website for the World War Z PlayStation DayZ community.
 
-This release pairs with Bot v1.55.2 and hardens both Chernarus Zone Management and Shop Administration. Managed Chernarus PvP polygons retain the exact DayZ++ geometry and fixed gameplay profile, while the bot enforces illegal open-world/cross-boundary PvP.
+This release pairs with Bot v1.55.3 and completes the Owner Shop catalogue-management pass. Shop Administration can maintain persistent classname/wildcard sync exclusions, delete or Delete & Exclude catalogue entries, deliberately preserve custom source-backed labels, and return an item to its synced generated label/category. Built-in exclusions keep applied splint helper types, chem lights and party tents out of automatic catalogue sync.
 
-Owner Shop Administration now exposes the real DayZ delivery classnames directly: normal item Types and event/rental child classnames can be edited, live-CE validated and saved as deliberate Owner overrides. Catalogue tables show the current classname values and sync feedback identifies automatic repairs or unresolved legacy values.
+The Automatic Delivery workspace also exposes Retry item spawn for paid normal-item deliveries that are missing in game. The existing order and coordinates are reused without charging the member again.
 
-The PWA advances to v1.54.2 without rotating the bounded map-cache generation. Livonia remains isolated and unchanged by the Chernarus PvE policy.
+The PWA advances to v1.54.3 without rotating the bounded map-cache generation. Chernarus/Livonia isolation and the v1.54.2 PvE/zone behaviour remain unchanged.

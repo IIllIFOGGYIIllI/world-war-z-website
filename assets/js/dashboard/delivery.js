@@ -278,7 +278,9 @@ const performDeliveryAction = async (order, action) => {
     verify: 'This verifies the initial spawn. Multi-restart rentals remain active until their restart count reaches zero.',
     cleanup: 'The DayZ server must be fully stopped. This will retire the temporary event entries and mark the completed rental fulfilled.',
     rollback: 'This will restore the recorded pre-deployment backups.',
-    retry_spawn: 'Only use this if the vehicle/event is definitely missing. This will NOT charge the member again. It requeues the same paid order at the recorded X/Z/angle for the next restart; using it when the vehicle already exists could create a duplicate.'
+    retry_spawn: order?.delivery_kind === 'item'
+      ? 'Only use this if the delivered item(s) are definitely missing in-game. This will NOT charge the member again. It requeues the same paid order at the recorded X/Y/Z/angle using a fresh item-spawn deployment for the next restart; using it when the items already exist could create duplicates.'
+      : 'Only use this if the vehicle/event is definitely missing. This will NOT charge the member again. It requeues the same paid order at the recorded X/Z/angle for the next restart; using it when the vehicle already exists could create a duplicate.'
   };
   if (warnings[action] && !window.confirm(warnings[action])) return;
   deliveryActionInProgress = true;
@@ -286,7 +288,7 @@ const performDeliveryAction = async (order, action) => {
     const response = await protectedActionFetch(ADMIN_SHOP_DELIVERY_ACTION_URL, {
       method: 'POST',
       headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ delivery_id: order.delivery_id, action, note })
+      body: JSON.stringify({ delivery_id: order.delivery_id, delivery_kind: order.delivery_kind, action, note })
     });
     const payload = await response.json().catch(() => ({}));
     if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: true })) return;
@@ -352,7 +354,7 @@ const renderDeliveryQueue = (payload) => {
     if (delivery.last_error) { const error=document.createElement('p'); error.className='delivery-error-copy'; error.textContent=`Last deployment error: ${delivery.last_error}`; card.append(error); }
     const automationNote=document.createElement('p'); automationNote.className='delivery-automation-note'; automationNote.textContent=deliveryStatusHelp[deliveryState]||'Railway is managing this delivery automatically.'; card.append(automationNote);
     const latestEvent=Array.isArray(delivery.events)?delivery.events[0]:null; if(latestEvent?.note){ const eventLine=document.createElement('div'); eventLine.className='delivery-latest-event'; const label=document.createElement('span'); label.textContent='Latest automation event'; const copyText=document.createElement('strong'); copyText.textContent=latestEvent.note; eventLine.append(label,copyText); card.append(eventLine); }
-    const actions=document.createElement('div'); actions.className='heading-actions delivery-actions'; if(delivery.delivery_kind==='event'&&!['cancelled','cancelled_cleaned','rolled_back'].includes(deliveryState)&&!['cancelled','refunded'].includes(order.status)){ actions.append(deliveryActionButton(delivery,'Retry missing spawn','retry_spawn')); } if(['pending','processing'].includes(order.status)) actions.append(adminShopActionButton('Cancel & refund','cancel',order,true)); else if(order.status==='fulfilled') actions.append(adminShopActionButton('Refund order','refund',order,true)); if(actions.childElementCount) card.append(actions);
+    const actions=document.createElement('div'); actions.className='heading-actions delivery-actions'; const retryBlocked=['cancelled','cancelled_cleaned','rolled_back','queued','restart_pending'].includes(deliveryState)||['cancelled','refunded'].includes(order.status); if(!retryBlocked){ actions.append(deliveryActionButton(delivery,delivery.delivery_kind==='event'?'Retry missing spawn':'Retry item spawn','retry_spawn')); } if(['pending','processing'].includes(order.status)) actions.append(adminShopActionButton('Cancel & refund','cancel',order,true)); else if(order.status==='fulfilled') actions.append(adminShopActionButton('Refund order','refund',order,true)); if(actions.childElementCount) card.append(actions);
     deliveryOrderList.append(card);
   });
   if (deliveryEmpty) deliveryEmpty.hidden = orders.length !== 0;

@@ -23,6 +23,7 @@ const OWNER_SHOP_CONFIG_URL = `${DASHBOARD_API_BASE}/api/owner/shop/config`;
 const OWNER_SHOP_ITEM_URL = `${DASHBOARD_API_BASE}/api/owner/shop/item`;
 const OWNER_SHOP_BULK_URL = `${DASHBOARD_API_BASE}/api/owner/shop/bulk`;
 const OWNER_SHOP_SYNC_URL = `${DASHBOARD_API_BASE}/api/owner/shop/sync`;
+const OWNER_SHOP_CATALOGUE_ACTION_URL = `${DASHBOARD_API_BASE}/api/owner/shop/catalogue/action`;
 const OWNER_SHOP_SETTINGS_URL = `${DASHBOARD_API_BASE}/api/owner/shop/settings`;
 const ACCOUNT_DELIVERY_LOCATIONS_URL = `${DASHBOARD_API_BASE}/api/account/delivery/locations`;
 const ACCOUNT_DELIVERY_LOCATION_ACTION_URL = `${DASHBOARD_API_BASE}/api/account/delivery/locations/action`;

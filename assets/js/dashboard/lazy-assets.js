@@ -237,13 +237,13 @@
 
   const ensureShopController = () => ensureShopHelpers().then(() => loadScriptOnce(
     'shop-controller',
-    'assets/js/dashboard/shop.js?v=1.54.2&rev=shop-classname-admin-1',
+    'assets/js/dashboard/shop.js?v=1.54.3&rev=shop-sync-retry-1',
     () => window.__wwzShopControllerReady === true
   ));
 
   const ensureDeliveryController = () => ensureShopController().then(() => loadScriptOnce(
     'delivery-controller',
-    'assets/js/dashboard/delivery.js?v=1.22.93&rev=3',
+    'assets/js/dashboard/delivery.js?v=1.54.3&rev=item-retry-1',
     () => window.__wwzDeliveryControllerReady === true
   ));
 
