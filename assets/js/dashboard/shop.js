@@ -1028,7 +1028,7 @@ const renderOwnerShopItems = () => {
       refreshOwnerBulkState();
     });
     selectCell.append(checkbox);
-    const itemCell = document.createElement('td'); const strong = document.createElement('strong'); strong.textContent = `#${item.item_id} · ${item.name}`; const small = document.createElement('small'); small.textContent = item.sku; itemCell.append(strong, document.createElement('br'), small);
+    const itemCell = document.createElement('td'); const strong = document.createElement('strong'); strong.textContent = `#${item.item_id} · ${item.name}`; const small = document.createElement('small'); small.textContent = item.sku; const typeSmall = document.createElement('small'); typeSmall.className = 'muted-label'; typeSmall.textContent = `${(item.types || []).join(', ') || 'No classname'}${item.classname_override ? ' · Owner override' : ''}`; itemCell.append(strong, document.createElement('br'), small, document.createElement('br'), typeSmall);
     const category = document.createElement('td'); category.textContent = item.category;
     const scope = document.createElement('td'); scope.textContent = String(item.catalogue_scope || 'local').toLowerCase() === 'global' ? 'Global' : 'Local';
     const price = document.createElement('td'); price.textContent = formatMoney(item.price);
@@ -1043,7 +1043,7 @@ const renderOwnerShopItems = () => {
   eventPageItems.forEach((item) => {
     const profile = item.delivery_profile || {};
     const row = document.createElement('tr'); const name = document.createElement('td'); const strong = document.createElement('strong'); strong.textContent = `#${item.item_id} · ${item.name}`; const small = document.createElement('small'); small.textContent = item.sku; name.append(strong, document.createElement('br'), small);
-    const category = document.createElement('td'); category.textContent = item.category; const child = document.createElement('td'); child.textContent = profile.child_type || 'Missing profile'; const price = document.createElement('td'); price.textContent = `${formatMoney(item.price)} / restart`; const restarts = document.createElement('td'); restarts.textContent = `${Number(profile.minimum_restarts || 1).toLocaleString()}–${Number(profile.maximum_restarts || 30000).toLocaleString()}`; const approval = document.createElement('td'); approval.textContent = 'Automatic queue'; const state = document.createElement('td'); const pill = document.createElement('span'); pill.className = `table-status ${item.active ? 'online' : 'offline'}`; pill.textContent = item.active ? 'Active' : 'Inactive'; state.append(pill); const action = document.createElement('td'); action.append(ownerShopEditButton(item)); row.append(name, category, child, price, restarts, approval, state, action); eventFragment.append(row);
+    const category = document.createElement('td'); category.textContent = item.category; const child = document.createElement('td'); child.textContent = `${profile.child_type || 'Missing profile'}${item.classname_override ? ' · Owner override' : ''}`; const price = document.createElement('td'); price.textContent = `${formatMoney(item.price)} / restart`; const restarts = document.createElement('td'); restarts.textContent = `${Number(profile.minimum_restarts || 1).toLocaleString()}–${Number(profile.maximum_restarts || 30000).toLocaleString()}`; const approval = document.createElement('td'); approval.textContent = 'Automatic queue'; const state = document.createElement('td'); const pill = document.createElement('span'); pill.className = `table-status ${item.active ? 'online' : 'offline'}`; pill.textContent = item.active ? 'Active' : 'Inactive'; state.append(pill); const action = document.createElement('td'); action.append(ownerShopEditButton(item)); row.append(name, category, child, price, restarts, approval, state, action); eventFragment.append(row);
   });
   ownerShopItemList.append(manualFragment);
   ownerEventItemList?.append(eventFragment);
@@ -1329,6 +1329,19 @@ shopItemDeliveryType?.addEventListener('change', syncShopItemDeliveryEditor);
 shopItemCooldownEnabled?.addEventListener('change', syncShopPurchaseWindow);
 shopItemRequiredRoles?.addEventListener('change', () => populateShopItemRoleSelect(selectedShopItemRoles()));
 shopEventXml?.addEventListener('input', () => { updateEventEditorCounts(); validateEventTemplateEditors(); });
+shopEventChildReadout?.addEventListener('change', () => {
+  const classname = String(shopEventChildReadout.value || '').trim();
+  try {
+    if (!shopEventXml?.value.trim()) throw new Error('Add Event XML before changing its DayZ classname.');
+    shopEventXml.value = replaceEventXmlChildType(shopEventXml.value, classname);
+    updateEventEditorCounts();
+    validateEventTemplateEditors({ throwOnError: true });
+    showInlineMessage(shopItemMessage, `Event child classname updated to ${classname}. Save the item to apply it.`, 'info');
+  } catch (error) {
+    showInlineMessage(shopItemMessage, error.message || 'The Event XML classname could not be updated.');
+    validateEventTemplateEditors();
+  }
+});
 shopEventZone?.addEventListener('input', () => { updateEventEditorCounts(); validateEventTemplateEditors(); });
 shopEventXmlTools.forEach((button) => button.addEventListener('click', () => handleEventEditorTool(shopEventXml, shopEventXmlStatus, 'event', button.dataset.eventXmlAction)));
 shopEventZoneTools.forEach((button) => button.addEventListener('click', () => handleEventEditorTool(shopEventZone, shopEventZoneStatus, 'zone', button.dataset.eventZoneAction)));
@@ -1622,7 +1635,9 @@ syncDayzCatalogueButton?.addEventListener('click', async () => {
     if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: true })) return;
     if (!response.ok) throw new Error(payload.message || 'Catalogue sync failed.');
     const summary = payload.summary || {};
-    showInlineMessage(ownerShopSyncMessage, `${payload.message || 'DayZ catalogue synced.'} ${Number(summary.items_existing || 0).toLocaleString()} existing item(s) preserved; ${Number(summary.rentals_existing || 0).toLocaleString()} existing rental(s) preserved.`, 'success');
+    const repaired = Number(summary.item_classnames_corrected || 0) + Number(summary.rental_classnames_corrected || 0) + Number(summary.profile_classnames_corrected || 0);
+    const unresolved = Number(summary.unresolved_classname_entries || 0);
+    showInlineMessage(ownerShopSyncMessage, `${payload.message || 'DayZ catalogue synced.'} ${Number(summary.items_existing || 0).toLocaleString()} existing item(s) preserved; ${Number(summary.rentals_existing || 0).toLocaleString()} existing rental(s) preserved; ${repaired.toLocaleString()} classname value(s) repaired${unresolved ? `; ${unresolved.toLocaleString()} unresolved value(s) need Owner review` : ''}.`, unresolved ? 'info' : 'success');
     await Promise.all([loadOwnerShopConfig(sessionToken), loadMemberShop(sessionToken)]);
   } catch (error) {
     showInlineMessage(ownerShopSyncMessage, error.message || 'Catalogue sync failed.');

@@ -124,6 +124,17 @@ const parseEventXmlEditor = (value) => {
   };
 };
 
+const replaceEventXmlChildType = (value, classname) => {
+  const clean = String(classname || '').trim();
+  if (!/^[A-Za-z0-9_.-]+$/.test(clean)) throw new Error('Enter a valid DayZ classname before updating Event XML.');
+  const root = parseXmlEditorSnippet(value, 'Event XML', 'event');
+  const children = requiredXmlChild(root, 'children');
+  const childNodes = [...children.children].filter((child) => child.tagName.toLowerCase() === 'child');
+  if (childNodes.length !== 1) throw new Error('Event XML must contain exactly one <child> element.');
+  childNodes[0].setAttribute('type', clean);
+  return new XMLSerializer().serializeToString(root);
+};
+
 const parseEventZoneEditor = (value) => {
   const text = String(value || '').trim();
   if (!text) return null;

@@ -24,6 +24,7 @@
     editorShape: 'circle',
     editorZoneId: null,
     editorPoints: [],
+    editorManaged: false,
     onlineTimer: null,
     onlineLoading: false,
   };
@@ -191,8 +192,8 @@
             const z = $('[data-zone-center-z]');
             if (x) x.value = formatCoordinate(point.x);
             if (z) z.value = formatCoordinate(point.z);
-          } else if (state.editorPoints.length < 256) {
-            state.editorPoints.push({ x: Number(point.x.toFixed(1)), z: Number(point.z.toFixed(1)) });
+          } else if (!state.editorManaged && state.editorPoints.length < 256) {
+            state.editorPoints.push({ x: Number(point.x.toFixed(4)), z: Number(point.z.toFixed(4)) });
           }
           renderEditorGeometry();
         },
@@ -310,6 +311,7 @@
       const meta = document.createElement('div');
       meta.className = 'zone-row-status';
       meta.append(
+        ...(zone.managed ? [checkboxPill('Managed PvP Area', true, 'activity')] : []),
         checkboxPill(zone.active ? 'Active' : 'Inactive', zone.active, 'activity'),
         checkboxPill(zone.ping_on_detection ? `Radar ${Number(zone.radar_interval_minutes || 5)}m` : 'Radar off', zone.ping_on_detection, 'activity'),
         checkboxPill(zone.alert_on_enter ? 'Entry alerts' : 'Entry off', zone.alert_on_enter),
@@ -338,7 +340,8 @@
       remove.className = 'danger-action compact-action';
       remove.textContent = 'Delete';
       remove.addEventListener('click', () => deleteZone(zone));
-      actions.append(locate, edit, remove);
+      actions.append(locate, edit);
+      if (!zone.managed) actions.append(remove);
 
       row.append(swatch, copy, actions);
       body.append(row);
@@ -486,7 +489,9 @@
       remove.type = 'button';
       remove.textContent = '×';
       remove.setAttribute('aria-label', `Remove polygon point ${index + 1}`);
+      remove.disabled = state.editorManaged;
       remove.addEventListener('click', () => {
+        if (state.editorManaged) return;
         state.editorPoints.splice(index, 1);
         renderEditorGeometry();
       });
@@ -533,6 +538,7 @@
     state.editorZoneId = null;
     state.editorShape = 'circle';
     state.editorPoints = [];
+    state.editorManaged = false;
     state.dynamicLists = [];
     if ($('[data-zone-colour]')) $('[data-zone-colour]').value = '#d52b1e';
     if ($('[data-zone-active]')) $('[data-zone-active]').checked = true;
@@ -540,7 +546,6 @@
     if ($('[data-zone-include-location]')) $('[data-zone-include-location]').checked = true;
     if ($('[data-zone-ping-on-detection]')) $('[data-zone-ping-on-detection]').checked = true;
     if ($('[data-zone-radar-interval]')) $('[data-zone-radar-interval]').value = '5';
-    if ($('[data-zone-ping-payout]')) $('[data-zone-ping-payout]').value = '0';
     if ($('[data-zone-temporary-ban-minutes]')) $('[data-zone-temporary-ban-minutes]').value = '60';
     if ($('[data-zone-radius]')) $('[data-zone-radius]').value = '150';
     setRuleValues({});
@@ -556,11 +561,43 @@
     editorMessage('');
   };
 
+  const applyManagedEditorPolicy = (zone = null) => {
+    state.editorManaged = Boolean(zone?.managed);
+    const fixedSelectors = [
+      '[data-zone-name]', '[data-zone-active]', '[data-zone-alert-enter]', '[data-zone-alert-exit]',
+      '[data-zone-include-location]', '[data-zone-verbose]', '[data-zone-ping-on-detection]',
+      '[data-zone-ping-bounties]', '[data-zone-temporary-ban]', '[data-zone-temporary-ban-minutes]',
+      '[data-zone-center-x]', '[data-zone-center-z]', '[data-zone-radius]',
+    ];
+    ZONE_RULE_KEYS.forEach((key) => fixedSelectors.push(`[data-zone-rule="${key}"]`));
+    fixedSelectors.forEach((selector) => {
+      const input = $(selector);
+      if (input) input.disabled = state.editorManaged;
+    });
+    $$('[data-zone-ignored-events] input, [data-zone-allowed-events] input').forEach((input) => {
+      input.disabled = state.editorManaged;
+    });
+    if (state.editorManaged) {
+      // Fixed owner policy for the seven fenced Chernarus military PvP areas.
+      $('[data-zone-active]').checked = true;
+      $('[data-zone-alert-enter]').checked = false;
+      $('[data-zone-alert-exit]').checked = false;
+      $('[data-zone-include-location]').checked = false;
+      $('[data-zone-verbose]').checked = true;
+      $('[data-zone-ping-on-detection]').checked = false;
+      $('[data-zone-ping-bounties]').checked = false;
+      $('[data-zone-temporary-ban]').checked = false;
+      setRuleValues({ ban_on_build: true, kill_zone: true });
+      editorMessage('Managed Chernarus PvP Area: geometry and enforcement policy are locked to the DayZ++ boundary. Discord routing, roles and allowlists remain editable.', 'info');
+    }
+  };
+
   const openEditor = (shape, zone = null) => {
     if (!isAdmin()) return;
     resetEditor();
     state.editorShape = shape === 'polygon' ? 'polygon' : 'circle';
     state.editorZoneId = zone ? Number(zone.id) : null;
+    state.editorManaged = Boolean(zone?.managed);
     setShapeFields();
 
     if (zone) {
@@ -574,7 +611,6 @@
       $('[data-zone-ping-on-detection]').checked = zone.ping_on_detection !== false;
       $('[data-zone-ping-bounties]').checked = Boolean(zone.ping_bounties);
       $('[data-zone-radar-interval]').value = String(Number(zone.radar_interval_minutes || 5));
-      $('[data-zone-ping-payout]').value = String(Number(zone.ping_on_detection_payout || 0));
       $('[data-zone-temporary-ban]').checked = Boolean(zone.temporary_ban);
       $('[data-zone-temporary-ban-minutes]').value = String(Number(zone.temporary_ban_minutes || 60));
       setRuleValues(zone);
@@ -595,6 +631,7 @@
         state.editorPoints = (zone.points || []).map((point) => ({ x: Number(point.x), z: Number(point.z) }));
       }
     }
+    applyManagedEditorPolicy(zone);
 
     const dialog = $('[data-zone-dialog]');
     if (typeof dialog?.showModal === 'function') dialog.showModal();
@@ -624,7 +661,6 @@
       ping_on_detection: Boolean($('[data-zone-ping-on-detection]')?.checked),
       ping_bounties: Boolean($('[data-zone-ping-bounties]')?.checked),
       radar_interval_minutes: Number($('[data-zone-radar-interval]')?.value || 5),
-      ping_on_detection_payout: Number($('[data-zone-ping-payout]')?.value || 0),
       temporary_ban: Boolean($('[data-zone-temporary-ban]')?.checked),
       temporary_ban_minutes: Number($('[data-zone-temporary-ban-minutes]')?.value || 60),
       channel_key: String($('[data-zone-channel]')?.value || ''),
@@ -642,7 +678,7 @@
       common.center_z = Number($('[data-zone-center-z]')?.value);
       common.radius = Number($('[data-zone-radius]')?.value);
     } else {
-      common.points = state.editorPoints.map((point) => ({ x: Number(point.x.toFixed(1)), z: Number(point.z.toFixed(1)) }));
+      common.points = state.editorPoints.map((point) => ({ x: Number(point.x.toFixed(4)), z: Number(point.z.toFixed(4)) }));
     }
     return common;
   };
@@ -678,6 +714,7 @@
   };
 
   const deleteZone = async (zone) => {
+    if (zone?.managed) { message('Managed Chernarus PvP Areas cannot be deleted.', 'warning'); return; }
     if (!zone || !window.confirm(`Delete “${zone.name}”? This removes its saved geometry and detection configuration.`)) return;
     message(`Deleting ${zone.name}…`);
     try {

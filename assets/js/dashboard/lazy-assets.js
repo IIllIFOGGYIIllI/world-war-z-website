@@ -201,7 +201,7 @@
   const ensureZones = () => Promise.all([ensureMapRuntime(), ensureZonesStyles()])
     .then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
       'zones',
-      'assets/js/dashboard/zones.js?v=1.54.0&rev=chernarus-pvp-zones-1',
+      'assets/js/dashboard/zones.js?v=1.54.2&rev=zone-enforcement-2',
       () => window.__wwzZonesReady === true
     )));
 
@@ -231,13 +231,13 @@
 
   const ensureShopHelpers = () => loadAfterDashboardRuntime(() => loadScriptOnce(
     'shop-helpers',
-    'assets/js/dashboard/shop-helpers.js?v=1.22.93',
+    'assets/js/dashboard/shop-helpers.js?v=1.54.2&rev=shop-classname-admin-1',
     () => window.__wwzShopHelpersReady === true
   ));
 
   const ensureShopController = () => ensureShopHelpers().then(() => loadScriptOnce(
     'shop-controller',
-    'assets/js/dashboard/shop.js?v=1.22.93&rev=4',
+    'assets/js/dashboard/shop.js?v=1.54.2&rev=shop-classname-admin-1',
     () => window.__wwzShopControllerReady === true
   ));
 
