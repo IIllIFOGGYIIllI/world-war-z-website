@@ -1,10 +1,10 @@
-# World War Z Website v1.55.1
+# World War Z Website v1.55.2
 
 World War Z community dashboard and installable PWA for Chernarus and Livonia.
 
 ## Current release
-Map Runtime Hotfix repairs the public WWZ Interactive Map Hub by correcting the Leaflet 1.9.4 Subresource Integrity hash used by `map-link.html`. The invalid hash caused browsers to reject Leaflet before the WWZ map runtime could initialise.
+Map Hub Coordinate Hotfix corrects the public WWZ Interactive Map Hub opening at a false `X 0 / Z 0` Discord location when no coordinate query was supplied. A normal Map Hub launch now opens the intended Chernarus overview instead of the southwest map corner.
 
-The existing v1.55.0 Map Hub features, public POIs, deep links, public PvP/kill-zone overlays, private pin permissions, Group/Faction layers, Livonia isolation and Bot v1.56.0 integration are otherwise unchanged.
+Public POI merging also now treats same-location live/API markers as authoritative, preventing the existing Radio Zenit Trader marker from being duplicated by the website fallback list while retaining the seven website-only Chernarus public POIs.
 
-The PWA advances to v1.55.1 without rotating the bounded map-cache generation.
+The PWA advances to v1.55.2 without rotating the bounded map-cache generation. Bot v1.56.0 is unchanged.

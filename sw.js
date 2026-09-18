@@ -1,6 +1,6 @@
 'use strict';
 
-const WWZ_PWA_VERSION = '1.55.1';
+const WWZ_PWA_VERSION = '1.55.2';
 const CACHE_PREFIX = 'wwz-pwa-';
 const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 // Public release versions can advance without discarding the bounded map caches.
@@ -8,7 +8,7 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-09-19-website-v1-55-1-map-runtime-hotfix-1';
+const WWZ_PWA_UPDATE_REVISION = '2026-09-19-website-v1-55-2-map-hub-coordinate-fix-1';
 const CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${CACHE_RELEASE}`;
@@ -41,7 +41,7 @@ const APP_SHELL = [
   './assets/js/pages/home.js?v=1.53.0&rev=companion-download-repair-1',
   './assets/js/pages/companion.js?v=1.53.0&rev=companion-download-repair-1',
   './assets/data/companion-release.json',
-  './assets/js/pwa.js?v=1.55.1&rev=map-runtime-hotfix-1',
+  './assets/js/pwa.js?v=1.55.2&rev=map-hub-coordinate-fix-1',
   './assets/js/ui-system.js?v=1.24.0&rev=ops-ui-1'
 ].map(scopedUrl);
 
@@ -77,6 +77,7 @@ const UPDATE_INVALIDATIONS = [
   './assets/js/pages/dashboard-map-loader.js?v=1.22.94&rev=chernarus-public-markers-1',
   './assets/js/pages/dashboard-map-loader.js?v=1.55.0&rev=map-hub-1',
   './assets/js/pages/map-link.js?v=1.55.0&rev=map-hub-1',
+  './assets/js/pages/map-link.js?v=1.55.1&rev=map-hub-1',
   './assets/js/pwa.js?v=1.55.0&rev=map-hub-1',
   './map-link.html',
   './assets/js/dashboard/shop.js?v=1.54.2&rev=shop-classname-admin-1',
@@ -129,7 +130,7 @@ const UPDATE_INVALIDATIONS = [
   './assets/css/dashboard/factions.css?v=1.22.93',
   './assets/js/dashboard/lazy-assets.js?v=1.33.0&rev=events-overhaul-1',
   './assets/js/pages/home.js?v=1.53.0&rev=companion-download-repair-1',
-  './assets/js/pwa.js?v=1.55.1&rev=map-runtime-hotfix-1',
+  './assets/js/pwa.js?v=1.55.2&rev=map-hub-coordinate-fix-1',
   './assets/css/pwa.css?v=1.22.93',
   './assets/data/companion-release.json',
   './assets/js/dashboard/server-context.js?v=1.25.4&rev=chernarus-pve-1',

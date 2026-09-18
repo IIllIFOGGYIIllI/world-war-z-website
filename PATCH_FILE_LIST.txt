@@ -2,6 +2,7 @@
 PATCH_FILE_LIST.txt
 PATCH_NOTES.md
 README.md
+assets/js/pages/map-link.js
 changelog.html
 community-guidelines.html
 companion.html

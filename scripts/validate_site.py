@@ -390,10 +390,10 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "section === 'server-audit') loadServerActionHistory()" not in operations_admin:
         errors.append("administration.js: Operations Centre must auto-load the unified audit.")
 
-    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.55.1</strong></div>' not in dashboard:
+    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.55.2</strong></div>' not in dashboard:
         errors.append("dashboard.html: command-centre footer release label is stale.")
 
-    if "Website v1.55.1 · Bot v1.56.0" not in index:
+    if "Website v1.55.2 · Bot v1.56.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
 
     moderation_centre_js = (ROOT / "assets/js/dashboard/moderation-centre.js").read_text(encoding="utf-8")
@@ -1024,6 +1024,15 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         errors.append("map-link.html: Leaflet 1.9.4 runtime SRI hash is incorrect; browsers will block the map runtime.")
     if 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js' not in map_link_html:
         errors.append("map-link.html: Leaflet 1.9.4 runtime source is missing.")
+
+    map_link_js = (ROOT / "assets/js/pages/map-link.js").read_text(encoding="utf-8")
+    for token, message in (
+        ("requestedXRaw = params.get('x')", "map-link.js: missing explicit X query-presence guard."),
+        ("requestedZRaw = params.get('z')", "map-link.js: missing explicit Z query-presence guard."),
+        ("Math.hypot(dx, dz) <= 75", "map-link.js: missing nearby-POI fallback deduplication guard."),
+    ):
+        if token not in map_link_js:
+            errors.append(message)
     for token in (
         "const loadStylesheetOnce =",
         "const ensureMapRuntime = () =>",
@@ -2041,8 +2050,8 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.55.1'",
-        "const WWZ_PWA_UPDATE_REVISION = '2026-09-19-website-v1-55-1-map-runtime-hotfix-1'",
+        "const WWZ_PWA_VERSION = '1.55.2'",
+        "const WWZ_PWA_UPDATE_REVISION = '2026-09-19-website-v1-55-2-map-hub-coordinate-fix-1'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
         "if (request.method !== 'GET') return;",
@@ -2128,7 +2137,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     expected_manifest_ref = '<link href="manifest.webmanifest" rel="manifest"/>'
     expected_pwa_css = f'assets/css/pwa.css?v={EXPECTED_ASSET_VERSION}'
-    expected_pwa_js = 'assets/js/pwa.js?v=1.55.1&rev=map-runtime-hotfix-1'
+    expected_pwa_js = 'assets/js/pwa.js?v=1.55.2&rev=map-hub-coordinate-fix-1'
     expected_apple = f'assets/icons/pwa/apple-touch-icon-180.png?v={EXPECTED_ASSET_VERSION}'
     for html_path in sorted(ROOT.glob("*.html")):
         source = html_path.read_text(encoding="utf-8")

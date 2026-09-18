@@ -8,9 +8,11 @@
   const viewMode = String(params.get('view') || '').trim().toLowerCase();
   const requestedMarker = String(params.get('marker') || '').trim().slice(0, 80);
   const requestedPoi = String(params.get('poi') || '').trim().slice(0, 100);
-  const requestedX = Number(params.get('x'));
-  const requestedZ = Number(params.get('z'));
-  const hasRequestedCoordinates = Number.isFinite(requestedX) && Number.isFinite(requestedZ);
+  const requestedXRaw = params.get('x');
+  const requestedZRaw = params.get('z');
+  const requestedX = requestedXRaw === null || requestedXRaw.trim() === '' ? Number.NaN : Number(requestedXRaw);
+  const requestedZ = requestedZRaw === null || requestedZRaw.trim() === '' ? Number.NaN : Number(requestedZRaw);
+  const hasRequestedCoordinates = requestedXRaw !== null && requestedZRaw !== null && Number.isFinite(requestedX) && Number.isFinite(requestedZ);
 
   const STATIC_CHERNARUS_POIS = Object.freeze([
     { id:'public-radio-zenit-fallback', name:'Radio Zenit Trader', category:'Trader', description:'World War Z public trader.', colour:'amber', x:8143, z:9156, fallback:true },
@@ -95,15 +97,28 @@
   };
 
   const mergePois = (dynamic) => {
-    const source = [...(Array.isArray(dynamic) ? dynamic : []), ...(mapKey === 'chernarus' ? STATIC_CHERNARUS_POIS : [])];
-    const merged = [], seen = new Set();
-    for (const raw of source) {
-      const poi = validPoi(raw); if (!poi) continue;
-      const key = keyFor(poi); if (seen.has(key)) continue;
-      // A database-backed marker takes precedence over a same-location fallback.
-      seen.add(key); merged.push(poi);
+    const live = (Array.isArray(dynamic) ? dynamic : []).map(validPoi).filter(Boolean);
+    const merged = [...live];
+    if (mapKey === 'chernarus') {
+      for (const raw of STATIC_CHERNARUS_POIS) {
+        const poi = validPoi(raw); if (!poi) continue;
+        const duplicate = merged.some((existing) => {
+          const sameName = clean(existing.name).toLowerCase() === clean(poi.name).toLowerCase();
+          const dx = Number(existing.x) - Number(poi.x);
+          const dz = Number(existing.z) - Number(poi.z);
+          const sameLocation = Number.isFinite(dx) && Number.isFinite(dz) && Math.hypot(dx, dz) <= 75;
+          return sameName || sameLocation;
+        });
+        if (!duplicate) merged.push(poi);
+      }
     }
-    return merged.sort((a,b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name));
+    const unique = [], seen = new Set();
+    for (const poi of merged) {
+      const key = keyFor(poi);
+      if (seen.has(key)) continue;
+      seen.add(key); unique.push(poi);
+    }
+    return unique.sort((a,b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name));
   };
 
   const renderPois = (pois) => {
