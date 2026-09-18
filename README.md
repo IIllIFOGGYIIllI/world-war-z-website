@@ -1,4 +1,4 @@
-# World War Z Website v1.54.3
+# World War Z Website v1.54.4
 
 Companion website for the World War Z PlayStation DayZ community.
 
@@ -6,4 +6,4 @@ This release pairs with Bot v1.55.3 and completes the Owner Shop catalogue-manag
 
 The Automatic Delivery workspace also exposes Retry item spawn for paid normal-item deliveries that are missing in game. The existing order and coordinates are reused without charging the member again.
 
-The PWA advances to v1.54.3 without rotating the bounded map-cache generation. Chernarus/Livonia isolation and the v1.54.2 PvE/zone behaviour remain unchanged.
+The PWA advances to v1.54.4 without rotating the bounded map-cache generation. This website-only release adds the seven agreed Chernarus public markers while preserving Livonia, private pins, Group/Faction layers, bot files and database state.

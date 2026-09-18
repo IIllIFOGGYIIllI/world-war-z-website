@@ -1,10 +1,8 @@
 404.html
 PATCH_NOTES.md
 README.md
-assets/js/dashboard/core.js
-assets/js/dashboard/delivery.js
 assets/js/dashboard/lazy-assets.js
-assets/js/dashboard/shop.js
+assets/js/pages/dashboard-map-loader.js
 changelog.html
 community-guidelines.html
 companion.html
@@ -18,8 +16,8 @@ moderation-policy.html
 offline.html
 privacy.html
 rules.html
-scripts/validate_site.py
 shop.html
 sw.js
 terms.html
+scripts/validate_site.py
 PATCH_FILE_LIST.txt

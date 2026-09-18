@@ -390,10 +390,10 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "section === 'server-audit') loadServerActionHistory()" not in operations_admin:
         errors.append("administration.js: Operations Centre must auto-load the unified audit.")
 
-    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.54.3</strong></div>' not in dashboard:
+    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.54.4</strong></div>' not in dashboard:
         errors.append("dashboard.html: command-centre footer release label is stale.")
 
-    if "Website v1.54.3 · Bot v1.55.3" not in index:
+    if "Website v1.54.4 · Bot v1.55.3" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
 
     moderation_centre_js = (ROOT / "assets/js/dashboard/moderation-centre.js").read_text(encoding="utf-8")
@@ -978,7 +978,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         errors.append(
             "dashboard.html: command library must be lazy-loaded instead of downloaded on every dashboard visit."
         )
-    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.54.3&amp;rev=shop-sync-retry-1'
+    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.54.4&amp;rev=chernarus-public-markers-1'
     lazy_index = dashboard.find(lazy_script)
     shell_index = dashboard.find("assets/js/dashboard/shell.js")
     if lazy_index < 0:
@@ -1067,7 +1067,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append(f"lazy-assets.js: missing view-style lazy-loading guard: {token}")
 
     lazy_view_assets = (
-        ("dashboard map", f"assets/js/pages/dashboard-map-loader.js?v={EXPECTED_ASSET_VERSION}&rev=4", "ensureDashboardMap"),
+        ("dashboard map", f"assets/js/pages/dashboard-map-loader.js?v=1.22.94&rev=chernarus-public-markers-1", "ensureDashboardMap"),
         ("structured configuration", f"assets/js/dashboard/configuration-studio.js?v={EXPECTED_ASSET_VERSION}", "ensureConfigurationStudio"),
         ("dashboard Shop wiki previews", f"assets/js/shop-wiki-previews.js?v={EXPECTED_ASSET_VERSION}", "ensureShopWikiPreviews"),
     )
@@ -2020,7 +2020,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     launch_requirements = {
         "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.55.3"),
-        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/server-context.js?v=1.42.0&amp;rev=livonia-live-1", "assets/js/dashboard/lazy-assets.js?v=1.54.3&amp;rev=shop-sync-retry-1"),
+        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/server-context.js?v=1.42.0&amp;rev=livonia-live-1", "assets/js/dashboard/lazy-assets.js?v=1.54.4&amp;rev=chernarus-public-markers-1"),
         "assets/js/dashboard/server-context.js": ("player_capacity", "Capacity', `${server.player_capacity} slots`"),
         "assets/js/dashboard/account.js": ("payload.server?.player_capacity",),
         "assets/js/dashboard/livonia-pvp.js": ("rotation.player_capacity", "players online"),
@@ -2034,8 +2034,8 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.54.3'",
-        "const WWZ_PWA_UPDATE_REVISION = '2026-09-16-website-v1-54-3-shop-sync-retry'",
+        "const WWZ_PWA_VERSION = '1.54.4'",
+        "const WWZ_PWA_UPDATE_REVISION = '2026-09-19-website-v1-54-4-chernarus-public-markers'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
         "if (request.method !== 'GET') return;",
@@ -2121,7 +2121,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     expected_manifest_ref = '<link href="manifest.webmanifest" rel="manifest"/>'
     expected_pwa_css = f'assets/css/pwa.css?v={EXPECTED_ASSET_VERSION}'
-    expected_pwa_js = 'assets/js/pwa.js?v=1.54.3&rev=shop-sync-retry-1'
+    expected_pwa_js = 'assets/js/pwa.js?v=1.54.4&rev=chernarus-public-markers-1'
     expected_apple = f'assets/icons/pwa/apple-touch-icon-180.png?v={EXPECTED_ASSET_VERSION}'
     for html_path in sorted(ROOT.glob("*.html")):
         source = html_path.read_text(encoding="utf-8")
