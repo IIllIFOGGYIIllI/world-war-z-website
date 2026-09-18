@@ -184,7 +184,7 @@
     ensureMapIntelligenceStyles(),
     loadScriptOnce(
       'dashboard-map',
-      'assets/js/pages/dashboard-map-loader.js?v=1.22.93&rev=4',
+      'assets/js/pages/dashboard-map-loader.js?v=1.22.94&rev=chernarus-public-markers-1',
       () => Boolean(window.WWZDashboardMap?.initialise)
     )
   ]))).then(() => loadScriptOnce(

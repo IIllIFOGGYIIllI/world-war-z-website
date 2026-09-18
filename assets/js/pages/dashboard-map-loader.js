@@ -15,6 +15,19 @@
     white: '#f3eee7'
   });
 
+
+  // Website-only Chernarus public locations. These are deliberately static so
+  // publishing them does not mutate the shared marker database or any bot data.
+  const CHERNARUS_PUBLIC_MARKERS = Object.freeze([
+    { id: 'public-cherno-builder-shed', name: 'Chernogorsk Builder Shed', category: 'Builder Shed', description: 'Public Chernarus builder shed.', colour: 'green', x: 5726, z: 3136 },
+    { id: 'public-pustoshka-builder-shed', name: 'Pustoshka Builder Shed', category: 'Builder Shed', description: 'Public Chernarus builder shed.', colour: 'green', x: 3022, z: 7496 },
+    { id: 'public-stary-sobor-builder-shed', name: 'Stary Sobor Builder Shed', category: 'Builder Shed', description: 'Public Chernarus builder shed.', colour: 'green', x: 5949, z: 7565 },
+    { id: 'public-black-lake-builder-shed', name: 'Black Lake Builder Shed', category: 'Builder Shed', description: 'Public Chernarus builder shed.', colour: 'green', x: 13518, z: 11867 },
+    { id: 'public-tisy-bunker', name: 'Tisy Bunker', category: 'Bunker', description: 'Public Chernarus bunker.', colour: 'red', x: 1329, z: 14482 },
+    { id: 'public-nwaf-bunker', name: 'NWAF Bunker', category: 'Bunker', description: 'Public Chernarus bunker.', colour: 'red', x: 4483, z: 10377 },
+    { id: 'public-rify-bunker', name: 'Rify Bunker', category: 'Bunker', description: 'Public Chernarus bunker.', colour: 'red', x: 13847, z: 11196 }
+  ]);
+
   let mapInstance = null;
   let loadPromise = null;
   let activeMapKey = null;
@@ -671,7 +684,17 @@
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload?.message || 'Public map markers could not be loaded.');
-      publicPois = (Array.isArray(payload?.markers) ? payload.markers : []).map(validatePoi).filter(Boolean);
+      const apiPois = (Array.isArray(payload?.markers) ? payload.markers : []).map(validatePoi).filter(Boolean);
+      if (activeMapKey === 'chernarus') {
+        const existingNames = new Set(apiPois.map((poi) => poi.name.toLowerCase()));
+        const websitePois = CHERNARUS_PUBLIC_MARKERS
+          .map(validatePoi)
+          .filter(Boolean)
+          .filter((poi) => !existingNames.has(poi.name.toLowerCase()));
+        publicPois = [...apiPois, ...websitePois];
+      } else {
+        publicPois = apiPois;
+      }
       return true;
     } catch (error) {
       console.warn('Public map markers unavailable.', error);
