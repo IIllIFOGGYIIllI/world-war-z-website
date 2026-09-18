@@ -2,10 +2,6 @@
 PATCH_FILE_LIST.txt
 PATCH_NOTES.md
 README.md
-assets/js/dashboard/lazy-assets.js
-assets/js/dashboard/server-context.js
-assets/js/pages/dashboard-map-loader.js
-assets/js/pages/map-link.js
 changelog.html
 community-guidelines.html
 companion.html

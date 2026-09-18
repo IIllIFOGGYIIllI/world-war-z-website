@@ -390,10 +390,10 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "section === 'server-audit') loadServerActionHistory()" not in operations_admin:
         errors.append("administration.js: Operations Centre must auto-load the unified audit.")
 
-    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.55.0</strong></div>' not in dashboard:
+    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.55.1</strong></div>' not in dashboard:
         errors.append("dashboard.html: command-centre footer release label is stale.")
 
-    if "Website v1.55.0 · Bot v1.56.0" not in index:
+    if "Website v1.55.1 · Bot v1.56.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
 
     moderation_centre_js = (ROOT / "assets/js/dashboard/moderation-centre.js").read_text(encoding="utf-8")
@@ -1017,6 +1017,13 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append(f"dashboard.html: {label} must be map-lazy instead of loading on every dashboard visit.")
         if asset_url not in lazy_assets:
             errors.append(f"lazy-assets.js: missing current map-lazy asset for {label}.")
+
+    map_link_html = (ROOT / "map-link.html").read_text(encoding="utf-8")
+    leaflet_runtime_sri = 'integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="'
+    if leaflet_runtime_sri not in map_link_html:
+        errors.append("map-link.html: Leaflet 1.9.4 runtime SRI hash is incorrect; browsers will block the map runtime.")
+    if 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js' not in map_link_html:
+        errors.append("map-link.html: Leaflet 1.9.4 runtime source is missing.")
     for token in (
         "const loadStylesheetOnce =",
         "const ensureMapRuntime = () =>",
@@ -2034,8 +2041,8 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.55.0'",
-        "const WWZ_PWA_UPDATE_REVISION = '2026-09-19-website-v1-55-0-map-hub-phase-1'",
+        "const WWZ_PWA_VERSION = '1.55.1'",
+        "const WWZ_PWA_UPDATE_REVISION = '2026-09-19-website-v1-55-1-map-runtime-hotfix-1'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
         "if (request.method !== 'GET') return;",
@@ -2121,7 +2128,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     expected_manifest_ref = '<link href="manifest.webmanifest" rel="manifest"/>'
     expected_pwa_css = f'assets/css/pwa.css?v={EXPECTED_ASSET_VERSION}'
-    expected_pwa_js = 'assets/js/pwa.js?v=1.55.0&rev=map-hub-1'
+    expected_pwa_js = 'assets/js/pwa.js?v=1.55.1&rev=map-runtime-hotfix-1'
     expected_apple = f'assets/icons/pwa/apple-touch-icon-180.png?v={EXPECTED_ASSET_VERSION}'
     for html_path in sorted(ROOT.glob("*.html")):
         source = html_path.read_text(encoding="utf-8")
