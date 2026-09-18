@@ -24,14 +24,18 @@
     const serverKey = String(params.get('server') || '').trim().toLowerCase();
     const x = Number(params.get('x'));
     const z = Number(params.get('z'));
-    if (!['chernarus', 'livonia'].includes(mapKey) || !Number.isFinite(x) || !Number.isFinite(z)) return null;
+    const poi = String(params.get('poi') || '').trim().slice(0, 100);
+    if (!['chernarus', 'livonia'].includes(mapKey)) return null;
+    const hasCoordinates = Number.isFinite(x) && Number.isFinite(z);
     const worldSize = mapKey === 'livonia' ? 12800 : 15360;
-    if (x < 0 || x > worldSize || z < 0 || z > worldSize) return null;
+    if (!hasCoordinates && !poi) return null;
+    if (hasCoordinates && (x < 0 || x > worldSize || z < 0 || z > worldSize)) return null;
     return {
       map_key: mapKey,
       server_key: SERVER_KEY_PATTERN.test(serverKey) ? serverKey : '',
-      x,
-      z,
+      x: hasCoordinates ? x : null,
+      z: hasCoordinates ? z : null,
+      poi,
       marker: String(params.get('marker') || 'Discord Location').trim().slice(0, 80) || 'Discord Location',
       source: String(params.get('source') || 'discord').trim().slice(0, 32) || 'discord'
     };

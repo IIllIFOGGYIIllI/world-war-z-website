@@ -1,17 +1,18 @@
-# World War Z Website v1.54.4 — Chernarus Public Map Markers
+# World War Z Website v1.55.0 — WWZ Map Integration Phase 1
 
-## Chernarus map
-- Adds the seven agreed website-only public markers: four Builder Sheds and three Bunkers.
-- Preserves the existing Radio Zenit Trader marker supplied by the public marker API.
-- Static public locations are merged only for Chernarus and do not write to the shared marker database.
+## Public Map Hub
+- Upgrades `map-link.html` from the single detection-marker viewer into the public WWZ Interactive Map Hub while preserving every existing Discord X/Z detection link.
+- Loads database-backed public markers plus the seven website-only Chernarus POIs and keeps Radio Zenit available as the public Trader location.
+- Adds a public POI browser, exact-coordinate selection, public POI/zone/road layer toggles and live PvP/kill-zone overlays from the existing public map-intelligence API.
+- No Discord sign-in is required for public layers; private pins, Group/Faction layers and Admin data remain protected.
 
-## Isolation / compatibility
-- Livonia is unchanged.
-- Private pins and Group/Faction map layers are unchanged.
-- Bot files and the database are untouched.
-- No DayZ mission upload, Nitrado configuration change, database migration, or bounded map-cache rotation is required.
+## Deep links
+- Adds map-hub links (`view=hub`) for Discord panels and preserves direct coordinate links.
+- Dashboard deep links can now target a public POI by ID/name as well as exact X/Z coordinates.
+- Member Dashboard links continue to enforce normal Discord authentication and layer permissions.
 
-## PWA
-- Advances the website/PWA release to v1.54.4.
-- Bumps the service-worker update revision and refreshes the dashboard lazy-loader/map-loader request keys so installed PWAs receive the marker update.
-- Keeps the bounded Chernarus map cache generation unchanged.
+## PWA / compatibility
+- Advances the Website/PWA to v1.55.0 and refreshes the Map Hub, dashboard map-loader and PWA request keys.
+- The bounded Chernarus map-cache generation is intentionally unchanged.
+- Livonia remains isolated; no bot database migration, DayZ mission upload or Nitrado change is required.
+- Pairs with Bot v1.56.0.

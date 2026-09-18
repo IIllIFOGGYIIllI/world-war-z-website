@@ -342,6 +342,16 @@
     if (!mapInstance) return false;
     const link = window.WWZServerContext?.getMapDeepLink?.();
     if (!link || link.map_key !== activeMapKey) return false;
+    if (link.poi) {
+      const requested = String(link.poi).trim().toLowerCase();
+      const poi = publicPois.find((entry) => String(entry.id || '').toLowerCase() === requested || String(entry.name || '').toLowerCase() === requested);
+      if (poi) {
+        selectLocation(poi, { focus: true, selectOnMap: true });
+        renderResults();
+        window.WWZServerContext?.clearMapDeepLink?.();
+        return true;
+      }
+    }
     const x = clampCoordinate(link.x);
     const z = clampCoordinate(link.z);
     if (x === null || z === null) return false;
