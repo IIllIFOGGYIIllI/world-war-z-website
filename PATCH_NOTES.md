@@ -1,9 +1,9 @@
-# World War Z Website v1.56.0 — Trader Status Workspace
+# World War Z Website v1.56.1 — Trader Animated Artwork Hotfix
 
-- Adds a Chernarus-only Radio Zenit Trader tab for members with live Open/Closed status, animated status artwork, exact map coordinates and direct WWZ Map access.
-- Converts the authoritative UTC status timestamp into each visitor's browser-local date and time while retaining the stored UTC value for clarity.
-- Adds protected Admin Open/Close controls backed by the same bot Trader state and Discord announcement workflow.
-- Shows the configured main-chat @everyone announcement route and persistent Trader panel route to Admins.
-- Keeps Livonia isolated and unchanged.
-- Advances the Website/PWA to v1.56.0 without rotating the bounded map-cache generation.
-- Pairs with Bot v1.58.0.
+- Replaces the two flattened Trader artwork payloads with the original multi-frame animated GIFs.
+- Bumps Trader artwork, controller and PWA request keys so installed/browser-cached copies receive the animated files immediately.
+- Adds site validation that rejects non-GIF or single-frame Trader artwork.
+- Preserves the Chernarus-only Trader workspace, Admin controls, main-chat routing, local-time conversion and WWZ Map link behaviour.
+- Keeps Livonia, private pins, Group/Faction layers and database state unchanged.
+- Advances the Website/PWA to v1.56.1 without rotating the bounded map-cache generation.
+- Pairs with Bot v1.58.1.

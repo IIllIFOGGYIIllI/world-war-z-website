@@ -1,11 +1,8 @@
-World War Z Website v1.56.0 — updated files only
+World War Z Website v1.56.1 — updated files only
 
-404.html
 PATCH_FILE_LIST.txt
 PATCH_NOTES.md
 README.md
-assets/css/dashboard/trader-status.css
-assets/js/dashboard/shell.js
 assets/js/dashboard/trader-status.js
 assets/trader/wwz-trader-closed.gif
 assets/trader/wwz-trader-open.gif

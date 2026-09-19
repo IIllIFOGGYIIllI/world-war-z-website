@@ -1,10 +1,11 @@
-# World War Z Website v1.56.0
+# World War Z Website v1.56.1
 
 World War Z community dashboard and installable PWA for Chernarus and Livonia.
 
-## Current release
-Map Hub Coordinate Hotfix corrects the public WWZ Interactive Map Hub opening at a false `X 0 / Z 0` Discord location when no coordinate query was supplied. A normal Map Hub launch now opens the intended Chernarus overview instead of the southwest map corner.
+## Current release — Trader Animated Artwork Hotfix
 
-Public POI merging also now treats same-location live/API markers as authoritative, preventing the existing Radio Zenit Trader marker from being duplicated by the website fallback list while retaining the seven website-only Chernarus public POIs.
+Website v1.56.1 replaces the flattened Trader OPEN/CLOSED image payloads from v1.56.0 with the original multi-frame animated GIFs supplied by the server owner.
 
-The PWA advances to v1.56.0 without rotating the bounded map-cache generation. Pairs with Bot v1.58.0 for the synchronized Radio Zenit Trader workspace.
+The Trader Status workspace otherwise remains unchanged: members can see the live Chernarus Radio Zenit state, local-time update information and map access, while authorised Admins retain the protected Open/Close controls and Discord routing information.
+
+The PWA advances to v1.56.1 and invalidates the previous Trader artwork request keys without rotating the bounded map-cache generation. Pairs with Bot v1.58.1.
