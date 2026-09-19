@@ -78,7 +78,7 @@ const activeWorldSize = () => state.server?.map_key === 'livonia' ? 12800 : stat
 const MAP_ASSETS = {
   leafletCss: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
   leafletJs: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
-  mapCss: 'assets/css/components/chernarus-map.css?v=1.22.93&rev=2',
+  mapCss: 'assets/css/components/wwz-map.css?v=1.22.93&rev=2',
   mapJs: 'assets/js/map/wwz-map.js?v=1.22.93&rev=3'
 };
 let checkoutMapRuntimePromise = null;

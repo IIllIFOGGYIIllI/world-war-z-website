@@ -1,6 +1,6 @@
 'use strict';
 
-const WWZ_PWA_VERSION = '1.56.1';
+const WWZ_PWA_VERSION = '1.57.0';
 const CACHE_PREFIX = 'wwz-pwa-';
 const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 // Public release versions can advance without discarding the bounded map caches.
@@ -8,12 +8,13 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-09-19-website-v1-56-1-trader-gif-hotfix-1';
-const CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
-const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_RELEASE}`;
-const STATIC_CACHE = `${CACHE_PREFIX}static-${CACHE_RELEASE}`;
-const MAP_TILE_CACHE = `${CACHE_PREFIX}map-tiles-${CACHE_RELEASE}`;
-const MAP_DATA_CACHE = `${CACHE_PREFIX}map-data-${CACHE_RELEASE}`;
+const WWZ_PWA_UPDATE_REVISION = '2026-09-19-website-v1-57-0-repository-optimisation-1';
+const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-repository-optimisation-1`;
+const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
+const SHELL_CACHE = `${CACHE_PREFIX}shell-${APP_CACHE_RELEASE}`;
+const STATIC_CACHE = `${CACHE_PREFIX}static-${APP_CACHE_RELEASE}`;
+const MAP_TILE_CACHE = `${CACHE_PREFIX}map-tiles-${MAP_CACHE_RELEASE}`;
+const MAP_DATA_CACHE = `${CACHE_PREFIX}map-data-${MAP_CACHE_RELEASE}`;
 const MAP_TILE_CACHE_LIMIT = 180;
 const MAP_DATA_CACHE_LIMIT = 8;
 const STATIC_CACHE_LIMIT = 160;
@@ -41,117 +42,12 @@ const APP_SHELL = [
   './assets/js/pages/home.js?v=1.53.0&rev=companion-download-repair-1',
   './assets/js/pages/companion.js?v=1.53.0&rev=companion-download-repair-1',
   './assets/data/companion-release.json',
-  './assets/js/pwa.js?v=1.56.1&rev=trader-gif-hotfix-1',
-  './assets/js/dashboard/trader-status.js?v=1.56.1&rev=trader-gif-hotfix-1',
-  './assets/css/dashboard/trader-status.css?v=1.56.1&rev=trader-gif-hotfix-1',
-  './assets/trader/wwz-trader-open.gif?v=1.56.1',
-  './assets/trader/wwz-trader-closed.gif?v=1.56.1',
+  './assets/js/pwa.js?v=1.57.0&rev=repo-optimisation-1',
   './assets/js/ui-system.js?v=1.24.0&rev=ops-ui-1'
 ].map(scopedUrl);
 
-const UPDATE_INVALIDATIONS = [
-  // Clear pre-hardening shared HTTP-client request keys.
-  './assets/js/core/http.js?v=1.22.93&rev=2',
-  './assets/js/core/http.js?v=1.22.102&rev=donation-storefront-1',
-  // Remove pre-v1.28 request keys without rotating the map-cache generation.
-  './assets/js/dashboard/bootstrap.js?v=1.22.93&rev=auth-restore-fix-1',
-  './assets/js/dashboard/my-wwz.js?v=1.27.0&rev=my-wwz-m09-1',
-  './assets/css/dashboard/my-wwz.css?v=1.27.0&rev=my-wwz-m09-1',
-  './assets/js/dashboard/command-centre.js?v=1.22.93',
-  './assets/css/dashboard/command-centre-m10.css?v=1.27.0&rev=m10-admin-push-1',
-  './assets/js/dashboard/community.js?v=1.33.0&rev=events-overhaul-1',
-  './assets/js/dashboard/community.js?v=1.49.0&rev=economy-panels-1',
-  './assets/js/dashboard/economy-panels.js?v=1.49.0&rev=economy-panels-1',
-  './assets/css/dashboard/economy-panels.css?v=1.49.0&rev=economy-panels-1',
-  './assets/js/pages/shop.js?v=1.49.0&rev=economy-panels-1',
-  './assets/css/dashboard/community.css?v=1.33.0&rev=events-overhaul-1',
-  './assets/js/dashboard/lazy-assets.js?v=1.27.0&rev=community-workflows-1',
-  // Canonical v1.28 request keys are listed as targeted safety invalidations too.
-  './assets/js/dashboard/bootstrap.js?v=1.28.0&rev=website-v1-28-0',
-  './assets/js/dashboard/my-wwz.js?v=1.28.0&rev=my-wwz-m09-polish-1',
-  './assets/css/dashboard/my-wwz.css?v=1.28.0&rev=my-wwz-m09-polish-1',
-  './assets/js/dashboard/command-centre.js?v=1.28.0&rev=m10-admin-push-1',
-  './assets/css/dashboard/command-centre-m10.css?v=1.28.0&rev=m10-admin-push-1',
-  './assets/js/dashboard/lazy-assets.js?v=1.28.0&rev=website-v1-28-0',
-  './assets/js/dashboard/lazy-assets.js?v=1.45.0&rev=bulk-routing-1',
-  './assets/js/dashboard/lazy-assets.js?v=1.51.0&rev=admin-operations-1',
-  './assets/js/dashboard/lazy-assets.js?v=1.54.1&rev=pvp-expedition-sync-1',
-  './assets/js/dashboard/lazy-assets.js?v=1.54.2&rev=zone-shop-integrity-1',
-  './assets/js/dashboard/lazy-assets.js?v=1.54.3&rev=shop-sync-retry-1',
-  './assets/js/pages/dashboard-map-loader.js?v=1.22.94&rev=chernarus-public-markers-1',
-  './assets/js/pages/dashboard-map-loader.js?v=1.55.0&rev=map-hub-1',
-  './assets/js/pages/map-link.js?v=1.55.0&rev=map-hub-1',
-  './assets/js/pages/map-link.js?v=1.55.1&rev=map-hub-1',
-  './assets/js/pwa.js?v=1.55.0&rev=map-hub-1',
-  './assets/js/pwa.js?v=1.56.0&rev=trader-status-1',
-  './assets/js/dashboard/trader-status.js?v=1.56.0&rev=trader-status-1',
-  './assets/css/dashboard/trader-status.css?v=1.56.0&rev=trader-status-1',
-  './assets/trader/wwz-trader-open.gif?v=1.56.0',
-  './assets/trader/wwz-trader-closed.gif?v=1.56.0',
-  './map-link.html',
-  './assets/js/dashboard/shop.js?v=1.54.2&rev=shop-classname-admin-1',
-  './assets/js/dashboard/delivery.js?v=1.22.93&rev=3',
-  './assets/js/dashboard/core.js?v=1.52.0&rev=moderation-centre-1',
-  './assets/js/dashboard/zones.js?v=1.54.0&rev=chernarus-pvp-zones-1',
-  './assets/js/dashboard/shop-helpers.js?v=1.22.93',
-  './assets/js/dashboard/shop.js?v=1.22.93&rev=4',
-  './assets/js/dashboard/core.js?v=1.44.0&rev=identity-sync-1',
-  './assets/js/dashboard/administration.js?v=1.43.0&rev=banlist-isolation-1',
-  './flags.html',
-  // Clear the original v1.29.0 Flag Claims request keys before serving the polished v1.29.1 UI and v1.29.2 actual DayZ flag artwork.
-  './assets/js/pages/flags.js?v=1.29.0&rev=flag-claims-1',
-  './assets/css/pages/flags.css?v=1.29.0&rev=flag-claims-1',
-  './assets/js/dashboard/flag-claims.js?v=1.29.0&rev=flag-claims-1',
-  './assets/css/dashboard/flag-claims.css?v=1.29.0&rev=flag-claims-1',
-  './assets/js/dashboard/lazy-assets.js?v=1.29.0&rev=flag-claims-1',
-  './assets/js/pages/flags.js?v=1.29.2&rev=real-dayz-flags-1',
-  './assets/css/pages/flags.css?v=1.29.2&rev=real-dayz-flags-1',
-  './assets/js/dashboard/flag-claims.js?v=1.30.0&rev=flag-phase2-1',
-  './assets/css/dashboard/flag-claims.css?v=1.30.0&rev=flag-phase2-1',
-  './assets/js/dashboard/lazy-assets.js?v=1.30.0&rev=flag-phase2-1',
-  './assets/js/dashboard/administration.js?v=1.22.93&rev=discord-channel-refresh-1',
-  './assets/js/dashboard/administration.js?v=1.31.0&rev=player-intelligence-1',
-  './assets/js/dashboard/lazy-assets.js?v=1.37.0&rev=quest-commerce-1',
-  './assets/js/dashboard/action-centre.js?v=1.38.0&rev=action-centre-1',
-  './assets/css/dashboard/action-centre.css?v=1.38.0&rev=action-centre-1',
-  './assets/js/dashboard/lazy-assets.js?v=1.38.0&rev=action-centre-1',
-  './assets/js/dashboard/objectives.js?v=1.37.0&rev=quest-progression-1',
-  './assets/css/dashboard/objectives.css?v=1.37.0&rev=quest-progression-1',
-  './assets/js/dashboard/progression.js?v=1.37.0&rev=quest-progression-1',
-  './assets/css/dashboard/progression.css?v=1.37.0&rev=quest-progression-1',
-  './assets/js/dashboard/donation-orders.js?v=1.37.0&rev=commerce-workflow-1',
-  './assets/css/dashboard/donation-orders.css?v=1.37.0&rev=commerce-workflow-1',
-  './assets/js/pages/donations.js?v=1.37.0&rev=commerce-workflow-1',
-  './assets/css/pages/donations.css?v=1.37.0&rev=commerce-workflow-1',
-  './assets/js/pages/shop.js?v=1.37.0&rev=commerce-workflow-1',
-  './assets/css/pages/shop.css?v=1.37.0&rev=commerce-workflow-1',
-  './assets/js/dashboard/administration.js?v=1.36.0&rev=operations-centre-1',
-  './assets/js/dashboard/lazy-assets.js?v=1.36.0&rev=operations-centre-1',
-  './assets/js/dashboard/core.js?v=1.36.0&rev=operations-centre-1',
-  './assets/js/dashboard/operations-centre.js?v=1.36.0&rev=operations-centre-1',
-  './assets/css/dashboard/operations-centre.css?v=1.36.0&rev=operations-centre-1',
-  './assets/css/dashboard/player-intelligence.css?v=1.31.0&rev=player-intelligence-1',
-  './assets/js/dashboard/lazy-assets.js?v=1.31.0&rev=player-intelligence-1',
-  './assets/js/dashboard/deathmatch-rotation.js?v=1.32.0&rev=livonia-dm-1',
-  './assets/css/dashboard/deathmatch-rotation.css?v=1.32.0&rev=livonia-dm-1',
-  './assets/js/dashboard/lazy-assets.js?v=1.32.0&rev=livonia-dm-1',
-  './assets/js/dashboard/factions.js?v=1.22.93&rev=2',
-  './assets/css/dashboard/factions.css?v=1.22.93',
-  './assets/js/dashboard/lazy-assets.js?v=1.33.0&rev=events-overhaul-1',
-  './assets/js/pages/home.js?v=1.53.0&rev=companion-download-repair-1',
-  './assets/js/pwa.js?v=1.55.2&rev=map-hub-coordinate-fix-1',
-  './assets/css/pwa.css?v=1.22.93',
-  './assets/data/companion-release.json',
-  './assets/js/dashboard/server-context.js?v=1.25.4&rev=chernarus-pve-1',
-  './assets/js/dashboard/account.js?v=1.22.93&rev=auth-restore-fix-1',
-  // Replace the pre-Identity-Sync dashboard bundles without rotating map caches.
-  './assets/js/dashboard/core.js?v=1.42.0&rev=livonia-live-1',
-  './assets/js/dashboard/account.js?v=1.42.0&rev=livonia-live-1',
-  './assets/css/dashboard/ux-consistency.css?v=1.35.0&rev=dashboard-ux-1',
-  './assets/js/dashboard/lazy-assets.js?v=1.39.0&rev=data-management-1',
-  './assets/js/dashboard/livonia-pvp.js?v=1.25.3',
-  './assets/js/dashboard/deathmatch-rotation.js?v=1.32.0&rev=livonia-dm-1'
-].map(scopedUrl);
+const UPDATE_INVALIDATIONS = [];
+
 
 const trimCache = async (cacheName, limit) => {
   const cache = await caches.open(cacheName);
@@ -189,8 +85,6 @@ self.addEventListener('activate', (event) => {
       .filter((name) => name.startsWith(CACHE_PREFIX) && !keep.has(name))
       .map((name) => caches.delete(name)));
 
-    const staticCache = await caches.open(STATIC_CACHE);
-    await Promise.all(UPDATE_INVALIDATIONS.map((url) => staticCache.delete(url)));
 
     await self.clients.claim();
   })());
@@ -271,18 +165,16 @@ const networkFirstMapData = async (request) => {
 
 const isMapTile = (pathname) =>
   pathname.includes('/assets/maps/chernarus/tiles/') ||
-  pathname.includes('/assets/maps/livonia/tiles/') ||
-  pathname.includes('/assets/chernarus-map/satellite-corrected/');
+  pathname.includes('/assets/maps/livonia/tiles/');
 
 const isMapData = (pathname) =>
   pathname.endsWith('/assets/maps/chernarus/roads.geojson') ||
   pathname.endsWith('/assets/maps/chernarus/labels.json') ||
   pathname.endsWith('/assets/maps/livonia/roads.geojson') ||
-  pathname.endsWith('/assets/maps/livonia/labels.json') ||
-  pathname.includes('/assets/chernarus-map/overlays/');
+  pathname.endsWith('/assets/maps/livonia/labels.json');
 
 const isStaticAsset = (pathname) =>
-  /[.](?:css|js|png|jpg|jpeg|webp|svg|webmanifest|json)$/i.test(pathname);
+  /[.](?:css|js|gif|png|jpg|jpeg|webp|svg|webmanifest|json)$/i.test(pathname);
 
 self.addEventListener('fetch', (event) => {
   const request = event.request;

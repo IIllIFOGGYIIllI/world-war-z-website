@@ -84,7 +84,7 @@
     ),
     loadStylesheetOnce(
       'wwz-map-css',
-      'assets/css/components/chernarus-map.css?v=1.22.93&rev=2'
+      'assets/css/components/wwz-map.css?v=1.22.93&rev=2'
     ),
     loadScriptOnce(
       'leaflet-runtime',

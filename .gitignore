@@ -9,3 +9,9 @@ ios/
 # Android signing keys
 android-app/*.jks
 android-app/*.jks.base64.txt
+
+.DS_Store
+Thumbs.db
+*.bak
+*.tmp
+*.swp

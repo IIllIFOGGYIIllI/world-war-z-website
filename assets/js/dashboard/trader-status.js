@@ -80,7 +80,7 @@
     stateCopy.textContent = isOpen
       ? 'Trader services are currently available at Radio Zenit.'
       : 'Trader services are currently unavailable. Wait for the next opening announcement before travelling to trade.';
-    art.src = `assets/trader/wwz-trader-${state}.gif?v=1.56.1`;
+    art.src = `assets/trader/wwz-trader-${state}.gif?v=1.57.0&rev=asset-opt-1`;
     art.alt = `World War Z Radio Zenit Trader ${isOpen ? 'open' : 'closed'}`;
     updatedLocal.textContent = localTime(payload.updated_at);
     updatedUtc.textContent = utcTime(payload.updated_at);

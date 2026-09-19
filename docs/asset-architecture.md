@@ -1,34 +1,23 @@
 # Website asset architecture
 
-Version 1.22.18 keeps every public HTML route at the repository root and divides the dashboard implementation into ordered responsibility bundles.
+## Canonical production layout
 
-```text
-assets/
-├── css/
-│   ├── dashboard/
-│   │   ├── core.css
-│   │   ├── moderation.css
-│   │   ├── workspace.css
-│   │   └── catalogue.css
-│   └── pages/              Smaller page-specific styles
-├── data/chernarus/         Public read-only map data
-├── images/maps/            Map fallbacks and supporting imagery
-└── js/
-    ├── core/               Shared browser infrastructure
-    ├── dashboard/
-    │   ├── shell.js
-    │   ├── core.js
-    │   ├── administration.js
-    │   ├── account.js
-    │   ├── shop.js
-    │   └── delivery.js
-    ├── data/               Static command catalogue data
-    ├── map/                Interactive map implementation
-    └── pages/              Smaller page entry points
-```
+- `assets/maps/chernarus/` — Chernarus WebP tile pyramid, production roads and labels.
+- `assets/maps/livonia/` — Livonia WebP tile pyramid, production roads and labels.
+- `assets/js/map/wwz-map.js` — the single shared DayZ map runtime for both maps.
+- `assets/css/components/wwz-map.css` — shared map presentation.
+- `assets/trader/` — animated Radio Zenit Trader state artwork.
+- `assets/js/dashboard/` — authenticated dashboard workspaces.
+- `assets/js/pages/` — standalone/public page controllers.
+- `assets/css/dashboard/`, `assets/css/pages/`, `assets/css/components/` — scoped presentation layers.
 
-The dashboard scripts are classic deferred scripts loaded in the listed order. Their concatenated source is byte-for-byte equivalent to the previous `dashboard.js`, preserving shared lexical bindings and execution order. The style bundles are also loaded in their original cascade order.
+The retired `assets/chernarus-map/` implementation must not be restored. It duplicated the Chernarus tile pyramid and road data and was superseded by `WWZMap`, which is also required for Livonia and Discord deep links.
 
-The Chernarus map remains lazy-loaded only when its workspace is requested. HTML routes, API routes, Railway authentication, CSP restrictions and map tile URLs remain unchanged.
+## Cache architecture
 
-The Pages workflow runs `scripts/validate_site.py` and `node --check` before artifact upload, so broken local references, required files, JSON or JavaScript prevent publication.
+The PWA uses independent cache generations:
+
+- shell/static caches rotate with the public website release;
+- bounded map tile/data caches retain the stable map-cache generation until a deliberate map migration is required.
+
+Large map pyramids and Trader animations are never part of the install-time application shell. They are cached on demand.
