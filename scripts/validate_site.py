@@ -1922,7 +1922,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
         "const WWZ_PWA_VERSION = '1.57.0'",
-        "const WWZ_PWA_UPDATE_REVISION = '2026-09-19-website-v1-57-0-repository-optimisation-1'",
+        "const WWZ_PWA_UPDATE_REVISION = '2026-09-19-website-v1-57-0-repository-cleanup-hotfix-2'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
         "const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-repository-optimisation-1`;",
