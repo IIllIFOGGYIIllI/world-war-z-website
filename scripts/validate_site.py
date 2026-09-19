@@ -390,10 +390,10 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "section === 'server-audit') loadServerActionHistory()" not in operations_admin:
         errors.append("administration.js: Operations Centre must auto-load the unified audit.")
 
-    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.55.2</strong></div>' not in dashboard:
+    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.56.0</strong></div>' not in dashboard:
         errors.append("dashboard.html: command-centre footer release label is stale.")
 
-    if "Website v1.55.2 · Bot v1.56.0" not in index:
+    if "Website v1.56.0 · Bot v1.58.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
 
     moderation_centre_js = (ROOT / "assets/js/dashboard/moderation-centre.js").read_text(encoding="utf-8")
@@ -2035,7 +2035,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
         errors.append(f"Apple touch icon dimensions are {apple_dimensions}; expected (180, 180).")
 
     launch_requirements = {
-        "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.56.0"),
+        "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.58.0"),
         "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/server-context.js?v=1.42.0&amp;rev=livonia-live-1", "assets/js/dashboard/lazy-assets.js?v=1.55.0&amp;rev=map-hub-1"),
         "assets/js/dashboard/server-context.js": ("player_capacity", "Capacity', `${server.player_capacity} slots`"),
         "assets/js/dashboard/account.js": ("payload.server?.player_capacity",),
@@ -2048,10 +2048,41 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
             if token not in source:
                 errors.append(f"{relative}: missing Livonia live-launch integration token: {token}")
 
+    dashboard_source = (ROOT / "dashboard.html").read_text(encoding="utf-8")
+    trader_js = (ROOT / "assets/js/dashboard/trader-status.js").read_text(encoding="utf-8")
+    trader_css = (ROOT / "assets/css/dashboard/trader-status.css").read_text(encoding="utf-8")
+    for token in (
+        'data-view="trader"',
+        'data-view-panel="trader"',
+        'data-trader-set-state="open"',
+        'data-trader-set-state="closed"',
+        'assets/trader/wwz-trader-closed.gif?v=1.56.0',
+    ):
+        if token not in dashboard_source:
+            errors.append(f"dashboard.html: missing Trader Status surface: {token}")
+    for token in (
+        '/api/trader/status',
+        '/api/admin/trader/action',
+        'Intl.DateTimeFormat',
+        '@everyone announcement',
+        'wwz-trader-${state}.gif?v=1.56.0',
+    ):
+        if token not in trader_js:
+            errors.append(f"trader-status.js: missing synchronized Trader guard: {token}")
+    for token in ('.trader-status-layout', '.trader-state-badge', '.trader-admin-controls'):
+        if token not in trader_css:
+            errors.append(f"trader-status.css: missing Trader layout guard: {token}")
+    for relative in (
+        "assets/trader/wwz-trader-open.gif",
+        "assets/trader/wwz-trader-closed.gif",
+    ):
+        if not (ROOT / relative).is_file():
+            errors.append(f"{relative}: Trader artwork is missing")
+
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.55.2'",
-        "const WWZ_PWA_UPDATE_REVISION = '2026-09-19-website-v1-55-2-map-hub-coordinate-fix-1'",
+        "const WWZ_PWA_VERSION = '1.56.0'",
+        "const WWZ_PWA_UPDATE_REVISION = '2026-09-19-website-v1-56-0-trader-status-1'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
         "if (request.method !== 'GET') return;",
@@ -2137,7 +2168,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     expected_manifest_ref = '<link href="manifest.webmanifest" rel="manifest"/>'
     expected_pwa_css = f'assets/css/pwa.css?v={EXPECTED_ASSET_VERSION}'
-    expected_pwa_js = 'assets/js/pwa.js?v=1.55.2&rev=map-hub-coordinate-fix-1'
+    expected_pwa_js = 'assets/js/pwa.js?v=1.56.0&rev=trader-status-1'
     expected_apple = f'assets/icons/pwa/apple-touch-icon-180.png?v={EXPECTED_ASSET_VERSION}'
     for html_path in sorted(ROOT.glob("*.html")):
         source = html_path.read_text(encoding="utf-8")
