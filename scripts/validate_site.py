@@ -394,10 +394,10 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "section === 'server-audit') loadServerActionHistory()" not in operations_admin:
         errors.append("administration.js: Operations Centre must auto-load the unified audit.")
 
-    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.58.0</strong></div>' not in dashboard:
+    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.58.1</strong></div>' not in dashboard:
         errors.append("dashboard.html: command-centre footer release label is stale.")
 
-    if "Website v1.58.0 · Bot v1.60.0" not in index:
+    if "Website v1.58.1 · Bot v1.60.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
 
     moderation_centre_js = (ROOT / "assets/js/dashboard/moderation-centre.js").read_text(encoding="utf-8")
@@ -1213,6 +1213,26 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append("core.js: temporary auth outage must preserve the selected Chernarus/Livonia server context.")
         if "else if (preserveSelection)" not in signed_out or "showLogin();" not in signed_out:
             errors.append("core.js: transient saved-session failures must preserve server context without claiming Discord is unavailable.")
+    bank_layout_css = (ROOT / "assets/css/dashboard/bank-layout.css").read_text(encoding="utf-8")
+    for token in (
+        'assets/css/dashboard/bank-layout.css?v=1.58.1&rev=bank-layout-1',
+        'class="metric-grid bank-metric-grid"',
+        'class="panel bank-account-panel"',
+        'class="panel bank-activity-panel"',
+    ):
+        if token not in dashboard:
+            errors.append(f"dashboard.html: missing WWZ Bank layout hotfix surface: {token}")
+    for token in (
+        '#dashboard-economy-banking .bank-metric-grid',
+        'grid-template-columns: repeat(3, minmax(0, 1fr)) !important;',
+        'white-space: nowrap;',
+        'font-variant-numeric: tabular-nums;',
+        '@media (max-width: 1320px)',
+        '@media (max-width: 720px)',
+    ):
+        if token not in bank_layout_css:
+            errors.append(f"bank-layout.css: missing responsive bank layout guard: {token}")
+
     account_script = 'assets/js/dashboard/account.js?v=1.58.0&amp;rev=banking-1'
     bootstrap_script = 'assets/js/dashboard/bootstrap.js?v=1.40.0&amp;rev=member-home-overhaul-1'
     account_index = dashboard.find(account_script)
@@ -1945,11 +1965,11 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.58.0'",
-        "const WWZ_PWA_UPDATE_REVISION = '2026-09-20-website-v1-58-0-banking-1'",
+        "const WWZ_PWA_VERSION = '1.58.1'",
+        "const WWZ_PWA_UPDATE_REVISION = '2026-09-20-website-v1-58-1-bank-layout-1'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
-        "const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-banking-1`;",
+        "const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-bank-layout-1`;",
         "const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;",
         "if (request.method !== 'GET') return;",
         "if (url.origin !== self.location.origin) return;",
@@ -2034,7 +2054,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     expected_manifest_ref = '<link href="manifest.webmanifest" rel="manifest"/>'
     expected_pwa_css = f'assets/css/pwa.css?v={EXPECTED_ASSET_VERSION}'
-    expected_pwa_js = 'assets/js/pwa.js?v=1.58.0&rev=banking-1'
+    expected_pwa_js = 'assets/js/pwa.js?v=1.58.1&rev=bank-layout-1'
     expected_apple = f'assets/icons/pwa/apple-touch-icon-180.png?v={EXPECTED_ASSET_VERSION}'
     for html_path in sorted(ROOT.glob("*.html")):
         source = html_path.read_text(encoding="utf-8")

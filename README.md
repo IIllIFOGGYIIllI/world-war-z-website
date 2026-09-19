@@ -1,6 +1,15 @@
-# World War Z Website v1.58.0
+# World War Z Website v1.58.1
 
 World War Z community dashboard and installable PWA for Chernarus and Livonia.
+
+
+## v1.58.1 — WWZ Bank Layout Hotfix
+
+- Fixes the WWZ Bank summary so Wallet, Bank and Net Worth use three deliberate equal-width cards instead of inheriting the global four-column metric layout.
+- Keeps large currency values on one line with responsive display sizing and tabular numerals.
+- Prevents Wallet / Bank / Net Worth labels from breaking across lines and removes the unused fourth-card gap.
+- Stacks the banking workspace cleanly before the cards become cramped, with single-column controls on small screens.
+- Advances the website/PWA revision without rotating the bounded Chernarus/Livonia map caches. Bot v1.60.0 is unchanged.
 
 ## v1.58.0 — WWZ Bank Phase 1
 

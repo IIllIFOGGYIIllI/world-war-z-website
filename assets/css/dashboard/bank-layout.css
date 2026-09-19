@@ -1,0 +1,101 @@
+/* WWZ Bank layout hotfix — v1.58.1
+   Scoped to the banking workspace so the global dashboard metric system remains unchanged. */
+
+#dashboard-economy-banking {
+  grid-template-columns: minmax(0, 1.08fr) minmax(320px, .92fr) !important;
+  align-items: stretch;
+}
+
+#dashboard-economy-banking > .panel {
+  min-width: 0;
+}
+
+#dashboard-economy-banking .bank-account-panel,
+#dashboard-economy-banking .bank-activity-panel {
+  height: 100%;
+}
+
+#dashboard-economy-banking .bank-metric-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  width: 100%;
+}
+
+#dashboard-economy-banking .bank-metric-grid .metric-card {
+  min-width: 0;
+  padding-inline: clamp(14px, 1.35vw, 20px) !important;
+}
+
+#dashboard-economy-banking .bank-metric-grid .metric-card > div {
+  min-width: 0;
+  flex-wrap: nowrap;
+}
+
+#dashboard-economy-banking .bank-metric-grid .metric-card small {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#dashboard-economy-banking .bank-metric-grid .metric-card > strong {
+  max-width: 100%;
+  margin-top: 14px !important;
+  font-size: clamp(1.35rem, 1.75vw, 1.9rem) !important;
+  line-height: 1 !important;
+  letter-spacing: -.025em !important;
+  white-space: nowrap;
+  overflow: visible;
+  word-break: normal;
+  overflow-wrap: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+#dashboard-economy-banking .dialog-field {
+  margin-top: 16px;
+}
+
+#dashboard-economy-banking .dialog-field > span {
+  align-items: baseline;
+}
+
+#dashboard-economy-banking .heading-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: 100%;
+  margin-top: 10px;
+}
+
+#dashboard-economy-banking .heading-actions > button {
+  width: 100%;
+  min-width: 0;
+  justify-content: center;
+}
+
+#dashboard-economy-banking .bank-activity-panel .detail-list dd {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 1320px) {
+  #dashboard-economy-banking {
+    grid-template-columns: 1fr !important;
+  }
+
+  #dashboard-economy-banking .bank-metric-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 720px) {
+  #dashboard-economy-banking .bank-metric-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  #dashboard-economy-banking .bank-metric-grid .metric-card > strong {
+    font-size: clamp(1.55rem, 9vw, 2rem) !important;
+  }
+
+  #dashboard-economy-banking .heading-actions {
+    grid-template-columns: 1fr;
+  }
+}

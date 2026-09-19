@@ -22,6 +22,7 @@
 <link href="assets/css/ui-system.css?v=1.24.0&rev=ops-ui-1" rel="stylesheet"/>
 <link href="assets/css/dashboard/ux-consistency.css?v=1.44.0&rev=identity-sync-1" rel="stylesheet"/>
 <link href="assets/css/dashboard/trader-status.css?v=1.57.0&rev=repo-optimisation-1" rel="stylesheet"/>
+<link href="assets/css/dashboard/bank-layout.css?v=1.58.1&rev=bank-layout-1" rel="stylesheet"/>
 </head>
 <body class="dashboard-gated">
 <a class="skip-link" href="#dashboard-content">Skip to dashboard content</a>
@@ -173,7 +174,7 @@
 <span aria-hidden="true" class="access-icon" data-access-icon="">⌁</span>
 <div><strong data-access-card-title="">Guest access</strong><small data-access-card-copy="">Sign in will securely verify your community access.</small></div>
 </div>
-<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.58.0</strong></div>
+<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.58.1</strong></div>
 <div class="sidebar-footer"><a href="index.html">Website</a><a href="legal.html">Policies</a><a href="privacy.html">Privacy</a></div>
 </aside>
 <button aria-label="Close dashboard menu" class="sidebar-scrim" data-sidebar-scrim="" type="button"></button>
@@ -708,15 +709,15 @@
 <div data-economy-content="" hidden="">
 <div class="metric-grid"><article class="metric-card featured"><div><span aria-hidden="true" class="metric-icon">$</span><small>Wallet balance</small></div><strong data-economy-balance="">—</strong><p>Live verified balance</p></article><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">♢</span><small>Community jackpot</small></div><strong data-economy-jackpot="">—</strong><p>Current shared prize</p></article><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">🔥</span><small>Heat</small></div><strong data-economy-heat="">○○○○○</strong><p>Current underworld heat</p></article><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">✓</span><small>Daily streak</small></div><strong data-economy-daily="">0</strong><p>Consecutive claims</p></article></div>
 <div class="dashboard-grid account-data-grid" data-dashboard-section="banking" id="dashboard-economy-banking">
-<article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Protected savings</p><h2>WWZ Bank</h2></div><span class="muted-label">Server scoped</span></div>
-<div class="metric-grid"><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">$</span><small>Wallet</small></div><strong data-bank-wallet="">—</strong><p>Spendable cash</p></article><article class="metric-card featured"><div><span aria-hidden="true" class="metric-icon">🏦</span><small>Bank</small></div><strong data-bank-balance="">—</strong><p>Protected savings</p></article><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">Σ</span><small>Net worth</small></div><strong data-bank-net-worth="">—</strong><p>Wallet + bank</p></article></div>
+<article class="panel bank-account-panel"><div class="panel-heading"><div><p class="panel-kicker">Protected savings</p><h2>WWZ Bank</h2></div><span class="muted-label">Server scoped</span></div>
+<div class="metric-grid bank-metric-grid"><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">$</span><small>Wallet</small></div><strong data-bank-wallet="">—</strong><p>Spendable cash</p></article><article class="metric-card featured"><div><span aria-hidden="true" class="metric-icon">🏦</span><small>Bank</small></div><strong data-bank-balance="">—</strong><p>Protected savings</p></article><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">Σ</span><small>Net worth</small></div><strong data-bank-net-worth="">—</strong><p>Wallet + bank</p></article></div>
 <div class="security-notice compact-notice"><span aria-hidden="true">🛡️</span><div><strong>Banked funds are protected from player robbery</strong><p>Shop purchases, gambling, fines and other normal spending still use your wallet. Withdraw savings when you want to spend them.</p></div></div>
 <label class="dialog-field"><span>Amount <small data-bank-minimums="">Loading limits…</small></span><input data-bank-amount inputmode="numeric" min="1000" placeholder="Enter whole-dollar amount" step="1000" type="number"/></label>
 <div class="heading-actions"><button class="primary-action" data-bank-action="deposit" type="button">Deposit To Bank</button><button class="secondary-action" data-bank-action="withdraw" type="button">Withdraw To Wallet</button></div>
 <div class="restart-dialog-message" data-bank-message="" hidden="" role="status"></div>
 <p class="table-note">Bank-to-bank player transfers are available through <code>/economy bank transfer</code> in Discord. The transfer stays inside the selected Chernarus or Livonia economy.</p>
 </article>
-<article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Savings ledger</p><h2>Bank Activity</h2></div><span class="muted-label">Latest six</span></div>
+<article class="panel bank-activity-panel"><div class="panel-heading"><div><p class="panel-kicker">Savings ledger</p><h2>Bank Activity</h2></div><span class="muted-label">Latest six</span></div>
 <dl class="detail-list"><div><dt>Total deposited</dt><dd data-bank-deposited="">—</dd></div><div><dt>Total withdrawn</dt><dd data-bank-withdrawn="">—</dd></div><div><dt>Bank transfers</dt><dd data-bank-transfers="">—</dd></div></dl>
 <ol class="activity-list" data-bank-transactions=""><li><span class="activity-symbol">…</span><div><strong>Loading bank activity</strong><small>Secure Railway request</small></div></li></ol><p class="table-note" data-bank-empty="" hidden="">No bank transactions have been recorded yet.</p>
 </article></div>
@@ -1623,7 +1624,7 @@ CarBattery,1" rows="6"></textarea></label>
 <dialog class="restart-dialog ticket-dialog" data-ticket-admin-confirm-dialog=""><form data-ticket-admin-confirm-form="" method="dialog"><button aria-label="Close confirmation" class="dialog-close" data-ticket-admin-confirm-cancel="" type="button">×</button><span aria-hidden="true" class="restart-mark">⚿</span><p class="panel-kicker">Protected synchronized action</p><h2 data-ticket-admin-confirm-title="">Confirm Ticket Action</h2><p class="dialog-copy" data-ticket-admin-confirm-copy="">This updates Railway and the linked Discord ticket.</p><label class="dialog-field" data-ticket-admin-confirm-reason-field=""><span>Reason</span><textarea data-ticket-admin-confirm-reason="" maxlength="1000" rows="4"></textarea></label><div class="restart-dialog-message" data-ticket-admin-confirm-message="" hidden="" role="status"></div><button class="danger-action wide" data-ticket-admin-confirm-submit="" type="submit">Confirm Action</button><button class="dialog-cancel" data-ticket-admin-confirm-cancel="" type="button">Cancel</button></form></dialog>
 <script defer="" src="assets/js/core/http.js?v=1.41.0&amp;rev=security-hardening-1"></script><script defer="" src="assets/js/dashboard/lazy-assets.js?v=1.55.0&amp;rev=map-hub-1"></script><script defer="" src="assets/js/dashboard/shell.js?v=1.25.1&amp;rev=livonia-pvp-1"></script><script defer="" src="assets/js/dashboard/core.js?v=1.58.0&amp;rev=banking-1"></script><script defer="" src="assets/js/dashboard/formatters.js?v=1.22.93"></script><script defer="" src="assets/js/dashboard/server-context.js?v=1.42.0&amp;rev=livonia-live-1"></script><script defer="" src="assets/js/dashboard/admin-access.js?v=1.22.93"></script><script defer="" src="assets/js/dashboard/account.js?v=1.58.0&amp;rev=banking-1"></script><script defer="" src="assets/js/dashboard/bootstrap.js?v=1.40.0&amp;rev=member-home-overhaul-1"></script>
 <script defer src="assets/js/dashboard/trader-status.js?v=1.57.0&rev=repo-optimisation-1"></script>
-<script defer src="assets/js/pwa.js?v=1.58.0&rev=banking-1"></script>
+<script defer src="assets/js/pwa.js?v=1.58.1&rev=bank-layout-1"></script>
 <script defer src="assets/js/ui-system.js?v=1.24.0&rev=ops-ui-1"></script>
 <script defer src="assets/js/dashboard/ux-consistency.js?v=1.35.0&rev=dashboard-ux-1"></script>
 </body>
