@@ -394,10 +394,10 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "section === 'server-audit') loadServerActionHistory()" not in operations_admin:
         errors.append("administration.js: Operations Centre must auto-load the unified audit.")
 
-    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.57.0</strong></div>' not in dashboard:
+    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.58.0</strong></div>' not in dashboard:
         errors.append("dashboard.html: command-centre footer release label is stale.")
 
-    if "Website v1.57.0 · Bot v1.59.0" not in index:
+    if "Website v1.58.0 · Bot v1.60.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
 
     moderation_centre_js = (ROOT / "assets/js/dashboard/moderation-centre.js").read_text(encoding="utf-8")
@@ -1213,7 +1213,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append("core.js: temporary auth outage must preserve the selected Chernarus/Livonia server context.")
         if "else if (preserveSelection)" not in signed_out or "showLogin();" not in signed_out:
             errors.append("core.js: transient saved-session failures must preserve server context without claiming Discord is unavailable.")
-    account_script = 'assets/js/dashboard/account.js?v=1.44.0&amp;rev=identity-sync-1'
+    account_script = 'assets/js/dashboard/account.js?v=1.58.0&amp;rev=banking-1'
     bootstrap_script = 'assets/js/dashboard/bootstrap.js?v=1.40.0&amp;rev=member-home-overhaul-1'
     account_index = dashboard.find(account_script)
     bootstrap_index = dashboard.find(bootstrap_script)
@@ -1868,7 +1868,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
         errors.append(f"Apple touch icon dimensions are {apple_dimensions}; expected (180, 180).")
 
     launch_requirements = {
-        "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.59.0"),
+        "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.60.0"),
         "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/server-context.js?v=1.42.0&amp;rev=livonia-live-1", "assets/js/dashboard/lazy-assets.js?v=1.55.0&amp;rev=map-hub-1"),
         "assets/js/dashboard/server-context.js": ("player_capacity", "Capacity', `${server.player_capacity} slots`"),
         "assets/js/dashboard/account.js": ("payload.server?.player_capacity",),
@@ -1882,6 +1882,30 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
                 errors.append(f"{relative}: missing Livonia live-launch integration token: {token}")
 
     dashboard_source = (ROOT / "dashboard.html").read_text(encoding="utf-8")
+    account_js = (ROOT / "assets/js/dashboard/account.js").read_text(encoding="utf-8")
+    dashboard_core_js = (ROOT / "assets/js/dashboard/core.js").read_text(encoding="utf-8")
+    for token in (
+        'data-nav-label="WWZ Bank"',
+        'data-dashboard-section="banking"',
+        'data-bank-action="deposit"',
+        'data-bank-action="withdraw"',
+        'data-bank-transactions',
+        'data-bank-net-worth',
+    ):
+        if token not in dashboard_source:
+            errors.append(f"dashboard.html: missing WWZ Bank surface: {token}")
+    for token in (
+        "ACCOUNT_BANK_ACTION_URL",
+        "renderBankTransactions",
+        "performBankAction",
+        "recent_bank_transactions",
+        "bank_total_deposited",
+        "bank_minimum_transfer",
+    ):
+        source = dashboard_core_js if token == "ACCOUNT_BANK_ACTION_URL" else account_js
+        if token not in source:
+            errors.append(f"dashboard banking integration missing: {token}")
+
     trader_js = (ROOT / "assets/js/dashboard/trader-status.js").read_text(encoding="utf-8")
     trader_css = (ROOT / "assets/css/dashboard/trader-status.css").read_text(encoding="utf-8")
     for token in (
@@ -1921,11 +1945,11 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.57.0'",
-        "const WWZ_PWA_UPDATE_REVISION = '2026-09-19-website-v1-57-0-repository-cleanup-hotfix-2'",
+        "const WWZ_PWA_VERSION = '1.58.0'",
+        "const WWZ_PWA_UPDATE_REVISION = '2026-09-20-website-v1-58-0-banking-1'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
-        "const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-repository-optimisation-1`;",
+        "const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-banking-1`;",
         "const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;",
         "if (request.method !== 'GET') return;",
         "if (url.origin !== self.location.origin) return;",
@@ -2010,7 +2034,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     expected_manifest_ref = '<link href="manifest.webmanifest" rel="manifest"/>'
     expected_pwa_css = f'assets/css/pwa.css?v={EXPECTED_ASSET_VERSION}'
-    expected_pwa_js = 'assets/js/pwa.js?v=1.57.0&rev=repo-optimisation-1'
+    expected_pwa_js = 'assets/js/pwa.js?v=1.58.0&rev=banking-1'
     expected_apple = f'assets/icons/pwa/apple-touch-icon-180.png?v={EXPECTED_ASSET_VERSION}'
     for html_path in sorted(ROOT.glob("*.html")):
         source = html_path.read_text(encoding="utf-8")

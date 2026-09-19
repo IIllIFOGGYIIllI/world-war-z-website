@@ -28,6 +28,100 @@ const renderTransactions = (transactions) => {
   });
 };
 
+
+const renderBankTransactions = (transactions) => {
+  const list = document.querySelector('[data-bank-transactions]');
+  const empty = document.querySelector('[data-bank-empty]');
+  if (!list) return;
+
+  list.replaceChildren();
+  const safeTransactions = Array.isArray(transactions) ? transactions : [];
+  empty?.toggleAttribute('hidden', safeTransactions.length !== 0);
+
+  safeTransactions.forEach((transaction) => {
+    const change = Math.trunc(Number(transaction.change) || 0);
+    const item = document.createElement('li');
+    const symbol = document.createElement('span');
+    symbol.className = `activity-symbol ${change >= 0 ? 'green' : 'red'}`;
+    symbol.textContent = change >= 0 ? '+' : '−';
+
+    const content = document.createElement('div');
+    const title = document.createElement('strong');
+    title.textContent = String(transaction.details || transaction.type || 'Bank activity');
+    const details = document.createElement('small');
+    const signedChange = `${change >= 0 ? '+' : '−'}${formatMoney(Math.abs(change))}`;
+    const counterparty = transaction.counterparty_psn_id
+      ? ` · ${String(transaction.counterparty_psn_id)}`
+      : '';
+    details.textContent = `${signedChange} · Bank ${formatMoney(transaction.balance_after)}${counterparty} · ${formatAccountDate(transaction.created_at)}`;
+    content.append(title, details);
+    item.append(symbol, content);
+    list.append(item);
+  });
+};
+
+const setBankActionState = (busy, message = '', tone = 'info') => {
+  document.querySelectorAll('[data-bank-action]').forEach((button) => {
+    button.toggleAttribute('disabled', Boolean(busy));
+  });
+  const messageBox = document.querySelector('[data-bank-message]');
+  if (!messageBox) return;
+  if (!message) {
+    messageBox.setAttribute('hidden', '');
+    messageBox.textContent = '';
+    delete messageBox.dataset.tone;
+    return;
+  }
+  messageBox.textContent = message;
+  messageBox.dataset.tone = tone;
+  messageBox.removeAttribute('hidden');
+};
+
+const performBankAction = async (action) => {
+  const token = storageGet(AUTH_SESSION_KEY);
+  if (!token) {
+    setBankActionState(false, 'Sign in with Discord before using WWZ Bank controls.', 'error');
+    return;
+  }
+
+  const input = document.querySelector('[data-bank-amount]');
+  const amount = Math.trunc(Number(input?.value) || 0);
+  if (amount <= 0) {
+    setBankActionState(false, 'Enter a valid whole-dollar amount.', 'error');
+    input?.focus();
+    return;
+  }
+
+  setBankActionState(true, action === 'deposit' ? 'Depositing funds…' : 'Withdrawing funds…', 'info');
+  try {
+    const response = await authFetch(ACCOUNT_BANK_ACTION_URL, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ action, amount })
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (response.status === 401 || response.status === 403) {
+      storageRemove(AUTH_SESSION_KEY);
+      applySignedOutState();
+      setBankActionState(false, 'Your dashboard session expired. Sign in again to continue.', 'error');
+      return;
+    }
+    if (!response.ok) {
+      throw new Error(payload.message || 'The banking transaction could not be completed.');
+    }
+
+    if (input) input.value = '';
+    await loadAccountSummary(token);
+    setBankActionState(false, String(payload.message || 'Bank account updated.'), 'success');
+  } catch (error) {
+    setBankActionState(false, error.message || 'The banking transaction could not be completed.', 'error');
+  }
+};
+
 const applyAccountSummary = (payload) => {
   const profile = payload?.profile;
   const economy = payload?.economy;
@@ -100,11 +194,19 @@ const applyAccountSummary = (payload) => {
   setText('[data-economy-gambling]', `${Number(economy.gambling_wins) || 0} wins · ${Number(economy.gambling_losses) || 0} losses`);
   setText('[data-economy-crime]', `${Number(economy.crime_successes) || 0} successes · ${Number(economy.crime_failures) || 0} failures`);
   setText('[data-economy-protection]', economy.protection_until ? `Until ${formatAccountDate(economy.protection_until)}` : 'Inactive');
+  setText('[data-bank-wallet]', formatMoney(economy.wallet_balance ?? economy.balance));
+  setText('[data-bank-balance]', formatMoney(economy.bank_balance));
+  setText('[data-bank-net-worth]', formatMoney(economy.net_worth ?? ((Number(economy.balance) || 0) + (Number(economy.bank_balance) || 0))));
+  setText('[data-bank-deposited]', formatMoney(economy.bank_total_deposited));
+  setText('[data-bank-withdrawn]', formatMoney(economy.bank_total_withdrawn));
+  setText('[data-bank-transfers]', `In ${formatMoney(economy.bank_total_transferred_in)} · Out ${formatMoney(economy.bank_total_transferred_out)}`);
+  setText('[data-bank-minimums]', `Deposit ${formatMoney(economy.bank_minimum_deposit)} · Withdraw ${formatMoney(economy.bank_minimum_withdrawal)} · Transfer ${formatMoney(economy.bank_minimum_transfer)}`);
   setText('[data-economy-badge-label]', 'Live account');
   setStatusClass(document.querySelector('[data-economy-badge]'), 'online');
   setText('[data-account-balance]', balance);
   setText('[data-account-balance-note]', 'Your verified survivor wallet');
   renderTransactions(payload.recent_transactions);
+  renderBankTransactions(payload.recent_bank_transactions);
 };
 
 const loadAccountSummary = async (sessionToken) => {
@@ -307,6 +409,13 @@ signOutButton?.addEventListener('click', async () => {
   } catch (error) {
     // Local sign-out is complete even when Railway cannot be reached.
   }
+});
+
+
+document.querySelectorAll('[data-bank-action]').forEach((button) => {
+  button.addEventListener('click', () => {
+    void performBankAction(String(button.dataset.bankAction || '').trim().toLowerCase());
+  });
 });
 
 const apiConnection = document.querySelector('[data-api-connection]');

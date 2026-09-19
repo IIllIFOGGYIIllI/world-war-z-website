@@ -1,6 +1,28 @@
-# World War Z Website v1.57.0
+# World War Z Website v1.58.0
 
 World War Z community dashboard and installable PWA for Chernarus and Livonia.
+
+## v1.58.0 — WWZ Bank Phase 1
+
+This release adds protected personal banking to the signed-in member economy workspace and pairs with Bot v1.60.0.
+
+### Banking workspace
+
+- Adds a dedicated **WWZ Bank** section under My Account.
+- Shows wallet cash, protected bank savings and total net worth.
+- Adds protected website Deposit and Withdraw controls backed by the Railway API.
+- Shows recent bank activity plus lifetime deposit, withdrawal and transfer totals.
+- Makes it clear that banked money is protected from player robbery and unavailable to normal spending until withdrawn.
+- Bank-to-bank player transfers remain a Discord workflow through `/economy bank transfer` in Phase 1.
+
+### Isolation and future economy work
+
+- Banking follows the existing selected-server context, so Chernarus and Livonia balances remain isolated.
+- No wallet balance or existing economy history is reset.
+- The Player Marketplace is intentionally reserved for a later **Livonia-specific** economy phase.
+- The PWA advances to v1.58.0 without rotating the bounded map caches.
+
+No Nitrado change, DayZ mission upload or database wipe is required. Pairs with Bot v1.60.0.
 
 ## v1.57.0 — Repository Organisation & Performance Maintenance
 

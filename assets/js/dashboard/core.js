@@ -6,6 +6,7 @@ const AUTH_COMPLETE_URL = `${DASHBOARD_API_BASE}/api/auth/discord/complete`;
 const AUTH_ME_URL = `${DASHBOARD_API_BASE}/api/auth/me`;
 const AUTH_LOGOUT_URL = `${DASHBOARD_API_BASE}/api/auth/logout`;
 const ACCOUNT_SUMMARY_URL = `${DASHBOARD_API_BASE}/api/account/summary`;
+const ACCOUNT_BANK_ACTION_URL = `${DASHBOARD_API_BASE}/api/account/bank/action`;
 const ACCOUNT_PROGRESSION_URL = `${DASHBOARD_API_BASE}/api/account/progression`;
 const ACCOUNT_OBJECTIVES_URL = `${DASHBOARD_API_BASE}/api/account/objectives`;
 const ACCOUNT_OBJECTIVES_ACTION_URL = `${DASHBOARD_API_BASE}/api/account/objectives/action`;
