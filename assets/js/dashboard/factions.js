@@ -38,6 +38,11 @@
   const governanceRecruitmentEmpty = q('[data-my-faction-recruitment-empty]');
   const governanceHistory = q('[data-my-faction-history]');
   const governanceHistoryEmpty = q('[data-my-faction-history-empty]');
+  const treasuryAmount = q('[data-faction-treasury-amount]');
+  const treasuryDepositButton = q('[data-faction-treasury-deposit]');
+  const treasuryDisburseButton = q('[data-faction-treasury-disburse]');
+  const treasuryManage = q('[data-faction-treasury-manage]');
+  const treasuryMessage = q('[data-faction-treasury-message]');
   const adminApplications = q('[data-faction-admin-applications]');
   const adminApplicationsEmpty = q('[data-faction-admin-applications-empty]');
   const adminRenames = q('[data-faction-admin-renames]');
@@ -555,6 +560,7 @@
     const stats = faction.stats || {};
     const set = (selector, value) => { const node = q(selector); if (node) node.textContent = String(value); };
     set('[data-my-faction-bank]', money(faction.bank?.balance || 0));
+    if (treasuryManage) treasuryManage.hidden = !['leader', 'officer'].includes(faction.my_role);
     set('[data-my-faction-flags]', stats.flag_claims || 0);
     set('[data-my-faction-bounties]', stats.bounty_claims || 0);
     set('[data-my-faction-contracts]', stats.completed_contracts || 0);
@@ -893,14 +899,14 @@
             success: 'Private Admin note updated.'
           });
         }),
-        button('Bank Adjust', async () => {
-          const raw = window.prompt(`Adjust ${faction.name} bank. Use a negative number to debit. Current: ${money(faction.bank?.balance || 0)}`, '0');
+        button('Treasury Adjust', async () => {
+          const raw = window.prompt(`Adjust ${faction.name} treasury. Use a negative number to debit. Current: ${money(faction.bank?.balance || 0)}`, '0');
           if (raw === null) return;
           const amount = Number.parseInt(raw, 10);
           if (!Number.isFinite(amount) || amount === 0) { showMessage(adminMessage, 'Enter a non-zero whole number.', 'error'); return; }
-          const note = window.prompt('Bank ledger note:', '') ?? '';
+          const note = window.prompt('Treasury ledger note:', '') ?? '';
           await actionAndReload('admin', { action: 'bank_adjust', faction_id: faction.faction_id, amount, note }, {
-            success: 'Faction bank updated.'
+            success: 'Faction treasury updated.'
           });
         }),
         button('Delete', () => deleteFaction(faction), 'secondary-action compact-action danger-action')
@@ -910,7 +916,7 @@
       const meta = document.createElement('div'); meta.className = 'faction-meta faction-admin-meta';
       meta.append(
         metaCell('Leader', faction.leader?.psn_id || 'Unassigned'),
-        metaCell('Bank', money(faction.bank?.balance || 0)),
+        metaCell('Treasury', money(faction.bank?.balance || 0)),
         metaCell('Flag claims', faction.stats?.flag_claims || 0),
         metaCell('Bounty claims', faction.stats?.bounty_claims || 0),
         metaCell('Contracts completed', faction.stats?.completed_contracts || 0),
@@ -950,6 +956,59 @@
       else if (errorBox) { errorBox.textContent = error.message; errorBox.hidden = false; }
     } finally { loading = false; refreshButton?.removeAttribute('disabled'); }
   };
+
+  treasuryDepositButton?.addEventListener('click', async () => {
+    const amount = Math.trunc(Number(treasuryAmount?.value) || 0);
+    if (amount <= 0) {
+      showMessage(treasuryMessage, 'Enter a valid whole-dollar treasury contribution.', 'error');
+      treasuryAmount?.focus();
+      return;
+    }
+    try {
+      treasuryDepositButton.disabled = true;
+      showMessage(treasuryMessage, 'Moving protected savings into the faction treasury…', 'info');
+      await actionAndReload('member', { action: 'treasury_deposit', amount }, {
+        success: `Deposited ${money(amount)} into the faction treasury.`
+      });
+      if (treasuryAmount) treasuryAmount.value = '';
+      showMessage(treasuryMessage, `Deposited ${money(amount)} into the faction treasury.`, 'success');
+    } catch (error) {
+      showMessage(treasuryMessage, error?.message || 'Faction treasury deposit failed.', 'error');
+    } finally {
+      treasuryDepositButton.disabled = false;
+    }
+  });
+
+  treasuryDisburseButton?.addEventListener('click', async () => {
+    const faction = memberPayload?.my_faction || null;
+    if (!faction || !['leader', 'officer'].includes(faction.my_role)) return;
+    const psn = window.prompt('Verified PlayStation ID receiving the faction treasury payment:', '');
+    if (!psn) return;
+    const raw = window.prompt('Whole-dollar amount to disburse:', '1000');
+    if (raw === null) return;
+    const amount = Number.parseInt(raw, 10);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      showMessage(treasuryMessage, 'Enter a valid whole-dollar disbursement.', 'error');
+      return;
+    }
+    const note = window.prompt('Required audited reason for this payment:', '') ?? '';
+    if (note.trim().length < 3) {
+      showMessage(treasuryMessage, 'Add a short reason so the faction treasury remains auditable.', 'error');
+      return;
+    }
+    try {
+      treasuryDisburseButton.disabled = true;
+      showMessage(treasuryMessage, 'Processing faction treasury disbursement…', 'info');
+      await actionAndReload('member', { action: 'treasury_disburse', psn_id: psn, amount, note }, {
+        success: `Disbursed ${money(amount)} to ${psn}.`
+      });
+      showMessage(treasuryMessage, `Disbursed ${money(amount)} to ${psn}.`, 'success');
+    } catch (error) {
+      showMessage(treasuryMessage, error?.message || 'Faction treasury disbursement failed.', 'error');
+    } finally {
+      treasuryDisburseButton.disabled = false;
+    }
+  });
 
   refreshButton?.addEventListener('click', () => loadAll({ forceAdmin: isStaff() }));
   adminRefreshButton?.addEventListener('click', () => loadAll({ forceAdmin: true }));

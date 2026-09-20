@@ -1,7 +1,32 @@
-# World War Z Website v1.58.1
+# World War Z Website v1.59.0
 
 World War Z community dashboard and installable PWA for Chernarus and Livonia.
 
+
+## v1.59.0 — Treasury & Escrow Economy
+
+This release adds shared economy management to the signed-in dashboard and pairs with Bot v1.61.0.
+
+### Community treasury
+
+- Adds **Community Treasury** under My Account with Available, Reserved and Managed Total balances.
+- Members can contribute directly from protected WWZ Bank savings.
+- Shows lifetime contributions/grants and recent audited treasury activity.
+- Admins can correct the treasury, grant verified survivors, reserve escrow and release/refund active escrow holds.
+
+### Faction treasury
+
+- Extends the existing Faction workspace with treasury contribution controls.
+- Faction leaders/officers can disburse treasury funds to verified members with an audited reason.
+- Uses the existing faction treasury ledger rather than introducing a second faction-balance system.
+
+### Isolation and marketplace boundary
+
+- Chernarus and Livonia treasury/escrow records remain isolated by selected server.
+- The Player Marketplace is still disabled and explicitly reserved for a later Livonia-specific economy release.
+- Advances the installed PWA to v1.59.0 without rotating bounded map caches.
+
+No Nitrado change, DayZ mission upload or database wipe is required. Pairs with Bot v1.61.0.
 
 ## v1.58.1 — WWZ Bank Layout Hotfix
 
