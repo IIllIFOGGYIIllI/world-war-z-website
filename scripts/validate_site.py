@@ -318,7 +318,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     ux_js_path = ROOT / "assets/js/dashboard/ux-consistency.js"
     ux_css = ux_css_path.read_text(encoding="utf-8") if ux_css_path.is_file() else ""
     ux_js = ux_js_path.read_text(encoding="utf-8") if ux_js_path.is_file() else ""
-    ux_css_url = "assets/css/dashboard/ux-consistency.css?v=1.44.0&rev=identity-sync-1"
+    ux_css_url = "assets/css/dashboard/ux-consistency.css?v=1.59.1&rev=workspace-title-1"
     ux_js_url = "assets/js/dashboard/ux-consistency.js?v=1.35.0&rev=dashboard-ux-1"
     if ux_css_url not in dashboard:
         errors.append("dashboard.html: missing current final UX/consistency stylesheet.")
@@ -394,11 +394,16 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "section === 'server-audit') loadServerActionHistory()" not in operations_admin:
         errors.append("administration.js: Operations Centre must auto-load the unified audit.")
 
-    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.59.0</strong></div>' not in dashboard:
+    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.59.1</strong></div>' not in dashboard:
         errors.append("dashboard.html: command-centre footer release label is stale.")
 
-    if "Website v1.59.0 · Bot v1.61.0" not in index:
+    if "Website v1.59.1 · Bot v1.61.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
+    if 'assets/css/dashboard/ux-consistency.css?v=1.59.1&rev=workspace-title-1' not in dashboard:
+        errors.append("dashboard.html: workspace-title hotfix stylesheet revision is missing.")
+    ux_consistency = (ROOT / "assets/css/dashboard/ux-consistency.css").read_text(encoding="utf-8")
+    if "flex: 0 0 232px;" not in ux_consistency or "min-width: 232px;" not in ux_consistency:
+        errors.append("assets/css/dashboard/ux-consistency.css: workspace title allocation regression.")
 
     moderation_centre_js = (ROOT / "assets/js/dashboard/moderation-centre.js").read_text(encoding="utf-8")
     moderation_centre_css = (ROOT / "assets/css/dashboard/moderation-centre.css").read_text(encoding="utf-8")
@@ -1999,11 +2004,11 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.59.0'",
-        "const WWZ_PWA_UPDATE_REVISION = '2026-09-20-website-v1-59-0-treasury-escrow-1'",
+        "const WWZ_PWA_VERSION = '1.59.1'",
+        "const WWZ_PWA_UPDATE_REVISION = '2026-09-21-website-v1-59-1-workspace-title-1'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
-        "const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-treasury-escrow-1`;",
+        "const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-workspace-title-1`;",
         "const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;",
         "if (request.method !== 'GET') return;",
         "if (url.origin !== self.location.origin) return;",
@@ -2088,7 +2093,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     expected_manifest_ref = '<link href="manifest.webmanifest" rel="manifest"/>'
     expected_pwa_css = f'assets/css/pwa.css?v={EXPECTED_ASSET_VERSION}'
-    expected_pwa_js = 'assets/js/pwa.js?v=1.59.0&rev=treasury-escrow-1'
+    expected_pwa_js = 'assets/js/pwa.js?v=1.59.1&rev=workspace-title-1'
     expected_apple = f'assets/icons/pwa/apple-touch-icon-180.png?v={EXPECTED_ASSET_VERSION}'
     for html_path in sorted(ROOT.glob("*.html")):
         source = html_path.read_text(encoding="utf-8")

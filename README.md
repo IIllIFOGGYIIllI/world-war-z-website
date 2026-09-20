@@ -1,7 +1,14 @@
-# World War Z Website v1.59.0
+# World War Z Website v1.59.1
 
 World War Z community dashboard and installable PWA for Chernarus and Livonia.
 
+
+## v1.59.1 — Workspace Title Layout Hotfix
+
+- Expands the desktop Command Centre workspace-label allocation so `Community Treasury` and other longer workspace names are no longer prematurely truncated.
+- Keeps the label responsive and preserves the existing compact/hide behaviour at narrower dashboard widths.
+- Advances the installed PWA shell to v1.59.1 without rotating the bounded Chernarus/Livonia map caches.
+- Website-only presentation hotfix; Bot v1.61.0, Treasury/Escrow logic, balances, database state and server isolation are unchanged.
 
 ## v1.59.0 — Treasury & Escrow Economy
 

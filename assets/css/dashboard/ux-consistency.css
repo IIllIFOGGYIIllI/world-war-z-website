@@ -70,13 +70,16 @@ body:has(dialog[open]) {
 }
 
 .topbar-workspace {
-  flex: 0 1 210px;
+  flex: 0 0 232px;
+  min-width: 232px;
 }
 
 .topbar-workspace strong {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: clamp(13px, .9vw, 15px);
+  letter-spacing: .025em;
 }
 
 .dashboard-search-trigger {
