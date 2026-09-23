@@ -1,7 +1,14 @@
-# World War Z Website v1.59.1
+# World War Z Website v1.59.2
 
 World War Z community dashboard and installable PWA for Chernarus and Livonia.
 
+
+## v1.59.2 — Escrow Ledger & Balance Refresh Hotfix
+
+- Treasury Activity displays escrow releases as the actual payout amount instead of “No balance change”.
+- Admin grant/release actions now refresh the complete Treasury account state so a payout to the signed-in survivor immediately updates the protected-bank balance on screen.
+- Escrow release confirmations show the recipient and resulting protected-bank balance when available.
+- Advances the PWA shell to v1.59.2 without rotating the bounded Chernarus/Livonia map caches. Pairs with Bot v1.61.1.
 
 ## v1.59.1 — Workspace Title Layout Hotfix
 

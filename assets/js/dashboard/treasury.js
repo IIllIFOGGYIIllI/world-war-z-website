@@ -32,15 +32,24 @@
     node.dataset.tone = tone;
   };
 
-  const renderActivity = (rows = []) => {
+  const renderActivity = (rows = [], escrows = []) => {
     const list = q('[data-treasury-activity]');
     const empty = q('[data-treasury-activity-empty]');
     if (!list) return;
     list.replaceChildren();
     const safe = Array.isArray(rows) ? rows : [];
+    const escrowAmounts = new Map(
+      (Array.isArray(escrows) ? escrows : [])
+        .filter((row) => row?.escrow_key)
+        .map((row) => [String(row.escrow_key), Math.abs(Math.trunc(Number(row.amount) || 0))])
+    );
     if (empty) empty.hidden = safe.length !== 0;
     safe.slice(0, 12).forEach((row) => {
-      const amount = Math.trunc(Number(row.amount) || 0);
+      const type = String(row.transaction_type || 'treasury_activity');
+      let amount = Math.trunc(Number(row.display_amount ?? row.amount) || 0);
+      if (type === 'escrow_release' && amount === 0 && row.escrow_key) {
+        amount = -Math.abs(escrowAmounts.get(String(row.escrow_key)) || 0);
+      }
       const li = document.createElement('li');
       const mark = document.createElement('span');
       mark.className = 'treasury-activity-mark';
@@ -48,7 +57,8 @@
       const body = document.createElement('div');
       const title = document.createElement('strong');
       const signed = amount === 0 ? 'No balance change' : `${amount > 0 ? '+' : '−'}${formatMoney(Math.abs(amount))}`;
-      title.textContent = `${signed} · ${String(row.transaction_type || 'Treasury activity').replaceAll('_', ' ')}`;
+      const label = type === 'escrow_release' ? 'escrow payout' : type.replaceAll('_', ' ');
+      title.textContent = `${signed} · ${label}`;
       const meta = document.createElement('small');
       const target = row.counterparty_psn_id ? ` · ${row.counterparty_psn_id}` : '';
       meta.textContent = `${row.actor_name || 'System'}${target} · ${localTime(row.created_at)}${row.details ? ` · ${row.details}` : ''}`;
@@ -92,13 +102,31 @@
         const psn = window.prompt(`Release ${row.escrow_key} (${formatMoney(row.amount)}) to which verified PlayStation ID?`, '');
         if (!psn) return;
         const note = window.prompt('Optional release note:', '') ?? '';
-        try { setMessage('Releasing escrow…'); const data = await adminAction({ action: 'escrow_release', escrow_key: row.escrow_key, psn_id: psn, note }); if (data) { payload.treasury = data.treasury; render(payload); setMessage(data.message || 'Escrow released.', 'success'); } } catch (error) { setMessage(error.message || 'Escrow release failed.', 'error'); }
+        try {
+          setMessage('Releasing escrow…');
+          const data = await adminAction({ action: 'escrow_release', escrow_key: row.escrow_key, psn_id: psn, note });
+          if (data) {
+            await load({ quiet: true });
+            const result = data.result || {};
+            const recipient = result.recipient_psn_id || psn;
+            const bank = Number.isFinite(Number(result.recipient_bank_balance)) ? ` · Protected bank ${formatMoney(result.recipient_bank_balance)}` : '';
+            setMessage(`${formatMoney(result.amount || row.amount)} released to ${recipient}${bank}.`, 'success');
+            if (typeof loadAccountSummary === 'function') void loadAccountSummary(token());
+          }
+        } catch (error) { setMessage(error.message || 'Escrow release failed.', 'error'); }
       });
       const refund = document.createElement('button'); refund.className = 'secondary-action compact-action'; refund.type = 'button'; refund.textContent = 'Refund';
       refund.addEventListener('click', async () => {
         if (!window.confirm(`Return ${formatMoney(row.amount)} from ${row.escrow_key} to the community treasury?`)) return;
         const note = window.prompt('Optional refund note:', '') ?? '';
-        try { setMessage('Refunding escrow…'); const data = await adminAction({ action: 'escrow_refund', escrow_key: row.escrow_key, note }); if (data) { payload.treasury = data.treasury; render(payload); setMessage(data.message || 'Escrow refunded.', 'success'); } } catch (error) { setMessage(error.message || 'Escrow refund failed.', 'error'); }
+        try {
+          setMessage('Refunding escrow…');
+          const data = await adminAction({ action: 'escrow_refund', escrow_key: row.escrow_key, note });
+          if (data) {
+            await load({ quiet: true });
+            setMessage(`${formatMoney(data.result?.amount || row.amount)} refunded to the community treasury.`, 'success');
+          }
+        } catch (error) { setMessage(error.message || 'Escrow refund failed.', 'error'); }
       });
       actions.append(release, refund); body.append(title, meta, actions); li.append(mark, body); list.append(li);
     });
@@ -116,7 +144,7 @@
     setText('[data-treasury-bank-balance]', formatMoney(data.bank_balance));
     setText('[data-treasury-minimum]', `Minimum contribution ${formatMoney(data.limits?.minimum_contribution || 1000)}`);
     setText('[data-treasury-server-name]', data.server_name || 'Selected server');
-    renderActivity(treasury.transactions || []);
+    renderActivity(treasury.transactions || [], treasury.escrows || []);
 
     const canAdmin = Boolean(data.can_administer) && ['staff', 'owner'].includes(String(dashboardAccessLevel || data.access_level || ''));
     qa('[data-treasury-admin]').forEach((node) => { node.hidden = !canAdmin; });
@@ -170,20 +198,20 @@
     const raw = window.prompt('Treasury adjustment. Positive adds funds; negative removes funds:', '0'); if (raw === null) return;
     const amount = Number.parseInt(raw, 10); if (!Number.isFinite(amount) || amount === 0) { setMessage('Enter a non-zero whole-dollar amount.', 'error'); return; }
     const note = window.prompt('Required audited reason:', '') ?? '';
-    try { setMessage('Applying treasury adjustment…'); const data = await adminAction({ action: 'adjust', amount, note }); if (data) { payload.treasury = data.treasury; render(payload); setMessage('Treasury adjusted.', 'success'); } } catch (error) { setMessage(error.message || 'Treasury adjustment failed.', 'error'); }
+    try { setMessage('Applying treasury adjustment…'); const data = await adminAction({ action: 'adjust', amount, note }); if (data) { await load({ quiet: true }); setMessage('Treasury adjusted.', 'success'); } } catch (error) { setMessage(error.message || 'Treasury adjustment failed.', 'error'); }
   });
 
   q('[data-treasury-admin-grant]')?.addEventListener('click', async () => {
     const psn = window.prompt('Verified PlayStation ID receiving the treasury grant:', ''); if (!psn) return;
     const raw = window.prompt('Grant amount:', '1000'); if (raw === null) return;
     const amount = Number.parseInt(raw, 10); const note = window.prompt('Required audited reason:', '') ?? '';
-    try { setMessage('Issuing treasury grant…'); const data = await adminAction({ action: 'grant', psn_id: psn, amount, note }); if (data) { payload.treasury = data.treasury; render(payload); setMessage('Treasury grant issued.', 'success'); } } catch (error) { setMessage(error.message || 'Treasury grant failed.', 'error'); }
+    try { setMessage('Issuing treasury grant…'); const data = await adminAction({ action: 'grant', psn_id: psn, amount, note }); if (data) { await load({ quiet: true }); setMessage(`Treasury grant issued to ${data.result?.recipient_psn_id || psn}.`, 'success'); if (typeof loadAccountSummary === 'function') void loadAccountSummary(token()); } } catch (error) { setMessage(error.message || 'Treasury grant failed.', 'error'); }
   });
 
   q('[data-treasury-admin-hold]')?.addEventListener('click', async () => {
     const raw = window.prompt('Amount to reserve in escrow:', '1000'); if (raw === null) return;
     const amount = Number.parseInt(raw, 10); const purpose = window.prompt('Required escrow purpose:', '') ?? '';
-    try { setMessage('Reserving treasury funds…'); const data = await adminAction({ action: 'escrow_hold', amount, purpose }); if (data) { payload.treasury = data.treasury; render(payload); setMessage(`Escrow ${data.result?.escrow_key || ''} created.`, 'success'); } } catch (error) { setMessage(error.message || 'Escrow reservation failed.', 'error'); }
+    try { setMessage('Reserving treasury funds…'); const data = await adminAction({ action: 'escrow_hold', amount, purpose }); if (data) { await load({ quiet: true }); setMessage(`Escrow ${data.result?.escrow_key || ''} created.`, 'success'); } } catch (error) { setMessage(error.message || 'Escrow reservation failed.', 'error'); }
   });
 
   window.addEventListener('wwz:viewchange', (event) => {
