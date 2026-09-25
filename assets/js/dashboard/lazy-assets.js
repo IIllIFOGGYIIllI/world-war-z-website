@@ -374,10 +374,10 @@
 
 
   const ensureCommunity = () => Promise.all([
-    loadStylesheetOnce('community-css', 'assets/css/dashboard/community.css?v=1.50.0&rev=events-rentals-polish-1'),
+    loadStylesheetOnce('community-css', 'assets/css/dashboard/community.css?v=1.60.0&rev=event-calendar-overhaul-3'),
     loadAfterDashboardRuntime(() => loadScriptOnce(
       'community',
-      'assets/js/dashboard/community.js?v=1.50.0&rev=events-rentals-polish-1',
+      'assets/js/dashboard/community.js?v=1.60.0&rev=event-calendar-overhaul-3',
       () => window.__wwzCommunityReady === true
     ))
   ]).then(() => undefined);

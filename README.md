@@ -1,6 +1,23 @@
-# World War Z Website v1.59.3
+# World War Z Website v1.60.0
 
 World War Z community dashboard and installable PWA for Chernarus and Livonia.
+
+
+## v1.60.0 — Event Calendar Overhaul
+
+- Month / Week / List calendar, browser-local times, eight editable WWZ templates and date-click creation.
+- Draft, Scheduled, Announced, Live, Completed and Cancelled lifecycle. Drafts and unpublished hidden events stay private.
+- Per-event editing, duplication, rescheduling, announcement preview and public activity updates.
+- Chernarus/Livonia isolation; existing configured KILLZONES and public POIs; WWZ Map location/zone links.
+- Persistent Discord calendar panel; Discord local timestamps; reminders and delayed Raid Weekend publication.
+- Reward definitions never trigger automatic balance changes. Existing attendance/winner payments require explicit Admin confirmation.
+- Pre-event restart notices only; actual restarts still require the existing Admin-confirmed Server Controls.
+- Exactly 100 top-level Discord commands. Additive database changes; no deletion instructions.
+- Website PWA/service-worker update revision: event-calendar-overhaul-3 (included with this release).
+
+Rebased onto the uploaded Bot v1.61.4 + Website v1.59.3 source. Preserves KILLZONE runtime suspension, Admin immunity, ban logging and website runtime controls. Live Discord/Nitrado testing remains outstanding.
+
+Rebased validation: 47 focused event/hotfix/isolation/command tests passed. Full bot suite: 835 passed, 2 skipped, 15 baseline failures also reproduced in the uploaded source (including the pre-existing banlist/logchannel inventory mismatch). Website, PWA, JavaScript syntax, map datasets and calendar DOM interaction checks passed. Exactly 100 top-level commands remain registered.
 
 
 ## v1.59.2 — Escrow Ledger & Balance Refresh Hotfix

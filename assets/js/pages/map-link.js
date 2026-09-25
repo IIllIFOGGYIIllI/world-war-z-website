@@ -152,7 +152,7 @@
           const scale=config.mapUnits/config.mapMetres; layer=window.L.circle(center,{radius:Number(zone.radius)*scale,color:colour,weight:2,fillColor:colour,fillOpacity:.13});
         }
       }
-      if (layer) { layer.bindTooltip(clean(zone.name || 'PvP / Kill Zone'),{sticky:true}); zoneLayer.addLayer(layer); count+=1; }
+      if (layer) { layer.bindTooltip(clean(zone.name || 'PvP / Kill Zone'),{sticky:true}); zoneLayer.addLayer(layer); count+=1;if(String(zone.zone_id)===params.get('zone')){layer.setStyle({weight:4,fillOpacity:.3});map.map.fitBounds(layer.getBounds(),{padding:[35,35],maxZoom:5});layer.openTooltip();} }
     }
     return count;
   };

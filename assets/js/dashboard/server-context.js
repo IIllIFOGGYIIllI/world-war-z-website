@@ -297,6 +297,11 @@
       return;
     }
     const stored = normalizeServer(readStoredServer());
+    const eventParams = new URLSearchParams(location.search);
+    const eventMap = eventParams.get('event_map');
+    const eventServer = eventParams.get('event_server');
+    const eventTarget = availableServers.find(server => server.map_key===eventMap && (!eventServer || server.key===eventServer));
+    if (eventTarget) { selectServer(eventTarget, {restored:true}); return; }
     const restored = stored
       ? availableServers.find((server) => server.key === stored.key && server.map_key === stored.map_key)
       : null;

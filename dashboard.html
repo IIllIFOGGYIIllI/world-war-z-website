@@ -176,7 +176,7 @@
 <span aria-hidden="true" class="access-icon" data-access-icon="">⌁</span>
 <div><strong data-access-card-title="">Guest access</strong><small data-access-card-copy="">Sign in will securely verify your community access.</small></div>
 </div>
-<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.59.3</strong></div>
+<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.60.0</strong></div>
 <div class="sidebar-footer"><a href="index.html">Website</a><a href="legal.html">Policies</a><a href="privacy.html">Privacy</a></div>
 </aside>
 <button aria-label="Close dashboard menu" class="sidebar-scrim" data-sidebar-scrim="" type="button"></button>
@@ -361,7 +361,12 @@
     <section class="community-panel community-events-overhaul" data-dashboard-section="events">
       <div class="community-panel-heading"><div><span class="community-kicker">Event Hub</span><h3>Upcoming &amp; Live Community Events</h3></div><span class="community-inline-note">Server-specific calendar · restart-safe reminders · registrations · results</span></div>
       <div class="community-event-summary"><div><span>Upcoming / Live</span><strong data-community-event-count>0</strong><small>Current server only</small></div><div><span>My Registrations</span><strong data-community-my-count>0</strong><small>Going or waitlisted</small></div><div><span>Published Results</span><strong data-community-result-count>0</strong><small>Recent completed events</small></div></div>
-      <div class="community-event-calendar" data-community-events></div>
+      <div class="community-calendar-toolbar" data-community-calendar-toolbar>
+        <div class="community-calendar-nav"><button class="secondary-action compact-action" data-calendar-prev type="button" aria-label="Previous calendar period">←</button><button class="secondary-action compact-action" data-calendar-today type="button">Today</button><button class="secondary-action compact-action" data-calendar-next type="button" aria-label="Next calendar period">→</button><strong data-calendar-title>Calendar</strong></div>
+        <div class="community-calendar-views" role="group" aria-label="Calendar view"><button class="secondary-action compact-action is-active" data-calendar-view="month" type="button">Month</button><button class="secondary-action compact-action" data-calendar-view="week" type="button">Week</button><button class="secondary-action compact-action" data-calendar-view="list" type="button">List</button></div>
+      </div>
+      <div class="community-calendar" data-community-calendar></div>
+      <div class="community-event-calendar community-event-list" data-community-events hidden></div>
       <div class="community-two community-member-event-grid">
         <div><h4>My Event Registrations</h4><div class="community-list" data-community-my-signups><p class="community-empty">Sign in with Discord to register for community events.</p></div></div>
         <div><h4>Recent Results</h4><div class="community-list" data-community-results></div></div>
@@ -383,9 +388,25 @@
     </section>
 
     <section class="community-panel community-planner-overhaul" data-dashboard-section="planner" data-staff-only hidden data-community-planner>
-      <div class="community-panel-heading"><div><span class="community-kicker">Event Operations</span><h3>Planner, Attendance &amp; Results</h3></div><span class="community-inline-note">Staff run events; Owner manages reusable plans, locations and loadouts.</span></div>
+      <div class="community-panel-heading"><div><span class="community-kicker">Event Operations</span><h3>Planner, Attendance &amp; Results</h3></div><span class="community-inline-note">Admins create and run event plans; Owner maintains reusable location/loadout libraries.</span></div>
       <div class="community-two">
         <div class="community-planner-column">
+          <h4>Quick Event Templates</h4><button class="secondary-action" data-event-choose-server type="button">Choose server: Chernarus / Livonia</button><p data-event-server-label></p>
+          <p class="community-inline-note">Start with a WWZ event format, then adjust only what changes.</p>
+          <div class="community-quick-template-grid" data-community-quick-templates><button class="secondary-action" data-event-preset="custom" type="button">Custom Event</button>
+            <button class="secondary-action" data-event-preset="demolition_derby" type="button">🚗 Demolition Derby</button>
+            <button class="secondary-action" data-event-preset="pvp_event" type="button">🎯 PvP Event</button>
+            <button class="secondary-action" data-event-preset="fight_night" type="button">🥊 Fight Night</button>
+            <button class="secondary-action" data-event-preset="capture_the_flag" type="button">🚩 Capture The Flag</button>
+            <button class="secondary-action" data-event-preset="scavenger_hunt" type="button">🔎 Scavenger Hunt</button>
+            <button class="secondary-action" data-event-preset="hunt_admins" type="button">🧟 Hunt The Admins</button>
+            <button class="secondary-action" data-event-preset="raid_weekend" type="button">💥 Raid Weekend</button>
+          </div>
+          <div class="community-calendar-panel-admin">
+            <div><strong>Discord Event Calendar Panel</strong><small data-community-calendar-panel-state>No panel published yet.</small></div>
+            <label class="community-field"><span>Panel channel</span><select data-community-calendar-channel><option value="">Choose Discord channel…</option></select></label>
+            <button class="secondary-action" data-community-calendar-publish type="button">Publish / Refresh Panel</button>
+          </div>
           <h4>Schedule from reusable plan</h4>
           <div class="community-form community-run-form">
             <label class="community-field"><span>Reusable event plan</span><select data-community-template-select><option value="">Choose an event plan…</option></select></label>
@@ -399,20 +420,28 @@
         <div class="community-planner-column">
           <h4>Reusable event plans</h4><div class="community-list" data-community-templates></div>
           <form class="community-form" data-community-template-form data-community-owner-editor>
-            <input name="template_id" type="hidden">
+            <input name="template_id" type="hidden"><input name="run_id" type="hidden">
+            <h4 data-event-editor-title>Create Event</h4>
+            <div class="community-form-grid"><label class="community-field"><span>Start (your local time)</span><input name="starts_at" type="datetime-local"></label><label class="community-field"><span>End (your local time)</span><input name="ends_at" type="datetime-local"></label></div>
             <div class="community-form-grid">
               <label class="community-field"><span>Plan name</span><input name="name" maxlength="80" required></label>
               <label class="community-field"><span>Announcement title</span><input name="title" maxlength="120" required></label>
+              <label class="community-field"><span>Event type</span><select name="event_type"><option value="custom">Custom Event</option><option value="demolition_derby">Demolition Derby</option><option value="pvp_event">PvP Event</option><option value="fight_night">Fight Night</option><option value="capture_the_flag">Capture The Flag</option><option value="scavenger_hunt">Scavenger Hunt</option><option value="hunt_admins">Hunt The Admins</option><option value="raid_weekend">Raid Weekend</option></select></label>
               <label class="community-field"><span>Category</span><input name="category" maxlength="60" placeholder="Fight Night, Hunt, Race…"></label>
+              <label class="community-field"><span>Visibility</span><select name="visibility"><option value="public">Public immediately</option><option value="hidden">Hidden / Admin only until publication</option></select></label>
+              <label class="community-field"><span>Publish lead time (minutes)</span><input name="publish_lead_minutes" type="number" min="0" max="10080" value="0"><small>Raid Weekend example: 2880 = 48 hours before.</small></label>
               <label class="community-field"><span>Discord channel</span><select name="discord_channel_id" data-community-template-channel><option value="">No Discord announcement</option></select></label>
+              <label class="community-field"><span>Pre-event restart (minutes before)</span><input name="restart_minutes_before" type="number" min="0" max="120" value="0"></label>
               <label class="community-field full"><span>Description</span><textarea name="description" maxlength="1000"></textarea></label>
-              <label class="community-field"><span>Reusable location</span><select name="location_id" data-community-template-location><option value="">Custom / server-wide</option></select></label>
+              <label class="community-field"><span>Location source</span><select name="location_source" data-community-location-source><option value="serverwide">Server-wide / no map point</option><option value="poi">Public POI</option><option value="preset">Reusable location</option><option value="killzone">PvP KILLZONE</option><option value="custom">Custom coordinates</option></select></label>
+              <label class="community-field"><span>Public POI</span><select name="poi_id" data-event-poi><option value="">Choose public POI…</option></select></label><label class="community-field"><span>PvP KILLZONE</span><select name="zone_id" data-community-killzone><option value="">Choose configured KILLZONE…</option></select></label>
+              <label class="community-field"><span>Reusable location</span><select name="location_id" data-community-template-location><option value="">Choose reusable location…</option></select></label>
               <label class="community-field"><span>Reusable loadout</span><select name="loadout_id" data-community-template-loadout><option value="">No preset</option></select></label>
               <label class="community-field"><span>Custom location label</span><input name="location_label" maxlength="120"></label>
               <label class="community-field"><span>Loadout label</span><input name="loadout_label" maxlength="180"></label>
               <label class="community-field"><span>X coordinate</span><input name="x" type="number" step="0.1"></label>
               <label class="community-field"><span>Z coordinate</span><input name="z" type="number" step="0.1"></label>
-              <label class="community-field"><span>Duration (minutes)</span><input name="duration_minutes" type="number" min="10" max="1440" value="60"></label>
+              <label class="community-field"><span>Duration (minutes)</span><input name="duration_minutes" type="number" min="10" max="10080" value="60"></label>
               <label class="community-field"><span>Starting-soon reminder (minutes)</span><input name="reminder_minutes" type="number" min="0" max="1440" value="30"></label>
               <label class="community-field"><span>Early reminder (minutes)</span><input name="second_reminder_minutes" type="number" min="0" max="10080" value="0"></label>
               <label class="community-field"><span>Signup capacity (0 = unlimited)</span><input name="capacity" type="number" min="0" max="500" value="0"></label>
@@ -420,14 +449,19 @@
               <label class="community-field"><span>Attendance currency</span><input name="reward_money" type="number" min="0" max="100000000" value="0"></label>
               <label class="community-field"><span>Winner XP</span><input name="winner_reward_xp" type="number" min="0" max="100000" value="0"></label>
               <label class="community-field"><span>Winner currency</span><input name="winner_reward_money" type="number" min="0" max="100000000" value="0"></label>
+              <label class="community-field full"><span>Event setup</span><textarea name="setup_text" maxlength="2000" placeholder="Vehicles, objective, spawn/loadout instructions, setup notes…"></textarea></label>
+              <label class="community-field full"><span>Reward categories</span><textarea name="reward_categories" maxlength="2400" placeholder="One per line: Longest Kill | 1000000 | 0
+Most Kills 1st | 750000 | 0
+Participation | 50000 | 0"></textarea><small>Format: Label | currency | XP</small></label>
               <label class="community-field full"><span>Event rules</span><textarea name="rules_text" maxlength="2000" placeholder="Rules specific to this event"></textarea></label>
               <label class="community-field full"><span>Announcement copy</span><textarea name="announcement_text" maxlength="1500"></textarea></label>
               <label class="community-field full"><span>Banner / image URL</span><input name="image_url" maxlength="500" type="url" placeholder="https://…"></label>
               <label class="community-checkbox-line full"><input name="signup_enabled" type="checkbox" checked> Allow member signups and waitlist</label>
-              <label class="community-checkbox-line full"><input name="announce_on_schedule" type="checkbox" checked> Announce when scheduled</label>
+              <label class="community-checkbox-line full"><input name="announce_on_schedule" type="checkbox" checked> Announce when scheduled (public events only)</label>
+              <label class="community-checkbox-line full"><input name="ping_everyone" type="checkbox"> Ping @everyone for scheduled/published/start announcements</label>
               <label class="community-checkbox-line full"><input name="enabled" type="checkbox" checked> Enabled plan</label>
             </div>
-            <div class="community-form-actions"><button class="primary-action" type="submit">Save Reusable Plan</button><button class="secondary-action" data-community-clear-template type="button">Clear Editor</button></div>
+            <div class="community-form-actions"><button class="primary-action" type="submit" value="schedule">Schedule / Save Event</button><button class="secondary-action" type="submit" value="draft">Save as Draft</button><button class="secondary-action" type="submit" value="template">Save Reusable Plan</button><button class="secondary-action" type="submit" value="preview">Preview Discord Announcement</button><button class="secondary-action" data-community-clear-template type="button">Clear Editor</button></div>
           </form>
         </div>
       </div>
@@ -442,7 +476,7 @@
         </div>
       </div>
       <div class="community-two community-ops-grid">
-        <div><h4>Attendance Manager</h4><p class="community-inline-note">Choose a scheduled/live event above to manage registrations, attendance and automatic configured rewards.</p><div class="community-list" data-community-attendance></div></div>
+        <div><h4>Attendance Manager</h4><p class="community-inline-note">Choose a scheduled/live event above to manage registrations, attendance and results. Rewards require explicit confirmation before any balance changes.</p><div class="community-list" data-community-attendance></div></div>
         <div><h4>Event History</h4><div class="community-history" data-community-history></div></div>
       </div>
     </section>
@@ -1644,9 +1678,9 @@ CarBattery,1" rows="6"></textarea></label>
 <dialog class="restart-dialog ticket-dialog" data-ticket-create-dialog=""><form data-ticket-create-form="" method="dialog"><button aria-label="Close ticket form" class="dialog-close" data-ticket-create-cancel="" type="button">×</button><span aria-hidden="true" class="restart-mark">🎟️</span><p class="panel-kicker">Discord + dashboard synchronized</p><h2>Open Support Ticket</h2><p class="dialog-copy">This creates a real private Discord ticket visible only to you, the configured Admin role and the bot, plus the same Railway record shown on the dashboard.</p><label class="dialog-field"><span>Category</span><select data-ticket-create-category="" required=""></select></label><label class="dialog-field"><span>Subject</span><input data-ticket-create-subject="" maxlength="100" minlength="3" required="" type="text"/></label><label class="dialog-field"><span>Details</span><textarea data-ticket-create-description="" maxlength="1500" minlength="10" required="" rows="6"></textarea></label><div class="restart-dialog-message" data-ticket-create-message="" hidden="" role="status"></div><button class="primary-action wide" data-ticket-create-submit="" type="submit">Create Private Ticket</button><button class="dialog-cancel" data-ticket-create-cancel="" type="button">Cancel</button></form></dialog>
 <dialog class="restart-dialog ticket-dialog ticket-member-detail-dialog" data-ticket-detail-dialog=""><form method="dialog"><button aria-label="Close ticket details" class="dialog-close" data-ticket-detail-close="" type="button">×</button><span aria-hidden="true" class="restart-mark">🎟️</span><p class="panel-kicker">Synchronized ticket record</p><h2 data-ticket-detail-title="">Ticket</h2><div class="ticket-detail-meta" data-ticket-detail-meta=""></div><section><h3>Request</h3><p class="ticket-description" data-ticket-detail-description=""></p></section><section class="ticket-thread-section"><div class="ticket-thread-heading"><h3>Live Discord Conversation</h3><span class="muted-label" data-ticket-thread-state="">Synced</span></div><div aria-live="polite" class="ticket-message-thread" data-ticket-message-thread=""></div><label class="dialog-field"><span>Reply <small>Appears immediately in the linked Discord ticket</small></span><textarea data-ticket-member-reply="" maxlength="1500" placeholder="Write a support reply…" rows="3"></textarea></label><button class="primary-action wide" data-ticket-member-reply-send="" type="button">Send Reply To Discord</button></section><section><h3>Activity</h3><div class="ticket-timeline" data-ticket-detail-actions=""></div></section><div class="ticket-member-actions"><label class="dialog-field" data-ticket-close-field=""><span>Close reason</span><textarea data-ticket-close-reason="" maxlength="1000" rows="3">Issue resolved.</textarea></label><button class="danger-action wide" data-ticket-member-close="" type="button">Close Ticket</button><button class="secondary-action wide" data-ticket-member-transcript="" hidden="" type="button">Open Saved Website Transcript</button><div data-ticket-rating-panel="" hidden=""><span>Rate the support you received</span><div class="ticket-rating-buttons"><button data-ticket-rate="1" type="button">1★</button><button data-ticket-rate="2" type="button">2★</button><button data-ticket-rate="3" type="button">3★</button><button data-ticket-rate="4" type="button">4★</button><button data-ticket-rate="5" type="button">5★</button></div></div></div><div class="restart-dialog-message" data-ticket-detail-message="" hidden="" role="status"></div><button class="dialog-cancel" data-ticket-detail-close="" type="button">Done</button></form></dialog>
 <dialog class="restart-dialog ticket-dialog" data-ticket-admin-confirm-dialog=""><form data-ticket-admin-confirm-form="" method="dialog"><button aria-label="Close confirmation" class="dialog-close" data-ticket-admin-confirm-cancel="" type="button">×</button><span aria-hidden="true" class="restart-mark">⚿</span><p class="panel-kicker">Protected synchronized action</p><h2 data-ticket-admin-confirm-title="">Confirm Ticket Action</h2><p class="dialog-copy" data-ticket-admin-confirm-copy="">This updates Railway and the linked Discord ticket.</p><label class="dialog-field" data-ticket-admin-confirm-reason-field=""><span>Reason</span><textarea data-ticket-admin-confirm-reason="" maxlength="1000" rows="4"></textarea></label><div class="restart-dialog-message" data-ticket-admin-confirm-message="" hidden="" role="status"></div><button class="danger-action wide" data-ticket-admin-confirm-submit="" type="submit">Confirm Action</button><button class="dialog-cancel" data-ticket-admin-confirm-cancel="" type="button">Cancel</button></form></dialog>
-<script defer="" src="assets/js/core/http.js?v=1.41.0&amp;rev=security-hardening-1"></script><script defer="" src="assets/js/dashboard/lazy-assets.js?v=1.59.3&amp;rev=killzone-runtime-1"></script><script defer="" src="assets/js/dashboard/shell.js?v=1.25.1&amp;rev=livonia-pvp-1"></script><script defer="" src="assets/js/dashboard/core.js?v=1.58.0&amp;rev=banking-1"></script><script defer="" src="assets/js/dashboard/formatters.js?v=1.22.93"></script><script defer="" src="assets/js/dashboard/server-context.js?v=1.42.0&amp;rev=livonia-live-1"></script><script defer="" src="assets/js/dashboard/admin-access.js?v=1.22.93"></script><script defer="" src="assets/js/dashboard/account.js?v=1.58.0&amp;rev=banking-1"></script><script defer src="assets/js/dashboard/treasury.js?v=1.59.2&rev=escrow-ledger-1"></script><script defer="" src="assets/js/dashboard/bootstrap.js?v=1.40.0&amp;rev=member-home-overhaul-1"></script>
+<script defer="" src="assets/js/core/http.js?v=1.41.0&amp;rev=security-hardening-1"></script><script defer="" src="assets/js/dashboard/lazy-assets.js?v=1.60.0&amp;rev=event-calendar-overhaul-3"></script><script defer="" src="assets/js/dashboard/shell.js?v=1.25.1&amp;rev=livonia-pvp-1"></script><script defer="" src="assets/js/dashboard/core.js?v=1.58.0&amp;rev=banking-1"></script><script defer="" src="assets/js/dashboard/formatters.js?v=1.22.93"></script><script defer="" src="assets/js/dashboard/server-context.js?v=1.60.0&amp;rev=event-calendar-overhaul-3"></script><script defer="" src="assets/js/dashboard/admin-access.js?v=1.22.93"></script><script defer="" src="assets/js/dashboard/account.js?v=1.58.0&amp;rev=banking-1"></script><script defer src="assets/js/dashboard/treasury.js?v=1.59.2&rev=escrow-ledger-1"></script><script defer="" src="assets/js/dashboard/bootstrap.js?v=1.40.0&amp;rev=member-home-overhaul-1"></script>
 <script defer src="assets/js/dashboard/trader-status.js?v=1.57.0&rev=repo-optimisation-1"></script>
-<script defer src="assets/js/pwa.js?v=1.59.3&rev=killzone-runtime-1"></script>
+<script defer src="assets/js/pwa.js?v=1.60.0&rev=event-calendar-overhaul-3"></script>
 <script defer src="assets/js/ui-system.js?v=1.24.0&rev=ops-ui-1"></script>
 <script defer src="assets/js/dashboard/ux-consistency.js?v=1.35.0&rev=dashboard-ux-1"></script>
 </body>
