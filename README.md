@@ -1,4 +1,4 @@
-# World War Z Website v1.59.2
+# World War Z Website v1.59.3
 
 World War Z community dashboard and installable PWA for Chernarus and Livonia.
 
@@ -92,3 +92,12 @@ This is a behaviour-preserving maintenance pass across the complete website repo
 - Adds GIFs to the normal static-asset cache path.
 
 No bot/database wipe, Nitrado change, DayZ mission upload or map-cache rotation is required. Pairs with Bot v1.59.0.
+
+
+## Website v1.59.3 — Killzone Runtime Sync Hotfix
+
+- Adds Admin website controls to enable or suspend PvP KILLZONES per selected server.
+- Uses the same authoritative server-scoped state as Discord `/pvp killzones`.
+- Managed KILLZONE rows display Suspended / Raid Weekend instead of Active while enforcement is paused.
+- Public map KILLZONE overlays disappear while enforcement is suspended.
+- Pairs with Bot v1.61.4.

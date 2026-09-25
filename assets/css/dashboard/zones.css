@@ -9,6 +9,37 @@
   flex-wrap: wrap;
 }
 .zone-action-bar { justify-content: space-between; margin-bottom: 1rem; }
+
+.killzone-runtime-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 1rem;
+  padding: 1rem 1.1rem;
+}
+.killzone-runtime-copy { min-width: 0; }
+.killzone-runtime-heading { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
+.killzone-runtime-heading h3 { margin: .12rem 0 0; }
+.killzone-runtime-copy > p { margin: .45rem 0 .3rem; color: var(--muted, #aeb7c7); }
+.killzone-runtime-copy > small { color: var(--muted, #8996aa); }
+.killzone-runtime-actions { display: flex; gap: .55rem; flex-wrap: wrap; justify-content: flex-end; }
+.killzone-runtime-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 27px;
+  padding: .3rem .62rem;
+  border-radius: 999px;
+  border: 1px solid rgba(64,188,111,.38);
+  background: rgba(64,188,111,.09);
+  color: #aaf1c3;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+}
+.killzone-runtime-badge[data-enabled="false"] { border-color: rgba(243,181,55,.45); background: rgba(243,181,55,.08); color: #f7d48b; }
+.zone-status-pill.suspended { border-color: rgba(243,181,55,.45); background: rgba(243,181,55,.08); color: #f7d48b; }
+@media (max-width: 760px) { .killzone-runtime-card { align-items: stretch; flex-direction: column; } .killzone-runtime-actions { justify-content: stretch; } .killzone-runtime-actions button { flex: 1 1 190px; } }
 .zone-action-primary { display: flex; gap: .65rem; flex-wrap: wrap; }
 .zone-toolbar { padding: .85rem; margin-bottom: 1rem; }
 .zone-toolbar .command-search { flex: 1 1 280px; }
