@@ -1,6 +1,18 @@
-# World War Z Website v1.60.0
+# World War Z Website v1.60.1
 
 World War Z community dashboard and installable PWA for Chernarus and Livonia.
+
+
+## v1.60.1 — Simplified Event Planner
+
+- Rebuilds Event Planner around a short template-first flow: choose event, set title/start/duration/location/visibility, then schedule.
+- Moves Discord, reminder, setup, reward, signup and reusable-plan controls into collapsed Advanced Settings.
+- Shows only the location controls relevant to the selected source (POI, saved location, KILLZONE or custom coordinates).
+- Replaces raw timing-minute entry with readable duration, publication, reminder and restart choices while retaining the existing API values.
+- Collapses Discord Calendar Panel settings, reusable plans/series, owner locations and owner loadouts into dedicated drawers.
+- Adds optional recurring-series controls that stay hidden for normal one-off events.
+- Preserves Month / Week / List calendar views, hidden Raid Weekend publication, KILLZONE integration, lifecycle management, attendance/results, Chernarus/Livonia isolation and Bot v1.62.0 compatibility.
+- Website-only UI patch. No database migration, Nitrado change, DayZ mission upload or Bot update is required.
 
 
 ## v1.60.0 — Event Calendar Overhaul

@@ -374,10 +374,10 @@
 
 
   const ensureCommunity = () => Promise.all([
-    loadStylesheetOnce('community-css', 'assets/css/dashboard/community.css?v=1.60.0&rev=event-calendar-overhaul-3'),
+    loadStylesheetOnce('community-css', 'assets/css/dashboard/community.css?v=1.60.1&rev=event-planner-simplified-1'),
     loadAfterDashboardRuntime(() => loadScriptOnce(
       'community',
-      'assets/js/dashboard/community.js?v=1.60.0&rev=event-calendar-overhaul-3',
+      'assets/js/dashboard/community.js?v=1.60.1&rev=event-planner-simplified-1',
       () => window.__wwzCommunityReady === true
     ))
   ]).then(() => undefined);

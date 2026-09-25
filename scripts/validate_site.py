@@ -394,24 +394,25 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "section === 'server-audit') loadServerActionHistory()" not in operations_admin:
         errors.append("administration.js: Operations Centre must auto-load the unified audit.")
 
-    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.60.0</strong></div>' not in dashboard:
+    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.60.1</strong></div>' not in dashboard:
         errors.append("dashboard.html: command-centre footer release label is stale.")
 
-    if "Website v1.60.0 · Bot v1.62.0" not in index:
+    if "Website v1.60.1 · Bot v1.62.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for token in (
         'data-community-calendar', 'data-calendar-view="month"', 'data-event-preset="demolition_derby"',
         'data-event-preset="pvp_event"', 'data-event-preset="raid_weekend"', 'data-community-killzone',
         'data-community-calendar-publish', 'name="reward_categories"', 'name="visibility"',
+        'data-event-advanced', 'data-event-location-block="killzone"', 'data-community-repeat-toggle',
     ):
         if token not in dashboard:
             errors.append(f"dashboard.html: missing Event Calendar/Planner surface: {token}")
     community_js = (ROOT / "assets/js/dashboard/community.js").read_text(encoding="utf-8")
-    for token in ("renderCalendar", "EVENT_PRESETS", "calendar_panel_publish", "publish_run", "location_source", "killzone"):
+    for token in ("renderCalendar", "EVENT_PRESETS", "calendar_panel_publish", "publish_run", "location_source", "killzone", "syncLocationFields", "syncEndFromDuration"):
         if token not in community_js:
             errors.append(f"community.js: missing Event Calendar/Planner runtime: {token}")
     community_css = (ROOT / "assets/css/dashboard/community.css").read_text(encoding="utf-8")
-    for token in (".community-calendar-month", ".community-calendar-week", ".community-quick-template-grid", ".community-calendar-panel-admin"):
+    for token in (".community-calendar-month", ".community-calendar-week", ".community-quick-template-grid", ".community-calendar-panel-admin", ".community-advanced-settings", ".community-tools-drawer"):
         if token not in community_css:
             errors.append(f"community.css: missing Event Calendar/Planner layout: {token}")
     if 'assets/css/dashboard/ux-consistency.css?v=1.59.1&rev=workspace-title-1' not in dashboard:
@@ -1002,7 +1003,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         errors.append(
             "dashboard.html: command library must be lazy-loaded instead of downloaded on every dashboard visit."
         )
-    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.60.0&amp;rev=event-calendar-overhaul-3'
+    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.60.1&amp;rev=event-planner-simplified-1'
     lazy_index = dashboard.find(lazy_script)
     shell_index = dashboard.find("assets/js/dashboard/shell.js")
     if lazy_index < 0:
@@ -1909,7 +1910,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     launch_requirements = {
         "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.62.0"),
-        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/server-context.js?v=1.60.0&amp;rev=event-calendar-overhaul-3", "assets/js/dashboard/lazy-assets.js?v=1.60.0&amp;rev=event-calendar-overhaul-3"),
+        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/server-context.js?v=1.60.0&amp;rev=event-calendar-overhaul-3", "assets/js/dashboard/lazy-assets.js?v=1.60.1&amp;rev=event-planner-simplified-1"),
         "assets/js/dashboard/server-context.js": ("player_capacity", "Capacity', `${server.player_capacity} slots`"),
         "assets/js/dashboard/account.js": ("payload.server?.player_capacity",),
         "assets/js/dashboard/livonia-pvp.js": ("rotation.player_capacity", "players online"),
@@ -2023,11 +2024,11 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.60.0'",
-        "const WWZ_PWA_UPDATE_REVISION = '2026-09-25-website-v1-60-0-event-calendar-overhaul-3'",
+        "const WWZ_PWA_VERSION = '1.60.1'",
+        "const WWZ_PWA_UPDATE_REVISION = '2026-09-25-website-v1-60-1-event-planner-simplified-1'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
-        "const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-event-calendar-overhaul-3`;",
+        "const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-event-planner-simplified-1`;",
         "const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;",
         "if (request.method !== 'GET') return;",
         "if (url.origin !== self.location.origin) return;",
@@ -2112,7 +2113,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     expected_manifest_ref = '<link href="manifest.webmanifest" rel="manifest"/>'
     expected_pwa_css = f'assets/css/pwa.css?v={EXPECTED_ASSET_VERSION}'
-    expected_pwa_js = 'assets/js/pwa.js?v=1.60.0&rev=event-calendar-overhaul-3'
+    expected_pwa_js = 'assets/js/pwa.js?v=1.60.1&rev=event-planner-simplified-1'
     expected_apple = f'assets/icons/pwa/apple-touch-icon-180.png?v={EXPECTED_ASSET_VERSION}'
     for html_path in sorted(ROOT.glob("*.html")):
         source = html_path.read_text(encoding="utf-8")

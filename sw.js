@@ -1,6 +1,6 @@
 'use strict';
 
-const WWZ_PWA_VERSION = '1.60.0';
+const WWZ_PWA_VERSION = '1.60.1';
 const CACHE_PREFIX = 'wwz-pwa-';
 const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 // Public release versions can advance without discarding the bounded map caches.
@@ -8,8 +8,8 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-09-25-website-v1-60-0-event-calendar-overhaul-3';
-const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-event-calendar-overhaul-3`;
+const WWZ_PWA_UPDATE_REVISION = '2026-09-25-website-v1-60-1-event-planner-simplified-1';
+const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-event-planner-simplified-1`;
 const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${APP_CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${APP_CACHE_RELEASE}`;
@@ -42,7 +42,7 @@ const APP_SHELL = [
   './assets/js/pages/home.js?v=1.53.0&rev=companion-download-repair-1',
   './assets/js/pages/companion.js?v=1.53.0&rev=companion-download-repair-1',
   './assets/data/companion-release.json',
-  './assets/js/pwa.js?v=1.60.0&rev=event-calendar-overhaul-3',
+  './assets/js/pwa.js?v=1.60.1&rev=event-planner-simplified-1',
   './assets/js/ui-system.js?v=1.24.0&rev=ops-ui-1'
 ].map(scopedUrl);
 
