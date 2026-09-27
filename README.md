@@ -1,7 +1,17 @@
-# World War Z Website v1.60.1
+# World War Z Website v1.61.0
 
 World War Z community dashboard and installable PWA for Chernarus and Livonia.
 
+
+## v1.61.0 — Storefront Cart & Bank Checkout
+
+- Raises normal catalogue Item checkout quantities to 50 while preserving Event Item / vehicle rental terms from 1–30,000 restarts.
+- Adds a persistent, server-isolated shopping cart for up to 25 different normal catalogue products with editable quantities, running subtotal and one protected checkout.
+- Adds Cash / Wallet or Protected Bank payment selection with live available-balance readouts.
+- Keeps rentals on their specialised restart checkout while normal cart items share one validated delivery location.
+- Shows the original payment source in private order history; compatible refunds return to that source through Bot v1.63.0.
+- Mirrors cart/payment controls in both the standalone Survivor Shop and Command Centre shop workspace.
+- Preserves role discounts, stock, per-player limits, automatic Railway delivery and Chernarus/Livonia isolation.
 
 ## v1.60.1 — Simplified Event Planner
 

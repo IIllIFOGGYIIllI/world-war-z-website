@@ -13,6 +13,9 @@ const shopOrderEmpty = document.querySelector('[data-shop-order-empty]');
 const shopPurchaseDialog = document.querySelector('[data-shop-purchase-dialog]');
 const shopPurchaseForm = document.querySelector('[data-shop-purchase-form]');
 const shopPurchaseQuantity = document.querySelector('[data-shop-purchase-quantity]');
+const shopPurchaseQuantityField = document.querySelector('[data-shop-quantity-field]');
+const shopPaymentMethod = document.querySelector('[data-shop-payment-method]');
+const shopPaymentHelp = document.querySelector('[data-shop-payment-help]');
 const shopPurchaseNote = document.querySelector('[data-shop-purchase-note]');
 const shopPurchaseMessage = document.querySelector('[data-shop-purchase-message]');
 const shopEventDeliveryFields = document.querySelector('[data-shop-event-delivery]');
@@ -28,6 +31,11 @@ const shopSaveNameField = document.querySelector('[data-shop-save-name-field]');
 const shopCoordinateConfirm = document.querySelector('[data-shop-coordinate-confirm]');
 const shopPurchaseCancelButtons = [...document.querySelectorAll('[data-shop-purchase-cancel]')];
 const confirmShopPurchaseButton = document.querySelector('[data-confirm-shop-purchase]');
+const shopCartList = document.querySelector('[data-shop-cart-list]');
+const shopCartEmpty = document.querySelector('[data-shop-cart-empty]');
+const shopCartSummary = document.querySelector('[data-shop-cart-summary]');
+const shopCartClearButton = document.querySelector('[data-shop-cart-clear]');
+const shopCartCheckoutButton = document.querySelector('[data-shop-cart-checkout]');
 const adminShopOrderScope = document.querySelector('[data-admin-shop-order-scope]');
 const adminShopOrderList = document.querySelector('[data-admin-shop-order-list]');
 const adminShopOrderEmpty = document.querySelector('[data-admin-shop-order-empty]');
@@ -149,6 +157,10 @@ const ownerEventPagination = document.querySelector('[data-owner-event-paginatio
 let shopItems = [];
 let memberShopOrders = [];
 let selectedShopItem = null;
+let shopCart = [];
+let shopCartCheckout = false;
+let shopCashBalance = 0;
+let shopBankBalance = 0;
 let selectedShopOrder = null;
 let selectedShopOrderAction = '';
 let ownerShopItems = [];
@@ -198,7 +210,82 @@ const resetShopPanels = () => {
   memberShopOrders = [];
   if (shopOrderList) shopOrderList.replaceChildren();
   setText('[data-shop-wallet]', 'Sign in required');
+  setText('[data-shop-bank]', 'Sign in required');
+  shopCashBalance = 0; shopBankBalance = 0;
   setText('[data-shop-open-orders]', '—');
+};
+
+const dashboardShopCartKey = () => `wwz_dashboard_shop_cart_v1:${window.WWZServerContext?.getSelectedServer?.()?.key || 'unselected'}`;
+const dashboardNormalOrderMax = (item) => Math.max(0, Math.min(
+  50,
+  Math.max(0, Number(item?.max_per_order ?? 50) || 0),
+  item?.stock_quantity == null ? 50 : Math.max(0, Number(item.stock_quantity) || 0),
+  item?.remaining_member_limit == null ? 50 : Math.max(0, Number(item.remaining_member_limit) || 0)
+));
+const saveDashboardShopCart = () => { try { localStorage.setItem(dashboardShopCartKey(), JSON.stringify(shopCart)); } catch {} };
+const loadDashboardShopCart = () => {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(dashboardShopCartKey()) || '[]');
+    shopCart = Array.isArray(parsed) ? parsed.map((line) => ({ item_id: Number(line.item_id), quantity: Math.max(1, Math.trunc(Number(line.quantity) || 1)) })).filter((line) => Number.isFinite(line.item_id)) : [];
+  } catch { shopCart = []; }
+};
+const dashboardCartEntries = () => {
+  const byId = new Map(shopItems.map((item) => [Number(item.item_id), item]));
+  return shopCart.map((line) => ({ line, item: byId.get(Number(line.item_id)) })).filter((entry) => entry.item && entry.item.delivery_type !== 'event');
+};
+const normalizeDashboardShopCart = () => {
+  const byId = new Map(shopItems.map((item) => [Number(item.item_id), item]));
+  const seen = new Set();
+  shopCart = shopCart.filter((line) => {
+    const item = byId.get(Number(line.item_id));
+    if (!item || item.delivery_type === 'event' || !item.available || seen.has(Number(line.item_id))) return false;
+    const max = dashboardNormalOrderMax(item);
+    if (max < 1) return false;
+    seen.add(Number(line.item_id));
+    line.quantity = Math.min(max, Math.max(1, Math.trunc(Number(line.quantity) || 1)));
+    return true;
+  }).slice(0, 25);
+  saveDashboardShopCart();
+};
+const dashboardCartSubtotal = () => dashboardCartEntries().reduce((sum, { line, item }) => sum + Number(line.quantity || 1) * Number(item.price || 0), 0);
+const dashboardCartUnitCount = () => shopCart.reduce((sum, line) => sum + Math.max(1, Number(line.quantity) || 1), 0);
+const renderDashboardShopCart = () => {
+  if (!shopCartList) return;
+  const entries = dashboardCartEntries();
+  const units = dashboardCartUnitCount();
+  setText('[data-shop-cart-count]', `${units.toLocaleString()} item${units === 1 ? '' : 's'}`);
+  setText('[data-shop-cart-lines]', String(entries.length));
+  setText('[data-shop-cart-units]', units.toLocaleString());
+  setText('[data-shop-cart-subtotal]', formatMoney(dashboardCartSubtotal()));
+  shopCartList.replaceChildren();
+  entries.forEach(({ line, item }) => {
+    const row = document.createElement('div'); row.className = 'dashboard-shop-cart-line';
+    const copy = document.createElement('div'); const name = document.createElement('strong'); name.textContent = item.name; const meta = document.createElement('small'); meta.textContent = `${item.sku} · ${formatMoney(item.price)} each · max ${dashboardNormalOrderMax(item)}`; copy.append(name, meta);
+    const controls = document.createElement('div');
+    const quantity = document.createElement('input'); quantity.type = 'number'; quantity.min = '1'; quantity.max = String(dashboardNormalOrderMax(item)); quantity.step = '1'; quantity.value = String(line.quantity); quantity.setAttribute('aria-label', `${item.name} quantity`);
+    quantity.addEventListener('change', () => { line.quantity = Math.min(dashboardNormalOrderMax(item), Math.max(1, Math.trunc(Number(quantity.value) || 1))); saveDashboardShopCart(); renderDashboardShopCart(); renderShopCatalogue(); });
+    const total = document.createElement('strong'); total.textContent = formatMoney(Number(item.price || 0) * Number(line.quantity || 1));
+    const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'secondary-action compact-action'; remove.textContent = 'Remove'; remove.addEventListener('click', () => { shopCart = shopCart.filter((entry) => Number(entry.item_id) !== Number(item.item_id)); saveDashboardShopCart(); renderDashboardShopCart(); renderShopCatalogue(); });
+    controls.append(quantity, total, remove); row.append(copy, controls); shopCartList.append(row);
+  });
+  const hasItems = entries.length > 0;
+  shopCartList.hidden = !hasItems; if (shopCartEmpty) shopCartEmpty.hidden = hasItems; if (shopCartSummary) shopCartSummary.hidden = !hasItems;
+  if (shopCartClearButton) shopCartClearButton.disabled = !hasItems;
+  if (shopCartCheckoutButton) shopCartCheckoutButton.disabled = !hasItems;
+};
+const addDashboardShopCart = (item) => {
+  if (!authenticatedUser) { handleAuthAction(); return; }
+  if (!shopPurchasesEnabled || !item?.available || item.delivery_type === 'event') return;
+  const max = dashboardNormalOrderMax(item); if (max < 1) return;
+  const existing = shopCart.find((line) => Number(line.item_id) === Number(item.item_id));
+  if (existing) existing.quantity = Math.min(max, Number(existing.quantity || 0) + 1);
+  else { if (shopCart.length >= 25) { document.querySelector('#dashboard-shop-cart')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; } shopCart.push({ item_id: Number(item.item_id), quantity: 1 }); }
+  saveDashboardShopCart(); renderDashboardShopCart(); renderShopCatalogue();
+};
+const clearDashboardShopCart = () => { shopCart = []; saveDashboardShopCart(); renderDashboardShopCart(); renderShopCatalogue(); };
+const updateDashboardPaymentHelp = () => {
+  if (!shopPaymentHelp) return;
+  shopPaymentHelp.textContent = shopPaymentMethod?.value === 'bank' ? `Protected Bank available: ${formatMoney(shopBankBalance)}` : `Cash / Wallet available: ${formatMoney(shopCashBalance)}`;
 };
 
 const populateShopCategories = () => {
@@ -293,7 +380,7 @@ const updateCoordinateMarker = () => {
 };
 
 const syncShopDeliveryForm = () => {
-  const isEvent = selectedShopItem?.delivery_type === 'event' || selectedShopItem?.requires_coordinates;
+  const isEvent = shopCartCheckout || selectedShopItem?.delivery_type === 'event' || selectedShopItem?.requires_coordinates;
   if (shopEventDeliveryFields) shopEventDeliveryFields.hidden = !isEvent;
   if (!isEvent) return;
   const usesSavedLocation = Boolean(shopDeliveryLocation?.value);
@@ -307,10 +394,10 @@ const syncShopDeliveryForm = () => {
     input.required = !usesSavedLocation;
   });
   if (shopSaveLocation) {
-    shopSaveLocation.disabled = usesSavedLocation;
+    shopSaveLocation.disabled = usesSavedLocation || shopCartCheckout;
     if (usesSavedLocation) shopSaveLocation.checked = false;
   }
-  if (shopSaveNameField) shopSaveNameField.hidden = usesSavedLocation || !shopSaveLocation?.checked;
+  if (shopSaveNameField) shopSaveNameField.hidden = usesSavedLocation || shopCartCheckout || !shopSaveLocation?.checked;
   if (shopSaveLocationName) shopSaveLocationName.required = !usesSavedLocation && Boolean(shopSaveLocation?.checked);
   if (shopCoordinateConfirm) shopCoordinateConfirm.required = true;
   shopCoordinateMap?.classList.toggle('saved-location-active', usesSavedLocation);
@@ -332,8 +419,11 @@ const openShopPurchase = (item) => {
     return;
   }
   if (!shopPurchasesEnabled || !item?.available || shopPurchaseInProgress) return;
+  shopCartCheckout = false;
   selectedShopItem = item;
   shopPurchaseForm?.reset();
+  if (shopPurchaseQuantityField) shopPurchaseQuantityField.hidden = false;
+  if (shopPaymentMethod) shopPaymentMethod.value = 'cash';
   const isEvent = item.delivery_type === 'event';
   if (shopPurchaseQuantity) {
     const minimumRestarts = Math.max(1, Number(item.delivery?.minimum_restarts || 1));
@@ -341,9 +431,7 @@ const openShopPurchase = (item) => {
     shopPurchaseQuantity.value = String(isEvent ? minimumRestarts : 1);
     shopPurchaseQuantity.min = String(isEvent ? minimumRestarts : 1);
     shopPurchaseQuantity.max = String(isEvent ? maximumRestarts : Math.max(1, Math.min(
-      Number(item.max_per_order || 1),
-      item.stock_quantity == null ? 100 : Number(item.stock_quantity),
-      item.remaining_member_limit == null ? 100 : Number(item.remaining_member_limit)
+      50, dashboardNormalOrderMax(item)
     )));
     shopPurchaseQuantity.disabled = false;
     if (shopQuantityLabel) shopQuantityLabel.textContent = isEvent ? 'Number Of Restarts' : 'Quantity';
@@ -359,6 +447,7 @@ const openShopPurchase = (item) => {
   const deliveryText = isEvent ? 'Restart-Bound Event Spawn' : 'Automatic coordinate delivery';
   setText('[data-shop-purchase-price]', `${formatMoney(item.price)} ${isEvent ? 'per restart' : 'each'} · ${shopStockText(item)} · ${deliveryText}`);
   showInlineMessage(shopPurchaseMessage, '');
+  updateDashboardPaymentHelp();
   updateShopPurchaseTotal();
   if (typeof shopPurchaseDialog?.showModal === 'function') shopPurchaseDialog.showModal();
   else shopPurchaseDialog?.setAttribute('open', '');
@@ -373,11 +462,27 @@ const openShopPurchase = (item) => {
 };
 
 const updateShopPurchaseTotal = () => {
-  const quantity = Math.max(1, Number(shopPurchaseQuantity?.value || 1));
-  const total = quantity * Number(selectedShopItem?.price || 0);
-  setText('[data-shop-purchase-total]', `Your wallet will be debited ${formatMoney(total)} immediately.`);
+  const total = shopCartCheckout ? dashboardCartSubtotal() : Math.max(1, Number(shopPurchaseQuantity?.value || 1)) * Number(selectedShopItem?.price || 0);
+  const source = shopPaymentMethod?.value === 'bank' ? 'Protected Bank' : 'Cash / Wallet';
+  setText('[data-shop-purchase-total]', `${source} will be debited ${formatMoney(total)} immediately.`);
+};
+const openDashboardCartCheckout = () => {
+  normalizeDashboardShopCart(); const entries = dashboardCartEntries();
+  if (!authenticatedUser) { handleAuthAction(); return; }
+  if (!entries.length || !shopPurchasesEnabled || shopPurchaseInProgress) return;
+  shopCartCheckout = true; selectedShopItem = null; shopPurchaseForm?.reset();
+  if (shopPurchaseQuantityField) shopPurchaseQuantityField.hidden = true; if (shopPaymentMethod) shopPaymentMethod.value = 'cash';
+  if (shopDeliveryY) shopDeliveryY.value = '0'; if (shopDeliveryRotation) shopDeliveryRotation.value = '0';
+  populatePurchaseLocationSelect(); loadDeliveryLocations(undefined, { quiet: true }).then(() => { populatePurchaseLocationSelect(); syncShopDeliveryForm(); }); syncShopDeliveryForm();
+  const units = dashboardCartUnitCount(); setText('[data-shop-purchase-title]', 'Checkout Shopping Cart'); setText('[data-shop-purchase-item]', `${entries.length} different items · ${units.toLocaleString()} total units`); setText('[data-shop-purchase-price]', 'One protected checkout · shared automatic delivery location');
+  showInlineMessage(shopPurchaseMessage, ''); updateDashboardPaymentHelp(); updateShopPurchaseTotal();
+  if (typeof shopPurchaseDialog?.showModal === 'function') shopPurchaseDialog.showModal(); else shopPurchaseDialog?.setAttribute('open', '');
+  window.setTimeout(() => { const instance = ensureShopCoordinateMap(); resetCoordinatePicker(); updateCoordinateMarker(); instance?.invalidateSize(); }, 0);
 };
 shopPurchaseQuantity?.addEventListener('input', updateShopPurchaseTotal);
+shopPaymentMethod?.addEventListener('change', () => { updateDashboardPaymentHelp(); updateShopPurchaseTotal(); });
+shopCartClearButton?.addEventListener('click', clearDashboardShopCart);
+shopCartCheckoutButton?.addEventListener('click', openDashboardCartCheckout);
 shopDeliveryLocation?.addEventListener('change', syncShopDeliveryForm);
 shopSaveLocation?.addEventListener('change', syncShopDeliveryForm);
 [shopDeliveryX, shopDeliveryZ].forEach((input) => input?.addEventListener('input', updateCoordinateMarker));
@@ -454,9 +559,9 @@ const renderShopCatalogue = () => {
     button.className = 'primary-action wide';
     const linked = !document.querySelector('[data-shop-order-content]')?.hidden;
     const canBuy = shopPurchasesEnabled && linked && item.available;
-    button.textContent = !shopPurchasesEnabled ? 'Purchases paused' : !authenticatedUser ? 'Sign in to buy' : !linked ? 'Link PSN to buy' : item.available ? (item.delivery_type === 'event' ? 'Order event delivery' : 'Buy item') : 'Unavailable';
+    button.textContent = !shopPurchasesEnabled ? 'Purchases paused' : !authenticatedUser ? 'Sign in to buy' : !linked ? 'Link PSN to buy' : item.available ? (item.delivery_type === 'event' ? 'Order event delivery' : 'Add to cart') : 'Unavailable';
     button.disabled = !shopPurchasesEnabled || Boolean(authenticatedUser && !canBuy);
-    button.addEventListener('click', () => openShopPurchase(item));
+    button.addEventListener('click', () => item.delivery_type === 'event' ? openShopPurchase(item) : addDashboardShopCart(item));
     card.append(preview, heading, description, meta, button);
     shopCatalogue.append(card);
   });
@@ -493,7 +598,7 @@ const renderMemberShopOrders = (orders) => {
   safeOrders.forEach((order) => {
     const isEvent=order.delivery_type==='event'; const card=document.createElement('article'); card.className=`shop-order-card tracked-order ${isEvent?'rental-order':'item-order'}`;
     const heading=document.createElement('div'); heading.className='shop-order-card-heading'; const copy=document.createElement('div'); const kicker=document.createElement('small'); kicker.className='shop-order-kicker'; kicker.textContent=`${isEvent?'Vehicle / event rental':'Automatic item delivery'} · Order #${order.order_id}`; const title=document.createElement('strong'); title.textContent=order.item?.name||'Shop order'; const sub=document.createElement('span'); sub.textContent=isEvent?`${Number(order.event_restarts||1).toLocaleString()} restart(s) purchased`:`${Number(order.quantity||1).toLocaleString()} × ${order.item?.name||'item'}`; copy.append(kicker,title,sub); const status=document.createElement('span'); status.className=`shop-order-status ${dashboardOrderClass(order)}`; status.textContent=dashboardOrderDisplayStatus(order); heading.append(copy,status); card.append(heading);
-    const facts=document.createElement('div'); facts.className='shop-order-facts'; [[isEvent?'Rental term':'Quantity',isEvent?`${Number(order.event_restarts||1).toLocaleString()} restarts`:Number(order.quantity||1).toLocaleString()],['Total paid',formatMoney(order.total_price)],['Ordered',formatAccountDate(order.created_at)],['Delivery',dashboardOrderDisplayStatus(order)]].forEach(([label,value])=>{ const block=document.createElement('div'); const small=document.createElement('span'); small.textContent=label; const strong=document.createElement('strong'); strong.textContent=value; block.append(small,strong); facts.append(block); }); card.append(facts);
+    const facts=document.createElement('div'); facts.className='shop-order-facts'; [[isEvent?'Rental term':'Quantity',isEvent?`${Number(order.event_restarts||1).toLocaleString()} restarts`:Number(order.quantity||1).toLocaleString()],['Total paid',formatMoney(order.total_price)],['Paid from',String(order.payment_method||'cash').toLowerCase()==='bank'?'Protected Bank':'Cash / Wallet'],['Ordered',formatAccountDate(order.created_at)],['Delivery',dashboardOrderDisplayStatus(order)]].forEach(([label,value])=>{ const block=document.createElement('div'); const small=document.createElement('span'); small.textContent=label; const strong=document.createElement('strong'); strong.textContent=value; block.append(small,strong); facts.append(block); }); card.append(facts);
     appendDashboardOrderProgress(card,order); appendDashboardRestartBanner(card,order); appendDashboardRentalProgress(card,order);
     const coords=dashboardOrderCoordinates(order); if(coords){ const location=document.createElement('div'); location.className='shop-order-location'; const div=document.createElement('div'); const label=document.createElement('span'); label.textContent=order.delivery?.location?.name||'Delivery coordinates'; const strong=document.createElement('strong'); strong.textContent=coords; div.append(label,strong); const button=document.createElement('button'); button.type='button'; button.className='secondary-action compact-action'; button.textContent='Copy coordinates'; button.addEventListener('click',async()=>{ try{await navigator.clipboard.writeText(coords);button.textContent='Copied';}catch{button.textContent='Copy failed';}window.setTimeout(()=>button.textContent='Copy coordinates',1200);}); location.append(div,button); card.append(location); }
     if(order.buyer_note){ const note=document.createElement('div'); note.className='shop-order-note'; note.textContent=`Your note · ${order.buyer_note}`; card.append(note); }
@@ -523,17 +628,21 @@ const applyShopPayload = (payload, { member = false } = {}) => {
       shopOrderUnlinked?.removeAttribute('hidden');
       shopOrderContent?.setAttribute('hidden', '');
       setText('[data-shop-wallet]', 'PSN link required');
+      setText('[data-shop-bank]', 'PSN link required');
       setText('[data-shop-open-orders]', '—');
     } else {
       shopOrderUnlinked?.setAttribute('hidden', '');
       shopOrderContent?.removeAttribute('hidden');
       memberShopOrders = Array.isArray(payload.orders) ? payload.orders : [];
-      setText('[data-shop-wallet]', formatMoney(payload.balance));
+      shopCashBalance = Math.max(0, Number(payload.balance) || 0); shopBankBalance = Math.max(0, Number(payload.bank_balance) || 0);
+      setText('[data-shop-wallet]', formatMoney(shopCashBalance));
+      setText('[data-shop-bank]', formatMoney(shopBankBalance));
       setText('[data-shop-open-orders]', String(memberShopOrders.filter((order) => ['pending', 'processing'].includes(order.status)).length));
       renderMemberShopOrders(memberShopOrders);
     }
   }
-  renderShopCatalogue();
+  normalizeDashboardShopCart();
+  renderShopCatalogue(); renderDashboardShopCart();
 };
 
 const ensureShopPreviewRuntime = async () => {
@@ -610,40 +719,34 @@ shopSearch?.addEventListener('input', renderShopCatalogue);
 shopCategory?.addEventListener('change', renderShopCatalogue);
 refreshShopButton?.addEventListener('click', () => storageGet(AUTH_SESSION_KEY) ? loadMemberShop() : loadPublicShop());
 refreshShopOrdersButton?.addEventListener('click', () => loadMemberShop());
-shopPurchaseCancelButtons.forEach((button) => button.addEventListener('click', () => { if (!shopPurchaseInProgress) shopPurchaseDialog?.close?.(); }));
+shopPurchaseCancelButtons.forEach((button) => button.addEventListener('click', () => { if (!shopPurchaseInProgress) { shopPurchaseDialog?.close?.(); shopCartCheckout = false; selectedShopItem = null; } }));
 shopPurchaseForm?.addEventListener('submit', async (event) => {
   event.preventDefault();
   const sessionToken = storageGet(AUTH_SESSION_KEY);
-  if (!sessionToken || !selectedShopItem || shopPurchaseInProgress) return;
+  if (!sessionToken || (!selectedShopItem && !shopCartCheckout) || shopPurchaseInProgress) return;
   shopPurchaseInProgress = true;
   confirmShopPurchaseButton?.setAttribute('disabled', '');
-  showInlineMessage(shopPurchaseMessage, 'Railway is validating stock, purchase limits and your wallet.', 'info');
+  showInlineMessage(shopPurchaseMessage, 'Railway is validating stock, purchase limits and your selected payment source.', 'info');
   try {
     const response = await protectedActionFetch(ACCOUNT_SHOP_PURCHASE_URL, {
       method: 'POST',
       headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken}` },
-      body: JSON.stringify({
-        item_id: Number(selectedShopItem.item_id),
-        quantity: (selectedShopItem.delivery_type === 'event' ? 1 : Number(shopPurchaseQuantity?.value || 1)),
-        event_restarts: (selectedShopItem.delivery_type === 'event' ? Number(shopPurchaseQuantity?.value || 1) : 1),
-        buyer_note: shopPurchaseNote?.value.trim() || '',
-        purchase_key: `${Date.now().toString(36)}-${crypto.randomUUID?.() || Math.random().toString(36).slice(2)}-shop`,
-        delivery: (selectedShopItem.delivery_type === 'event' || selectedShopItem.requires_coordinates) ? (() => {
+      body: JSON.stringify((() => {
+        const purchaseKey = `${Date.now().toString(36)}-${crypto.randomUUID?.() || Math.random().toString(36).slice(2)}-shop`;
+        const paymentMethod = shopPaymentMethod?.value === 'bank' ? 'bank' : 'cash';
+        const needsDelivery = shopCartCheckout || selectedShopItem?.delivery_type === 'event' || selectedShopItem?.requires_coordinates;
+        const delivery = needsDelivery ? (() => {
           if (!shopCoordinateConfirm?.checked) throw new Error('Confirm that you checked the in-game coordinates.');
           if (shopDeliveryLocation?.value) return { location_id: Number(shopDeliveryLocation.value) };
-          const payload = {
-            x: shopDeliveryX?.value,
-            y: shopDeliveryY?.value,
-            z: shopDeliveryZ?.value,
-            rotation: shopDeliveryRotation?.value || 0,
-            save_location: Boolean(shopSaveLocation?.checked),
-            location_name: shopSaveLocationName?.value.trim() || ''
-          };
-          if (!payload.x || payload.y === '' || !payload.z) throw new Error('Enter complete X, Y and Z coordinates.');
-          if (payload.save_location && !payload.location_name) throw new Error('Name the saved location before continuing.');
-          return payload;
-        })() : null
-      })
+          const value = { x: shopDeliveryX?.value, y: shopDeliveryY?.value, z: shopDeliveryZ?.value, rotation: shopDeliveryRotation?.value || 0,
+            save_location: shopCartCheckout ? false : Boolean(shopSaveLocation?.checked), location_name: shopCartCheckout ? '' : (shopSaveLocationName?.value.trim() || '') };
+          if (!value.x || value.y === '' || !value.z) throw new Error('Enter complete X, Y and Z coordinates.');
+          if (value.save_location && !value.location_name) throw new Error('Name the saved location before continuing.');
+          return value;
+        })() : null;
+        if (shopCartCheckout) return { items: dashboardCartEntries().map(({ line, item }) => ({ item_id: Number(item.item_id), quantity: Math.max(1, Number(line.quantity) || 1) })), buyer_note: shopPurchaseNote?.value.trim() || '', payment_method: paymentMethod, checkout_key: purchaseKey, purchase_key: purchaseKey, delivery };
+        return { item_id: Number(selectedShopItem.item_id), quantity: selectedShopItem.delivery_type === 'event' ? 1 : Number(shopPurchaseQuantity?.value || 1), event_restarts: selectedShopItem.delivery_type === 'event' ? Number(shopPurchaseQuantity?.value || 1) : 1, buyer_note: shopPurchaseNote?.value.trim() || '', payment_method: paymentMethod, purchase_key: purchaseKey, delivery: (selectedShopItem.delivery_type === 'event' || selectedShopItem.requires_coordinates) ? delivery : null };
+      })())
     });
     const payload = await response.json().catch(() => ({}));
     if (response.status === 401) {
@@ -654,8 +757,9 @@ shopPurchaseForm?.addEventListener('submit', async (event) => {
     }
     if (!response.ok) throw new Error(payload.message || 'The purchase could not be completed.');
     showInlineMessage(shopPurchaseMessage, payload.message || 'Order placed.', 'success');
+    if (shopCartCheckout) clearDashboardShopCart();
     await loadMemberShop(sessionToken);
-    window.setTimeout(() => shopPurchaseDialog?.close?.(), 900);
+    window.setTimeout(() => { shopPurchaseDialog?.close?.(); shopCartCheckout = false; }, 900);
   } catch (error) {
     showInlineMessage(shopPurchaseMessage, error.message || 'The purchase could not be completed.');
   } finally {
@@ -1853,6 +1957,7 @@ window.WWZShopController = Object.freeze({
 });
 window.__wwzShopControllerReady = true;
 window.addEventListener('wwz:serverchange', () => {
+  loadDashboardShopCart(); renderDashboardShopCart();
   if (!shopCoordinateMapInstance) return;
   shopCoordinateMapInstance.destroy();
   shopCoordinateMapInstance = null;
@@ -1864,3 +1969,4 @@ window.addEventListener('wwz:restartstatus', (event) => {
   if (memberShopOrders.length) renderMemberShopOrders(memberShopOrders);
 });
 shopRestartOperations = window.WWZShopRestartOperations || null;
+loadDashboardShopCart(); renderDashboardShopCart();

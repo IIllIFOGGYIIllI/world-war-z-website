@@ -39,7 +39,11 @@ const state = {
   detailItem: null,
   selectedRental: null,
   rentalActionBusy: false,
-  orderScope: 'all'
+  orderScope: 'all',
+  cart: [],
+  checkoutCart: false,
+  cashBalance: 0,
+  bankBalance: 0
 };
 
 const readSelectedServer = () => {
@@ -138,8 +142,8 @@ const elements = {
   authAvatar: $('[data-shop-auth-avatar]'), signout: $('[data-shop-signout]'),
   loginDialog: $('[data-member-login-dialog]'), startLogin: $('[data-member-start-login]'),
   title: $('[data-member-shop-title]'), description: $('[data-member-shop-description]'),
-  instructions: $('[data-member-shop-instructions]'), wallet: $('[data-member-shop-wallet]'),
-  count: $('[data-member-shop-count]'), openOrders: $('[data-member-shop-open-orders]'),
+  instructions: $('[data-member-shop-instructions]'), wallet: $('[data-member-shop-wallet]'), bank: $('[data-member-shop-bank]'),
+  cartCount: $('[data-member-shop-cart-count]'), count: $('[data-member-shop-count]'), openOrders: $('[data-member-shop-open-orders]'),
   nextRestart: $('[data-member-shop-next-restart]'), restartCountdown: $('[data-member-shop-restart-countdown]'),
   access: $('[data-member-shop-access]'), accessNote: $('[data-member-shop-access-note]'),
   notice: $('[data-member-shop-notice]'), noticeTitle: $('[data-member-shop-notice-title]'),
@@ -161,7 +165,8 @@ const elements = {
   purchaseDialog: $('[data-member-purchase-dialog]'), purchaseForm: $('[data-member-purchase-form]'),
   purchaseTitle: $('[data-member-purchase-title]'), purchaseItem: $('[data-member-purchase-item]'),
   purchasePrice: $('[data-member-purchase-price]'), quantity: $('[data-member-purchase-quantity]'),
-  quantityLabel: $('[data-member-quantity-label]'), quantityHelp: $('[data-member-quantity-help]'),
+  quantityField: $('[data-member-quantity-field]'), quantityLabel: $('[data-member-quantity-label]'), quantityHelp: $('[data-member-quantity-help]'),
+  paymentMethod: $('[data-member-payment-method]'), paymentHelp: $('[data-member-payment-help]'),
   eventFields: $('[data-member-event-fields]'), location: $('[data-member-delivery-location]'),
   coordinateInputs: $('[data-member-coordinate-inputs]'), x: $('[data-member-delivery-x]'),
   y: $('[data-member-delivery-y]'), z: $('[data-member-delivery-z]'), rotation: $('[data-member-delivery-rotation]'),
@@ -181,6 +186,9 @@ const elements = {
   detailDescription: $('[data-member-item-detail-description]'), detailMeta: $('[data-member-item-detail-meta]'),
   detailTypes: $('[data-member-item-detail-types]'), detailClassname: $('[data-member-item-detail-classname]'),
   detailBuy: $('[data-member-item-detail-buy]'),
+  cartList: $('[data-member-cart-list]'), cartEmpty: $('[data-member-cart-empty]'), cartSummary: $('[data-member-cart-summary]'),
+  cartLines: $('[data-member-cart-lines]'), cartUnits: $('[data-member-cart-units]'), cartSubtotal: $('[data-member-cart-subtotal]'),
+  cartClear: $('[data-member-cart-clear]'), cartCheckout: $('[data-member-cart-checkout]'), cartCheckoutSecondary: $('[data-member-cart-checkout-secondary]'),
   serverButtons: $('[data-shop-server-buttons]')
 };
 let checkoutMapInstance = null;
@@ -227,6 +235,7 @@ const renderServerChoices = () => {
       saveSelectedServer(server);
       state.locations = [];
       state.orders = [];
+      loadCart();
       acceptServerContext({ servers: state.servers });
       renderServerChoices();
       renderOrders();
@@ -249,6 +258,7 @@ const loadServerChoices = async () => {
     || null;
   if (!selected) throw new Error('No World War Z shop server is currently available.');
   saveSelectedServer(selected);
+  loadCart();
   acceptServerContext({ servers: state.servers });
   renderServerChoices();
 };
@@ -283,7 +293,9 @@ const setSignedOut = () => {
   elements.authLabel.textContent = 'Sign in with Discord';
   avatar('', 'DISCORD');
   elements.signout.hidden = true;
+  state.cashBalance = 0; state.bankBalance = 0;
   elements.wallet.textContent = 'Sign in required';
+  if (elements.bank) elements.bank.textContent = 'Sign in required';
   elements.openOrders.textContent = '—';
   elements.access.textContent = 'Guest';
   elements.accessNote.textContent = 'Discord verification required';
@@ -341,6 +353,91 @@ const canPurchase = (item) => Boolean(
   state.user && state.settings.enabled && state.settings.website_enabled !== false && state.access.can_purchase && item.available
 );
 
+const cartStorageKey = () => `wwz_shop_cart_v1:${state.server?.key || 'unselected'}`;
+const normalOrderMax = (item) => Math.max(0, Math.min(
+  50,
+  Math.max(0, Number(item?.max_per_order ?? 50) || 0),
+  item?.stock_quantity == null ? 50 : Math.max(0, Number(item.stock_quantity) || 0),
+  item?.remaining_member_limit == null ? 50 : Math.max(0, Number(item.remaining_member_limit) || 0)
+));
+const cartEntries = () => {
+  const byId = new Map(state.items.map((item) => [Number(item.item_id), item]));
+  return state.cart.map((line) => ({ line, item: byId.get(Number(line.item_id)) })).filter((entry) => entry.item && entry.item.delivery_type !== 'event');
+};
+const saveCart = () => {
+  try { localStorage.setItem(cartStorageKey(), JSON.stringify(state.cart)); } catch {}
+};
+const loadCart = () => {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(cartStorageKey()) || '[]');
+    state.cart = Array.isArray(parsed) ? parsed.map((line) => ({ item_id: Number(line.item_id), quantity: Math.max(1, Math.trunc(Number(line.quantity) || 1)) })).filter((line) => Number.isFinite(line.item_id)) : [];
+  } catch { state.cart = []; }
+};
+const normalizeCart = () => {
+  const byId = new Map(state.items.map((item) => [Number(item.item_id), item]));
+  const seen = new Set();
+  state.cart = state.cart.filter((line) => {
+    const item = byId.get(Number(line.item_id));
+    if (!item || item.delivery_type === 'event' || !item.available || seen.has(Number(line.item_id))) return false;
+    const max = normalOrderMax(item);
+    if (max < 1) return false;
+    seen.add(Number(line.item_id));
+    line.quantity = Math.min(max, Math.max(1, Math.trunc(Number(line.quantity) || 1)));
+    return true;
+  }).slice(0, 25);
+  saveCart();
+};
+const cartSubtotal = () => cartEntries().reduce((total, { line, item }) => total + Math.max(1, Number(line.quantity) || 1) * Math.max(0, Number(item.price) || 0), 0);
+const cartUnitCount = () => state.cart.reduce((total, line) => total + Math.max(1, Number(line.quantity) || 1), 0);
+const renderCart = () => {
+  if (!elements.cartList) return;
+  const entries = cartEntries();
+  const units = cartUnitCount();
+  if (elements.cartCount) elements.cartCount.textContent = `${units.toLocaleString()} item${units === 1 ? '' : 's'}`;
+  if (elements.cartLines) elements.cartLines.textContent = String(entries.length);
+  if (elements.cartUnits) elements.cartUnits.textContent = units.toLocaleString();
+  if (elements.cartSubtotal) elements.cartSubtotal.textContent = money(cartSubtotal());
+  elements.cartList.replaceChildren();
+  entries.forEach(({ line, item }) => {
+    const row = document.createElement('article'); row.className = 'member-cart-line';
+    const preview = document.createElement('div'); preview.className = 'member-cart-line-preview'; preview.append(previewImage(item));
+    const copy = document.createElement('div'); copy.className = 'member-cart-line-copy';
+    const title = document.createElement('strong'); title.textContent = item.name;
+    const meta = document.createElement('small'); meta.textContent = `${item.sku} · ${money(item.price)} each · Max ${normalOrderMax(item)}`;
+    copy.append(title, meta);
+    const controls = document.createElement('div'); controls.className = 'member-cart-line-controls';
+    const quantity = document.createElement('input'); quantity.type = 'number'; quantity.min = '1'; quantity.max = String(normalOrderMax(item)); quantity.step = '1'; quantity.value = String(line.quantity); quantity.setAttribute('aria-label', `${item.name} quantity`);
+    quantity.addEventListener('change', () => { line.quantity = Math.min(normalOrderMax(item), Math.max(1, Math.trunc(Number(quantity.value) || 1))); saveCart(); renderCart(); renderCatalogue(); });
+    const total = document.createElement('strong'); total.textContent = money(Number(item.price || 0) * Number(line.quantity || 1));
+    const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'secondary-action compact-action'; remove.textContent = 'Remove'; remove.addEventListener('click', () => { state.cart = state.cart.filter((entry) => Number(entry.item_id) !== Number(item.item_id)); saveCart(); renderCart(); renderCatalogue(); });
+    controls.append(quantity, total, remove); row.append(preview, copy, controls); elements.cartList.append(row);
+  });
+  const hasItems = entries.length > 0;
+  elements.cartList.hidden = !hasItems;
+  if (elements.cartEmpty) elements.cartEmpty.hidden = hasItems;
+  if (elements.cartSummary) elements.cartSummary.hidden = !hasItems;
+  [elements.cartCheckout, elements.cartCheckoutSecondary, elements.cartClear].forEach((button) => { if (button) button.disabled = !hasItems; });
+};
+const addToCart = (item, quantity = 1) => {
+  if (!item || item.delivery_type === 'event' || !canPurchase(item)) return;
+  const max = normalOrderMax(item);
+  if (max < 1) return;
+  const existing = state.cart.find((line) => Number(line.item_id) === Number(item.item_id));
+  if (existing) existing.quantity = Math.min(max, Number(existing.quantity || 0) + Math.max(1, Math.trunc(Number(quantity) || 1)));
+  else {
+    if (state.cart.length >= 25) { document.querySelector('#cart')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+    state.cart.push({ item_id: Number(item.item_id), quantity: Math.min(max, Math.max(1, Math.trunc(Number(quantity) || 1))) });
+  }
+  saveCart(); renderCart(); renderCatalogue();
+};
+const clearCart = () => { state.cart = []; saveCart(); renderCart(); renderCatalogue(); };
+const updatePaymentHelp = () => {
+  if (!elements.paymentHelp) return;
+  elements.paymentHelp.textContent = elements.paymentMethod?.value === 'bank'
+    ? `Protected Bank available: ${money(state.bankBalance)}`
+    : `Cash / Wallet available: ${money(state.cashBalance)}`;
+};
+
 const previewFallback = (item) => {
   if (item?.delivery_type === 'event') return 'assets/shop-previews/vehicles.svg';
   const key = String(item?.category || 'default').trim().toLowerCase().replace(/&/g, ' ').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -369,7 +466,7 @@ const purchaseButtonLabel = (item) => {
   if (!state.settings.enabled) return 'Purchases paused';
   if (item?.has_required_roles === false) return 'Required item role missing';
   if (!item?.available) return 'Unavailable';
-  return item.delivery_type === 'event' ? 'Order rental' : 'Buy item';
+  return item.delivery_type === 'event' ? 'Order rental' : 'Add to cart';
 };
 const resetCataloguePage = () => { state.cataloguePage = 1; };
 const filteredModeItems = ({ ignoreCategory = false } = {}) => {
@@ -540,7 +637,7 @@ const renderCatalogue = () => {
     const details = document.createElement('button'); details.type = 'button'; details.className = 'secondary-action'; details.textContent = 'View Details'; details.addEventListener('click', () => openItemDetails(item));
     const buy = document.createElement('button'); buy.type = 'button'; buy.className = 'primary-action'; buy.textContent = purchaseButtonLabel(item);
     buy.disabled = Boolean(state.user && !canPurchase(item));
-    buy.addEventListener('click', () => state.user ? openPurchase(item) : openLogin());
+    buy.addEventListener('click', () => state.user ? (item.delivery_type === 'event' ? openPurchase(item) : addToCart(item)) : openLogin());
     actions.append(details, buy);
     card.append(meta, actions); elements.catalogue.append(card);
   });
@@ -769,6 +866,7 @@ const renderOrders = () => {
     const facts = document.createElement('div'); facts.className = 'member-order-facts';
     const factValues = [
       ['Total paid', money(order.total_price)],
+      ['Paid from', String(order.payment_method || 'cash').toLowerCase() === 'bank' ? 'Protected Bank' : 'Cash / Wallet'],
       ['Ordered', dateText(order.created_at)],
       [eventOrder ? 'Rental term' : 'Quantity', eventOrder ? `${Number(order.event_restarts || 1).toLocaleString()} restarts` : Number(order.quantity || 1).toLocaleString()],
       ['Delivery state', order.delivery ? orderDisplayStatus(order) : titleCase(order.status)]
@@ -825,7 +923,10 @@ const applyPayload = (payload, member = false) => {
   elements.eventCount.textContent = String(state.items.filter((item) => item.delivery_type === 'event').length);
   if (state.settings.dashboard_image_url) elements.heroImage.src = state.settings.dashboard_image_url;
   if (member) {
-    elements.wallet.textContent = payload.linked ? money(payload.balance) : 'PSN link required';
+    state.cashBalance = Math.max(0, Number(payload.balance) || 0);
+    state.bankBalance = Math.max(0, Number(payload.bank_balance) || 0);
+    elements.wallet.textContent = payload.linked ? money(state.cashBalance) : 'PSN link required';
+    if (elements.bank) elements.bank.textContent = payload.linked ? money(state.bankBalance) : 'PSN link required';
     elements.openOrders.textContent = payload.linked ? String(state.orders.filter((order) => ['pending','processing'].includes(order.status)).length) : '—';
     if (!state.access.website_enabled) {
       elements.access.textContent = 'Unavailable'; elements.accessNote.textContent = 'Member shop disabled by Owner';
@@ -848,7 +949,8 @@ const applyPayload = (payload, member = false) => {
     button.setAttribute('aria-selected', String(active));
   });
   elements.modeLabel.textContent = state.mode === 'event' ? 'Event items' : 'Items';
-  populateCategories(); renderCatalogue(); renderOrders();
+  normalizeCart();
+  populateCategories(); renderCatalogue(); renderCart(); renderOrders();
 };
 
 const applyRestartStatus = (payload) => {
@@ -985,25 +1087,54 @@ const updateMarker = () => {
 };
 
 const updateTotal = () => {
+  if (state.checkoutCart) { elements.total.textContent = money(cartSubtotal()); return; }
   const quantity = Math.max(1, Number(elements.quantity.value || 1));
   elements.total.textContent = money(quantity * Number(state.selectedItem?.price || 0));
+};
+const openCartCheckout = () => {
+  normalizeCart();
+  const entries = cartEntries();
+  if (!state.user) { openLogin(); return; }
+  if (!entries.length || state.purchasing) return;
+  state.checkoutCart = true; state.selectedItem = null; elements.purchaseForm.reset(); elements.y.value = '0'; elements.rotation.value = '0';
+  if (elements.quantityField) elements.quantityField.hidden = true;
+  if (elements.paymentMethod) elements.paymentMethod.value = 'cash';
+  elements.eventFields.hidden = false;
+  elements.purchaseTitle.textContent = 'Checkout Your Cart';
+  const units = cartUnitCount();
+  elements.purchaseItem.textContent = `${entries.length} different item${entries.length === 1 ? '' : 's'} · ${units.toLocaleString()} total unit${units === 1 ? '' : 's'}`;
+  elements.purchasePrice.textContent = 'One protected checkout · one shared delivery location';
+  populateLocations(); updateMarker(); updatePaymentHelp(); updateTotal(); showMessage(''); elements.purchaseDialog.showModal();
+  window.setTimeout(async () => {
+    try {
+      await ensureCheckoutMapRuntime();
+      const instance = ensureCheckoutMap();
+      resetCheckoutMap(); updateMarker(); instance?.invalidateSize();
+    } catch (error) {
+      if (elements.mapReadout) elements.mapReadout.textContent = 'Map preview unavailable — enter X/Z manually';
+      console.warn('Shop delivery map lazy-load failed:', error);
+    }
+  }, 0);
 };
 const openPurchase = (item) => {
   if (!canPurchase(item)) return;
   if (elements.detailDialog?.open) elements.detailDialog.close();
+  state.checkoutCart = false;
   state.selectedItem = item; elements.purchaseForm.reset(); elements.y.value = '0'; elements.rotation.value = '0';
+  if (elements.quantityField) elements.quantityField.hidden = false;
+  if (elements.paymentMethod) elements.paymentMethod.value = 'cash';
   const eventItem = item.delivery_type === 'event';
   const minimum = eventItem ? Math.max(1, Number(item.delivery?.minimum_restarts || state.settings.event_restart_min || 1)) : 1;
   const maximum = eventItem
     ? Math.min(30000, Number(item.delivery?.maximum_restarts || state.settings.event_restart_max || 30000))
-    : Math.max(1, Math.min(Number(item.max_per_order || 1), item.stock_quantity == null ? 100 : Number(item.stock_quantity), item.remaining_member_limit == null ? 100 : Number(item.remaining_member_limit)));
+    : normalOrderMax(item);
   elements.quantity.value = String(minimum); elements.quantity.min = String(minimum); elements.quantity.max = String(maximum);
   elements.quantityLabel.textContent = eventItem ? 'Number Of Restarts' : 'Quantity';
   elements.quantityHelp.textContent = eventItem ? `Allowed ${minimum.toLocaleString()}–${maximum.toLocaleString()} restarts.` : `Maximum ${maximum.toLocaleString()} per order.`;
   elements.eventFields.hidden = false;
   elements.purchaseTitle.textContent = `Buy ${item.name}?`; elements.purchaseItem.textContent = `${item.name} · ${item.sku}`;
   elements.purchasePrice.textContent = `${money(item.price)}${eventItem ? ' per restart' : ' each'} · ${stockText(item)}`;
-  populateLocations(); updateMarker(); updateTotal(); showMessage(''); elements.purchaseDialog.showModal();
+  populateLocations(); updateMarker(); updatePaymentHelp(); updateTotal(); showMessage(''); elements.purchaseDialog.showModal();
   window.setTimeout(async () => {
     try {
       await ensureCheckoutMapRuntime();
@@ -1019,10 +1150,10 @@ const openPurchase = (item) => {
 };
 const submitPurchase = async (event) => {
   event.preventDefault();
-  if (!state.token || !state.selectedItem || state.purchasing) return;
+  if (!state.token || (!state.selectedItem && !state.checkoutCart) || state.purchasing) return;
   state.purchasing = true; elements.purchaseConfirm.disabled = true; showMessage('Railway is validating your wallet, stock and access.', 'info');
   try {
-    const eventItem = state.selectedItem.delivery_type === 'event';
+    const eventItem = !state.checkoutCart && state.selectedItem?.delivery_type === 'event';
     let delivery = null;
     {
       if (!elements.coordinateConfirm.checked) throw new Error('Confirm that you checked the delivery coordinates.');
@@ -1032,17 +1163,23 @@ const submitPurchase = async (event) => {
       if (!elements.location.value && (!delivery.x || delivery.y === '' || !delivery.z)) throw new Error('Enter complete X, Y and Z coordinates.');
     }
     const quantity = Math.max(1, Number(elements.quantity.value || 1));
-    const body = {
+    const purchaseKey = `${Date.now().toString(36)}-${crypto.randomUUID?.() || Math.random().toString(36).slice(2)}-shop`;
+    const paymentMethod = elements.paymentMethod?.value === 'bank' ? 'bank' : 'cash';
+    const body = state.checkoutCart ? {
+      items: cartEntries().map(({ line, item }) => ({ item_id: Number(item.item_id), quantity: Math.max(1, Number(line.quantity) || 1) })),
+      buyer_note: elements.note.value.trim(), payment_method: paymentMethod, checkout_key: purchaseKey, purchase_key: purchaseKey, delivery
+    } : {
       item_id: Number(state.selectedItem.item_id), quantity: eventItem ? 1 : quantity,
-      event_restarts: eventItem ? quantity : 1, buyer_note: elements.note.value.trim(),
-      purchase_key: `${Date.now().toString(36)}-${crypto.randomUUID?.() || Math.random().toString(36).slice(2)}-shop`, delivery
+      event_restarts: eventItem ? quantity : 1, buyer_note: elements.note.value.trim(), payment_method: paymentMethod,
+      purchase_key: purchaseKey, delivery
     };
     const { response, payload } = await fetchJson(URLS.purchase, {
       method: 'POST', headers: authHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify(body)
     }, 60000);
     if (!response.ok) throw new Error(payload.message || 'The purchase could not be completed.');
     showMessage(payload.message || 'Order placed successfully.', 'success');
-    await loadShop(); window.setTimeout(() => elements.purchaseDialog.close(), 900);
+    if (state.checkoutCart) clearCart();
+    await loadShop(); window.setTimeout(() => { elements.purchaseDialog.close(); state.checkoutCart = false; }, 900);
   } catch (error) { showMessage(error.message || 'The purchase could not be completed.'); }
   finally { state.purchasing = false; elements.purchaseConfirm.disabled = false; }
 };
@@ -1067,7 +1204,7 @@ $$('[data-member-item-detail-close]').forEach((button) => button.addEventListene
 elements.detailBuy?.addEventListener('click', () => {
   const item = state.detailItem; if (!item) return;
   if (!state.user) { elements.detailDialog?.close(); openLogin(); return; }
-  if (canPurchase(item)) openPurchase(item);
+  if (canPurchase(item)) item.delivery_type === 'event' ? openPurchase(item) : addToCart(item);
 });
 elements.refresh.addEventListener('click', loadShop);
 elements.ordersRefresh.addEventListener('click', loadShop);
@@ -1080,9 +1217,13 @@ elements.signout.addEventListener('click', async () => {
   if (token) fetchJson(URLS.authLogout, { method: 'POST', headers: { Accept: 'application/json', Authorization: `Bearer ${token}` } }).catch(() => {});
 });
 elements.quantity.addEventListener('input', updateTotal);
+elements.paymentMethod?.addEventListener('change', updatePaymentHelp);
+elements.cartClear?.addEventListener('click', clearCart);
+elements.cartCheckout?.addEventListener('click', openCartCheckout);
+elements.cartCheckoutSecondary?.addEventListener('click', openCartCheckout);
 elements.location.addEventListener('change', syncLocationMode);
 [elements.x,elements.z].forEach((input) => input.addEventListener('input', updateMarker));
-$$('[data-member-purchase-cancel]').forEach((button) => button.addEventListener('click', () => { if (!state.purchasing) elements.purchaseDialog.close(); }));
+$$('[data-member-purchase-cancel]').forEach((button) => button.addEventListener('click', () => { if (!state.purchasing) { elements.purchaseDialog.close(); state.checkoutCart = false; state.selectedItem = null; } }));
 elements.purchaseForm.addEventListener('submit', submitPurchase);
 
 const initialise = async () => {

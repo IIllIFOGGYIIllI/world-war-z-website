@@ -105,7 +105,7 @@
 
   const ensureCatalogueStyles = () => loadStylesheetOnce(
     'catalogue-css',
-    'assets/css/dashboard/catalogue.css?v=1.22.93&rev=2'
+    'assets/css/dashboard/catalogue.css?v=1.61.0&rev=storefront-cart-1'
   );
 
   const ensureModerationStyles = () => loadStylesheetOnce(
@@ -237,7 +237,7 @@
 
   const ensureShopController = () => ensureShopHelpers().then(() => loadScriptOnce(
     'shop-controller',
-    'assets/js/dashboard/shop.js?v=1.54.3&rev=shop-sync-retry-1',
+    'assets/js/dashboard/shop.js?v=1.61.0&rev=storefront-cart-1',
     () => window.__wwzShopControllerReady === true
   ));
 

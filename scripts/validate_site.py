@@ -394,10 +394,10 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "section === 'server-audit') loadServerActionHistory()" not in operations_admin:
         errors.append("administration.js: Operations Centre must auto-load the unified audit.")
 
-    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.60.1</strong></div>' not in dashboard:
+    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.61.0</strong></div>' not in dashboard:
         errors.append("dashboard.html: command-centre footer release label is stale.")
 
-    if "Website v1.60.1 · Bot v1.62.0" not in index:
+    if "Website v1.61.0 · Bot v1.63.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     for token in (
         'data-community-calendar', 'data-calendar-view="month"', 'data-event-preset="demolition_derby"',
@@ -965,7 +965,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append(f"shop.js: extracted helper {helper} must live in shop-helpers.js.")
 
     shop_helper_script = 'assets/js/dashboard/shop-helpers.js?v=1.54.2&rev=shop-classname-admin-1'
-    shop_script = 'assets/js/dashboard/shop.js?v=1.54.3&rev=shop-sync-retry-1'
+    shop_script = 'assets/js/dashboard/shop.js?v=1.61.0&rev=storefront-cart-1'
     delivery_script = 'assets/js/dashboard/delivery.js?v=1.54.3&rev=item-retry-1'
     for label, asset_url in (
         ("shared Shop helpers", shop_helper_script),
@@ -1003,7 +1003,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         errors.append(
             "dashboard.html: command library must be lazy-loaded instead of downloaded on every dashboard visit."
         )
-    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.60.1&amp;rev=event-planner-simplified-1'
+    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=1.61.0&amp;rev=storefront-cart-1'
     lazy_index = dashboard.find(lazy_script)
     shell_index = dashboard.find("assets/js/dashboard/shell.js")
     if lazy_index < 0:
@@ -1021,7 +1021,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     for changed_asset in (
         'assets/js/dashboard/zones.js?v=1.59.3&rev=killzone-runtime-1',
         'assets/js/dashboard/shop-helpers.js?v=1.54.2&rev=shop-classname-admin-1',
-        'assets/js/dashboard/shop.js?v=1.54.3&rev=shop-sync-retry-1',
+        'assets/js/dashboard/shop.js?v=1.61.0&rev=storefront-cart-1',
     ):
         if changed_asset not in lazy_assets:
             errors.append(f'lazy-assets.js: stale changed-controller cache key: {changed_asset}')
@@ -1069,7 +1069,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append(f"lazy-assets.js: missing shared map-runtime lazy-loading guard: {token}")
 
     overview_map_preview = f"assets/css/dashboard/overview-map-preview.css?v={EXPECTED_ASSET_VERSION}"
-    catalogue_styles = f"assets/css/dashboard/catalogue.css?v={EXPECTED_ASSET_VERSION}&rev=2"
+    catalogue_styles = 'assets/css/dashboard/catalogue.css?v=1.61.0&rev=storefront-cart-1'
     if overview_map_preview not in dashboard:
         errors.append("dashboard.html: missing lightweight Overview map-preview stylesheet.")
     if catalogue_styles in dashboard:
@@ -1505,8 +1505,8 @@ def validate_checkout_compatibility(errors: list[str]) -> None:
         if token not in source:
             errors.append(f"Standalone Shop is missing v1.37 next-action behaviour/style: {token}")
     for token in (
-        'assets/css/pages/shop.css?v=1.50.0&amp;rev=events-rentals-polish-1',
-        'assets/js/pages/shop.js?v=1.50.0&amp;rev=events-rentals-polish-1',
+        'assets/css/pages/shop.css?v=1.61.0&amp;rev=storefront-cart-1',
+        'assets/js/pages/shop.js?v=1.61.0&amp;rev=storefront-cart-1',
     ):
         if token not in shop_html:
             errors.append(f"shop.html: missing current v1.37 commerce asset: {token}")
@@ -1909,8 +1909,8 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
         errors.append(f"Apple touch icon dimensions are {apple_dimensions}; expected (180, 180).")
 
     launch_requirements = {
-        "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.62.0"),
-        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/server-context.js?v=1.60.0&amp;rev=event-calendar-overhaul-3", "assets/js/dashboard/lazy-assets.js?v=1.60.1&amp;rev=event-planner-simplified-1"),
+        "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.63.0"),
+        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/server-context.js?v=1.60.0&amp;rev=event-calendar-overhaul-3", "assets/js/dashboard/lazy-assets.js?v=1.61.0&amp;rev=storefront-cart-1"),
         "assets/js/dashboard/server-context.js": ("player_capacity", "Capacity', `${server.player_capacity} slots`"),
         "assets/js/dashboard/account.js": ("payload.server?.player_capacity",),
         "assets/js/dashboard/livonia-pvp.js": ("rotation.player_capacity", "players online"),
@@ -2024,11 +2024,11 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.60.1'",
-        "const WWZ_PWA_UPDATE_REVISION = '2026-09-25-website-v1-60-1-event-planner-simplified-1'",
+        "const WWZ_PWA_VERSION = '1.61.0'",
+        "const WWZ_PWA_UPDATE_REVISION = '2026-09-27-website-v1-61-0-storefront-cart-1'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
-        "const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-event-planner-simplified-1`;",
+        "const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-storefront-cart-1`;",
         "const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;",
         "if (request.method !== 'GET') return;",
         "if (url.origin !== self.location.origin) return;",
@@ -2113,7 +2113,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     expected_manifest_ref = '<link href="manifest.webmanifest" rel="manifest"/>'
     expected_pwa_css = f'assets/css/pwa.css?v={EXPECTED_ASSET_VERSION}'
-    expected_pwa_js = 'assets/js/pwa.js?v=1.60.1&rev=event-planner-simplified-1'
+    expected_pwa_js = 'assets/js/pwa.js?v=1.61.0&rev=storefront-cart-1'
     expected_apple = f'assets/icons/pwa/apple-touch-icon-180.png?v={EXPECTED_ASSET_VERSION}'
     for html_path in sorted(ROOT.glob("*.html")):
         source = html_path.read_text(encoding="utf-8")
