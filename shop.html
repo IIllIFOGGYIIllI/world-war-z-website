@@ -24,6 +24,7 @@
 <link href="assets/css/pwa.css?v=1.22.93" rel="stylesheet"/>
 <link href="assets/css/ui-system.css?v=1.24.0&rev=ops-ui-1" rel="stylesheet"/>
 <link href="assets/css/modern-foundation.css?v=1.62.0&amp;rev=modern-ui-1" rel="stylesheet"/>
+<link href="assets/css/survivor-experience.css?v=1.63.0&amp;rev=survivor-ux-1" rel="stylesheet"/>
 </head>
 <body class="member-shop-page">
 <a class="skip-link" href="#shop-main">Skip to shop</a>
@@ -67,6 +68,14 @@
 </div>
 </section>
 <section aria-label="Shop server selection" class="shop-server-panel panel"><div><p class="panel-kicker">Purchase destination</p><h2>Choose DayZ Server</h2><p>Wallet, catalogue, orders, delivery locations and fulfilment are isolated to the selected server.</p></div><div class="shop-server-buttons" data-shop-server-buttons></div></section>
+<nav class="wwz-shop-journey" aria-label="How to shop">
+  <div class="wwz-journey-heading"><span class="wwz-journey-kicker">NEW TO WWZ?</span><div><h2>Shopping made simple</h2><p>Three quick steps from choosing a server to tracking your delivery.</p></div></div>
+  <div class="wwz-shop-steps">
+    <a href="#catalogue"><span class="wwz-step-no">01</span><span><strong>Choose your items</strong><small>Find what you want and add it to the cart</small></span><span aria-hidden="true">↗</span></a>
+    <a href="#cart"><span class="wwz-step-no">02</span><span><strong>Review &amp; checkout</strong><small>Select Cash / Wallet or Protected Bank</small></span><span aria-hidden="true">↗</span></a>
+    <a href="#orders"><span class="wwz-step-no">03</span><span><strong>Track your orders</strong><small>Follow delivery and rental status</small></span><span aria-hidden="true">↗</span></a>
+  </div>
+</nav>
 <section aria-label="Shop account summary" class="shop-account-strip panel">
 <div><span>Cash / wallet</span><strong data-member-shop-wallet="">Sign in required</strong><small>Spend directly at checkout</small></div>
 <div><span>Protected bank</span><strong data-member-shop-bank="">Sign in required</strong><small>Optional checkout payment source</small></div>
@@ -90,6 +99,7 @@
 <button aria-selected="false" data-member-shop-mode="event" role="tab" type="button"><span>↻</span><strong>Event Items</strong><small>Restart-Bound Deliveries</small><b data-member-event-count="">0</b></button>
 </div>
 <div class="shop-toolbar command-bar member-catalogue-toolbar">
+<button class="secondary-action wwz-shop-filter-toggle" type="button" aria-expanded="false" data-wwz-filter-toggle>Filters &amp; sort <span aria-hidden="true">⌄</span></button>
 <label class="command-search member-catalogue-search"><span aria-hidden="true">⌕</span><span class="sr-only">Search shop</span><input autocomplete="off" data-member-shop-search="" placeholder="Search item, classname, category or SKU…" type="search"/></label>
 <label class="dialog-field compact-select member-category-select"><span>Category</span><select data-member-shop-category=""><option value="all">All categories</option></select></label>
 <label class="dialog-field compact-select"><span>Sort</span><select data-member-shop-sort=""><option value="recommended">Catalogue order</option><option selected value="name-asc">Name A–Z</option><option value="name-desc">Name Z–A</option><option value="price-asc">Price low to high</option><option value="price-desc">Price high to low</option><option value="category">Category</option></select></label>
@@ -117,6 +127,10 @@
 <div><p class="breadcrumb">Member Shop / Cart</p><h2 id="cart-title">Shopping Cart</h2><p>Build one order from multiple normal catalogue items, then choose Cash or Bank at checkout. Vehicle rentals stay separate so their restart term can be configured safely.</p></div>
 <div class="member-cart-heading-actions"><button class="secondary-action compact-action" data-member-cart-clear="" type="button">Clear Cart</button><button class="primary-action compact-action" data-member-cart-checkout="" type="button">Checkout</button></div>
 </div>
+<div class="wwz-cart-tip"><span aria-hidden="true">✓</span><span>Your cart is saved for this server. Review items and costs before confirming a purchase.</span><a href="#catalogue">Continue shopping</a></div>
+<details class="wwz-help-details wwz-checkout-help"><summary>First purchase? Here's how checkout works</summary>
+  <div class="wwz-help-body"><p>Normal items can be added to one cart (up to 50 of each product, subject to its stock and account limits). Review everything, choose your delivery location, then select Cash / Wallet or Protected Bank at checkout.</p><p><strong>Vehicle rentals are different:</strong> buy them individually and choose a term from 1 to 30,000 server restarts. Final price and eligibility are checked before payment.</p><p>Orders may require a server restart for delivery. Check <a href="#orders">My Orders</a> for the latest status.</p></div>
+</details>
 <div class="member-cart-empty" data-member-cart-empty=""><span aria-hidden="true">🛒</span><div><strong>Your cart is empty</strong><small>Add normal catalogue items to build a combined purchase.</small></div></div>
 <div class="member-cart-list" data-member-cart-list="" hidden=""></div>
 <div class="member-cart-summary" data-member-cart-summary="" hidden=""><div><span>Different items</span><strong data-member-cart-lines="">0</strong></div><div><span>Total units</span><strong data-member-cart-units="">0</strong></div><div><span>Cart subtotal</span><strong data-member-cart-subtotal="">$0</strong></div><button class="primary-action" data-member-cart-checkout-secondary="" type="button">Proceed To Protected Checkout</button></div>
@@ -146,6 +160,7 @@
 <p class="table-note" data-member-orders-empty="" hidden="">You have not placed a shop order yet.</p>
 </section>
 </main>
+<a class="wwz-mobile-cart" href="#cart" aria-label="View shopping cart"><span aria-hidden="true">🛒</span><span>View cart</span><strong data-wwz-cart-badge>0</strong></a>
 <footer class="member-shop-footer">
 <span data-shop-map-footer="">World War Z · PlayStation DayZ · Chernarus</span>
 <span>Purchases and protected actions are processed by Railway. Item previews may be loaded from <a href="https://dayz.fandom.com/wiki/Category:Item_images" rel="noreferrer" target="_blank">DayZ Wiki</a>; community content is credited to its respective contributors/owners.</span>
@@ -234,5 +249,6 @@
 <script defer="" src="assets/js/core/http.js?v=1.41.0&rev=security-hardening-1"></script><script defer="" src="assets/js/shop-wiki-previews.js?v=1.22.93"></script><script defer="" src="assets/js/pages/shop.js?v=1.61.0&amp;rev=storefront-cart-1"></script>
 <script defer src="assets/js/pwa.js?v=1.61.0&rev=storefront-cart-1"></script>
 <script defer src="assets/js/ui-system.js?v=1.24.0&rev=ops-ui-1"></script>
+<script defer src="assets/js/pages/shop-experience.js?v=1.63.0&amp;rev=survivor-ux-1"></script>
 </body>
 </html>

@@ -394,10 +394,10 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "section === 'server-audit') loadServerActionHistory()" not in operations_admin:
         errors.append("administration.js: Operations Centre must auto-load the unified audit.")
 
-    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.62.0</strong></div>' not in dashboard:
+    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.63.0</strong></div>' not in dashboard:
         errors.append("dashboard.html: command-centre footer release label is stale.")
 
-    if "Website v1.62.0 · Bot v1.63.0" not in index:
+    if "Website v1.63.0 · Bot v1.63.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     if 'assets/css/modern-foundation.css?v=1.62.0&amp;rev=modern-ui-1' not in dashboard or 'assets/css/modern-foundation.css?v=1.62.0&amp;rev=modern-ui-1' not in index:
         errors.append('Modern UI Foundation: shared stylesheet must load on dashboard and public home.')
@@ -406,6 +406,36 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     for token in ('class="wwz-quick-navigation"', 'class="wwz-start-here"', 'data-jump="map" data-jump-section="explorer"'):
         if token not in dashboard:
             errors.append(f'Modern UI Foundation: missing beginner-friendly navigation {token}.')
+    # Phase 2: member UX additions are linked, while the existing protected flows stay authoritative.
+    shop_page = (ROOT / 'shop.html').read_text(encoding='utf-8')
+    survivor_css = ROOT / 'assets/css/survivor-experience.css'
+    survivor_js = ROOT / 'assets/js/pages/shop-experience.js'
+    for surface_name, surface, tokens in (
+        ('dashboard.html', dashboard, (
+            'class="wwz-member-paths"', 'class="wwz-bank-explainer"',
+            'class="wwz-progression-guide"', 'class="wwz-events-guide"',
+            'data-jump="economy" data-jump-section="banking"',
+            'The Survivor Shop lets you choose Cash / Wallet or Protected Bank at checkout.',
+            'assets/css/survivor-experience.css?v=1.63.0&amp;rev=survivor-ux-1',
+        )),
+        ('shop.html', shop_page, (
+            'class="wwz-shop-journey"', 'data-wwz-filter-toggle',
+            'data-wwz-cart-badge', 'wwz-checkout-help',
+            'assets/css/survivor-experience.css?v=1.63.0&amp;rev=survivor-ux-1',
+            'assets/js/pages/shop-experience.js?v=1.63.0&amp;rev=survivor-ux-1',
+        )),
+    ):
+        for token in tokens:
+            if token not in surface:
+                errors.append(f'{surface_name}: missing survivor UX surface {token}')
+    for path in (survivor_css, survivor_js):
+        if not path.is_file():
+            errors.append(f'{path.name}: missing Phase 2 asset')
+    if survivor_js.is_file():
+        controller = survivor_js.read_text(encoding='utf-8')
+        for token in ('MutationObserver', 'aria-expanded', 'wwz-filters-expanded'):
+            if token not in controller:
+                errors.append(f'shop-experience.js: missing progressive enhancement guard {token}')
     for token in (
         'data-community-calendar', 'data-calendar-view="month"', 'data-event-preset="demolition_derby"',
         'data-event-preset="pvp_event"', 'data-event-preset="raid_weekend"', 'data-community-killzone',
@@ -2031,11 +2061,11 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.62.0'",
-        "const WWZ_PWA_UPDATE_REVISION = '2026-10-09-website-v1-62-0-modern-ui-foundation-1'",
+        "const WWZ_PWA_VERSION = '1.63.0'",
+        "const WWZ_PWA_UPDATE_REVISION = '2026-10-09-website-v1-63-0-survivor-ux-1'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
-        "const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-modern-ui-foundation-1`;",
+        "const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-survivor-ux-1`;",
         "const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;",
         "if (request.method !== 'GET') return;",
         "if (url.origin !== self.location.origin) return;",

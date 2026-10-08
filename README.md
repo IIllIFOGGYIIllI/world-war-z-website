@@ -1,7 +1,16 @@
-# World War Z Website v1.62.0
+# World War Z Website v1.63.0
 
 World War Z community dashboard and installable PWA for Chernarus and Livonia.
 
+
+## v1.63.0 — Survivor Experience Overhaul (Phase 2)
+
+- Adds a guided three-step Shop experience (browse, cart/checkout, order history), contextual cart help and a mobile cart shortcut displaying the existing server-specific cart count.
+- Adds expandable mobile product filters, while keeping all desktop catalogue filters and all shop purchase/payment handlers unchanged.
+- Fixes outdated WWZ Bank guidance to reflect optional Protected Bank checkout at the Survivor Shop; adds a clear deposit/withdraw explanation and shortcuts.
+- Adds cross-workspace survivor shortcuts for Bank, XP/Prestige, Quests and Shop, plus accessible XP and Event Hub onboarding.
+- Refines responsive cards, calendar controls and member-facing surfaces without touching transactions, pricing, roles, permissions, Nitrado, map tiles, or bot commands.
+- Website-only release; pairs with Bot v1.63.0. No database migration.
 
 ## v1.62.0 — Modern UI Foundation
 
