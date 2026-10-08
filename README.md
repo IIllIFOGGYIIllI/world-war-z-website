@@ -1,6 +1,16 @@
-# World War Z Website v1.64.0
+# World War Z Website v1.65.0
 
 World War Z community dashboard and installable PWA for Chernarus and Livonia.
+
+## v1.65.0 — Whole-Site & Admin Experience
+
+- Extends the shared modern WWZ style to the entire 16-page public/private website, including homepage, legal/help pages, companion, offline, error screens, storefront and donations.
+- Adds a public `Start Here` section with accessible entry points for first-time survivors.
+- Refreshes the signed-in gateway's Discord login and server selection layout; existing auth/session wiring is unchanged.
+- Adds task-first Admin shortcut cards via the existing Command Centre navigation handlers, with `data-staff-only` role gating and the same protected back-end controls.
+- Refines modern rounded surfaces, responsive layout and accessibility without touching economies, shop orders, event lifecycle, maps, KILLZONE geometry, Nitrado control handlers or database state.
+- Rotates only website shell/static PWA caches. Existing Chernarus/Livonia map tile/data cache generations remain unchanged.
+- Website-only presentation release paired with Bot v1.63.0. Live authenticated checking remains necessary.
 
 ## v1.64.0 — Community Experience Overhaul (Phase 3)
 

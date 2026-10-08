@@ -1,6 +1,6 @@
 'use strict';
 
-const WWZ_PWA_VERSION = '1.64.0';
+const WWZ_PWA_VERSION = '1.65.0';
 const CACHE_PREFIX = 'wwz-pwa-';
 const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 // Public release versions can advance without discarding the bounded map caches.
@@ -8,8 +8,8 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-10-09-website-v1-64-0-community-ux-1';
-const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-community-ux-1`;
+const WWZ_PWA_UPDATE_REVISION = '2026-10-09-website-v1-65-0-whole-site-1';
+const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-whole-site-1`;
 const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${APP_CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${APP_CACHE_RELEASE}`;
@@ -46,6 +46,7 @@ const APP_SHELL = [
   './assets/css/modern-foundation.css?v=1.62.0&rev=modern-ui-1',
   './assets/css/survivor-experience.css?v=1.63.0&rev=survivor-ux-1',
   './assets/css/community-experience.css?v=1.64.0&rev=community-ux-1',
+  './assets/css/sitewide-experience.css?v=1.65.0&rev=whole-site-1',
   './assets/js/dashboard/community-experience.js?v=1.64.0&rev=community-ux-1',
   './assets/js/pages/shop-experience.js?v=1.63.0&rev=survivor-ux-1',
   './assets/js/ui-system.js?v=1.24.0&rev=ops-ui-1',

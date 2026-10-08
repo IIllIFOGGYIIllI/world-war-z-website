@@ -1,0 +1,129 @@
+/* WWZ v1.65.0 — whole-site modern experience / admin UI: styles only.
+   Preserve handler attributes, visibility permissions, map canvas layout and API flow. */
+:root {
+  --wwz-unified-accent:#ed514b;
+  --wwz-unified-ink:#0d121a;
+  --wwz-unified-panel:#19222e;
+  --wwz-unified-raised:#232f3e;
+  --wwz-unified-edge:rgba(190,206,225,.17);
+  --wwz-unified-muted:#b9c7d6;
+  --wwz-unified-radius:18px;
+}
+/* Site consistency: headings, containers and controlled surface depth. */
+body:not(.dashboard-ready) { background-color:#0c1118; }
+:where(.site-header,.page-header,.donation-topbar,.shop-topbar) {
+  background:rgba(15,21,30,.94) !important;
+  border-top:2px solid rgba(237,81,75,.86) !important;
+  border-bottom:1px solid var(--wwz-unified-edge) !important;
+  backdrop-filter:blur(18px) saturate(1.2);
+}
+:where(.site-navigation,.page-nav,.donation-topnav,.shop-topnav) { border:1px solid var(--wwz-unified-edge) !important; border-radius:16px !important; }
+:where(.site-navigation,.page-nav,.donation-topnav,.shop-topnav) > a:hover,
+:where(.site-navigation,.page-nav,.donation-topnav,.shop-topnav) > a:focus-visible {
+  background:rgba(237,81,75,.11) !important;
+  color:#fff !important;
+}
+:where(.hero,.page-hero,.companion-hero,.shop-hero,.donation-hero) { isolation:isolate; }
+:where(.page-hero,.companion-hero) { background:radial-gradient(circle at 86% 5%,rgba(207,49,42,.15),transparent 41%),linear-gradient(120deg,#161f2c,#0b111a) !important; }
+:where(.page-hero h1,.companion-hero h1,.shop-hero h1,.donation-hero h1) { letter-spacing:-.035em; line-height:1.12; }
+:where(.feature-card,.roadmap-card,.content-card,.policy-link-card,.donation-card,.member-shop-item-card,.companion-panel,.marker-card,.hub-panel,.version,.faq-item) {
+  border-radius:var(--wwz-unified-radius) !important;
+  border-color:var(--wwz-unified-edge) !important;
+  box-shadow:0 18px 44px rgba(0,0,0,.17) !important;
+}
+:where(.content-card,.policy-link-card,.companion-panel,.marker-card,.hub-panel,.version) { background-color:#18212d !important; }
+:where(.content-card,.version,.policy-link-card,.companion-panel) :where(p,li) { line-height:1.68; }
+:where(.content-nav,.faq-item,.version-heading,.policy-grid,.flag-summary-grid) { border-radius:14px !important; }
+:where(.content-nav a,.policy-link-card,.wwz-public-step,.wwz-admin-hub-link) { transition:background .16s,border-color .16s,box-shadow .16s,transform .16s; }
+:where(.policy-link-card,.wwz-public-step,.wwz-admin-hub-link):hover { transform:translateY(-2px); border-color:rgba(255,148,138,.42) !important; }
+:where(.site-header,.page-header,.donation-topbar,.shop-topbar) button,
+:where(.site-header,.page-header,.donation-topbar,.shop-topbar) a,
+:where(.shop-hero,.donation-hero,.companion-hero) a.button { border-radius:12px; }
+:where(.content-card,.companion-panel,.shop-server-panel,.donation-server-panel,.donation-workflow-overview) { padding:clamp(18px,2.4vw,29px); }
+/* Public homepage — visible on desktop, mobile and before Discord authentication. */
+.hero .hero-copy-block { max-width:730px; }
+.hero .hero-actions { gap:11px; flex-wrap:wrap; }
+.hero .hero-actions .button { min-height:46px; border-radius:13px !important; }
+.hero .hero-ops-board { border:1px solid var(--wwz-unified-edge) !important; box-shadow:0 22px 70px rgba(0,0,0,.26); }
+.wwz-public-start { padding:clamp(36px,5vw,66px) 0; background:linear-gradient(180deg,#101720,#141c27); border-top:1px solid rgba(255,255,255,.06); border-bottom:1px solid rgba(255,255,255,.07); }
+.wwz-public-start-inner { width:min(1200px,calc(100% - 44px)); margin:auto; }
+.wwz-public-kicker { color:#ffaca5; font:800 11px/1.5 Inter,'Segoe UI',sans-serif; letter-spacing:.13em; text-transform:uppercase; }
+.wwz-public-start h2 { color:#f7f9fd; font-size:clamp(25px,3.3vw,40px); line-height:1.14; letter-spacing:-.04em; margin:6px 0 10px; }
+.wwz-public-start .wwz-public-lead { color:#b8c5d5; max-width:700px; line-height:1.65; margin:0 0 23px; }
+.wwz-public-steps { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; }
+.wwz-public-step { display:flex; flex-direction:column; gap:9px; min-width:0; min-height:184px; padding:20px;
+  color:#fff; text-decoration:none; border:1px solid var(--wwz-unified-edge); border-radius:20px;
+  background:linear-gradient(148deg,#212c39,#18222e); box-shadow:0 14px 30px rgba(0,0,0,.15); }
+.wwz-public-step .wwz-public-number { display:inline-grid; place-items:center; width:33px; height:33px; border:1px solid rgba(255,139,126,.34);
+  border-radius:11px; color:#ffada6; background:rgba(237,81,75,.13); font-weight:900; font-size:13px; }
+.wwz-public-step strong { font-size:16px; letter-spacing:-.025em; }
+.wwz-public-step small { color:#b9c8d8; font:500 12px/1.65 Inter,'Segoe UI',sans-serif; }
+.wwz-public-step::after { content:'Explore  →'; font-size:11px; color:#ffa59d; font-weight:800; margin-top:auto; }
+/* Login and server selection: clear flow, soft surfaces; preserves all login handlers. */
+.wwz-gateway { background:radial-gradient(circle at 14% 10%,rgba(221,65,54,.14),transparent 41%),linear-gradient(150deg,#080c13,#101927) !important; }
+.wwz-gateway-login,.wwz-gateway-servers { padding:clamp(14px,4vw,32px) !important; }
+.wwz-gateway-card { border-radius:26px !important; background:linear-gradient(145deg,rgba(30,41,56,.98),rgba(16,24,36,.98)) !important;
+  border:1px solid rgba(204,217,230,.18) !important; box-shadow:0 32px 100px rgba(0,0,0,.47) !important; }
+.wwz-gateway-card h1 { font-size:clamp(31px,4.1vw,49px); letter-spacing:-.045em !important; line-height:1.08 !important; }
+.wwz-gateway-copy { max-width:55ch; color:#c0cbda !important; line-height:1.7; }
+.wwz-gateway-discord { min-height:54px !important; border-radius:14px !important; box-shadow:0 13px 28px rgba(73,81,207,.23); }
+.wwz-gateway-features { gap:10px; flex-wrap:wrap; }
+.wwz-gateway-features span { border-radius:999px !important; background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.085); padding:9px 12px; }
+.wwz-access-steps { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:16px 0; }
+.wwz-access-steps span { display:inline-flex; align-items:center; gap:7px; color:#dbe4ee; font-size:11px; font-weight:700; padding:8px 12px; border-radius:11px;
+  background:rgba(255,255,255,.055); border:1px solid rgba(255,255,255,.08); }
+.wwz-access-steps b { color:#ffaea6; font-size:12px; }
+.wwz-server-select { width:min(1040px,100%) !important; }
+.wwz-server-grid > * { border-radius:18px !important; border-color:var(--wwz-unified-edge) !important; }
+.wwz-server-select > h1 { letter-spacing:-.035em; }
+.wwz-server-choice-info { max-width:72ch; padding:13px 16px; margin:16px 0 20px; color:#c5d1de; background:rgba(236,80,71,.075);
+  border:1px solid rgba(236,80,71,.21); border-radius:14px; font-size:12px; line-height:1.6; }
+/* Member storefront and donation checkout retain original commerce controls. */
+:where(.member-shop-section,.donation-section) { scroll-margin-top:115px; }
+:where(.shop-hero,.donation-hero,.donation-hero-card) { border-radius:22px !important; }
+:where(.member-shop-grid,.donation-card-grid,.donation-package-grid) { gap:15px !important; }
+:where(.member-cart-section,.donation-payment-section,.member-orders-section) { border-radius:18px !important; }
+/* Admin workspaces — distinct from member forms, no changes to permission or data hooks. */
+.wwz-admin-hub { padding:clamp(18px,2.4vw,26px); margin:14px 0 22px; background:linear-gradient(118deg,#242e3d,#141d2b);
+  border:1px solid rgba(255,150,140,.24); border-radius:22px; box-shadow:0 18px 44px rgba(0,0,0,.17); }
+.wwz-admin-hub h2 { margin:0 0 7px; font:850 clamp(21px,2.5vw,28px)/1.2 Inter,'Segoe UI',sans-serif; color:#fff; letter-spacing:-.035em; }
+.wwz-admin-hub > p { margin:0 0 17px; color:#bbc9d8; font-size:12px; line-height:1.65; }
+.wwz-admin-hub .wwz-admin-kicker { display:block; text-transform:uppercase; color:#ffaaa1; font-size:10px; font-weight:850; letter-spacing:.13em; margin-bottom:8px; }
+.wwz-admin-hub-links { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+.wwz-admin-hub-link { display:flex; flex-direction:column; align-items:flex-start; gap:6px; text-align:left; min-height:86px; padding:13px 15px;
+  background:#2a3546; border:1px solid rgba(206,221,234,.16); border-radius:14px; cursor:pointer; color:#fff; }
+.wwz-admin-hub-link strong { font:800 13px/1.3 Inter,'Segoe UI',sans-serif; }
+.wwz-admin-hub-link small { color:#bacbdc; font:500 11px/1.4 Inter,'Segoe UI',sans-serif; }
+[data-view-panel='staff'] :is(.panel,.inset-panel,.command-centre-health-grid > div,.command-centre-tool-grid > button),
+[data-view-panel='zones'] :is(.panel,.inset-panel),
+[data-view-panel='configuration'] :is(.panel,.inset-panel) { border-radius:17px !important; }
+[data-view-panel='staff'] :is(.command-centre-health-grid,.command-centre-summary-grid,.command-centre-tool-grid) { gap:12px !important; }
+[data-view-panel='staff'] :is(input,select,textarea) { max-width:100%; }
+[data-view-panel='staff'] .security-notice { border-radius:15px; }
+[data-dashboard-section='server-controls'] { border-color:rgba(234,125,100,.26) !important; }
+[data-dashboard-section='moderation-centre'] .panel-heading { gap:15px; }
+[data-view-panel='staff'] .view-heading { margin-bottom:14px; }
+/* Uniform mobile affordances without hiding any functional form control. */
+@media(max-width:1020px) { .wwz-public-steps { grid-template-columns:repeat(2,minmax(0,1fr)); }
+ .wwz-admin-hub-links { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:650px) {
+ .wwz-public-start-inner { width:min(100% - 30px,1200px); }
+ .wwz-public-start { padding:34px 0; }
+ .wwz-public-steps { grid-template-columns:1fr; }
+ .wwz-public-step { min-height:0; padding:17px; }
+ .wwz-gateway-card { border-radius:21px !important; }
+ .wwz-gateway-features { justify-content:center; }
+ .wwz-access-steps { gap:5px; }
+ .wwz-access-steps span { flex:1 1 100%; }
+ .wwz-admin-hub-links { grid-template-columns:1fr; }
+ .wwz-admin-hub-link { min-height:0; }
+ .wwz-admin-hub { padding:17px; }
+ :where(.content-card,.companion-panel,.shop-server-panel,.donation-server-panel) { padding:17px !important; }
+}
+@media(prefers-reduced-motion:reduce) {
+ :where(.wwz-public-step,.wwz-admin-hub-link,.policy-link-card) { transition:none !important; }
+ :where(.wwz-public-step,.wwz-admin-hub-link,.policy-link-card):hover { transform:none !important; }
+}
+
+.wwz-public-release-note { margin:16px auto 4px; padding:18px 21px; border:1px solid rgba(195,206,222,.18); border-radius:18px; background:#1c2633; }
+.wwz-public-release-note p { color:#b9c9d8; line-height:1.6; margin-bottom:0; }
