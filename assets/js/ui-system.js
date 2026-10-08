@@ -8,12 +8,15 @@
     return name.includes('.') ? name : 'index.html';
   };
 
+  // Put the everyday survivor destinations first; retain legal/support discovery.
   const GLOBAL_LINKS = [
-    { label: 'Dashboard', href: 'dashboard.html', detail: 'Command Centre' },
-    { label: 'Donations', href: 'donations.html', detail: 'Support WWZ' },
-    { label: 'Policies', href: 'legal.html', detail: 'Legal & community policies' },
+    { label: 'Home', href: 'index.html', detail: 'Community home' },
+    { label: 'Dashboard', href: 'dashboard.html', detail: 'Survivor Command Centre' },
+    { label: 'Shop', href: 'shop.html', detail: 'Survivor Shop' },
     { label: 'Rules', href: 'rules.html', detail: 'Server rules' },
-    { label: 'Shop', href: 'shop.html', detail: 'Survivor shop' },
+    { label: 'Donations', href: 'donations.html', detail: 'Support WWZ' },
+    { label: 'Companion', href: 'companion.html', detail: 'Install the companion app' },
+    { label: 'Policies', href: 'legal.html', detail: 'Community policies' },
   ];
 
   const POLICY_FILES = new Set([
@@ -31,6 +34,7 @@
     link.href = href;
     link.textContent = label;
     if (className) link.className = className;
+    if (href === 'companion.html') link.dataset.companionHomeNav = '';
     if (isCurrent(href)) link.setAttribute('aria-current', 'page');
     return link;
   };
@@ -38,19 +42,37 @@
   const normalizePublicNavigation = () => {
     const nav = $('.site-navigation, .page-nav, .donation-topnav, .shop-topnav');
     if (!nav) return;
+    // IMPORTANT: pwa.js binds an event handler to the original install button.
+    // Move that same node into the unified menu instead of deleting its handler.
+    const installControls = [...nav.children].filter((item) => item.matches('[data-pwa-install]'));
     nav.replaceChildren(...GLOBAL_LINKS.map((entry) => makeGlobalLink(entry)));
+    if (!nav.hasAttribute('aria-label')) nav.setAttribute('aria-label', 'Primary navigation');
     const discord = document.createElement('a');
     discord.href = 'https://discord.gg/worldwarzps';
     discord.target = '_blank';
     discord.rel = 'noreferrer';
     discord.textContent = 'Discord';
     discord.className = 'wwz-discord-link';
-    nav.append(discord);
-    nav.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => {
-      const menuButton = $('[data-menu-button]');
+    nav.append(discord, ...installControls);
+    const menuButton = $('[data-menu-button]');
+    const closeMobileMenu = () => {
       menuButton?.setAttribute('aria-expanded', 'false');
       nav.classList.remove('open');
-    }));
+    };
+    nav.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeMobileMenu));
+    installControls.forEach((control) => control.addEventListener('click', closeMobileMenu));
+    // Keyboard and outside-click dismissal keep the narrow-screen menu usable.
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape' || !nav.classList.contains('open')) return;
+      event.preventDefault();
+      closeMobileMenu();
+      menuButton?.focus();
+    });
+    document.addEventListener('click', (event) => {
+      if (!nav.classList.contains('open')) return;
+      if (nav.contains(event.target) || menuButton?.contains(event.target)) return;
+      closeMobileMenu();
+    });
   };
 
   const createNetworkRail = () => {
@@ -194,9 +216,8 @@
     const render = () => {
       const query = search.value.trim().toLowerCase();
       list.replaceChildren();
-      entries
-        .filter((entry) => !query || `${entry.label} ${entry.detail} ${entry.kind}`.toLowerCase().includes(query))
-        .forEach((entry) => {
+      const matches = entries.filter((entry) => !query || `${entry.label} ${entry.detail} ${entry.kind}`.toLowerCase().includes(query));
+      matches.forEach((entry) => {
           const link = document.createElement('a');
           link.className = 'wwz-quick-item';
           link.href = entry.href;
@@ -207,6 +228,13 @@
           const badge = document.createElement('b'); badge.textContent = entry.kind;
           copy.append(strong, small); link.append(copy, badge); list.append(link);
         });
+      if (!matches.length) {
+        const empty = document.createElement('p');
+        empty.className = 'wwz-quick-empty';
+        empty.setAttribute('role', 'status');
+        empty.textContent = 'No matching pages. Try Shop, Events, Bank or Support.';
+        list.append(empty);
+      }
     };
 
     const open = () => { if (!dialog.open) dialog.showModal(); render(); requestAnimationFrame(() => search.focus()); };
@@ -228,7 +256,10 @@
     button.className = 'wwz-back-to-top';
     button.textContent = '↑';
     button.setAttribute('aria-label', 'Back to top');
-    button.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    button.addEventListener('click', () => window.scrollTo({
+      top: 0,
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'
+    }));
     let framePending = false;
     const update = () => {
       framePending = false;
@@ -255,7 +286,7 @@
   };
 
   const markUiReady = () => {
-    document.documentElement.dataset.wwzUi = '1.24.0';
+    document.documentElement.dataset.wwzUi = '2.0.0';
     document.body.dataset.wwzPage = fileName().replace(/\.html$/i, '') || 'home';
     document.body.classList.add('wwz-ui-ready', 'wwz-ops-interface');
   };

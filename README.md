@@ -1,6 +1,19 @@
-# World War Z Website v1.65.0
+# World War Z Website v2.0.0
 
 World War Z community dashboard and installable PWA for Chernarus and Livonia.
+
+## v2.0.0 — Final Polish & Consolidation
+
+- Aligns modern public, login, shop, policies and dashboard styling with a single final polish pass in the existing whole-site stylesheet (no new overriding stylesheet layer).
+- Makes public navigation intuitive: Home, Dashboard, Shop, Rules, Donations, Companion, Policies and Discord.
+- Retains the *original* PWA install control when rebuilding the public menu, so its install handler is not lost; Companion remains discoverable.
+- Adds Escape and outside-click mobile menu dismissal and a no-results explanation in Quick Access search.
+- Improves mobile touch target sizing, legibility, focus/contrast and reduced-motion handling while preserving all functional maps and forms.
+- Reduces off-screen changelog card rendering work without removing history.
+- Advances the PWA application shell to v2.0.0 without rotating existing Chernarus/Livonia map tile or map data caches.
+- Website only: existing Bot v1.63.0, login/authentication, bank, cart/checkout, ticket, event, faction, KILLZONE and Admin APIs are unchanged. No database or DayZ mission migration.
+
+**Deployment:** Overlay the updated-files ZIP on Website v1.65.0. Keep a backup of v1.65.0 for rollback; verify mobile navigation and Discord sign-in on the live site.
 
 ## v1.65.0 — Whole-Site & Admin Experience
 

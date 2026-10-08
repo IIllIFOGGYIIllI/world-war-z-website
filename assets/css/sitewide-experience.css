@@ -127,3 +127,115 @@ body:not(.dashboard-ready) { background-color:#0c1118; }
 
 .wwz-public-release-note { margin:16px auto 4px; padding:18px 21px; border:1px solid rgba(195,206,222,.18); border-radius:18px; background:#1c2633; }
 .wwz-public-release-note p { color:#b9c9d8; line-height:1.6; margin-bottom:0; }
+
+
+/* WWZ v2.0.0 — final unified surface polish.
+   No changes to map canvas sizing, permission visibility or checkout execution. */
+:root {
+  --wwz-v2-radius-control: 12px;
+  --wwz-v2-radius-panel: 18px;
+  --wwz-v2-touch: 44px;
+  --wwz-v2-muted: #bdcbd9;
+  --wwz-v2-border: rgba(203,220,239,.19);
+}
+/* Give all public pages a coherent, less compressed reading rhythm. */
+:where(.content-card,.companion-panel,.policy-link-card,.roadmap-card,.feature-card,.version) {
+  border-color: var(--wwz-v2-border) !important;
+}
+:where(.page-content,.content-card,.companion-panel,.policy-content) p,
+:where(.page-content,.content-card,.companion-panel,.policy-content) li {
+  line-height: 1.65;
+}
+:where(.site-navigation,.page-nav,.donation-topnav,.shop-topnav) > a {
+  font-size: 12px !important;
+  font-weight: 720 !important;
+  letter-spacing: .015em !important;
+  text-transform: none !important;
+  padding-inline: 12px !important;
+  border-radius: var(--wwz-v2-radius-control) !important;
+}
+:where(.site-navigation,.page-nav,.donation-topnav,.shop-topnav) [data-pwa-install]:not([hidden]) {
+  min-height: var(--wwz-v2-touch);
+  border-radius: var(--wwz-v2-radius-control) !important;
+}
+:where(.site-navigation,.page-nav,.donation-topnav,.shop-topnav) > a[aria-current='page'] {
+  background: rgba(237,81,75,.16) !important;
+  color: #fff !important;
+}
+:where(.shop-mode-tabs,.wwz-page-tabs,.content-nav) > :where(button,a),
+:where(.primary-action,.secondary-action,.discord-button,.danger-action,.button,
+ .wwz-admin-hub-link,.wwz-public-step,.wwz-quick-item) {
+  min-height: var(--wwz-v2-touch);
+  border-radius: var(--wwz-v2-radius-control) !important;
+}
+:where(.dashboard-sidebar,.dashboard-main,.shop-layout,.donation-store-layout) { min-width: 0; }
+:where(.dashboard-main,.panel,.content-card,.member-shop-section,.wwz-admin-hub) { overflow-wrap: break-word; }
+:where(.view-heading,.panel,.metric-card,.wwz-gateway-card,.wwz-public-step,.wwz-admin-hub,
+ .shop-server-panel,.donation-server-panel) { border-radius: var(--wwz-v2-radius-panel) !important; }
+:where(.view-heading,.panel,.metric-card,.wwz-public-step,.wwz-admin-hub) {
+  border-color: var(--wwz-v2-border) !important;
+}
+:where(.view-heading,.panel,.metric-card,.wwz-public-step,.wwz-admin-hub) p,
+:where(.wwz-gateway-copy,.wwz-public-lead,.wwz-admin-hub > p,.wwz-public-step small) {
+  color: var(--wwz-v2-muted);
+}
+:where(input:not([type='checkbox']):not([type='radio']),select,textarea) {
+  border-radius:var(--wwz-v2-radius-control) !important;
+  max-width:100%;
+}
+:where(input,select,textarea)::placeholder { color:#a5b5c7; opacity:1; }
+:where(.wwz-gateway-notice,.donation-store-notice,.member-shop-notice) { line-height:1.6; }
+/* A real result is more helpful than a blank command-search popover. */
+.wwz-quick-empty {
+  padding:18px 15px; margin:0; border:1px dashed rgba(203,220,239,.26);
+  border-radius:13px; color:#c8d5e3; background:rgba(255,255,255,.035);
+  font-size:13px; line-height:1.55;
+}
+/* Changelog contains dozens of release cards; let the browser skip painting
+   off-screen cards without changing their DOM or anchor accessibility. */
+body[data-wwz-page='changelog'] .page-content .version {
+  content-visibility:auto;
+  contain-intrinsic-size:auto 240px;
+}
+/* Keep long figures/IDs legible while preserving genuine horizontal scrolling for tables. */
+:where(.panel,.content-card,.member-shop-section,.donation-card) :where(table,pre) {
+  max-width:100%;
+}
+:where(.panel,.content-card,.member-shop-section,.donation-card) pre { overflow-x:auto; }
+:where(.panel,.content-card,.member-shop-section,.donation-card) :where(code,output) { overflow-wrap:anywhere; }
+/* Narrow screens: preserve all controls but avoid squeezed multi-column cards. */
+@media (max-width: 980px) {
+  :where(.page-nav,.donation-topnav,.shop-topnav) > a { flex:0 0 auto; }
+  :where(.page-nav,.donation-topnav,.shop-topnav) { overflow-x:auto; max-width:100%; }
+  .wwz-admin-hub-links { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 900px) {
+  .site-navigation.open {
+    max-height:calc(100dvh - var(--wwz-header-height, 72px) - 12px);
+    overflow-y:auto !important;
+    overscroll-behavior:contain;
+    border-radius:0 0 18px 18px !important;
+    box-shadow:0 25px 50px rgba(0,0,0,.5);
+  }
+  .site-navigation > a { width:100%; min-height:var(--wwz-v2-touch); justify-content:flex-start; }
+  .site-navigation [data-pwa-install]:not([hidden]) { width:100%; }
+}
+@media (max-width: 650px) {
+  :where(.wwz-public-start,.page-content,.companion-content) h2 { line-height:1.2; }
+  :where(.panel,.content-card,.wwz-admin-hub,.wwz-gateway-card) { max-width:100%; }
+  :where(.wwz-gateway-discord,.wwz-admin-hub-link,.wwz-public-step) { min-height:48px; }
+  :where(.wwz-quick-search,.wwz-quick-close,.wwz-back-to-top) { min-height:44px; }
+  .wwz-admin-hub-links { grid-template-columns:1fr; }
+  .wwz-gateway-card { padding:clamp(18px,5vw,30px) !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  :where(.wwz-quick-item,.wwz-public-step,.wwz-admin-hub-link,.feature-card,.roadmap-card) {
+    transition:none !important; transform:none !important;
+  }
+  html:focus-within { scroll-behavior:auto !important; }
+}
+@media (forced-colors: active) {
+  :where(.primary-action,.secondary-action,.wwz-public-step,.wwz-admin-hub-link,.side-link.active) {
+    border:1px solid ButtonText !important;
+  }
+}
