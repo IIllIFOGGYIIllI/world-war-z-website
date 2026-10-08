@@ -1,6 +1,15 @@
-# World War Z Website v2.1.0
+# World War Z Website v2.2.0
 
 World War Z community dashboard and installable PWA for Chernarus and Livonia.
+
+## v2.2.0 — Admin Operations Centre 2.0
+
+- Adds read-only automatic-delivery queue insights to the protected Admin Operations Centre: item deliveries and restart-based rentals, queue failures, approvals and cleanup tasks.
+- Displays task-specific operational recommendations with links to the existing audited delivery/failure tools; opening the centre never retries, refunds, approves or restarts anything.
+- Keeps service and worker health monitoring intact, using the existing authentication, server scope and Railway snapshot route.
+- Refreshes the operations assets and PWA shell, retaining all Chernarus/Livonia production map caches.
+- Pairs with Bot v1.65.0. No database migration or DayZ server restart required.
+
 
 ## v2.1.0 — Storefront 2.0, Multi-Destination Checkout
 

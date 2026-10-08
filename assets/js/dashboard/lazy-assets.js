@@ -295,10 +295,10 @@
   ]).then(() => undefined);
 
   const ensureOperationsCentre = () => Promise.all([
-    loadStylesheetOnce('operations-centre-css', 'assets/css/dashboard/operations-centre.css?v=1.51.0&rev=admin-operations-1'),
+    loadStylesheetOnce('operations-centre-css', 'assets/css/dashboard/operations-centre.css?v=2.2.0&rev=delivery-health-1'),
     loadAfterDashboardRuntime(() => loadScriptOnce(
       'operations-centre',
-      'assets/js/dashboard/operations-centre.js?v=1.51.0&rev=admin-operations-1',
+      'assets/js/dashboard/operations-centre.js?v=2.2.0&rev=delivery-health-1',
       () => window.__wwzOperationsCentreReady === true
     ))
   ]).then(() => undefined);

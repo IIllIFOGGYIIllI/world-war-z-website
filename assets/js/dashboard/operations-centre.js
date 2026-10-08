@@ -156,6 +156,97 @@
     if (empty) empty.hidden = items.length !== 0;
   };
 
+  const renderDelivery = (queue) => {
+    const available = Boolean(queue?.available);
+    const count = (value) => Math.max(0, Number(value) || 0);
+    set('[data-operations-delivery-open]', available ? count(queue.open) : '—');
+    set('[data-operations-delivery-failed]', available ? count(queue.failed) : '—');
+    set('[data-operations-delivery-approvals]', available ? count(queue.approvals) : '—');
+    set('[data-operations-delivery-cleanup]', available ? count(queue.cleanup_due) : '—');
+    const item = queue?.items || {};
+    const rentals = queue?.rentals || {};
+    set('[data-operations-delivery-items]', available
+      ? `${count(item.queued)} queued · ${count(item.restart_pending)} awaiting restart · ${count(item.failed)} failed`
+      : 'Queue telemetry unavailable. Open Delivery Manager to investigate.');
+    set('[data-operations-delivery-rentals]', available
+      ? `${count(rentals.awaiting_approval)} awaiting approval · ${count(rentals.restart_pending)} awaiting restart · ${count(rentals.active)} active · ${count(rentals.failed)} failed`
+      : 'Queue telemetry unavailable.');
+    set('[data-operations-delivery-updated]', !available
+      ? 'Diagnostics unavailable'
+      : (queue?.last_updated_at ? `Last order update ${timeLabel(queue.last_updated_at)}` : 'No delivery activity yet'));
+    const waiting = queue?.oldest_waiting_at;
+    const ageHours = waiting ? (Date.now() - new Date(waiting).getTime()) / 3_600_000 : 0;
+    set('[data-operations-delivery-note]', !available
+      ? 'Delivery queue data is currently unavailable. Do not assume there are zero pending orders.'
+      : count(queue.failed) > 0
+        ? `${count(queue.failed)} failed deliveries require review. Use the protected Delivery Manager for targeted retries.`
+        : count(queue.approvals) > 0
+          ? `${count(queue.approvals)} rental approvals are waiting. This page never approves, refunds or retries automatically.`
+          : Number.isFinite(ageHours) && ageHours >= 24
+            ? 'At least one queued delivery has waited over 24 hours. Check server restarts and the Delivery Manager.'
+            : 'No failed deliveries detected. Normal deliveries may still be waiting for the next DayZ restart.');
+  };
+
+  const renderRecommendations = (payload) => {
+    const target = select('[data-operations-next-actions]');
+    if (!target) return;
+    target.replaceChildren();
+    const queue = payload?.delivery_queue || {};
+    const workers = Array.isArray(payload?.workers) ? payload.workers : [];
+    const recommendations = [];
+    if (queue.available && Number(queue.failed) > 0) recommendations.push({
+      heading: 'Review failed deliveries',
+      description: `${Math.max(0, Number(queue.failed))} deliveries need targeted investigation. Review order status before retrying.`,
+      view: 'delivery', section: 'queue', button: 'Review deliveries', severity: 'critical'
+    });
+    if (queue.available && Number(queue.approvals) > 0) recommendations.push({
+      heading: 'Approve pending rentals',
+      description: `${Math.max(0, Number(queue.approvals))} rentals are awaiting an Admin decision.`,
+      view: 'delivery', section: 'queue', button: 'Open approvals', severity: 'warning'
+    });
+    if (!queue.available) recommendations.push({
+      heading: 'Check delivery diagnostics',
+      description: 'Queue totals are unavailable. Inspect the dedicated Delivery Manager before taking action.',
+      view: 'delivery', section: 'queue', button: 'Open deliveries', severity: 'warning'
+    });
+    const stopped = workers.filter((worker) => ['critical', 'degraded'].includes(safeState(worker?.state)));
+    if (stopped.length) recommendations.push({
+      heading: 'Investigate worker health',
+      description: `${stopped.length} background worker(s) need attention. Check Railway logs and recent operational failures.`,
+      view: 'staff', section: 'failures', button: 'Open failure queue', severity: 'critical'
+    });
+    if (Number(payload?.failure_count) > 0) recommendations.push({
+      heading: 'Review operational failures',
+      description: `${Math.max(0, Number(payload.failure_count))} recorded failures remain. Use the existing audited recovery workflow.`,
+      view: 'staff', section: 'failures', button: 'Review failures', severity: 'warning'
+    });
+    if (!recommendations.length) recommendations.push({
+      heading: 'No immediate intervention needed',
+      description: 'No failed deliveries, pending rental approvals or stopped workers were reported. Check the latest health signals below.',
+      view: 'staff', section: 'server-audit', button: 'Review monitoring', severity: 'healthy'
+    });
+    recommendations.slice(0, 5).forEach((rec) => {
+      const card = document.createElement('article');
+      const content = document.createElement('div');
+      const title = document.createElement('strong');
+      const description = document.createElement('p');
+      const action = document.createElement('button');
+      card.className = 'operations-recommendation';
+      card.dataset.severity = rec.severity;
+      title.textContent = rec.heading;
+      description.textContent = rec.description;
+      action.type = 'button';
+      action.className = 'secondary-action compact-action';
+      action.textContent = rec.button;
+      action.dataset.operationsNavView = rec.view;
+      action.dataset.operationsNavSection = rec.section;
+      action.addEventListener('click', () => navigate(action));
+      content.append(title, description);
+      card.append(content, action);
+      target.append(card);
+    });
+  };
+
   const renderRuntime = (payload) => {
     const runtime = payload?.runtime || {};
     const scope = payload?.scope || {};
@@ -209,6 +300,8 @@
     renderRuntime(payload);
     renderServices(payload?.services);
     renderWorkers(payload?.workers, payload?.worker_summary);
+    renderDelivery(payload?.delivery_queue);
+    renderRecommendations(payload);
     renderSignals(payload?.signals);
     renderErrors(payload?.recent_errors);
     renderHistory(payload?.history);
