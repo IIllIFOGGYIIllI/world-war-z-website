@@ -1,6 +1,15 @@
-# World War Z Website v1.63.0
+# World War Z Website v1.64.0
 
 World War Z community dashboard and installable PWA for Chernarus and Livonia.
+
+## v1.64.0 — Community Experience Overhaul (Phase 3)
+
+- Adds a beginner-friendly Action Centre guide to clarify active actions, unread updates and support requests; mobile advanced filters collapse without hiding the search box.
+- Adds Faction shortcuts to the live directory, member invitations and existing request flow; invitation count mirrors the authoritative faction UI.
+- Adds guided private-ticket support with direct access to the existing Create Ticket dialog, ticket history and protected appeal navigation.
+- Adds a map quick-start guide, search focus/reset/fullscreen shortcuts and a compact mobile location-filter drawer. Existing map controls, coordinates, private pins and server map datasets remain unchanged.
+- Modernises rounded card and responsive layouts across these community workspaces. Shortcuts invoke existing authorised controls only.
+- Website-only changes. Preserves authenticated data boundaries, Chernarus/Livonia isolation, roles, commerce, map assets and bot v1.63.0. No database migration.
 
 
 ## v1.63.0 — Survivor Experience Overhaul (Phase 2)

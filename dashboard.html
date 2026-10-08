@@ -26,6 +26,7 @@
 <link href="assets/css/dashboard/treasury.css?v=1.59.0&rev=treasury-1" rel="stylesheet"/>
 <link href="assets/css/modern-foundation.css?v=1.62.0&amp;rev=modern-ui-1" rel="stylesheet"/>
 <link href="assets/css/survivor-experience.css?v=1.63.0&amp;rev=survivor-ux-1" rel="stylesheet"/>
+<link href="assets/css/community-experience.css?v=1.64.0&amp;rev=community-ux-1" rel="stylesheet"/>
 </head>
 <body class="dashboard-gated">
 <a class="skip-link" href="#dashboard-content">Skip to dashboard content</a>
@@ -191,7 +192,7 @@
 <span aria-hidden="true" class="access-icon" data-access-icon="">⌁</span>
 <div><strong data-access-card-title="">Guest access</strong><small data-access-card-copy="">Sign in will securely verify your community access.</small></div>
 </div>
-<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.63.0</strong></div>
+<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.64.0</strong></div>
 <div class="sidebar-footer"><a href="index.html">Website</a><a href="legal.html">Policies</a><a href="privacy.html">Privacy</a></div>
 </aside>
 <button aria-label="Close dashboard menu" class="sidebar-scrim" data-sidebar-scrim="" type="button"></button>
@@ -280,6 +281,14 @@
         <div><strong>One queue, one selected server</strong><p>Everything below is rebuilt from the authoritative WWZ systems for the currently selected server. Chernarus and Livonia remain isolated; read/archive state is private to your account.</p></div>
       </div>
 
+<div class="wwz-community-guide wwz-action-guide" aria-label="How to use the Action Centre">
+  <div class="wwz-community-guide-copy"><span class="wwz-community-eyebrow">Your community inbox</span><h2>Start with what needs you</h2><p>Active items need a response. Unread shows updates you have not reviewed. Archived keeps earlier activity out of the way.</p></div>
+  <div class="wwz-community-shortcuts" aria-label="Action Centre shortcuts">
+    <button type="button" data-community-action="action-active"><span aria-hidden="true">✓</span> Review actions</button>
+    <button type="button" data-community-action="action-unread"><span aria-hidden="true">◉</span> Read updates</button>
+    <button type="button" data-community-action="action-support"><span aria-hidden="true">◇</span> Support tickets</button>
+  </div>
+</div>
       <div class="action-centre-guest panel" data-action-centre-guest hidden>
         <div><p class="panel-kicker">Private account workspace</p><h2>Discord sign-in required</h2><p>Sign in to load your faction, flag, quest, event, order, ticket and notification activity. Admin queues are only included for authorised staff.</p></div>
         <button class="primary-action" data-action-centre-signin type="button">Sign In With Discord</button>
@@ -301,7 +310,8 @@
             <button data-action-centre-view="archived" role="tab" aria-selected="false" type="button">Archived</button>
           </div>
 
-          <div class="action-centre-toolbar">
+          <button type="button" class="wwz-community-filter-toggle wwz-action-filter-toggle" data-community-toggle="action-filters" aria-expanded="false" aria-controls="wwz-action-filters"><span aria-hidden="true">☷</span> Filter notifications <span class="wwz-community-toggle-icon" aria-hidden="true">⌄</span></button>
+          <div class="action-centre-toolbar" id="wwz-action-filters">
             <label class="command-search action-centre-search"><span aria-hidden="true">⌕</span><span class="sr-only">Search Action Centre</span><input data-action-centre-search placeholder="Search actions, alerts and notifications…" type="search"/></label>
             <label class="dialog-field compact-select"><span>Source</span><select data-action-centre-source><option value="all">All sources</option></select></label>
             <label class="dialog-field compact-select"><span>Priority</span><select data-action-centre-priority><option value="all">All priorities</option><option value="urgent">Urgent</option><option value="high">High</option><option value="normal">Normal</option><option value="low">Low</option></select></label>
@@ -336,7 +346,17 @@
 </section>
 <section aria-labelledby="map-title" class="dashboard-view" data-view-panel="map" hidden="">
 <div class="view-heading map-view-heading"><div><p class="breadcrumb">Dashboard / Interactive map</p><h1 id="map-title">Interactive Map</h1><p>Explore the configured server's validated satellite imagery, official labels, shared Admin markers and accurate DayZ X/Z coordinates.</p></div><span class="status-badge online map-public-badge"><i></i>Satellite map live</span></div>
-<div class="map-toolbar panel"><label class="command-search map-search"><span aria-hidden="true">⌕</span><span class="sr-only">Search map locations</span><input autocomplete="off" data-map-search="" list="wwz-map-place-suggestions" placeholder="Search locations, labels, notes or coordinates…" type="search"/><datalist data-map-place-suggestions="" id="wwz-map-place-suggestions"></datalist></label><div aria-label="Filter map locations" class="filter-list map-filter-list" data-map-filters=""></div><div class="map-result-count"><strong data-map-result-count="">0</strong> locations</div></div>
+<div class="wwz-community-guide wwz-map-guide" aria-label="Map quick start">
+  <div class="wwz-community-guide-copy"><span class="wwz-community-eyebrow">Explore your selected world</span><h2>Find your way around</h2><p>Search a location, drag to move, zoom with the map controls and tap anywhere to select coordinates.</p></div>
+  <div class="wwz-community-shortcuts" aria-label="Map quick actions">
+    <button type="button" data-community-action="map-search"><span aria-hidden="true">⌕</span> Find a place</button>
+    <button type="button" data-community-action="map-reset"><span aria-hidden="true">⌂</span> Reset view</button>
+    <button type="button" data-community-action="map-fullscreen"><span aria-hidden="true">⛶</span> Fullscreen</button>
+  </div>
+  <details class="wwz-community-help"><summary>How do map pins and coordinates work?</summary><p>Public markers are shared by WWZ Admins. Your private pins stay separate. Select a location and use the map’s existing Copy button for X/Z coordinates. Changes here do not modify server mission files.</p></details>
+</div>
+<button type="button" class="wwz-community-filter-toggle wwz-map-filter-toggle" data-community-toggle="map-filters" aria-expanded="false" aria-controls="wwz-map-filters"><span aria-hidden="true">☷</span> Location filters <span class="wwz-community-toggle-icon" aria-hidden="true">⌄</span></button>
+<div class="map-toolbar panel" id="wwz-map-filters"><label class="command-search map-search"><span aria-hidden="true">⌕</span><span class="sr-only">Search map locations</span><input autocomplete="off" data-map-search="" list="wwz-map-place-suggestions" placeholder="Search locations, labels, notes or coordinates…" type="search"/><datalist data-map-place-suggestions="" id="wwz-map-place-suggestions"></datalist></label><div aria-label="Filter map locations" class="filter-list map-filter-list" data-map-filters=""></div><div class="map-result-count"><strong data-map-result-count="">0</strong> locations</div></div>
 <div class="map-workspace" data-map-fullscreen-workspace="">
 <article class="panel interactive-map-panel" data-dashboard-section="explorer" data-map-fullscreen-target="" id="dashboard-map-explorer">
 <div aria-label="Interactive server satellite map. Drag to pan, scroll or pinch to zoom, and click to select coordinates." class="map-frame wwz-map-fullscreen-target" data-map-frame="" tabindex="0">
@@ -958,7 +978,16 @@ Participation | 50000 | 0"></textarea><small>Format: Label | currency | XP</smal
 <section aria-labelledby="factions-title" class="dashboard-view" data-view-panel="factions" hidden="">
 <div class="view-heading" data-dashboard-section="directory"><div><p class="breadcrumb">Dashboard / Factions</p><h1 id="factions-title">World War Z Factions</h1><p>Faction applications, invitations, leaders, officers, roster management, linked flag claims, contracts, bounty activity and an audited faction bank — all scoped to the selected server.</p></div><button class="secondary-action compact-action" data-refresh-factions="" type="button">Refresh Factions</button></div>
 <div class="locked-hero panel" data-faction-guest=""><div class="locked-copy"><span aria-hidden="true" class="large-lock">⚑</span><p class="panel-kicker">Faction network</p><h2>Sign In To View Factions</h2><p>Faction membership is tied to your verified Discord ↔ PlayStation survivor identity.</p><button class="primary-action" data-open-login="" type="button">Sign In With Discord</button></div></div>
-<div data-faction-content="" hidden="">
+<div data-faction-content="" hidden=""><div class="wwz-community-guide wwz-faction-guide" aria-label="Faction quick start">
+  <div class="wwz-community-guide-copy"><span class="wwz-community-eyebrow">Your survivor group</span><h2>Find, join or lead a faction</h2><p>Already invited? Review your invitations. Looking for a group? Browse the directory. Want to lead? Request a faction for Admin approval.</p></div>
+  <div class="wwz-community-shortcuts" aria-label="Faction shortcuts">
+    <button type="button" data-community-action="faction-directory"><span aria-hidden="true">⚑</span> Browse factions</button>
+    <button type="button" data-community-action="faction-invites"><span aria-hidden="true">✉</span> Invitations <span class="wwz-community-count" data-community-invite-count>0 pending</span></button>
+    <button type="button" data-community-action="faction-request"><span aria-hidden="true">＋</span> Request a faction</button>
+  </div>
+  <details class="wwz-community-help"><summary>How do factions work?</summary><p>Your Discord account must be linked to your PlayStation identity. Membership, recruitment and treasury data belong to the selected WWZ server. Faction requests require Admin approval.</p></details>
+</div>
+
 <article class="panel faction-my-card" data-dashboard-section="directory"><div class="panel-heading"><div><p class="panel-kicker">Your membership</p><h2 data-my-faction-name="">No Faction</h2></div><div class="faction-heading-status"><span class="faction-state-pill" data-my-faction-status="">Unassigned</span><span class="muted-label" data-my-faction-role="">Unassigned</span></div></div><p data-my-faction-copy="">You are not currently assigned to a faction.</p><div class="faction-inline-actions" data-my-faction-actions=""></div></article>
 <article class="panel faction-registration-card" data-dashboard-section="directory" data-faction-registration-card=""><div class="panel-heading"><div><p class="panel-kicker">Faction registration</p><h2>Create An Official Faction</h2></div><span class="muted-label" data-faction-registration-limit="">Up to 10 members</span></div><p data-faction-registration-copy="">Submit a faction request without copying a template into Discord. Your verified linked PlayStation ID becomes the faction leader after Admin approval.</p><div class="faction-inline-actions" data-faction-registration-actions=""><button class="primary-action compact-action" data-request-faction-creation="" type="button">Request A Faction</button></div><div class="restart-dialog-message" data-faction-registration-message="" hidden="" role="status"></div></article>
 <div class="faction-member-inbox-grid" data-dashboard-section="directory"><article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Your inbox</p><h2>Faction Invitations</h2></div><span class="muted-label" data-my-faction-invite-count="">0 pending</span></div><div class="faction-queue-list" data-my-faction-invites=""></div><p class="table-note" data-my-faction-invites-empty="">No pending invitations.</p></article><article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Recruitment</p><h2>My Applications</h2></div><span class="muted-label" data-my-faction-application-count="">0 pending</span></div><div class="faction-queue-list" data-my-faction-applications=""></div><p class="table-note" data-my-faction-applications-empty="">No faction applications yet.</p></article></div>
@@ -972,7 +1001,16 @@ Participation | 50000 | 0"></textarea><small>Format: Label | currency | XP</smal
 <div class="view-heading" data-dashboard-section="support" id="dashboard-ticket-support"><div><p class="breadcrumb">Dashboard / Support tickets</p><h1 id="tickets-title">Synchronized Support Centre</h1><p>Discord and the dashboard use the same Railway ticket records and the same private Discord channels. Ticket channels are restricted to the creator, the configured Admin role and the bot.</p></div><div class="heading-actions"><span class="restricted-badge ticket-sync-badge">Discord ↔ Dashboard</span><button class="secondary-action" data-refresh-member-tickets="" type="button">Refresh Tickets</button><button class="primary-action" data-open-ticket-create="" type="button">Open Ticket</button></div></div>
 <div class="security-notice ticket-sync-notice"><span aria-hidden="true">⇄</span><div><strong>One ticket system, two interfaces</strong><p>A dashboard-created ticket opens a real private Discord ticket channel. Discord claims, closes, tags, notes, transcripts and ratings update the same Railway record read by this page.</p></div></div>
 <div class="locked-hero panel" data-ticket-guest=""><div class="locked-copy"><span aria-hidden="true" class="large-lock">🎟️</span><p class="panel-kicker">Private support records</p><h2>Sign In To Use Support</h2><p>Connect Discord to open tickets and view only your own support history.</p><button class="primary-action" data-open-login="" type="button">Sign In With Discord</button></div></div>
-<div class="ticket-member-shell" data-ticket-member-content="" hidden="">
+<div class="ticket-member-shell" data-ticket-member-content="" hidden=""><div class="wwz-community-guide wwz-ticket-guide" aria-label="Support quick start">
+  <div class="wwz-community-guide-copy"><span class="wwz-community-eyebrow">Private WWZ support</span><h2>Need a hand? Here's how it works</h2><p>Open a private request with a subject and details. Then find it in your ticket history to read updates and reply through the linked Discord thread.</p></div>
+  <div class="wwz-community-shortcuts" aria-label="Support shortcuts">
+    <button type="button" data-community-action="support-open"><span aria-hidden="true">＋</span> Create ticket</button>
+    <button type="button" data-community-action="support-history"><span aria-hidden="true">▤</span> My tickets</button>
+    <button type="button" data-community-action="support-appeals"><span aria-hidden="true">⚖</span> My appeals</button>
+  </div>
+  <details class="wwz-community-help"><summary>What happens after I create a ticket?</summary><p>Your request is associated with a private Discord channel. Use My Tickets to view its current status and reply. Only authorised participants can access the ticket; closing and reviewing are handled by the existing ticket system.</p></details>
+</div>
+
 <div class="ticket-summary-grid"><div><span>System</span><strong data-ticket-system-state="">—</strong><small>Discord channel creation</small></div><div><span>Your open tickets</span><strong data-ticket-open-count="">—</strong><small data-ticket-open-limit="">Maximum —</small></div><div><span>Your history</span><strong data-ticket-total-count="">—</strong><small>Open, closed and archived</small></div><div><span>Inactivity policy</span><strong data-ticket-inactivity="">—</strong><small>Warning → automatic close</small></div></div>
 <article class="panel ticket-member-panel"><div class="panel-heading"><div><p class="panel-kicker">Your synchronized records</p><h2>My Support Tickets</h2></div><label class="dialog-field compact-select"><span>View</span><select data-ticket-member-filter=""><option value="all">All tickets</option><option value="open">Open</option><option value="closed">Closed</option></select></label></div><div class="ticket-card-list" data-member-ticket-list=""></div><p class="table-note" data-member-ticket-empty="" hidden="">You have not opened a support ticket yet.</p><p class="table-note history-error" data-member-ticket-error="" hidden="">Support tickets are temporarily unavailable.</p></article>
 </div>
@@ -1784,5 +1822,6 @@ CarBattery,1" rows="6"></textarea></label>
 <script defer src="assets/js/ui-system.js?v=1.24.0&rev=ops-ui-1"></script>
 <script defer src="assets/js/dashboard/ux-consistency.js?v=1.35.0&rev=dashboard-ux-1"></script>
 <script defer src="assets/js/dashboard/modern-navigation.js?v=1.62.0&amp;rev=modern-ui-1"></script>
+<script defer src="assets/js/dashboard/community-experience.js?v=1.64.0&amp;rev=community-ux-1"></script>
 </body>
 </html>
