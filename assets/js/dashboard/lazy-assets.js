@@ -237,7 +237,7 @@
 
   const ensureShopController = () => ensureShopHelpers().then(() => loadScriptOnce(
     'shop-controller',
-    'assets/js/dashboard/shop.js?v=1.61.0&rev=storefront-cart-1',
+    'assets/js/dashboard/shop.js?v=2.1.0&rev=multi-destination-1',
     () => window.__wwzShopControllerReady === true
   ));
 

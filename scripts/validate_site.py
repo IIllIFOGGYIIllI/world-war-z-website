@@ -226,10 +226,16 @@ def validate_asset_versions(errors: list[str]) -> None:
     for html_path in sorted(ROOT.glob("*.html")):
         source = html_path.read_text(encoding="utf-8")
         for reference, version in pattern.findall(source):
-            if version != EXPECTED_ASSET_VERSION:
+            # Storefront 2.0 has two new versioned assets; legacy pages retain
+            # their established cache versions until individually revised.
+            expected = '2.1.0' if reference.split('?', 1)[0] in {
+                'assets/css/components/cart-deliveries.css',
+                'assets/js/core/cart-deliveries.js',
+            } else EXPECTED_ASSET_VERSION
+            if version != expected:
                 errors.append(
                     f"{html_path.name}: stale local asset cache version {version!r} in {reference}; "
-                    f"expected {EXPECTED_ASSET_VERSION}"
+                    f"expected {expected}"
                 )
 
 
@@ -396,10 +402,10 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "section === 'server-audit') loadServerActionHistory()" not in operations_admin:
         errors.append("administration.js: Operations Centre must auto-load the unified audit.")
 
-    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v2.0.0</strong></div>' not in dashboard:
+    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v2.1.0</strong></div>' not in dashboard:
         errors.append("dashboard.html: command-centre footer release label is stale.")
 
-    if "Website v2.0.0 · Bot v1.63.0" not in index:
+    if "Website v2.1.0 · Bot v1.64.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     if 'assets/css/modern-foundation.css?v=1.62.0&amp;rev=modern-ui-1' not in dashboard or 'assets/css/modern-foundation.css?v=1.62.0&amp;rev=modern-ui-1' not in index:
         errors.append('Modern UI Foundation: shared stylesheet must load on dashboard and public home.')
@@ -1037,7 +1043,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append(f"shop.js: extracted helper {helper} must live in shop-helpers.js.")
 
     shop_helper_script = 'assets/js/dashboard/shop-helpers.js?v=1.54.2&rev=shop-classname-admin-1'
-    shop_script = 'assets/js/dashboard/shop.js?v=1.61.0&rev=storefront-cart-1'
+    shop_script = 'assets/js/dashboard/shop.js?v=2.1.0&rev=multi-destination-1'
     delivery_script = 'assets/js/dashboard/delivery.js?v=1.54.3&rev=item-retry-1'
     for label, asset_url in (
         ("shared Shop helpers", shop_helper_script),
@@ -1093,7 +1099,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     for changed_asset in (
         'assets/js/dashboard/zones.js?v=1.59.3&rev=killzone-runtime-1',
         'assets/js/dashboard/shop-helpers.js?v=1.54.2&rev=shop-classname-admin-1',
-        'assets/js/dashboard/shop.js?v=1.61.0&rev=storefront-cart-1',
+        'assets/js/dashboard/shop.js?v=2.1.0&rev=multi-destination-1',
     ):
         if changed_asset not in lazy_assets:
             errors.append(f'lazy-assets.js: stale changed-controller cache key: {changed_asset}')
@@ -1578,7 +1584,7 @@ def validate_checkout_compatibility(errors: list[str]) -> None:
             errors.append(f"Standalone Shop is missing v1.37 next-action behaviour/style: {token}")
     for token in (
         'assets/css/pages/shop.css?v=1.61.0&amp;rev=storefront-cart-1',
-        'assets/js/pages/shop.js?v=1.61.0&amp;rev=storefront-cart-1',
+        'assets/js/pages/shop.js?v=2.1.0&amp;rev=multi-destination-1',
     ):
         if token not in shop_html:
             errors.append(f"shop.html: missing current v1.37 commerce asset: {token}")
@@ -1981,7 +1987,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
         errors.append(f"Apple touch icon dimensions are {apple_dimensions}; expected (180, 180).")
 
     launch_requirements = {
-        "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.63.0"),
+        "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.64.0"),
         "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/server-context.js?v=1.60.0&amp;rev=event-calendar-overhaul-3", "assets/js/dashboard/lazy-assets.js?v=1.61.0&amp;rev=storefront-cart-1"),
         "assets/js/dashboard/server-context.js": ("player_capacity", "Capacity', `${server.player_capacity} slots`"),
         "assets/js/dashboard/account.js": ("payload.server?.player_capacity",),
@@ -2096,11 +2102,11 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '2.0.0'",
-        "const WWZ_PWA_UPDATE_REVISION = '2026-10-09-website-v2-0-0-final-polish-1'",
+        "const WWZ_PWA_VERSION = '2.1.0'",
+        "const WWZ_PWA_UPDATE_REVISION = '2026-10-09-website-v2-1-0-multi-destination-1'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
-        "const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-final-polish-1`;",
+        "const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-multi-destination-1`;",
         "const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;",
         "if (request.method !== 'GET') return;",
         "if (url.origin !== self.location.origin) return;",
@@ -2295,8 +2301,8 @@ def main() -> int:
     for token in ('class="wwz-access-steps"', 'class="wwz-server-choice-info"', 'class="wwz-admin-hub"', 'data-command-centre-jump="zones"'):
         if token not in dashboard:
             errors.append(f'dashboard.html: missing {token}')
-    if "const WWZ_PWA_VERSION = '2.0.0';" not in (ROOT / 'sw.js').read_text(encoding='utf-8'):
-        errors.append('PWA version should be v2.0.0')
+    if "const WWZ_PWA_VERSION = '2.1.0';" not in (ROOT / 'sw.js').read_text(encoding='utf-8'):
+        errors.append('PWA version should be v2.1.0')
     ui_source = (ROOT / 'assets/js/ui-system.js').read_text(encoding='utf-8')
     if '...installControls' not in ui_source or "label: 'Companion'" not in ui_source:
         errors.append('v2.0.0 navigation must retain install controls and Companion link')
@@ -2305,6 +2311,20 @@ def main() -> int:
     for page in ROOT.glob('*.html'):
         if 'assets/js/ui-system.js?v=2.0.0&rev=final-polish-1' not in page.read_text(encoding='utf-8'):
             errors.append(f'{page.name}: v2.0.0 controller reference missing')
+    # Multi-destination: shared checkout allocator must be loaded before either
+    # purchase controller, including the lazy dashboard Shop controller.
+    for page_name, host_token in (
+        ('shop.html', 'data-member-cart-routes'),
+        ('dashboard.html', 'data-shop-cart-routes'),
+    ):
+        page = (ROOT / page_name).read_text(encoding='utf-8')
+        if host_token not in page or 'assets/js/core/cart-deliveries.js?v=2.1.0' not in page:
+            errors.append(f'{page_name}: multi-destination checkout missing shared allocator')
+        if 'assets/css/components/cart-deliveries.css?v=2.1.0' not in page:
+            errors.append(f'{page_name}: multi-destination checkout stylesheet missing')
+    for controller in ('assets/js/pages/shop.js', 'assets/js/dashboard/shop.js'):
+        if 'DeliveryPlan.lines(delivery)' not in (ROOT / controller).read_text(encoding='utf-8'):
+            errors.append(f'{controller}: split delivery allocations not submitted')
     validate_required_files(errors)
     validate_repository_hygiene(errors, info)
     validate_site_wide_theme(errors)

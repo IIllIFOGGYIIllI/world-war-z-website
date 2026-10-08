@@ -1,6 +1,16 @@
-# World War Z Website v2.0.0
+# World War Z Website v2.1.0
 
 World War Z community dashboard and installable PWA for Chernarus and Livonia.
+
+## v2.1.0 — Storefront 2.0, Multi-Destination Checkout
+
+- Normal cart items support an individual delivery destination per item: main coordinates, server-specific saved location, or custom coordinates.
+- Split quantities of a product between multiple destinations while enforcing the combined per-product 50-unit cap and existing stock, role, lifetime and cooldown limits.
+- One atomic Cash or Protected Bank payment still creates separately traceable automatic delivery orders, each with its own validated destination.
+- Supports both the standalone Survivor Shop and the authenticated dashboard storefront; existing vehicle rentals retain their 1–30,000 restart terms and original checkout.
+- Checkout remains server-isolated and purchase-key idempotent. No destructive database migration or Nitrado restart.
+- Cache update refreshes storefront JS/CSS without rotating Chernarus or Livonia map data caches.
+
 
 ## v2.0.0 — Final Polish & Consolidation
 

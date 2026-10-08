@@ -1030,7 +1030,7 @@ const syncLocationMode = () => {
     // required for legacy saved locations whose stored precision may not match
     // the manual coordinate input step used by older website releases.
     input.disabled = saved;
-    input.required = !saved;
+    input.required = !saved && !state.checkoutCart;
   });
   if (saved) {
     const location = state.locations.find((entry) => String(entry.location_id) === elements.location.value);
@@ -1091,6 +1091,7 @@ const updateTotal = () => {
   const quantity = Math.max(1, Number(elements.quantity.value || 1));
   elements.total.textContent = money(quantity * Number(state.selectedItem?.price || 0));
 };
+let cartDeliveryPlan = null;
 const openCartCheckout = () => {
   normalizeCart();
   const entries = cartEntries();
@@ -1103,7 +1104,13 @@ const openCartCheckout = () => {
   elements.purchaseTitle.textContent = 'Checkout Your Cart';
   const units = cartUnitCount();
   elements.purchaseItem.textContent = `${entries.length} different item${entries.length === 1 ? '' : 's'} · ${units.toLocaleString()} total unit${units === 1 ? '' : 's'}`;
-  elements.purchasePrice.textContent = 'One protected checkout · one shared delivery location';
+  elements.purchasePrice.textContent = 'One payment · choose a delivery location per product';
+  const routesHost = $('[data-member-cart-routes]');
+  if (routesHost) routesHost.hidden = false;
+  cartDeliveryPlan = window.WWZCartDeliveries.create({
+    host: routesHost, entries, locations: state.locations,
+    worldSize: state.server?.map_key === 'livonia' ? 12800 : 15360
+  });
   populateLocations(); updateMarker(); updatePaymentHelp(); updateTotal(); showMessage(''); elements.purchaseDialog.showModal();
   window.setTimeout(async () => {
     try {
@@ -1120,6 +1127,8 @@ const openPurchase = (item) => {
   if (!canPurchase(item)) return;
   if (elements.detailDialog?.open) elements.detailDialog.close();
   state.checkoutCart = false;
+  cartDeliveryPlan = null;
+  const routesHost = $('[data-member-cart-routes]'); if (routesHost) routesHost.hidden = true;
   state.selectedItem = item; elements.purchaseForm.reset(); elements.y.value = '0'; elements.rotation.value = '0';
   if (elements.quantityField) elements.quantityField.hidden = false;
   if (elements.paymentMethod) elements.paymentMethod.value = 'cash';
@@ -1157,16 +1166,18 @@ const submitPurchase = async (event) => {
     let delivery = null;
     {
       if (!elements.coordinateConfirm.checked) throw new Error('Confirm that you checked the delivery coordinates.');
-      delivery = elements.location.value ? { location_id: Number(elements.location.value) } : {
-        x: elements.x.value, y: elements.y.value, z: elements.z.value, rotation: elements.rotation.value || 0
-      };
-      if (!elements.location.value && (!delivery.x || delivery.y === '' || !delivery.z)) throw new Error('Enter complete X, Y and Z coordinates.');
+      delivery = elements.location.value ? { location_id: Number(elements.location.value) } : (
+        state.checkoutCart && !elements.x.value && !elements.z.value ? null : {
+          x: elements.x.value, y: elements.y.value, z: elements.z.value, rotation: elements.rotation.value || 0
+        });
+      if (delivery && !elements.location.value && (!String(delivery.x).trim() || String(delivery.y).trim() === '' || !String(delivery.z).trim())) throw new Error('Enter complete X, Y and Z coordinates.');
+      if (!delivery && !state.checkoutCart) throw new Error('Choose in-game delivery coordinates.');
     }
     const quantity = Math.max(1, Number(elements.quantity.value || 1));
     const purchaseKey = `${Date.now().toString(36)}-${crypto.randomUUID?.() || Math.random().toString(36).slice(2)}-shop`;
     const paymentMethod = elements.paymentMethod?.value === 'bank' ? 'bank' : 'cash';
     const body = state.checkoutCart ? {
-      items: cartEntries().map(({ line, item }) => ({ item_id: Number(item.item_id), quantity: Math.max(1, Number(line.quantity) || 1) })),
+      items: cartDeliveryPlan.lines(delivery),
       buyer_note: elements.note.value.trim(), payment_method: paymentMethod, checkout_key: purchaseKey, purchase_key: purchaseKey, delivery
     } : {
       item_id: Number(state.selectedItem.item_id), quantity: eventItem ? 1 : quantity,

@@ -391,7 +391,7 @@ const syncShopDeliveryForm = () => {
     // hidden manual inputs so legacy multi-decimal coordinates cannot trigger
     // browser step-mismatch validation and silently block the submit event.
     input.disabled = usesSavedLocation;
-    input.required = !usesSavedLocation;
+    input.required = !usesSavedLocation && !shopCartCheckout;
   });
   if (shopSaveLocation) {
     shopSaveLocation.disabled = usesSavedLocation || shopCartCheckout;
@@ -420,6 +420,8 @@ const openShopPurchase = (item) => {
   }
   if (!shopPurchasesEnabled || !item?.available || shopPurchaseInProgress) return;
   shopCartCheckout = false;
+  dashboardCartDeliveryPlan = null;
+  const routesHost = document.querySelector('[data-shop-cart-routes]'); if (routesHost) routesHost.hidden = true;
   selectedShopItem = item;
   shopPurchaseForm?.reset();
   if (shopPurchaseQuantityField) shopPurchaseQuantityField.hidden = false;
@@ -466,6 +468,7 @@ const updateShopPurchaseTotal = () => {
   const source = shopPaymentMethod?.value === 'bank' ? 'Protected Bank' : 'Cash / Wallet';
   setText('[data-shop-purchase-total]', `${source} will be debited ${formatMoney(total)} immediately.`);
 };
+let dashboardCartDeliveryPlan = null;
 const openDashboardCartCheckout = () => {
   normalizeDashboardShopCart(); const entries = dashboardCartEntries();
   if (!authenticatedUser) { handleAuthAction(); return; }
@@ -473,8 +476,18 @@ const openDashboardCartCheckout = () => {
   shopCartCheckout = true; selectedShopItem = null; shopPurchaseForm?.reset();
   if (shopPurchaseQuantityField) shopPurchaseQuantityField.hidden = true; if (shopPaymentMethod) shopPaymentMethod.value = 'cash';
   if (shopDeliveryY) shopDeliveryY.value = '0'; if (shopDeliveryRotation) shopDeliveryRotation.value = '0';
-  populatePurchaseLocationSelect(); loadDeliveryLocations(undefined, { quiet: true }).then(() => { populatePurchaseLocationSelect(); syncShopDeliveryForm(); }); syncShopDeliveryForm();
-  const units = dashboardCartUnitCount(); setText('[data-shop-purchase-title]', 'Checkout Shopping Cart'); setText('[data-shop-purchase-item]', `${entries.length} different items · ${units.toLocaleString()} total units`); setText('[data-shop-purchase-price]', 'One protected checkout · shared automatic delivery location');
+  populatePurchaseLocationSelect();
+  const routesHost = document.querySelector('[data-shop-cart-routes]');
+  if (routesHost) routesHost.hidden = false;
+  dashboardCartDeliveryPlan = window.WWZCartDeliveries.create({
+    host: routesHost, entries, locations: savedDeliveryLocations,
+    worldSize: Number(window.WWZServerContext?.getWorldSize?.()) || 15360
+  });
+  loadDeliveryLocations(undefined, { quiet: true }).then(() => {
+    populatePurchaseLocationSelect(); syncShopDeliveryForm();
+    dashboardCartDeliveryPlan?.refreshLocations(savedDeliveryLocations);
+  }); syncShopDeliveryForm();
+  const units = dashboardCartUnitCount(); setText('[data-shop-purchase-title]', 'Checkout Shopping Cart'); setText('[data-shop-purchase-item]', `${entries.length} different items · ${units.toLocaleString()} total units`); setText('[data-shop-purchase-price]', 'One payment · per-product delivery locations');
   showInlineMessage(shopPurchaseMessage, ''); updateDashboardPaymentHelp(); updateShopPurchaseTotal();
   if (typeof shopPurchaseDialog?.showModal === 'function') shopPurchaseDialog.showModal(); else shopPurchaseDialog?.setAttribute('open', '');
   window.setTimeout(() => { const instance = ensureShopCoordinateMap(); resetCoordinatePicker(); updateCoordinateMarker(); instance?.invalidateSize(); }, 0);
@@ -738,13 +751,14 @@ shopPurchaseForm?.addEventListener('submit', async (event) => {
         const delivery = needsDelivery ? (() => {
           if (!shopCoordinateConfirm?.checked) throw new Error('Confirm that you checked the in-game coordinates.');
           if (shopDeliveryLocation?.value) return { location_id: Number(shopDeliveryLocation.value) };
+          if (shopCartCheckout && !shopDeliveryX?.value && !shopDeliveryZ?.value) return null;
           const value = { x: shopDeliveryX?.value, y: shopDeliveryY?.value, z: shopDeliveryZ?.value, rotation: shopDeliveryRotation?.value || 0,
             save_location: shopCartCheckout ? false : Boolean(shopSaveLocation?.checked), location_name: shopCartCheckout ? '' : (shopSaveLocationName?.value.trim() || '') };
           if (!value.x || value.y === '' || !value.z) throw new Error('Enter complete X, Y and Z coordinates.');
           if (value.save_location && !value.location_name) throw new Error('Name the saved location before continuing.');
           return value;
         })() : null;
-        if (shopCartCheckout) return { items: dashboardCartEntries().map(({ line, item }) => ({ item_id: Number(item.item_id), quantity: Math.max(1, Number(line.quantity) || 1) })), buyer_note: shopPurchaseNote?.value.trim() || '', payment_method: paymentMethod, checkout_key: purchaseKey, purchase_key: purchaseKey, delivery };
+        if (shopCartCheckout) return { items: dashboardCartDeliveryPlan.lines(delivery), buyer_note: shopPurchaseNote?.value.trim() || '', payment_method: paymentMethod, checkout_key: purchaseKey, purchase_key: purchaseKey, delivery };
         return { item_id: Number(selectedShopItem.item_id), quantity: selectedShopItem.delivery_type === 'event' ? 1 : Number(shopPurchaseQuantity?.value || 1), event_restarts: selectedShopItem.delivery_type === 'event' ? Number(shopPurchaseQuantity?.value || 1) : 1, buyer_note: shopPurchaseNote?.value.trim() || '', payment_method: paymentMethod, purchase_key: purchaseKey, delivery: (selectedShopItem.delivery_type === 'event' || selectedShopItem.requires_coordinates) ? delivery : null };
       })())
     });
