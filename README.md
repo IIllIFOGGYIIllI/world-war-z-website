@@ -1,7 +1,17 @@
-# World War Z Website v1.61.0
+# World War Z Website v1.62.0
 
 World War Z community dashboard and installable PWA for Chernarus and Livonia.
 
+
+## v1.62.0 — Modern UI Foundation
+
+- Introduces a new, rounded charcoal/blood-red WWZ design layer across the public website, Survivor Shop, content pages and Command Centre.
+- Adds prominent beginner-friendly dashboard shortcuts for the map, calendar, shop and survivor profile.
+- Adds persistent quick access in the sidebar for Home, Map, Events, Shop, Bank, Support and the existing command search.
+- Collapses long navigation groups by default, keeping the active workspace expanded without exposing new tools or changing permissions.
+- Improves card spacing, contrast, typography, form controls, focus states and small-screen layout.
+- Preserves all existing authenticated routes, data attributes, original API handlers, Chernarus/Livonia map tiles and map caches, events, carts, checkout and admin controls.
+- Website-only UX update. No bot, database or Nitrado configuration changes are required. Staged broader page-by-page overhaul follows.
 
 ## v1.61.0 — Storefront Cart & Bank Checkout
 

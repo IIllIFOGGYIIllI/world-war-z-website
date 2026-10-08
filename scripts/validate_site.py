@@ -394,11 +394,18 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "section === 'server-audit') loadServerActionHistory()" not in operations_admin:
         errors.append("administration.js: Operations Centre must auto-load the unified audit.")
 
-    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.61.0</strong></div>' not in dashboard:
+    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v1.62.0</strong></div>' not in dashboard:
         errors.append("dashboard.html: command-centre footer release label is stale.")
 
-    if "Website v1.61.0 · Bot v1.63.0" not in index:
+    if "Website v1.62.0 · Bot v1.63.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
+    if 'assets/css/modern-foundation.css?v=1.62.0&amp;rev=modern-ui-1' not in dashboard or 'assets/css/modern-foundation.css?v=1.62.0&amp;rev=modern-ui-1' not in index:
+        errors.append('Modern UI Foundation: shared stylesheet must load on dashboard and public home.')
+    if 'assets/js/dashboard/modern-navigation.js?v=1.62.0&amp;rev=modern-ui-1' not in dashboard:
+        errors.append('Modern UI Foundation: navigation accordion controller missing.')
+    for token in ('class="wwz-quick-navigation"', 'class="wwz-start-here"', 'data-jump="map" data-jump-section="explorer"'):
+        if token not in dashboard:
+            errors.append(f'Modern UI Foundation: missing beginner-friendly navigation {token}.')
     for token in (
         'data-community-calendar', 'data-calendar-view="month"', 'data-event-preset="demolition_derby"',
         'data-event-preset="pvp_event"', 'data-event-preset="raid_weekend"', 'data-community-killzone',
@@ -2024,11 +2031,11 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '1.61.0'",
-        "const WWZ_PWA_UPDATE_REVISION = '2026-09-27-website-v1-61-0-storefront-cart-1'",
+        "const WWZ_PWA_VERSION = '1.62.0'",
+        "const WWZ_PWA_UPDATE_REVISION = '2026-10-09-website-v1-62-0-modern-ui-foundation-1'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
-        "const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-storefront-cart-1`;",
+        "const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-modern-ui-foundation-1`;",
         "const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;",
         "if (request.method !== 'GET') return;",
         "if (url.origin !== self.location.origin) return;",

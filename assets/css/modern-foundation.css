@@ -1,0 +1,225 @@
+/* World War Z v1.62.0 - Modern UI Foundation
+   Presentation and navigation only. No API/permission/economy changes. */
+:root {
+  --wwz-ux-ink: #090d13;
+  --wwz-ux-surface: #141b24;
+  --wwz-ux-raised: #1c2531;
+  --wwz-ux-border: rgba(195, 206, 222, .14);
+  --wwz-ux-text: #f4f5f8;
+  --wwz-ux-muted: #abb7c5;
+  --wwz-ux-accent: #e74a44;
+  --wwz-ux-focus: #ff9386;
+  --wwz-ux-shadow: 0 16px 38px rgba(0, 0, 0, .22);
+  --wwz-radius: 16px;
+  --wwz-radius-sm: 11px;
+  --wwz-sidebar: 288px;
+  --sidebar: 288px;
+}
+html { scroll-padding-top: 90px; }
+body { color: var(--wwz-ux-text); background-color: var(--wwz-ux-ink); }
+/* Distinct interactive focus for keyboard and controller-style navigation. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--wwz-ux-focus) !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 5px rgba(231, 74, 68, .18) !important;
+}
+/* Rounded global navigation, cards and opt-in actions across public pages. */
+.site-navigation, .page-nav, .donation-topnav, .shop-topnav,
+.wwz-page-tabs, .content-nav, .hero-ops-board, .hero-emblem, .status-strip,
+.terminal, .community-panel, .shop-hero, .donation-hero-card,
+.member-shop-sidebar, .member-shop-toolbar, .command-bar, .shop-mode-tabs {
+  border-radius: 16px !important;
+  overflow: clip;
+}
+.site-navigation, .page-nav, .donation-topnav, .shop-topnav {
+  padding: 4px !important;
+  gap: 4px !important;
+  align-items: center !important;
+}
+.site-navigation > a, .page-nav > a, .donation-topnav > a, .shop-topnav > a,
+.wwz-page-tabs a, .content-nav a {
+  border-right: 0 !important;
+  border-radius: 10px !important;
+  min-height: 42px;
+}
+.brand-mark, .page-brand-mark, .dashboard-brand-mark,
+.donation-brand > img, .shop-brand > img { border-radius: 12px !important; }
+.feature-grid, .metric-grid { gap: 14px !important; background: none !important; border: 0 !important; }
+.feature-card, .roadmap-card, .content-card, .version, .policy-link-card,
+.donation-card, .shop-item-card, .member-shop-item-card,
+.shop-item-preview, .member-shop-preview, .feature-tag,
+.donation-card-preview, .donation-server-button, .shop-server-button,
+.member-category-button, .donation-store-notice, .shop-mode-tabs button {
+  border-radius: 16px !important;
+}
+.feature-card, .roadmap-card, .content-card, .version, .donation-card,
+.shop-item-card, .member-shop-item-card {
+  border: 1px solid var(--wwz-ux-border) !important;
+  background-color: var(--wwz-ux-surface) !important;
+  box-shadow: var(--wwz-ux-shadow) !important;
+}
+/* Reusable controls - preserve existing variants, colors and click handlers. */
+.primary-action, .secondary-action, .discord-button, .danger-action,
+.button, .button-primary, .button-secondary, .nav-cta, .wwz-quick-access-button,
+.wwz-back-to-top, .wwz-quick-close, .wwz-quick-item,
+.shop-mode-tabs button, .member-shop-pagination button,
+.wwz-gateway-discord, .wwz-page-tabs a {
+  border-radius: 11px !important;
+}
+.primary-action, .secondary-action, .discord-button, .button,
+.shop-mode-tabs button, .wwz-gateway-discord { min-height: 43px; }
+:where(input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea) {
+  border-radius: 11px !important;
+}
+:where(input, select, textarea)::placeholder { color: #96a3b3; }
+:where(input, select, textarea):disabled { opacity: .58; }
+/* Dashboard shell: promote comprehension, not an endless technical sidebar. */
+.dashboard-topbar {
+  border-top: 0 !important;
+  border-bottom: 1px solid var(--wwz-ux-border) !important;
+  background: rgba(14, 19, 27, .96) !important;
+  box-shadow: 0 14px 40px rgba(0,0,0,.20) !important;
+}
+.dashboard-search-trigger, .server-switcher, .pwa-install-button,
+.connection-state, .account-menu-trigger, .icon-button,
+.service-context-card, .service-context-icon, .service-context-state {
+  border-radius: 12px !important;
+}
+.dashboard-search-trigger { background: #1b2430 !important; min-height: 43px !important; }
+.dashboard-sidebar {
+  width: var(--wwz-sidebar) !important;
+  background: linear-gradient(175deg,#151d28,#0c1119) !important;
+  border-right: 1px solid var(--wwz-ux-border) !important;
+  scrollbar-color: #414b5a transparent;
+}
+.dashboard-sidebar::before { content: 'YOUR WWZ SPACE' !important; color: #8996a8 !important; letter-spacing: .12em !important; }
+.service-context-card {
+  border: 1px solid rgba(231,74,68,.22) !important;
+  background: linear-gradient(120deg, rgba(231,74,68,.11), rgba(255,255,255,.035)) !important;
+}
+.sidebar-navigation { gap: 8px !important; }
+.nav-group {
+  border: 1px solid rgba(255,255,255,.055) !important;
+  border-radius: 14px !important;
+  background: rgba(255,255,255,.025) !important;
+  overflow: hidden;
+}
+.nav-group[open] { border-color: var(--wwz-ux-border) !important; background: rgba(255,255,255,.035) !important; }
+.nav-group > summary {
+  min-height: 48px !important;
+  padding-inline: 12px !important;
+  border-radius: 12px !important;
+  color: #d6dee9 !important;
+  font-size: 11px !important;
+  cursor: pointer;
+}
+.nav-group > summary:hover { background: rgba(255,255,255,.065) !important; color: white !important; }
+.nav-group-icon, .side-link-icon { border-radius: 10px !important; }
+.nav-group-links { gap: 3px !important; padding: 4px 6px 8px !important; }
+.side-link {
+  min-height: 47px !important;
+  margin: 1px 0 !important;
+  border: 1px solid transparent !important;
+  border-radius: 10px !important;
+  padding: 8px 9px !important;
+  background: transparent;
+}
+.side-link:hover { background: rgba(255,255,255,.065) !important; }
+.side-link.active, .side-link[aria-current=page] {
+  background: linear-gradient(95deg,rgba(231,74,68,.22),rgba(231,74,68,.055)) !important;
+  border-color: rgba(231,74,68,.24) !important;
+  box-shadow: inset 3px 0 var(--wwz-ux-accent) !important;
+}
+.side-link-copy strong { color: #e7ecf3 !important; font-size: 11px !important; letter-spacing: .02em !important; text-transform: none !important; }
+.side-link-copy small { color: #a5b1c0 !important; font-size: 10px !important; letter-spacing: 0 !important; text-transform: none !important; }
+/* The existing showView(...) handler is used for every quick link. */
+.wwz-quick-navigation { margin: 12px 10px 16px; }
+.wwz-quick-navigation h2 { margin: 0 0 10px; color: #e8ecf3; font-size: 12px; letter-spacing: .035em; }
+.wwz-quick-navigation > p { margin: 0 0 12px; color: #a6b3c2; font-size: 11px; line-height: 1.5; }
+.wwz-quick-links { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 7px; }
+.wwz-quick-links button, .wwz-quick-links a {
+  min-height: 50px; padding: 9px 6px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 5px; text-align: center;
+  background: #222c38; color: #e9edf4; border: 1px solid rgba(255,255,255,.10);
+  border-radius: 12px; font: 700 11px/1.25 Inter, system-ui, sans-serif; cursor: pointer; text-decoration: none;
+}
+.wwz-quick-links button:hover, .wwz-quick-links a:hover { border-color: rgba(231,74,68,.5); background: #2b303c; }
+.wwz-quick-links .wwz-quick-search { grid-column: 1 / -1; flex-direction: row; gap: 8px; min-height: 40px; }
+.wwz-quick-links [aria-hidden=true] { color: #fa7972; font-size: 17px; line-height: 1; }
+.wwz-nav-subheading { padding: 0 8px; margin: 0 0 8px; font-size: 11px; font-weight: 800; letter-spacing: .11em; color: #9caabd; text-transform: uppercase; }
+.dashboard-main { background: transparent !important; }
+.view-heading {
+  border: 1px solid var(--wwz-ux-border) !important;
+  border-left: 3px solid var(--wwz-ux-accent) !important;
+  border-radius: 18px !important;
+  background: linear-gradient(110deg, rgba(231,74,68,.095), #19222d 46%, #101720) !important;
+  padding: clamp(20px,2.5vw,30px) !important;
+}
+.view-heading h1 { font-size: clamp(1.8rem,3vw,3.1rem) !important; text-transform: none !important; letter-spacing: -.025em !important; line-height: 1.1 !important; }
+.view-heading p:not(.breadcrumb) { color: var(--wwz-ux-muted) !important; font-size: 13px !important; line-height: 1.6; }
+.metric-grid { border: 0 !important; gap: 14px !important; }
+.metric-card, .panel {
+  border: 1px solid var(--wwz-ux-border) !important;
+  border-radius: 18px !important;
+  background: linear-gradient(150deg,#19212b,#111820) !important;
+  box-shadow: var(--wwz-ux-shadow) !important;
+}
+.metric-card { padding: 18px !important; }
+.metric-card small, .metric-card p { color: #a4b0bf !important; }
+.metric-icon, .quick-grid button, .operation-grid button, .activity-list > li,
+.server-hero, .server-hero > div, .operations-summary-grid > div,
+.member-order-summary-grid > div { border-radius: 11px !important; }
+.server-hero, .operations-summary-grid, .member-order-summary-grid {
+  gap: 8px !important; border: none !important; background: transparent !important;
+}
+.server-hero > div, .operations-summary-grid > div, .member-order-summary-grid > div {
+  border: 1px solid rgba(255,255,255,.08) !important; background: #121b25 !important;
+}
+.panel { padding: clamp(18px,2vw,27px) !important; }
+.panel-kicker { color: #ff8880 !important; font-size: 10px !important; letter-spacing: .11em !important; }
+.panel h2 { font-size: clamp(1.25rem,2vw,1.7rem) !important; line-height: 1.2 !important; }
+.status-badge, .lock-label, .restricted-badge, .validation-pass, .source-pill, .preview-banner { border-radius: 999px !important; }
+.preview-banner { border-radius: 14px !important; }
+/* New accessible start-here destinations: route to existing views. */
+.wwz-start-here { margin: 0 0 20px; padding: 2px 0; }
+.wwz-start-here > div:first-child { display:flex; align-items:baseline; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+.wwz-start-here h2 { margin:0; color:#f3f6fa; font-size:clamp(1.05rem,1.5vw,1.25rem); font-weight:800; line-height:1.25; }
+.wwz-start-here p { margin: 0; color: #b0bdcb; font-size: 12px; }
+.wwz-start-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
+.wwz-start-grid > button, .wwz-start-grid > a {
+  display:flex; flex-direction:column; align-items:flex-start; gap:7px;
+  min-height:108px; padding:16px; border:1px solid var(--wwz-ux-border);
+  border-radius:16px; background:linear-gradient(140deg,#202b37,#141c26);
+  color:#f0f3f8; text-align:left; text-decoration:none; cursor:pointer;
+}
+.wwz-start-grid > button:hover, .wwz-start-grid > a:hover {
+  border-color: rgba(231,74,68,.54); transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0,0,0,.22);
+}
+.wwz-start-grid .wwz-start-icon { font-size: 20px; line-height:1; color: #ff7b70; }
+.wwz-start-grid strong { font-size: 13px; }
+.wwz-start-grid small { font-size: 11px; color: #aab8c8; line-height: 1.4; }
+/* Minor visual refinements without disturbing interactive map canvases. */
+.wwz-global-footer a, .sidebar-footer a { border-radius: 9px !important; border-right: 0 !important; }
+.wwz-quick-access-button, .wwz-back-to-top, .wwz-quick-close, .wwz-quick-item { border-radius: 12px !important; }
+@media (max-width: 1150px) {
+  .wwz-start-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 700px) {
+  .metric-grid { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+  .wwz-start-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
+  .wwz-start-grid > button, .wwz-start-grid > a { min-height: 98px; padding: 12px; }
+  .feature-grid { grid-template-columns: 1fr !important; }
+  .dashboard-main { padding: 16px !important; }
+  .view-heading { padding: 18px !important; }
+  .panel { padding: 16px !important; }
+  .wwz-start-here > div:first-child { display: block; }
+  .wwz-start-here p { margin-top: 4px; }
+}
+@media (max-width: 390px) {
+  .wwz-start-grid { grid-template-columns: 1fr 1fr; }
+  .wwz-start-grid > button, .wwz-start-grid > a { min-height: 86px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wwz-start-grid > button, .wwz-start-grid > a { transition: none !important; transform: none !important; }
+}
