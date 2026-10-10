@@ -374,10 +374,10 @@
 
 
   const ensureCommunity = () => Promise.all([
-    loadStylesheetOnce('community-css', 'assets/css/dashboard/community.css?v=2.4.1&rev=event-options-1'),
+    loadStylesheetOnce('community-css', 'assets/css/dashboard/community.css?v=2.4.2&rev=badlands-release-1'),
     loadAfterDashboardRuntime(() => loadScriptOnce(
       'community',
-      'assets/js/dashboard/community.js?v=2.4.1&rev=event-options-1',
+      'assets/js/dashboard/community.js?v=2.4.2&rev=badlands-release-1',
       () => window.__wwzCommunityReady === true
     ))
   ]).then(() => undefined);

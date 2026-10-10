@@ -1,4 +1,12 @@
-# World War Z Website v2.4.1
+# World War Z Website v2.4.2
+
+## v2.4.2 — Badlands Release-linked Event
+
+- Green LIVE indicator in the Bot-published persistent Discord Event Calendar.
+- Adds a selectable official Badlands PlayStation release ending condition for ongoing events, while retaining ordinary manual endings.
+- Existing live Road to Badlands: Total Chaos event shows the correct ending condition without being recreated.
+- Admin-only release confirmation is required before marking that event complete; no external release monitoring or automatic completion.
+- PWA shell refreshed without rotating production Chernarus/Livonia map caches.
 
 ## v2.4.1 — Event Planner Options & Wording
 
