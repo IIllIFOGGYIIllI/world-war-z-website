@@ -57,3 +57,24 @@
 @media(max-width:1280px){.community-quick-template-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.community-core-event-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.community-core-title{grid-column:1/-1}.community-advanced-grid{grid-template-columns:1fr}}
 @media(max-width:900px){.community-planner-topbar{grid-template-columns:1fr}.community-calendar-panel-controls{grid-template-columns:1fr}.community-event-builder{padding:15px}.community-core-event-grid{grid-template-columns:1fr}.community-core-title{grid-column:auto}.community-primary-event-actions{justify-content:stretch}.community-primary-event-actions button{flex:1 1 170px}}
 @media(max-width:620px){.community-quick-template-grid{grid-template-columns:1fr}.community-planner-server{align-items:flex-start;flex-direction:column}.community-builder-heading,.community-section-heading{align-items:flex-start}.community-template-hint{display:none}.community-advanced-grid{padding:10px}.community-settings-group{padding:11px}.community-primary-event-actions button{flex:1 1 100%}}
+
+/* v2.3.0 — Live Event Desk, additive to the existing Event Planner. */
+.wwz-event-desk-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0}
+.wwz-event-desk-stats>div,.wwz-event-scoreboards>section,.wwz-event-bulk,.wwz-event-person,.wwz-event-desk-intro{border:1px solid rgba(238,232,222,.12);background:rgba(255,255,255,.035);border-radius:16px;padding:14px}
+.wwz-event-desk-stats span,.wwz-event-desk-stats strong{display:block}
+.wwz-event-desk-stats span{font-size:.75rem;color:#b6b5b8}
+.wwz-event-desk-stats strong{font-size:1.5rem;margin-top:4px;color:#fff}
+.wwz-event-desk-intro{margin-bottom:12px}.wwz-event-desk-intro h4{margin:0 0 5px}.wwz-event-desk-intro p{margin:0;color:#b9b2b0;line-height:1.55}
+.wwz-event-bulk{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;align-items:center;margin:12px 0}
+.wwz-event-bulk label{display:flex;gap:9px;align-items:center}
+.wwz-event-participant-list{display:grid;gap:10px;margin:12px 0}
+.wwz-event-person{display:grid;grid-template-columns:minmax(170px,1fr) minmax(250px,2fr);align-items:start;gap:14px}
+.wwz-event-person-name{display:flex;align-items:center;gap:12px}.wwz-event-person-name strong,.wwz-event-person-name small{display:block}.wwz-event-person-name small{color:#ada7aa}
+.wwz-event-person-controls{display:flex;gap:8px;align-items:end;flex-wrap:wrap}.wwz-event-person-controls label{display:grid;gap:4px;font-size:.78rem;color:#bab4b4;min-width:108px;flex:1}
+.wwz-event-person-controls input{width:100%;max-width:200px;min-height:39px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:#111317;color:#f3f0ef;padding:8px}
+.wwz-event-person-controls .community-actions{display:flex;gap:6px;flex-wrap:wrap}
+.wwz-event-scoreboards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}.wwz-event-scoreboards h5{margin:0 0 12px}
+.wwz-event-rank{display:flex;gap:10px;align-items:center;border-bottom:1px solid rgba(255,255,255,.09);padding:9px 0}.wwz-event-rank:last-child{border-bottom:0}.wwz-event-rank>b{color:#ed5d52}.wwz-event-rank>span{flex:1;min-width:0;overflow-wrap:anywhere}.wwz-event-rank small{display:block;color:#b0aeb6}.wwz-event-rank strong{font-size:.85rem;white-space:nowrap}
+.wwz-event-podium{display:flex;flex-wrap:wrap;gap:7px;margin:9px 0 14px}.wwz-event-podium span{border-radius:10px;background:rgba(242,68,51,.1);border:1px solid rgba(242,68,51,.2);padding:8px 10px}
+@media(max-width:860px){.wwz-event-person{grid-template-columns:1fr}.wwz-event-scoreboards{grid-template-columns:1fr}.wwz-event-desk-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:490px){.wwz-event-person-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.wwz-event-person-controls .community-actions{grid-column:1/-1}.wwz-event-person-controls input{max-width:none}.wwz-event-bulk .community-actions{width:100%}}

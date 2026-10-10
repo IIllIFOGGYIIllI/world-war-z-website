@@ -1,6 +1,14 @@
-# World War Z Website v2.2.0
+# World War Z Website v2.3.0
 
 World War Z community dashboard and installable PWA for Chernarus and Livonia.
+
+## v2.3.0 — Live Event Management 2.0
+
+- Adds a task-focused Live Event Desk to the existing Admin Event Planner: participant check-in, bulk check-in, team assignment, scorekeeping and local event leaderboards.
+- Publishes the top player/team standings on the public results cards only after event results are published.
+- Separates attendance/winner rewards into explicit Admin confirmation actions; check-ins and publishing results never automatically issue payouts.
+- Preserves existing templates, Month/Week/List views, Discord announcements, hidden Raid Weekend privacy, and existing map/KILLZONE integration.
+- Releases the PWA shell without resetting the bounded Chernarus/Livonia map caches; pairs with Bot v1.66.0.
 
 ## v2.2.0 — Admin Operations Centre 2.0
 
