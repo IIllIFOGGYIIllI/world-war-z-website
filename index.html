@@ -184,20 +184,21 @@
 <div class="section-heading reveal roadmap-heading">
 <div>
 <p class="eyebrow">Development roadmap</p>
-<h2 id="roadmap-title">Chernarus + Livonia Live—Personal Command Centre Online</h2>
-<p>The core WWZ platform, dual-map architecture, PvE/PvP progression, personalised member home, unified Action Centre, protected Data Management, community workflows and Admin operations are live. Chernarus and Livonia continue to retain isolated Discord, Nitrado, map, progression, economy and operational state.</p>
+<h2 id="roadmap-title">WWZ Live — Badlands World Profiles Roadmap</h2>
+<p>Chernarus and Livonia remain operational while we prepare Badlands as a fresh world. Stage 1 World Manager is verified; Stage 2A adds isolated Badlands staging storage. Live gameplay routing, automatic Discord role reconciliation, official console map support and verified rollback are still required before activation.</p>
 </div>
 <div aria-label="Current roadmap release" class="roadmap-release">
 <small>Roadmap updated</small>
-<strong>9 October 2026</strong>
-<span>Website v2.6.0 · Bot v1.69.0</span>
+<strong>11 October 2026</strong>
+<span>Website v2.6.1 · Bot v1.69.0</span>
 </div>
 </div>
 <div aria-label="Roadmap status key" class="roadmap-status-key reveal">
 <span class="complete">Available now</span>
 <span class="complete">Live server</span>
-<span class="complete">Production verified</span>
-<span class="future">Later improvements</span>
+<span class="verification">Staged · verify live</span>
+<span class="next">Next development</span>
+<span class="future">Future · blocked</span>
 </div>
 <div class="roadmap-grid">
 <article class="roadmap-card roadmap-card-complete reveal">
@@ -266,10 +267,10 @@
 </ul>
 </article>
 <article class="roadmap-card roadmap-card-complete reveal">
-<div class="roadmap-card-heading"><span>07</span><div><small>Available now</small><h3>Chernarus PvE Progression &amp; Survivor Passport</h3></div></div>
-<p>Chernarus is now a PvE-first world with PvP restricted to designated fenced military areas, while retaining its persistent exploration and survival progression loop built around telemetry that a PlayStation DayZ server can actually verify.</p>
+<div class="roadmap-card-heading"><span>07</span><div><small>Available now</small><h3>Chernarus Survivor Passport &amp; Exploration</h3></div></div>
+<p>Chernarus retains its configured PvE-era Survivor Passport and exploration progression. However, Road to Badlands: Total Chaos currently overrides the normal PvE / military-zone rules with full-map PvP and base raiding until Badlands releases on PlayStation.</p>
 <ul>
-<li>Outside designated fenced military PvP areas, Chernarus remains PvE; normal PvP combat is confined to those marked compounds or explicitly announced temporary event zones.</li>
+<li>For the ongoing Total Chaos event, full-map PvP and raiding apply; the previous PvE / military-zone configuration remains preserved for rollback.</li>
 <li>Survivor Passport discovery across 27 Chernarus locations with categories, completion percentage, badges, milestones and a private personal map layer.</li>
 <li>Per-life survival records, validated distance travelled, PvE reputation ranks and multi-stage no-death WWZ Operations with ordered and dwell-based stages.</li>
 <li>Travel/PvE-heavy daily and weekly quests, weekly community campaigns, existing-faction PvE standings and seasonal survival/exploration records.</li>
@@ -288,18 +289,73 @@
 <li>A Capacitor 8 wrapper foundation prepares the same canonical website release for Android/iOS; store signing and publication remain external developer-account steps.</li>
 </ul>
 </article>
-<article class="roadmap-card roadmap-card-future reveal">
-<div class="roadmap-card-heading"><span>09</span><div><small>Production observation</small><h3>Live QA &amp; Optional Store Publication</h3></div></div>
-<p>No major platform subsystem is currently waiting to be built. Future work is driven by real server use, DayZ updates and optional native-store publication.</p>
+<article class="roadmap-card roadmap-card-complete reveal">
+<div class="roadmap-card-heading"><span>09</span><div><small>Stage 1 · verified</small><h3>World Profiles &amp; Admin World Manager</h3></div></div>
+<p>World-profile readiness has been confirmed in live Admin testing (Bot v1.68.0 / Website v2.5.0). No map, player balance or Discord role changes were triggered.</p>
 <ul>
-<li>Observe event reminders, push opt-ins, analytics trends and Chernarus/Livonia progression under normal community activity.</li>
-<li>Continue real-device accessibility and map usability refinements when practical issues are observed.</li>
-<li>If desired, use the shipped Capacitor workflow with administrator-owned Google Play / Apple Developer signing credentials and store-review metadata.</li>
-<li>Keep mission/economy compatibility audits aligned with future DayZ console updates instead of changing stable systems without evidence.</li>
+<li>Chernarus remains the primary active world, and all Chernarus records and map data are retained for rollback.</li>
+<li>Badlands is a separate staged world profile; Livonia stays fully independent and unchanged.</li>
+<li>Admin-only World Manager displays profile readiness, migration blockers and a non-destructive Discord role-change preview.</li>
+</ul>
+</article>
+<article class="roadmap-card roadmap-card-verification reveal">
+<div class="roadmap-card-heading"><span>10</span><div><small>Stage 2A · deployed, verify live</small><h3>Badlands Economy &amp; Progression Storage</h3></div></div>
+<p>Bot v1.69.0 / Website v2.6.0 establishes isolated Badlands staging and a domain coverage tracker. Deployment has been reported; final live validation is pending.</p>
+<ul>
+<li>Transaction-safe Badlands-only XP/levels/prestige, wallets, bank balances, ledger and transfer operations are staged and tested.</li>
+<li>Fresh factions, claims, coordinates and other world-owned records have separate staging structures.</li>
+<li>Badlands starts at Level 1, XP 0 and Prestige 0, with fresh economy and faction progression. Existing Chernarus levels, balances, ranks and history are preserved.</li>
+<li>Production Discord commands and automated jobs still use existing Chernarus/Livonia storage; installing this release does not reset anyone.</li>
+</ul>
+</article>
+<article class="roadmap-card roadmap-card-next reveal">
+<div class="roadmap-card-heading"><span>11</span><div><small>Stage 2B · next</small><h3>Gameplay &amp; Transaction World Routing</h3></div></div>
+<p>Move live gameplay services from guild-only ownership to verified server-plus-world routing without altering existing Chernarus records.</p>
+<ul>
+<li>Route profiles, XP/prestige, wallet/bank, quests, bounties, contracts, leaderboards, statistics and rewards per active world.</li>
+<li>Separate faction/claim records, purchases, carts, rentals, delivery coordinates, events and scheduled workers.</li>
+<li>Reconcile pending orders and test all money-changing paths against cross-world leakage and replay before permitting activation.</li>
+</ul>
+</article>
+<article class="roadmap-card roadmap-card-future reveal">
+<div class="roadmap-card-heading"><span>12</span><div><small>Stage 2C · planned</small><h3>Automatic Discord Role Reconciliation</h3></div></div>
+<p>Build a guild-wide managed-role sync that applies each player's currently active world progression, including members who are offline.</p>
+<ul>
+<li>Reset Badlands level, prestige, rank and faction roles to reflect its fresh world data; restore corresponding Chernarus roles on rollback.</li>
+<li>Preserve Verified, Admin, donor, moderation, Livonia and unrelated roles; respect Discord role hierarchy and rate limits.</li>
+<li>Persistent retry queue, audit trail, Admin full-resync control and clear failure reporting before marking activation complete.</li>
+</ul>
+</article>
+<article class="roadmap-card roadmap-card-future reveal">
+<div class="roadmap-card-heading"><span>13</span><div><small>Stage 3 · awaiting platform support</small><h3>Badlands Map &amp; Nitrado Readiness</h3></div></div>
+<p>Do not invent or substitute Badlands coordinates, mission paths, map tiles or console server support before official assets are available.</p>
+<ul>
+<li>Verify official DayZ PlayStation and Nitrado Badlands mission support before constructing deployment-ready configurations.</li>
+<li>Load world-specific tiles, markers, PvP zones, trader locations, spawn and delivery coordinates only from reliable Badlands data.</li>
+<li>Preserve every Chernarus tile, map marker, mission rule and customisation as a reversible fallback.</li>
+</ul>
+</article>
+<article class="roadmap-card roadmap-card-future reveal">
+<div class="roadmap-card-heading"><span>14</span><div><small>Stage 4 · activation locked</small><h3>Verified Backup, Migration &amp; Rollback</h3></div></div>
+<p>Activation will require an Admin confirmation, verified external backups, controlled DayZ/Nitrado mission transition and post-switch checks.</p>
+<ul>
+<li>Archive and test-restoring Chernarus data, world configuration and relevant DayZ persistence before any switch.</li>
+<li>Pause/reconcile pending Chernarus transactions, validate Badlands and then activate world-specific gameplay plus Discord role sync.</li>
+<li>Keep rollback able to restore Chernarus's original player levels, economy, factions and world-specific roles.</li>
+<li>Complete Road to Badlands: Total Chaos through its existing Admin-confirmed ending action when Badlands is released on PlayStation.</li>
+</ul>
+</article>
+<article class="roadmap-card roadmap-card-future reveal">
+<div class="roadmap-card-heading"><span>15</span><div><small>Later improvements</small><h3>Production QA &amp; Optional Store Publication</h3></div></div>
+<p>Continue production observation, map accessibility refinements and optional native-store publication alongside world migration work.</p>
+<ul>
+<li>Observe event reminders, user opt-ins, analytics, progression and delivery handling under real community activity.</li>
+<li>Maintain the installable WWZ Companion PWA; mobile app-store signing and review remain optional future work.</li>
+<li>Keep console mission compatibility checks aligned with official DayZ updates.</li>
 </ul>
 </article>
 </div>
-<div class="roadmap-note reveal"><span aria-hidden="true">✓</span><p><strong>Roadmap rule:</strong> validated Chernarus/Livonia map sources and geometry stay preserved, both live servers retain isolated mutable state, live Railway/API/admin data is never treated as offline-confirmed state, XP/Prestige is production-verified, Chernarus PvE progression remains limited to console-safe telemetry, browser push is opt-in, community workflows remain guild-isolated, and Railway-owned persistent records are never replaced by a website release.</p></div>
+<div class="roadmap-note reveal"><span aria-hidden="true">✓</span><p><strong>Migration safety rule:</strong> No Badlands activation, world-wide economy reset, automatic Discord role edits or Nitrado mission switch is enabled by Stage 2A. Chernarus balances, progression, roles, map assets and world settings remain preserved; Livonia stays independent. Badlands launches with fresh world progression only after all live data paths, backups, role sync and console map readiness have passed verification.</p></div>
 </div>
 </section>
 <section aria-labelledby="faq-title" class="faq section" id="faq">

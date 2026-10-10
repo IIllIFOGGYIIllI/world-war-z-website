@@ -1,3 +1,12 @@
+# World War Z Website v2.6.1
+
+## v2.6.1 — Public Roadmap & Dashboard Alignment
+
+- Refreshes the public `index.html#roadmap` cards with verified Stage 1, deployed/pending-live-verification Stage 2A, and blocked Stages 2B/2C/3/4.
+- Updates the Dashboard Overview roadmap summary to match the Admin World Manager rather than showing old XP verification tasks.
+- Corrects the public Chernarus roadmap wording to reflect the ongoing Road to Badlands: Total Chaos full-map PvP/raiding event; historical PvE settings remain preserved.
+- Pairs with unchanged Bot v1.69.0. No player records, gameplay, Nitrado services, Discord roles or map data are changed. New PWA shell revision preserves map caches.
+
 # World War Z Website v2.6.0
 
 ## v2.6.0 — World Profiles Stage 2A: Migration Coverage

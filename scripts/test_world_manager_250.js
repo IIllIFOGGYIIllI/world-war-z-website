@@ -17,5 +17,5 @@ assert(js.includes('role.member_cache_complete'),'Cache completeness surfaced');
 assert(!js.includes("method:'POST'") && !js.includes('add_roles') && !js.includes('remove_roles'),'Read-only panel');
 assert(lazy.includes('ensureWorldManager') && lazy.includes("section === 'world-manager'"),'Lazy asset routing');
 assert(css.includes('world-check[data-state="ready"]'),'Readiness styling');
-assert(sw.includes("WWZ_PWA_VERSION = '2.6.0'"),'PWA version updated');
+assert(sw.includes("WWZ_PWA_VERSION = '2.6.1'"),'PWA version updated');
 console.log('World Manager v2.6.0: 16 readiness, safe-panel and lazy-routing checks passed');

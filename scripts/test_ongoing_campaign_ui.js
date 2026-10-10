@@ -8,5 +8,5 @@ for(const text of ['data-event-preset="campaign"', '<option value="campaign">Ong
 for(const text of ['ongoing:Number(f.get(\'duration_minutes\'))===0','e.ongoing','data-complete-run','End Event','syncEndFromDuration','event_type:\'campaign\'']) assert(js.includes(text),`Missing campaign behaviour: ${text}`);
 for(const text of ['.community-planner-overhaul select option','.community-planner-overhaul .community-field input','.community-planner-overhaul .community-quick-template-grid button small'])assert(css.includes(text),`Missing readable event controls: ${text}`);
 assert(lazy.includes('community.js?v=2.4.2')&&lazy.includes('community.css?v=2.4.2'),'Lazy module cache update');
-assert(sw.includes("WWZ_PWA_VERSION = '2.6.0'"),'PWA cache release');
+assert(sw.includes("WWZ_PWA_VERSION = '2.6.1'"),'PWA cache release');
 console.log('Ongoing Event + readable planner UI: 16 assertions passed');
