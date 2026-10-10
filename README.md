@@ -1,3 +1,12 @@
+# World War Z Website v2.6.0
+
+## v2.6.0 — World Profiles Stage 2A: Migration Coverage
+
+- Admin World Manager shows isolated Badlands domain staging progress and clearly distinguishes transactional staging from live production integration.
+- Adds a visible Stage 2 roadmap with future gameplay/role-sync/platform/backup gates.
+- Pairs with Bot v1.69.0; world switching, Chernarus resets and Discord role edits are NOT enabled. Livonia untouched.
+- Full roadmap: `docs/WORLD_PROFILES_ROADMAP.md`. PWA shell updated without rotating production map-tile caches.
+
 # World War Z Website v2.5.0
 
 ## v2.5.0 — World Profiles & Badlands readiness (preparatory)

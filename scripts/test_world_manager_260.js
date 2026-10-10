@@ -1,0 +1,17 @@
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const {join}=require('node:path');
+const r=join(__dirname,'..');
+const read=p=>fs.readFileSync(join(r,p),'utf8');
+const html=read('dashboard.html'),js=read('assets/js/dashboard/world-manager.js');
+const css=read('assets/css/dashboard/world-manager.css'),sw=read('sw.js');
+for(const token of ['data-world-roadmap','data-world-coverage-summary','data-world-domains','Stage 2B','Stage 2C','Activation readiness checks']) assert(html.includes(token),token);
+assert(html.includes('data-staff-only="" hidden="" id="dashboard-admin-world-manager"'));
+for(const token of ['payload.domain_coverage','coverage.domains','production_routed','transactional_stage','textContent','authFetch('])assert(js.includes(token),token);
+assert(!js.includes("method:'POST'") && !js.includes('add_roles') && !js.includes('remove_roles'));
+assert(css.includes('.world-domain-grid') && css.includes('.world-roadmap-steps'));
+assert(sw.includes("WWZ_PWA_VERSION = '2.6.0'"));
+assert(read('assets/js/dashboard/lazy-assets.js').includes('world-manager.js?v=2.6.0'));
+assert(read('docs/WORLD_PROFILES_ROADMAP.md').includes('verified'));
+console.log('World Manager Stage 2A checks passed');

@@ -11,6 +11,6 @@ for (const bit of ['data-event-end-condition-field hidden', 'name="end_condition
 for (const bit of ["end_condition:'badlands_playstation_release'", "end_condition:'manual'", 'isBadlandsEvent', 'eventEnding', 'Confirm Badlands Released & End Event', 'confirm_badlands_release:release']) {
   assert.ok(js.includes(bit), `Missing UI or confirmation wiring: ${bit}`);
 }
-assert.ok(sw.includes("WWZ_PWA_VERSION = '2.5.0'"));
+assert.ok(sw.includes("WWZ_PWA_VERSION = '2.6.0'"));
 assert.ok(sw.includes("MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`"));
 console.log('Badlands release-linked event UI: 12 assertions passed');

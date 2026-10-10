@@ -21,3 +21,15 @@
 .world-manager-role-summary strong{font-size:1.4rem}.world-manager-role-summary small{opacity:.68}
 @media(max-width:800px){.world-profile-grid{grid-template-columns:1fr}}
 @media(max-width:620px){.world-manager-role-summary{grid-template-columns:1fr}}
+
+.world-roadmap-steps{list-style:none;margin:0;padding:0;display:grid;gap:.5rem;counter-reset:world-stage}
+.world-roadmap-steps li{display:grid;gap:.25rem;padding:.75rem .85rem;border-radius:10px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.08)}
+.world-roadmap-steps li strong{font-size:.88rem}.world-roadmap-steps li span{font-size:.8rem;opacity:.73;line-height:1.45}
+.world-roadmap-steps li[data-status="completed"]{border-left:3px solid #71d49a}
+.world-roadmap-steps li[data-status="staged"]{border-left:3px solid #eac078}
+.world-domain-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.55rem}
+.world-domain{display:grid;gap:.35rem;padding:.72rem .8rem;border:1px solid rgba(255,255,255,.08);border-radius:11px;background:rgba(0,0,0,.13)}
+.world-domain strong{font-size:.79rem}.world-domain-state{font-size:.72rem;color:#eac078}
+.world-domain[data-stage="transactional"] .world-domain-state{color:#88d6b4}
+@media(max-width:900px){.world-domain-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.world-domain-grid{grid-template-columns:1fr}}

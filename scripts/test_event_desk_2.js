@@ -21,5 +21,5 @@ assert.ok(js.includes("action:'event_desk_winner_reward'") && js.includes("confi
 assert.ok(html.includes('Live Event Desk') && html.includes('data-community-attendance'), 'Live Event Desk is available in the planner');
 assert.ok(css.includes('wwz-event-scoreboards') && css.includes('@media(max-width:490px)'), 'Responsive event desk styles exist');
 assert.ok(lazy.includes('community.js?v=2.4.2') && lazy.includes('community.css?v=2.4.2'),'Lazy assets use new cache revision');
-assert.ok(sw.includes("WWZ_PWA_VERSION = '2.5.0'"),'PWA version updated');
+assert.ok(sw.includes("WWZ_PWA_VERSION = '2.6.0'"),'PWA version updated');
 console.log('WWZ Event Desk 2.0 wiring: 16 assertions passed');

@@ -304,9 +304,9 @@
   ]).then(() => undefined);
 
   const ensureWorldManager = () => Promise.all([
-    loadStylesheetOnce('world-manager-css', 'assets/css/dashboard/world-manager.css?v=2.5.0'),
+    loadStylesheetOnce('world-manager-css', 'assets/css/dashboard/world-manager.css?v=2.6.0'),
     loadAfterDashboardRuntime(() => loadScriptOnce(
-      'world-manager', 'assets/js/dashboard/world-manager.js?v=2.5.0',
+      'world-manager', 'assets/js/dashboard/world-manager.js?v=2.6.0',
       () => window.__wwzWorldManagerReady === true
     ))
   ]).then(() => undefined);
