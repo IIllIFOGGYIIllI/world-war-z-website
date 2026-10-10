@@ -402,10 +402,10 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if "section === 'server-audit') loadServerActionHistory()" not in operations_admin:
         errors.append("administration.js: Operations Centre must auto-load the unified audit.")
 
-    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v2.3.0</strong></div>' not in dashboard:
+    if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v2.4.0</strong></div>' not in dashboard:
         errors.append("dashboard.html: command-centre footer release label is stale.")
 
-    if "Website v2.3.0 · Bot v1.66.0" not in index:
+    if "Website v2.4.0 · Bot v1.67.0" not in index:
         errors.append("index.html: public roadmap release pair is stale.")
     if 'assets/css/modern-foundation.css?v=1.62.0&amp;rev=modern-ui-1' not in dashboard or 'assets/css/modern-foundation.css?v=1.62.0&amp;rev=modern-ui-1' not in index:
         errors.append('Modern UI Foundation: shared stylesheet must load on dashboard and public home.')
@@ -1987,7 +1987,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
         errors.append(f"Apple touch icon dimensions are {apple_dimensions}; expected (180, 180).")
 
     launch_requirements = {
-        "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.66.0"),
+        "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.67.0"),
         "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/server-context.js?v=1.60.0&amp;rev=event-calendar-overhaul-3", "assets/js/dashboard/lazy-assets.js?v=1.61.0&amp;rev=storefront-cart-1"),
         "assets/js/dashboard/server-context.js": ("player_capacity", "Capacity', `${server.player_capacity} slots`"),
         "assets/js/dashboard/account.js": ("payload.server?.player_capacity",),
@@ -2102,11 +2102,11 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '2.3.0'",
-        "const WWZ_PWA_UPDATE_REVISION = '2026-10-11-website-v2-3-0-event-desk-1'",
+        "const WWZ_PWA_VERSION = '2.4.0'",
+        "const WWZ_PWA_UPDATE_REVISION = '2026-10-11-website-v2-4-0-campaign-1'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
-        "const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-event-desk-1`;",
+        "const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-campaign-1`;",
         "const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;",
         "if (request.method !== 'GET') return;",
         "if (url.origin !== self.location.origin) return;",
@@ -2301,8 +2301,8 @@ def main() -> int:
     for token in ('class="wwz-access-steps"', 'class="wwz-server-choice-info"', 'class="wwz-admin-hub"', 'data-command-centre-jump="zones"'):
         if token not in dashboard:
             errors.append(f'dashboard.html: missing {token}')
-    if "const WWZ_PWA_VERSION = '2.3.0';" not in (ROOT / 'sw.js').read_text(encoding='utf-8'):
-        errors.append('PWA version should be v2.3.0')
+    if "const WWZ_PWA_VERSION = '2.4.0';" not in (ROOT / 'sw.js').read_text(encoding='utf-8'):
+        errors.append('PWA version should be v2.4.0')
     ui_source = (ROOT / 'assets/js/ui-system.js').read_text(encoding='utf-8')
     if '...installControls' not in ui_source or "label: 'Companion'" not in ui_source:
         errors.append('v2.0.0 navigation must retain install controls and Companion link')

@@ -1,6 +1,15 @@
-# World War Z Website v2.3.0
+# World War Z Website v2.4.0
 
 World War Z community dashboard and installable PWA for Chernarus and Livonia.
+
+## v2.4.0 — Ongoing Campaigns & Clearer Event Planner
+
+- Introduces an Ongoing Campaign template and duration option “Until manually ended.”
+- Provides higher-contrast, larger form labels, options, checkboxes and helper text across the Event Planner only.
+- Displays ongoing status instead of a fabricated end date; Admins can explicitly End Campaign in the existing audited workflow.
+- Preconfigures Road to Badlands: Total Chaos as a Chernarus campaign example, with signups and automatic rewards off by default. Review its rules before publication.
+- Keeps normal timed events, Discord panels, PvP KILLZONEs, historical event data, and Chernarus/Livonia isolation intact.
+- Website-only cache shell rotation preserves the existing large shared map asset caches. Pairs with Bot v1.67.0.
 
 ## v2.3.0 — Live Event Management 2.0
 

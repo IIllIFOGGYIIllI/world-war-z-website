@@ -1,0 +1,12 @@
+'use strict';
+const fs = require('fs'); const assert=require('assert'); const path=require('path');
+const root=path.resolve(__dirname,'..');
+const read=x=>fs.readFileSync(path.join(root,x),'utf8');
+const html=read('dashboard.html'),js=read('assets/js/dashboard/community.js'),css=read('assets/css/dashboard/community.css');
+const lazy=read('assets/js/dashboard/lazy-assets.js'),sw=read('sw.js');
+for(const text of ['data-event-preset="campaign"', '<option value="campaign">Ongoing Campaign</option>', 'value="0">♾️ Until manually ended', 'data-event-duration-help'])assert(html.includes(text),`Missing UI: ${text}`);
+for(const text of ['ongoing:Number(f.get(\'duration_minutes\'))===0','e.ongoing','data-complete-run','End Campaign','syncEndFromDuration','event_type:\'campaign\'']) assert(js.includes(text),`Missing campaign behaviour: ${text}`);
+for(const text of ['.community-planner-overhaul select option','.community-planner-overhaul .community-field input','.community-planner-overhaul .community-quick-template-grid button small'])assert(css.includes(text),`Missing readable event controls: ${text}`);
+assert(lazy.includes('community.js?v=2.4.0')&&lazy.includes('community.css?v=2.4.0'),'Lazy module cache update');
+assert(sw.includes("WWZ_PWA_VERSION = '2.4.0'"),'PWA cache release');
+console.log('Ongoing Campaign + readable planner UI: 16 assertions passed');

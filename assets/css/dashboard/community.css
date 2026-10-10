@@ -78,3 +78,23 @@
 .wwz-event-podium{display:flex;flex-wrap:wrap;gap:7px;margin:9px 0 14px}.wwz-event-podium span{border-radius:10px;background:rgba(242,68,51,.1);border:1px solid rgba(242,68,51,.2);padding:8px 10px}
 @media(max-width:860px){.wwz-event-person{grid-template-columns:1fr}.wwz-event-scoreboards{grid-template-columns:1fr}.wwz-event-desk-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:490px){.wwz-event-person-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.wwz-event-person-controls .community-actions{grid-column:1/-1}.wwz-event-person-controls input{max-width:none}.wwz-event-bulk .community-actions{width:100%}}
+
+/* Event Planner: readable choices, labels and helper copy. Scoped to prevent unrelated UI regressions. */
+.community-planner-overhaul .community-event-builder{background:linear-gradient(155deg,rgba(27,19,20,.96),rgba(13,16,20,.98));border-color:rgba(255,255,255,.15)}
+.community-planner-overhaul .community-builder-heading h4,.community-planner-overhaul .community-section-heading h4{font-size:1.22rem;line-height:1.4;letter-spacing:0}
+.community-planner-overhaul .community-quick-template-grid button{min-height:88px;gap:8px;border-radius:15px;padding:15px 17px;text-align:left}
+.community-planner-overhaul .community-quick-template-grid button b{font-size:1rem;line-height:1.4;letter-spacing:0}
+.community-planner-overhaul .community-quick-template-grid button small{display:block;font-size:.85rem;line-height:1.4;color:#b8c3ce;font-weight:500}
+.community-planner-overhaul .community-field{gap:8px}
+.community-planner-overhaul .community-field>span{font-size:.92rem;line-height:1.45;color:#f1f4f6;font-weight:700;letter-spacing:0}
+.community-planner-overhaul .community-field small{font-size:.81rem;line-height:1.5;color:#afb9c3}
+.community-planner-overhaul .community-field input,.community-planner-overhaul .community-field select,.community-planner-overhaul .community-field textarea{min-height:48px;font-size:1rem;line-height:1.4;color:#f6f8fa;background-color:#131820;border:1px solid #46505b;border-radius:11px;padding:10px 13px}
+.community-planner-overhaul select option{font-size:1rem;background-color:#161c24;color:#f6f8fa}
+.community-planner-overhaul .community-checkbox-line{font-size:.91rem;line-height:1.6;color:#e8edf2;align-items:flex-start}
+.community-planner-overhaul .community-checkbox-line input{width:18px;height:18px;flex:none;margin-top:3px}
+.community-planner-overhaul .community-settings-group{background:rgba(18,23,28,.9);border-color:rgba(255,255,255,.13)}
+.community-planner-overhaul .community-settings-heading h5{font-size:1.05rem;line-height:1.4;color:#f6f8fa}
+.community-planner-overhaul .community-settings-heading small,.community-planner-overhaul .community-advanced-settings>summary small{font-size:.86rem;line-height:1.55;color:#b5bec8}
+.community-planner-overhaul .community-primary-event-actions button{min-height:48px;font-size:.89rem;letter-spacing:0}
+.community-planner-overhaul :is(select,input,textarea,button):focus-visible{outline:2px solid #fd766b;outline-offset:3px}
+@media(max-width:700px){.community-planner-overhaul .community-quick-template-grid button{min-height:74px}.community-planner-overhaul .community-event-builder{padding:14px}}
