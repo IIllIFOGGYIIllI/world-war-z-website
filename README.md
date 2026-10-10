@@ -1,4 +1,11 @@
-# World War Z Website v2.4.2
+# World War Z Website v2.5.0
+
+## v2.5.0 — World Profiles & Badlands readiness (preparatory)
+
+- Admin World Manager under Operations. Inspect current Chernarus data, fresh Badlands profile policy, migration blockers, pending transactions, and Discord role **dry-run** impact.
+- No World Activation button exists yet. Badlands progression/economy, roles, mission, persistence and shop paths are **not** active; this is a safe preparation and audit release, not the real map conversion.
+- Livonia unaffected; Chernarus records and maps remain in place; PWA shell revision updated without rotating map-tile caches.
+
 
 ## v2.4.2 — Badlands Release-linked Event
 

@@ -303,6 +303,14 @@
     ))
   ]).then(() => undefined);
 
+  const ensureWorldManager = () => Promise.all([
+    loadStylesheetOnce('world-manager-css', 'assets/css/dashboard/world-manager.css?v=2.5.0'),
+    loadAfterDashboardRuntime(() => loadScriptOnce(
+      'world-manager', 'assets/js/dashboard/world-manager.js?v=2.5.0',
+      () => window.__wwzWorldManagerReady === true
+    ))
+  ]).then(() => undefined);
+
   const ensureModerationCentre = () => ensureAdministration().then(() => Promise.all([
     loadStylesheetOnce('moderation-centre-css', 'assets/css/dashboard/moderation-centre.css?v=1.52.0&rev=moderation-centre-1'),
     loadAfterDashboardRuntime(() => loadScriptOnce(
@@ -404,7 +412,7 @@
   };
 
   const administrationView = ({ view = '', section = '' } = {}) => (
-    (view === 'staff' && ['moderation-centre', 'queue', 'cases', 'banlists', 'players', 'server-controls', 'server-audit', 'failures', 'rules', 'economy-panels', 'donations', 'donation-orders'].includes(section))
+    (view === 'staff' && ['moderation-centre', 'queue', 'cases', 'banlists', 'players', 'server-controls', 'server-audit', 'world-manager', 'failures', 'rules', 'economy-panels', 'donations', 'donation-orders'].includes(section))
     || (view === 'configuration' && ['discord-onboarding', 'community-tools', 'discord-logs', 'notifications'].includes(section))
   );
 
@@ -420,6 +428,7 @@
     if (commerceView(detail)) activateCommerceView(detail).catch(() => {});
     if (administrationView(detail)) ensureAdministration().catch(() => {});
     if (view === 'staff' && section === 'moderation-centre') ensureModerationCentre().then(() => window.WWZModerationCentre?.activate?.(detail)).catch(() => {});
+    if (view === 'staff' && section === 'world-manager') ensureWorldManager().then(() => window.WWZWorldManager?.activate?.(detail)).catch(() => {});
     if (view === 'staff' && section === 'server-audit') ensureOperationsCentre().then(() => window.WWZOperationsCentre?.activate?.(detail)).catch(() => {});
     if (view === 'configuration' && section === 'data-management') ensureDataManagement().then(() => window.WWZDataManagement?.activate?.(detail)).catch(() => {});
     if (view === 'staff' && section === 'rules') ensureRulesManager().catch(() => {});
@@ -513,6 +522,11 @@
     button.addEventListener('focus', () => ensureModerationCentre().catch(() => {}));
   });
 
+  document.querySelectorAll('[data-view="staff"][data-section="world-manager"]').forEach((button) => {
+    button.addEventListener('pointerenter', () => ensureWorldManager().catch(() => {}), { passive: true });
+    button.addEventListener('focus', () => ensureWorldManager().catch(() => {}));
+  });
+
   document.querySelectorAll('[data-view="staff"][data-section="server-audit"]').forEach((button) => {
     button.addEventListener('pointerenter', () => ensureOperationsCentre().catch(() => {}), { passive: true });
     button.addEventListener('focus', () => ensureOperationsCentre().catch(() => {}));
@@ -555,6 +569,7 @@
     ensureMapRuntime,
     ensureModerationStyles,
     ensureOperationsCentre,
+    ensureWorldManager,
     ensureDataManagement,
     ensureRulesManager,
     ensureDonationManager,
