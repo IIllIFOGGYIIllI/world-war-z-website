@@ -1,4 +1,11 @@
-# World War Z Website v2.4.0
+# World War Z Website v2.4.1
+
+## v2.4.1 — Event Planner Options & Wording
+
+- Presents indefinite events as Ongoing Events throughout the Event Planner and Discord UI.
+- Adds independent switches for pre-event restart notices and event rewards. Disabled sections are hidden in preview/public event detail, and rewards cannot be paid while switched off.
+- Keeps all existing templates, saved values and Chernarus/Livonia map caches.
+
 
 World War Z community dashboard and installable PWA for Chernarus and Livonia.
 
