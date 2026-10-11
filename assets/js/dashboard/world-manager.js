@@ -10,6 +10,12 @@
   const refresh = find('[data-world-refresh]');
   const cleanCount = (value) => value == null ? 'Not available' : Number(value).toLocaleString();
   let loading = false;
+  const memberForm = find('[data-world-member-form]');
+  const memberInput = find('[data-world-member-id]');
+  const memberResult = find('[data-world-member-preview]');
+  const memberError = find('[data-world-member-error]');
+  const memberSubmit = find('[data-world-member-submit]');
+
   const element = (tag, className, value) => {
     const node = document.createElement(tag);
     if (className) node.className = className;
@@ -49,12 +55,38 @@
       }
       profilesRoot.append(card);
     });
+    if (memberForm) memberForm.hidden = !primary;
     if (!primary) {
       find('[data-world-coverage-summary]').textContent = 'Livonia is independent; no Badlands migration scheduled.';
       checksRoot.append(element('p','world-muted','World Profiles migration preparation applies to the Chernarus primary server only. Livonia is unchanged.'));
       find('[data-world-role-preview]').hidden = true;
+      find('[data-world-member-panel]').hidden = true;
       return;
     }
+    find('[data-world-member-panel]').hidden = false;
+    const route = payload.routing_capabilities || {};
+    find('[data-world-routing-summary]').textContent = route.member_progression_reads === 'world_scoped_preview'
+      ? 'Read-only XP and wallet/bank routing available. Gameplay writes and world activation remain locked.'
+      : 'Awaiting world-aware account read adapter.';
+    const memberCompare = payload.member_route_preview;
+    if (memberResult) {
+      memberResult.replaceChildren();
+      memberResult.hidden = !memberCompare;
+      if (memberCompare) {
+        for (const world of ['chernarus','badlands']) {
+          const data=memberCompare[world] || {};
+          const card=element('div','world-profile-card');
+          card.append(element('strong','',world === 'chernarus' ? 'Chernarus · Preserved' : 'Badlands · Staging'));
+          const info=element('div','world-profile-stats');
+          [['Level',data.level],['XP',data.current_xp],['Prestige',data.prestige],['Wallet',data.wallet],['Bank',data.bank_balance]].forEach(([label,value])=>{
+            const cell=element('div');cell.append(element('span','',label),element('strong','',cleanCount(value)));info.append(cell);
+          });
+          card.append(info,element('small','world-muted',data.member_exists?'Existing world record':'No account row · fresh-start defaults only'));
+          memberResult.append(card);
+        }
+      }
+    }
+    if (memberError) memberError.hidden=true;
     const coverage = payload.domain_coverage || {};
     const domains = Array.isArray(coverage.domains) ? coverage.domains : [];
     find('[data-world-coverage-summary]').textContent = `${domains.filter(item => item.status === 'transactional_stage').length} transactional staging domains · ${domains.filter(item => item.production_routed).length} live integrations · ${domains.length} tracked domains`;
@@ -62,7 +94,7 @@
       const node = element('div','world-domain');
       node.dataset.stage = item.status === 'transactional_stage' ? 'transactional' : 'pending';
       const label = element('strong','',item.label || item.key);
-      const status = element('span','world-domain-state',item.production_routed ? 'Production ready' : item.status === 'transactional_stage' ? 'Transactional staging' : item.status === 'schema_stage' ? 'Schema only' : 'Dry run only');
+      const status = element('span','world-domain-state',item.production_routed ? 'Production ready' : item.preview_routed ? 'Read-only routing + staging' : item.status === 'transactional_stage' ? 'Transactional staging' : item.status === 'schema_stage' ? 'Schema only' : 'Dry run only');
       node.append(label,status);domainsRoot.append(node);
     });
     (Array.isArray(payload.checks) ? payload.checks : []).forEach((check)=> {
@@ -84,12 +116,13 @@
       : `${Object.values(payload.pending_transactions || {}).reduce((sum,v)=>sum+Math.max(0,Number(v)||0),0)} unresolved delivery/rental records`;
     if (warning) warning.hidden=true;
   };
-  const load = async () => {
+  const load = async (memberId = '') => {
     const token=typeof storageGet==='function'?storageGet(AUTH_SESSION_KEY):'';
     if (!token || loading || (typeof hasServerActionAccess === 'function' && !hasServerActionAccess())) return;
-    loading=true; if(refresh) refresh.disabled=true;
+    loading=true; if(refresh) refresh.disabled=true; if(memberSubmit) memberSubmit.disabled=true;
     try {
-      const response=await authFetch(`${DASHBOARD_API_BASE}/api/admin/world-profiles`,{method:'GET', headers:{Accept:'application/json', Authorization:`Bearer ${token}`}});
+      const memberQuery = memberId ? `?discord_id=${encodeURIComponent(memberId)}` : '';
+      const response=await authFetch(`${DASHBOARD_API_BASE}/api/admin/world-profiles${memberQuery}`,{method:'GET', headers:{Accept:'application/json', Authorization:`Bearer ${token}`}});
       const payload=await response.json().catch(()=>({}));
       if (response.status===401 || response.status===403) {
         storageRemove(AUTH_SESSION_KEY);applySignedOutState();return;
@@ -99,10 +132,20 @@
       find('[data-world-updated]').textContent=`Checked ${new Date().toLocaleTimeString()}`;
     } catch (error) {
       if(warning){warning.hidden=false;warning.textContent=String(error?.message||'World Manager unavailable');}
+      if(memberError && memberId){memberError.hidden=false;memberError.textContent=String(error?.message||'Comparison unavailable');}
       find('[data-world-updated]').textContent='Readiness unavailable';
-    } finally {loading=false;if(refresh) refresh.disabled=false;}
+    } finally {loading=false;if(refresh) refresh.disabled=false;if(memberSubmit) memberSubmit.disabled=false;}
   };
-  refresh?.addEventListener('click',load);
+  refresh?.addEventListener('click',()=>load());
+  memberForm?.addEventListener('submit',(event)=>{
+    event.preventDefault();
+    const value = String(memberInput?.value || '').trim();
+    if(!/^[0-9]{15,22}$/.test(value)){
+      if(memberError){memberError.hidden=false;memberError.textContent='Enter a valid Discord user ID (15–22 digits).';}
+      return;
+    }
+    load(value);
+  });
   const activate=({view='',section=''}={})=> {if(view==='staff'&&section==='world-manager') load();};
   window.addEventListener('wwz:viewchange',(event)=>activate(event.detail||{}));
   window.WWZWorldManager=Object.freeze({activate,refresh:load});

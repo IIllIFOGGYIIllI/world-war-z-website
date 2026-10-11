@@ -1,3 +1,12 @@
+# World War Z Website v2.7.0
+
+## v2.7.0 — World Profiles Stage 2B Phase 1 & Release Hygiene
+
+- Adds Admin-only, read-only comparison of one Discord user's Chernarus and Badlands staging XP, levels, prestige, wallet and bank data; does not create accounts or move money.
+- Displays world-routing capabilities and explicit blockers. Actual command, shop, faction, quest, event and worker writes remain guild-scoped and must not switch worlds yet.
+- Updates **public Homepage roadmap**, **Dashboard roadmap**, **Admin World Manager**, **public Changelog page**, `docs/WORLD_PROFILES_ROADMAP.md` and release checklist.
+- Pairs with Bot v1.70.0. Updates PWA shell without rotating Chernarus/Livonia map caches. No Discord role changes, Nitrado changes or activation.
+
 # World War Z Website v2.6.1
 
 ## v2.6.1 — Public Roadmap & Dashboard Alignment
