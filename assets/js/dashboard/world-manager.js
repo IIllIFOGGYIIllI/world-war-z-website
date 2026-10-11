@@ -65,7 +65,9 @@
     }
     find('[data-world-member-panel]').hidden = false;
     const route = payload.routing_capabilities || {};
-    find('[data-world-routing-summary]').textContent = route.member_progression_reads === 'world_scoped_preview'
+    find('[data-world-routing-summary]').textContent = route.write_gateway_available === true
+      ? 'Guarded XP/prestige and wallet/bank write adapters built. Existing gameplay commands/workers and world activation remain locked.'
+      : route.member_progression_reads === 'world_scoped_preview'
       ? 'Read-only XP and wallet/bank routing available. Gameplay writes and world activation remain locked.'
       : 'Awaiting world-aware account read adapter.';
     const memberCompare = payload.member_route_preview;
@@ -94,7 +96,7 @@
       const node = element('div','world-domain');
       node.dataset.stage = item.status === 'transactional_stage' ? 'transactional' : 'pending';
       const label = element('strong','',item.label || item.key);
-      const status = element('span','world-domain-state',item.production_routed ? 'Production ready' : item.preview_routed ? 'Read-only routing + staging' : item.status === 'transactional_stage' ? 'Transactional staging' : item.status === 'schema_stage' ? 'Schema only' : 'Dry run only');
+      const status = element('span','world-domain-state',item.production_routed ? 'Production ready' : item.write_adapter ? 'Guarded write gateway · producers pending' : item.preview_routed ? 'Read-only routing + staging' : item.status === 'transactional_stage' ? 'Transactional staging' : item.status === 'schema_stage' ? 'Schema only' : 'Dry run only');
       node.append(label,status);domainsRoot.append(node);
     });
     (Array.isArray(payload.checks) ? payload.checks : []).forEach((check)=> {

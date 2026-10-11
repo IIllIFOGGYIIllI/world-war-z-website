@@ -1,3 +1,10 @@
+# World War Z Website v2.8.0 — Stage 2B Phase 2
+
+- World Manager reports guarded XP/prestige and wallet/bank write adapters, while correctly marking production command/workers integration outstanding.
+- Public Homepage roadmap, Dashboard milestones, public Changelog, release docs and PWA shell updated for Bot v1.71.0 / Website v2.8.0.
+- No Badlands world activation, role changes, Chernarus wipe, Livonia reconfiguration, map-cache rotation or in-place economy transfer.
+
+
 # World War Z Website v2.7.0
 
 ## v2.7.0 — World Profiles Stage 2B Phase 1 & Release Hygiene
