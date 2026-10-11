@@ -1,3 +1,9 @@
+# World War Z Website v2.9.0 — World Profiles Stage 2B Phase 3
+
+- Admin World Manager reports the first four live XP/wallet reward producer routes; Chernarus and Livonia keep their current ledgers and Badlands remains staging-only.
+- Updated the public Homepage Roadmap, Dashboard overview roadmap, actual public Changelog, migration documentation and PWA shell (preserving map tile-cache generation).
+- Pairs with Bot v1.72.0. Remaining quests, bank commands, shop, rentals, factions, workers and role sync are blocked. No world switch, balance reset, Discord role change or mission change.
+
 # World War Z Website v2.8.0 — Stage 2B Phase 2
 
 - World Manager reports guarded XP/prestige and wallet/bank write adapters, while correctly marking production command/workers integration outstanding.

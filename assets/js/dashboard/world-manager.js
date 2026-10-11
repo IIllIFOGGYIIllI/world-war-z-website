@@ -66,7 +66,9 @@
     find('[data-world-member-panel]').hidden = false;
     const route = payload.routing_capabilities || {};
     find('[data-world-routing-summary]').textContent = route.write_gateway_available === true
-      ? 'Guarded XP/prestige and wallet/bank write adapters built. Existing gameplay commands/workers and world activation remain locked.'
+      ? (route.write_gateway_producers_integrated === true
+        ? 'Four XP/wallet reward producers are now guarded by live server/world identity. Remaining gameplay, banking, shops, workers and activation stay blocked.'
+        : 'Guarded XP/prestige and wallet/bank write adapters built. Existing gameplay commands/workers and world activation remain locked.')
       : route.member_progression_reads === 'world_scoped_preview'
       ? 'Read-only XP and wallet/bank routing available. Gameplay writes and world activation remain locked.'
       : 'Awaiting world-aware account read adapter.';
