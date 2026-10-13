@@ -1,0 +1,11 @@
+"use strict";
+const fs=require("node:fs"),assert=require("node:assert/strict"),path=require("node:path");
+const read=name=>fs.readFileSync(path.join(__dirname,"..",name),"utf8");
+const html=read("dashboard.html"),js=read("assets/js/dashboard/world-manager.js"),log=read("changelog.html"),index=read("index.html"),sw=read("sw.js");
+for(const t of ["data-world-badlands-plan","data-world-chernarus-rollback","data-world-role-bindings","data-world-role-warnings"])assert(html.includes(t),t);
+for(const t of ["role.badlands","role.chernarus_rollback","role.excluded_role_bindings","role.warnings","role.member_cache_complete"])assert(js.includes(t),t);
+assert(!js.includes("method:'POST'")&&!js.includes("remove_roles")&&!js.includes("add_roles"));
+assert(log.includes("Version 2.10.0")&&log.includes("Version 2.9.0"));
+assert(index.includes("Website v2.10.0 · Bot v1.73.0"));
+assert(sw.includes("WWZ_PWA_VERSION = '2.10.0'"));
+console.log("Role planner v2.10.0: preview-only UI, roadmap, changelog, PWA passed");

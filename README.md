@@ -1,3 +1,9 @@
+# World War Z Website v2.10.0 — Role Reconciliation Planner (Stage 2C Phase 1)
+
+- Two-way Admin World Manager preview for hypothetical Badlands Discord role reset and preserved Chernarus rollback, with safe binding exclusions and guild-roster warnings.
+- No role mutation, database changes, or world activation; full-member sync execution, retries and map-dependent Badlands work remain blocked.
+- Updated actual public Roadmap, Dashboard Roadmap, Changelog and PWA shell alongside Bot v1.73.0.
+
 # World War Z Website v2.9.0 — World Profiles Stage 2B Phase 3
 
 - Admin World Manager reports the first four live XP/wallet reward producer routes; Chernarus and Livonia keep their current ledgers and Badlands remains staging-only.

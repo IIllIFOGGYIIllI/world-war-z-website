@@ -1,3 +1,9 @@
+## Stage 2C Phase 1 — Role planner (Bot v1.73.0 / Website v2.10.0)
+
+- Two-way read-only role plan for Badlands and Chernarus rollback with role binding safety diagnostics. No member role changes.
+- Work independent of map data (complete Discord execution engine and account/transaction integration) can continue; geographic Badlands missions/traders/KILLZONEs/deliveries wait for official data.
+- All-member enumeration, persistent jobs, hierarchy validation, live activation and backups remain blocked.
+
 ## Stage 2B Phase 3 — first reward producers (Bot v1.72.0 / Website v2.9.0)
 
 **Status:** Built for upload, not yet validated in live reward events. Chernarus existing account comparison and Stage 2B Phase 2 staging dashboard were previously verified.

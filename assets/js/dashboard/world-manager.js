@@ -112,8 +112,23 @@
     find('[data-world-member-count]').textContent=cleanCount(role.cached_human_members);
     find('[data-world-role-count]').textContent=cleanCount(role.affected_cached_members);
     find('[data-world-role-removals]').textContent=cleanCount(role.roles_to_remove_from_cached_members);
+    const renderRolePlan = (target,plan) => {
+      if (!target) return;
+      target.replaceChildren();
+      [['Affected members',plan.affected_members],['Role removals',plan.roles_to_remove],['Role additions',plan.roles_to_add]].forEach(([label,value]) => {
+        const stat=element('div','world-role-plan-stat');
+        stat.append(element('span','',label),element('strong','',cleanCount(value)));
+        target.append(stat);
+      });
+    };
+    renderRolePlan(find('[data-world-badlands-plan]'),role.badlands || {});
+    renderRolePlan(find('[data-world-chernarus-rollback]'),role.chernarus_rollback || {});
+    find('[data-world-role-bindings]').textContent = `${cleanCount(role.safe_managed_role_ids)} safe role bindings · ${cleanCount(role.excluded_role_bindings)} excluded · ${cleanCount(role.missing_role_bindings)} missing · ${cleanCount(role.hierarchy_blocked_bindings)} hierarchy blocked`;
+    const roleWarnings=find('[data-world-role-warnings]');
+    roleWarnings.replaceChildren();
+    (Array.isArray(role.warnings)?role.warnings:[]).forEach(message=>roleWarnings.append(element('li','',message)));
     find('[data-world-cache-warning]').textContent=role.member_cache_complete
-      ? 'Current guild member cache appears complete; this remains a dry run.'
+      ? 'The cached guild roster appears complete; this remains read-only and requires a fresh full-member scan before activation.'
       : 'Member cache may be incomplete. A real migration requires a full fetch and persistent retries.';
     find('[data-world-pending]').textContent = Object.values(payload.pending_transactions || {}).some(v => v == null)
       ? 'Delivery state cannot be fully verified from current tables.'
