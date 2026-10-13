@@ -1,3 +1,11 @@
+# World War Z Website v2.11.1 — Role Dry-Run Stability (14 October 2026)
+
+- Admin World Manager shows the most recent persisted full-roster plan, with prior plans collapsed; accurate post-refresh success/status messaging even after an interrupted HTTP response.
+- Disables repeat clicks while scanning and rechecks role-scan capability after the operation. Bot reuses identical staged plans without adding duplicate jobs.
+- Paired Bot v1.74.1 safely handles missing Discord audit-log target IDs without breaking audit entry handling.
+- Roadmap: future Stage 2D dynamic world branding will follow verified active-world state for supported Website pages, Bot text and Bot-owned Discord embeds/panels; preserve historically accurate Chernarus labels, offline/static artifacts and Livonia. This release does NOT switch branding or activate Badlands.
+- Preserve public Roadmap/Changelog, both READMEs, World Manager, versioned assets and existing map caches on every release.
+
 # World War Z Website v2.11.0 — Full-roster dry-run plans (Stage 2C Phase 2)
 
 - Admin-only **on-demand** Discord full-member scan via `fetch_members(limit=None)`, requiring complete roster match; interrupted or incomplete scans persist no plan.

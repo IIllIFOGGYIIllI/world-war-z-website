@@ -1,0 +1,13 @@
+"use strict";
+const fs=require('node:fs'),assert=require('node:assert/strict'),path=require('node:path');
+const read=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
+const js=read('assets/js/dashboard/world-manager.js'),html=read('dashboard.html');
+for (const item of ['lastSavedJobId','scanAvailable','result.reused','scanHistory.replaceChildren()','world-role-job-older','role-dry-run','No roles changed.']) assert(js.includes(item), item);
+assert(js.includes('lastSavedJobId > priorJobId'));
+assert(js.includes('scanButton.disabled = !scanAvailable'));
+assert(!js.includes('scanButton.disabled=false;'));
+assert(read('changelog.html').includes('Version 2.11.1'));
+assert(read('index.html').includes('Automatic Active-World Branding'));
+assert(read('sw.js').includes("WWZ_PWA_VERSION = '2.11.1'"));
+assert(html.includes('Stage 2D · Active-world branding'));
+console.log('World role dry-run hotfix checks passed');

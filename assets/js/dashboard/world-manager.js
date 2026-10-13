@@ -11,6 +11,8 @@
   const cleanCount = (value) => value == null ? 'Not available' : Number(value).toLocaleString();
   let loading = false;
   let scanBusy = false;
+  let scanAvailable = false;
+  let lastSavedJobId = 0;
   const scanButton = find('[data-world-role-scan]');
   const scanTarget = find('[data-world-role-target]');
   const scanStatus = find('[data-world-role-scan-status]');
@@ -132,18 +134,34 @@
     const roleWarnings=find('[data-world-role-warnings]');
     roleWarnings.replaceChildren();
     (Array.isArray(role.warnings)?role.warnings:[]).forEach(message=>roleWarnings.append(element('li','',message)));
+    const roleSync = payload.role_sync || {};
+    const savedJobs = Array.isArray(roleSync.jobs) ? roleSync.jobs : [];
+    scanAvailable = roleSync.roster_scan_available === true;
+    lastSavedJobId = savedJobs.reduce((latest, job) => Math.max(latest, Number(job.job_id) || 0), 0);
     if (scanHistory) {
       scanHistory.replaceChildren();
-      const roleSync = payload.role_sync || {};
-      (Array.isArray(roleSync.jobs) ? roleSync.jobs : []).forEach(job => {
-        const record=element('div');
+      const makeRecord = (job) => {
+        const record=element('div', 'world-role-job-entry');
         record.append(element('strong','',`Dry run #${job.job_id} · ${job.target_world} · ${job.status}`));
         record.append(element('small','',`${cleanCount(job.scanned_members)} scanned · ${cleanCount(job.pending_changes)} planned member changes · ${job.created_at || 'Date unavailable'}`));
-        scanHistory.append(record);
-      });
-      if (!scanHistory.children.length) scanHistory.append(element('p','world-muted','No saved full-guild scans yet.'));
+        return record;
+      };
+      if (savedJobs.length) {
+        scanHistory.append(makeRecord(savedJobs[0]));
+        if (savedJobs.length > 1) {
+          const older=element('details', 'world-role-job-older');
+          older.append(element('summary','',`Show ${savedJobs.length - 1} earlier dry runs`));
+          savedJobs.slice(1).forEach(job => older.append(makeRecord(job)));
+          scanHistory.append(older);
+        }
+      } else scanHistory.append(element('p','world-muted','No saved full-guild scans yet.'));
     }
-    if (scanButton) scanButton.disabled=scanBusy || payload.role_sync?.roster_scan_available !== true;
+    if (scanStatus && !scanBusy) {
+      scanStatus.textContent = savedJobs.length
+        ? `Latest saved dry run #${savedJobs[0].job_id}: ${cleanCount(savedJobs[0].scanned_members)} members scanned, ${cleanCount(savedJobs[0].pending_changes)} planned changes. No roles changed.`
+        : (scanAvailable ? 'No full-roster dry runs saved yet.' : 'Full-roster scanning is currently unavailable.');
+    }
+    if (scanButton) scanButton.disabled = scanBusy || !scanAvailable;
     find('[data-world-cache-warning]').textContent=role.member_cache_complete
       ? 'The cached guild roster appears complete; this remains read-only and requires a fresh full-member scan before activation.'
       : 'Member cache may be incomplete. A real migration requires a full fetch and persistent retries.';
@@ -166,10 +184,12 @@
       if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Readiness unavailable');
       render(payload);
       find('[data-world-updated]').textContent=`Checked ${new Date().toLocaleTimeString()}`;
+      return payload;
     } catch (error) {
       if(warning){warning.hidden=false;warning.textContent=String(error?.message||'World Manager unavailable');}
       if(memberError && memberId){memberError.hidden=false;memberError.textContent=String(error?.message||'Comparison unavailable');}
       find('[data-world-updated]').textContent='Readiness unavailable';
+      return null;
     } finally {loading=false;if(refresh) refresh.disabled=false;if(memberSubmit) memberSubmit.disabled=false;}
   };
   scanButton?.addEventListener('click',async ()=>{
@@ -178,7 +198,8 @@
     scanBusy=true;
     scanButton.disabled=true;
     const target=String(scanTarget?.value || 'badlands');
-    if (scanStatus) scanStatus.textContent='Fetching complete Discord roster and staging read-only plan…';
+    const priorJobId = lastSavedJobId;
+    if (scanStatus) scanStatus.textContent='Fetching complete Discord roster and staging read-only plan… Please wait.';
     try {
       const response=await authFetch(`${DASHBOARD_API_BASE}/api/admin/world-profiles/role-dry-run`,{
         method:'POST',headers:{Accept:'application/json',Authorization:`Bearer ${token}`,'Content-Type':'application/json'},
@@ -188,12 +209,23 @@
       if (response.status===401 || response.status===403) {
         storageRemove(AUTH_SESSION_KEY);applySignedOutState();return;
       }
-      if (!response.ok || result.status!=='ok') throw new Error(result.message||'Discord roster scan unavailable');
-      if (scanStatus) scanStatus.textContent=`Read-only job #${result.job_id} saved: ${cleanCount(result.scanned_members)} scanned, ${cleanCount(result.affected_members)} affected. No roles changed.`;
-      await load();
+      if (!response.ok || result.status!=='ok') throw new Error(result.message||`Full-roster request returned HTTP ${response.status}.`);
+      const saved = await load();
+      if (scanStatus) scanStatus.textContent = result.reused
+        ? `Identical role plan already saved as dry run #${result.job_id}. No duplicate created and no roles changed.`
+        : `Dry run #${result.job_id} saved: ${cleanCount(result.scanned_members)} scanned, ${cleanCount(result.affected_members)} affected. No roles changed.`;
+      if (!saved && scanStatus) scanStatus.textContent += ' Refresh to review job history.';
     } catch(error) {
-      if (scanStatus) scanStatus.textContent=String(error?.message || 'Full roster scan failed; no role changes made.');
-    } finally {scanBusy=false;scanButton.disabled=false;}
+      // Railway/edge timeouts can occur after the Bot already committed a plan.
+      // Refresh the read-only history before claiming the scan did not persist.
+      const refreshed = await load();
+      if (scanStatus) scanStatus.textContent = lastSavedJobId > priorJobId
+        ? `Dry run #${lastSavedJobId} was saved despite a connection interruption. No roles changed.`
+        : `${String(error?.message || 'Full roster scan request failed.')} ${refreshed ? 'No new job was confirmed.' : 'Check saved history before retrying.'}`;
+    } finally {
+      scanBusy=false;
+      if (scanButton) scanButton.disabled = !scanAvailable;
+    }
   });
   refresh?.addEventListener('click',()=>load());
   memberForm?.addEventListener('submit',(event)=>{

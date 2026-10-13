@@ -1,3 +1,11 @@
+# World War Z Website v2.11.1 — Role Dry-Run Stability (14 October 2026)
+
+- Admin World Manager shows the most recent persisted full-roster plan, with prior plans collapsed; accurate post-refresh success/status messaging even after an interrupted HTTP response.
+- Disables repeat clicks while scanning and rechecks role-scan capability after the operation. Bot reuses identical staged plans without adding duplicate jobs.
+- Paired Bot v1.74.1 safely handles missing Discord audit-log target IDs without breaking audit entry handling.
+- Roadmap: future Stage 2D dynamic world branding will follow verified active-world state for supported Website pages, Bot text and Bot-owned Discord embeds/panels; preserve historically accurate Chernarus labels, offline/static artifacts and Livonia. This release does NOT switch branding or activate Badlands.
+- Preserve public Roadmap/Changelog, both READMEs, World Manager, versioned assets and existing map caches on every release.
+
 ## Stage 2C Phase 2 — Full roster scans and durable plans (Bot v1.74.0 / Website v2.11.0)
 
 - Admin-only **on-demand** Discord full-member scan via `fetch_members(limit=None)`, requiring complete roster match; interrupted or incomplete scans persist no plan.
@@ -42,3 +50,10 @@ Verified current state: Stage 1 World Manager (Bot 1.68.0 / Website 2.5.0). Stag
 **Activation is NOT available in v1.71.0/v2.8.0.** Admin member comparison stays read-only. The new write gateways are internal APIs, not Discord/web actions; staged Badlands values are test data and production gameplay commands, purchases and workers are not redirected. Maintain rollback readiness.
 
 Each release must update public Roadmap, Dashboard summary and Admin World Manager as applicable, actual public Changelog, both repository READMEs/roadmaps, release checklist and PWA cache revision; run validation and package only updated files.
+
+### Stage 2D — Dynamic active-world branding (planned, not active)
+
+- Replace hardcoded **current-world** Chernarus presentation with a central validated active-world label throughout supported Website pages, Dashboard, Bot responses and managed Discord embeds/panels when Badlands is actually activated.
+- Track Bot-owned editable Discord message IDs, schedule refreshes and publish replacements for uneditable legacy announcements as needed. Discord server/channel renaming only for explicitly opted-in managed names; never rename unmanaged channels.
+- Keep historical Chernarus events, archived records and rollback assets accurately labelled; leave Livonia and unrelated communities untouched.
+- Activation requires validated PlayStation/Nitrado Badlands support, approved migration, transaction safety, backups, role-sync and smoke tests. No global find-and-replace of legacy data.

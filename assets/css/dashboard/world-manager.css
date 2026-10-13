@@ -60,3 +60,9 @@
 .world-role-job-history{display:grid;gap:.5rem}
 .world-role-job-history>div{padding:.65rem .8rem;border:1px solid rgba(255,255,255,.08);border-radius:.55rem;display:grid;gap:.25rem;font-size:.81rem}
 .world-role-job-history small{opacity:.7}
+
+/* v2.11.1: compact latest-scan history and disclosure for older plans. */
+.world-role-job-history .world-role-job-entry{padding:.65rem .8rem;border:1px solid rgba(255,255,255,.08);border-radius:.55rem;display:grid;gap:.25rem;font-size:.81rem}
+.world-role-job-older{padding:.45rem .75rem;border:1px solid rgba(255,255,255,.08);border-radius:.55rem}
+.world-role-job-older summary{cursor:pointer;font-size:.8rem;opacity:.82;padding:.25rem}
+.world-role-job-older[open] .world-role-job-entry{margin-top:.45rem}
