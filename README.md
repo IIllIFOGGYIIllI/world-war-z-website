@@ -1,3 +1,5 @@
+**Current release: Website v2.12.0 — Stage 2D Phase 1 Dynamic World Branding.** Registry-derived read-only naming; Badlands activation remains locked.
+
 # World War Z Website v2.11.1 — Role Dry-Run Stability (14 October 2026)
 
 - Admin World Manager shows the most recent persisted full-roster plan, with prior plans collapsed; accurate post-refresh success/status messaging even after an interrupted HTTP response.

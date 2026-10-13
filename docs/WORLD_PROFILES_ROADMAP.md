@@ -1,3 +1,8 @@
+## Stage 2D Phase 1 — Dynamic active-world branding · Website v2.12.0 + Bot v1.75.0
+- **Built:** registry-derived, public read-only world-branding API; live homepage/current-world labels; dashboard/admin World Manager preview; new managed Bot server-status and community-event map labels.
+- **Blocked:** rewriting historical references, renaming Discord guild/channels, updating existing persistent embeds (requires tracked message IDs and permission preflight), renaming custom rules, Badlands maps/coordinates/deliveries, live gameplay migration and activation.
+- Chernarus remains the active primary world. Badlands staging is **not** an active-world name source; Livonia stays independent.
+
 # World War Z Website v2.11.1 — Role Dry-Run Stability (14 October 2026)
 
 - Admin World Manager shows the most recent persisted full-roster plan, with prior plans collapsed; accurate post-refresh success/status messaging even after an interrupted HTTP response.

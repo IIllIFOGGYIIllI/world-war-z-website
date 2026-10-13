@@ -58,7 +58,7 @@
 <div class="hero-copy-block">
 <p class="eyebrow"><span class="pulse"></span> World War Z operations network</p>
 <h1 id="hero-title">Survive The World.<br/><span>Control The Network.</span></h1>
-<p class="hero-copy">One connected operations platform for the World War Z PlayStation DayZ community — live server intelligence, survivor systems, economy, shop delivery, moderation and administration across Chernarus and Livonia.</p>
+<p class="hero-copy">One connected operations platform for the World War Z PlayStation DayZ community — live server intelligence, survivor systems, economy, shop delivery, moderation and administration across <span data-wwz-primary-world>Chernarus</span> and Livonia.</p>
 <div class="hero-actions">
 <a class="button button-primary" href="dashboard.html">Enter Command Centre</a><a class="button button-secondary" href="shop.html">Survivor Shop</a><a class="button button-secondary" href="donations.html">Support WWZ</a>
 <a class="button button-secondary" href="https://discord.gg/worldwarzps" rel="noreferrer" target="_blank">Open Discord</a>
@@ -67,7 +67,7 @@
 <aside aria-label="World War Z network overview" class="hero-ops-board">
 <header><small>Operational summary</small><strong>World War Z Network</strong></header>
 <div class="hero-ops-grid">
-<div class="live"><span>Worlds</span><strong>2 Active</strong><small>Chernarus + Livonia</small></div>
+<div class="live"><span>Worlds</span><strong>2 Active</strong><small data-wwz-network-worlds>Chernarus + Livonia</small></div>
 <div><span>Platform</span><strong>PS4 / PS5</strong><small>Console DayZ community</small></div>
 <div><span>Bot surface</span><strong>100 Commands</strong><small>Member + Admin operations</small></div>
 <div><span>Control layer</span><strong>Railway</strong><small>Secure API + automation</small></div>
@@ -83,7 +83,7 @@
 <p class="wwz-public-lead">No need to learn every system at once. These four destinations cover the essentials: sign in, learn the rules, shop and get support.</p>
 <div class="wwz-public-steps">
 <a class="wwz-public-step" href="dashboard.html"><span class="wwz-public-number">01</span><strong>My survivor dashboard</strong><small>Connect with Discord, select a WWZ server and find your account, events and map.</small></a>
-<a class="wwz-public-step" href="rules.html"><span class="wwz-public-number">02</span><strong>Read the rules</strong><small>Know how Chernarus and Livonia work before heading into the server.</small></a>
+<a class="wwz-public-step" href="rules.html"><span class="wwz-public-number">02</span><strong>Read the rules</strong><small>Read the current rules for each world before joining.</small></a>
 <a class="wwz-public-step" href="shop.html"><span class="wwz-public-number">03</span><strong>Survivor Shop</strong><small>Browse items, manage your cart and choose Cash or Bank at checkout.</small></a>
 <a class="wwz-public-step" href="dashboard.html"><span class="wwz-public-number">04</span><strong>Events &amp; support</strong><small>Find upcoming events, factions and private support tickets in your dashboard.</small></a>
 </div>
@@ -93,7 +93,7 @@
 <div class="shell">
 <div class="status-strip reveal">
 <div><span>Platform</span><strong>PlayStation 4 &amp; 5</strong></div>
-<div><span>Maps</span><strong>Chernarus + Livonia</strong></div>
+<div><span>Maps</span><strong data-wwz-network-worlds>Chernarus + Livonia</strong></div>
 <div><span>Capacity</span><strong>26 survivors</strong></div>
 <div><span>Community</span><strong>World War Z</strong></div>
 </div>
@@ -185,12 +185,12 @@
 <div>
 <p class="eyebrow">Development roadmap</p>
 <h2 id="roadmap-title">WWZ Live — Badlands World Profiles Roadmap</h2>
-<p>Chernarus and Livonia remain operational while we prepare Badlands as a fresh world. Stage 1 World Manager is verified, Stage 2A provides isolated Badlands staging storage, and Stage 2B Phase 3 now guards four live XP/reward producers (Chernarus expedition, Chernarus progression, Livonia hotspot and community event rewards), while remaining gameplay, banking and worker paths still require migration. Stage 2C Phase 2 adds Admin-only full-roster scans and audited dry-run plans (v2.11.1 hardens status, duplicate handling and audit logs); actual Discord role updates, official console support and verified rollback are still required before activation.</p>
+<p>Chernarus and Livonia remain operational while we prepare Badlands as a fresh world. Stage 1 World Manager is verified, Stage 2A provides isolated Badlands staging storage, and Stage 2B Phase 3 now guards four live XP/reward producers (Chernarus expedition, Chernarus progression, Livonia hotspot and community event rewards), while remaining gameplay, banking and worker paths still require migration. Stage 2C Phase 2 adds Admin-only full-roster scans and audited dry-run plans (v2.11.1 hardens status, duplicate handling and audit logs); Stage 2D Phase 1 introduces registry-sourced active-world branding on supported live surfaces (v2.12.0); actual Discord role updates, official console support and verified rollback are still required before activation.</p>
 </div>
 <div aria-label="Current roadmap release" class="roadmap-release">
 <small>Roadmap updated</small>
 <strong>14 October 2026</strong>
-<span>Website v2.11.1 · Bot v1.74.1</span>
+<span>Website v2.12.0 · Bot v1.75.0</span>
 </div>
 </div>
 <div aria-label="Roadmap status key" class="roadmap-status-key reveal">
@@ -327,8 +327,8 @@
 </ul>
 </article>
 <article class="roadmap-card roadmap-card-future reveal">
-<div class="roadmap-card-heading"><span>15</span><div><small>Stage 2D · planned</small><h3>Automatic Active-World Branding</h3></div></div>
-<p>Once Badlands activation is verified, supported Website, Bot and Bot-managed Discord embed labels will automatically reflect the primary server's active world.</p>
+<div class="roadmap-card-heading"><span>15</span><div><small>Stage 2D · Phase 1 ready</small><h3>Automatic Active-World Branding</h3></div></div>
+<p>Phase 1 (v2.12.0 / Bot v1.75.0) establishes central live-world naming and updates selected current Website, Bot and managed status/event labels. Existing persistent Discord panels, channel names and historical content still require an audited rollout after activation.</p>
 <ul><li>Load current-world titles and descriptions from one authoritative world profile; never rewrite historical Chernarus records or Livonia names.</li><li>Refresh Bot-owned editable panels and calendar embeds, and identify old messages requiring replacement announcements.</li><li>Protect unmanaged Discord channels, roles, events and server names from blanket renaming; activation and map-dependent work remain locked.</li></ul>
 </article>
 <article class="roadmap-card roadmap-card-future reveal">
@@ -429,6 +429,7 @@
 <p>© <span data-year=""></span> World War Z Community.</p>
 </div>
 </footer>
+<script defer src="assets/js/world-branding.js?v=1.22.93&rev=world-branding-212"></script>
 <script defer="" src="assets/js/pages/home.js?v=1.53.0&rev=companion-download-repair-1"></script>
 <script defer src="assets/js/pwa.js?v=1.61.0&rev=storefront-cart-1"></script>
 <script defer src="assets/js/ui-system.js?v=2.0.0&rev=final-polish-1"></script>

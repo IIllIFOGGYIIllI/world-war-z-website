@@ -8,6 +8,6 @@ assert(js.includes('scanButton.disabled = !scanAvailable'));
 assert(!js.includes('scanButton.disabled=false;'));
 assert(read('changelog.html').includes('Version 2.11.1'));
 assert(read('index.html').includes('Automatic Active-World Branding'));
-assert(read('sw.js').includes("WWZ_PWA_VERSION = '2.11.1'"));
+assert(read('sw.js').includes("WWZ_PWA_VERSION = '2.12.0'"));
 assert(html.includes('Stage 2D · Active-world branding'));
 console.log('World role dry-run hotfix checks passed');

@@ -33,8 +33,14 @@
     profilesRoot.replaceChildren();
     checksRoot.replaceChildren();
     domainsRoot.replaceChildren();
+    const branding = payload.world_branding || {};
+    const brandedPrimary = branding.primary || {};
+    const brandingLive = find('[data-world-branding-current]');
+    const brandingPreview = find('[data-world-branding-preview]');
+    if (brandingLive) brandingLive.textContent = `Primary world: ${brandedPrimary.world_name || 'Chernarus'} · Secondary world: Livonia`;
+    if (brandingPreview) brandingPreview.textContent = `Badlands name preview: ${branding.badlands_preview?.server_name || 'World War Z | Badlands'} (staging only; no activation)`;
     const primary = payload.primary === true;
-    find('[data-world-mode]').textContent = primary ? 'Primary server · Chernarus live' : 'Independent server · Livonia';
+    find('[data-world-mode]').textContent = primary ? `Primary server · ${brandedPrimary.world_name || 'Chernarus'} live` : 'Independent server · Livonia';
     find('[data-world-activation]').textContent = 'Activation locked — preparation only';
     find('[data-world-notice]').textContent = String(payload.message || 'No activation in this version.');
     (Array.isArray(payload.profiles) ? payload.profiles : []).forEach((profile) => {

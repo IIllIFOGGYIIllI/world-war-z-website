@@ -6,6 +6,6 @@ for(const t of ["data-world-badlands-plan","data-world-chernarus-rollback","data
 for(const t of ["role.badlands","role.chernarus_rollback","role.excluded_role_bindings","role.warnings","role.member_cache_complete"])assert(js.includes(t),t);
 assert(js.includes('/api/admin/world-profiles/role-dry-run')&&!js.includes("remove_roles")&&!js.includes("add_roles"));
 assert(log.includes("Version 2.10.0")&&log.includes("Version 2.9.0"));
-assert(index.includes("Website v2.11.1 · Bot v1.74.1"));
-assert(sw.includes("WWZ_PWA_VERSION = '2.11.1'"));
+assert(index.includes("Website v2.12.0 · Bot v1.75.0"));
+assert(sw.includes("WWZ_PWA_VERSION = '2.12.0'"));
 console.log("Role planner v2.10.0: preview-only UI, roadmap, changelog, PWA passed");
