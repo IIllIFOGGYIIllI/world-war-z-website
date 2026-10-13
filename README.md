@@ -1,4 +1,6 @@
-**Current release: Website v2.13.0 — Stage 2D Phase 2 Managed Discord Message Registry.** Read-only panel inventory and audit metadata; activation remains locked.
+**Current release: Website v2.14.0 — Stage 2D Phase 3 Managed Message Transition Planning.** Read-only preview; no Discord edits or world activation.
+
+**Previous release: Website v2.13.0 — Stage 2D Phase 2 Managed Discord Message Registry.** Read-only panel inventory and audit metadata; activation remains locked.
 
 **Current release: Website v2.12.0 — Stage 2D Phase 1 Dynamic World Branding.** Registry-derived read-only naming; Badlands activation remains locked.
 

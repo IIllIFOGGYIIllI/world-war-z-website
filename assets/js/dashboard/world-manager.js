@@ -40,6 +40,8 @@
     if (brandingLive) brandingLive.textContent = `Primary world: ${brandedPrimary.world_name || 'Chernarus'} · Secondary world: Livonia`;
     if (brandingPreview) brandingPreview.textContent = `Badlands name preview: ${branding.badlands_preview?.server_name || 'World War Z | Badlands'} (staging only; no activation)`;
     const inventory = payload.managed_messages || {};
+    const refreshPlan = inventory.refresh_plan || {};
+    const planItems = Array.isArray(refreshPlan.items) ? refreshPlan.items : [];
     const inventoryPanel = find('[data-world-managed-messages]');
     if (inventoryPanel) {
       inventoryPanel.hidden = payload.primary !== true;
@@ -55,12 +57,27 @@
           card.append(element('strong','',String(item.surface_key || 'Unknown managed surface')));
           card.append(element('small','',`Channel ${item.channel_id || '—'} · Message ${item.message_id || '—'}`));
           card.append(element('small','',`World ${item.world_key || '—'} · Last registered ${item.updated_at || '—'}`));
+          const step = planItems.find(row => row.surface_key === item.surface_key && row.message_id === item.message_id);
+          if (step) card.append(element('small','world-muted',`Plan: ${step.proposed_action.replaceAll('_',' ')} · Ownership and permissions not live-verified`));
           itemsRoot.append(card);
         });
         if (!itemsRoot.children.length) itemsRoot.append(element('p','world-muted','No Bot-owned messages have been recorded yet. Existing panels remain untouched until their next verified publication.'));
       }
       const safety = find('[data-world-managed-message-safety]');
-      if (safety) safety.textContent = 'Preview only: no Discord edits, channel changes, migration execution or historical message rewriting. Fresh author and permission verification is required before a future refresh.';
+      if (safety) safety.textContent = 'Metadata-only preview: no Discord edits, channel changes, migration execution or historical rewriting. Discord author, access and permission checks are NOT performed by this view.';
+      const planSummary = find('[data-world-managed-refresh-plan-summary]');
+      if (planSummary) planSummary.textContent = `${cleanCount(refreshPlan.total ?? 0)} tracked panels evaluated · ${cleanCount(refreshPlan.actions_to_review ?? 0)} actions to review · Execution locked`;
+      const planList = find('[data-world-managed-refresh-plan]');
+      if (planList) {
+        planList.replaceChildren();
+        planItems.forEach(step => {
+          const row=element('div','world-managed-message');
+          row.append(element('strong','',`${step.surface_key} — ${String(step.proposed_action || 'unclassified').replaceAll('_',' ')}`));
+          row.append(element('small','',step.explanation || 'Requires additional validation'));
+          planList.append(row);
+        });
+        if (!planList.children.length) planList.append(element('p','world-muted','No message metadata to plan yet. A normal Bot panel publication will add tracked records.'));
+      }
     }
     const primary = payload.primary === true;
     find('[data-world-mode]').textContent = primary ? `Primary server · ${brandedPrimary.world_name || 'Chernarus'} live` : 'Independent server · Livonia';

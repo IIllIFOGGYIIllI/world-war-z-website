@@ -1,3 +1,4 @@
+- [x] Website v2.14.0 / Bot v1.77.0 public Roadmap, Dashboard Roadmap, Changelog, documentation and read-only World Manager updated.
 
 - [x] Stage 2D2: Admin-managed Discord message registry, per-world audit and safety checks documented; no message-edit or world-activation controls.
 - [x] Paired Bot v1.76.0 / Website v2.13.0 changelogs and World Manager roadmap updated; preserve all server data.

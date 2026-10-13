@@ -1,3 +1,9 @@
+## Stage 2D Phase 3 — Managed Discord transition planning · Website v2.14.0 / Bot v1.77.0
+- Add Bot-owned Radio Zenit Trader panel publications/refreshes and periodic server-status updates to the guild/world-scoped message registry. Existing event/calendar and ownership checks remain.
+- Admin World Manager now displays a *metadata-only* Badlands transition plan: rebuild primary server status after verified activation, publish a new Badlands event calendar rather than rewriting Chernarus history, preserve historical event announcements and Chernarus Radio Zenit Trader location/coordinates.
+- A saved message ID is **not** live proof of author, access, message existence or edit permissions. No Discord network preflight, write/refresh executor, actual activation or historical rewrite is implemented. Each action requires future live verification and approved external backup/rollback plan.
+- Chernarus remains active; Livonia is independent; Badlands Level 1/economy staging, role executor, map data and gameplay integration blockers remain unchanged.
+
 ## Stage 2D Phase 2 — Managed Discord message registry · Website v2.13.0 / Bot v1.76.0
 - Newly published WWZ event/calendar and server-status messages are indexed by guild, map, type and Discord message ID. Replacements produce audit entries; existing messages stay untouched.
 - Admin World Manager shows registry inventory and explicit refresh blockers. No author verification, bulk refresh, Discord channel rename, role update or Badlands activation is enabled.
