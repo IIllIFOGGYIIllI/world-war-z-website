@@ -1,3 +1,12 @@
+## Stage 2C Phase 2 — Full roster scans and durable plans (Bot v1.74.0 / Website v2.11.0)
+
+- Admin-only **on-demand** Discord full-member scan via `fetch_members(limit=None)`, requiring complete roster match; interrupted or incomplete scans persist no plan.
+- Durable, guild-scoped **planned-only** member role deltas in additive SQLite tables, with a dry-run audit record, safe role exclusions, scan history and bounded retry-backoff design.
+- Role mutations and worker execution **do not exist in this release**; no automatic retries are running. Stored plans cannot be applied without fresh permission, role, member and world-state preflight and explicit activation in a later release.
+- Preserves all live Chernarus/Livonia data, protected Discord roles and the 100 top-level command design. Badlands map assets, live migration and backups remain blocked; Stage 2B gameplay producer completion also remains outstanding.
+- Paired with Bot v1.74.0 and Website v2.11.0; public Roadmap, Dashboard roadmap, World Manager, Changelog, documentation and PWA revision updated together.
+
+
 ## Stage 2C Phase 1 — Role planner (Bot v1.73.0 / Website v2.10.0)
 
 - Two-way read-only role plan for Badlands and Chernarus rollback with role binding safety diagnostics. No member role changes.

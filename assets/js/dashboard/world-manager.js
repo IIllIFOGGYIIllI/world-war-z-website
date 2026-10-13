@@ -10,6 +10,11 @@
   const refresh = find('[data-world-refresh]');
   const cleanCount = (value) => value == null ? 'Not available' : Number(value).toLocaleString();
   let loading = false;
+  let scanBusy = false;
+  const scanButton = find('[data-world-role-scan]');
+  const scanTarget = find('[data-world-role-target]');
+  const scanStatus = find('[data-world-role-scan-status]');
+  const scanHistory = find('[data-world-role-job-history]');
   const memberForm = find('[data-world-member-form]');
   const memberInput = find('[data-world-member-id]');
   const memberResult = find('[data-world-member-preview]');
@@ -127,6 +132,18 @@
     const roleWarnings=find('[data-world-role-warnings]');
     roleWarnings.replaceChildren();
     (Array.isArray(role.warnings)?role.warnings:[]).forEach(message=>roleWarnings.append(element('li','',message)));
+    if (scanHistory) {
+      scanHistory.replaceChildren();
+      const roleSync = payload.role_sync || {};
+      (Array.isArray(roleSync.jobs) ? roleSync.jobs : []).forEach(job => {
+        const record=element('div');
+        record.append(element('strong','',`Dry run #${job.job_id} · ${job.target_world} · ${job.status}`));
+        record.append(element('small','',`${cleanCount(job.scanned_members)} scanned · ${cleanCount(job.pending_changes)} planned member changes · ${job.created_at || 'Date unavailable'}`));
+        scanHistory.append(record);
+      });
+      if (!scanHistory.children.length) scanHistory.append(element('p','world-muted','No saved full-guild scans yet.'));
+    }
+    if (scanButton) scanButton.disabled=scanBusy || payload.role_sync?.roster_scan_available !== true;
     find('[data-world-cache-warning]').textContent=role.member_cache_complete
       ? 'The cached guild roster appears complete; this remains read-only and requires a fresh full-member scan before activation.'
       : 'Member cache may be incomplete. A real migration requires a full fetch and persistent retries.';
@@ -155,6 +172,29 @@
       find('[data-world-updated]').textContent='Readiness unavailable';
     } finally {loading=false;if(refresh) refresh.disabled=false;if(memberSubmit) memberSubmit.disabled=false;}
   };
+  scanButton?.addEventListener('click',async ()=>{
+    const token=typeof storageGet==='function'?storageGet(AUTH_SESSION_KEY):'';
+    if (!token || scanBusy || (typeof hasServerActionAccess==='function' && !hasServerActionAccess())) return;
+    scanBusy=true;
+    scanButton.disabled=true;
+    const target=String(scanTarget?.value || 'badlands');
+    if (scanStatus) scanStatus.textContent='Fetching complete Discord roster and staging read-only plan…';
+    try {
+      const response=await authFetch(`${DASHBOARD_API_BASE}/api/admin/world-profiles/role-dry-run`,{
+        method:'POST',headers:{Accept:'application/json',Authorization:`Bearer ${token}`,'Content-Type':'application/json'},
+        body:JSON.stringify({action:'stage_dry_run',target_world:target}),
+      });
+      const result=await response.json().catch(()=>({}));
+      if (response.status===401 || response.status===403) {
+        storageRemove(AUTH_SESSION_KEY);applySignedOutState();return;
+      }
+      if (!response.ok || result.status!=='ok') throw new Error(result.message||'Discord roster scan unavailable');
+      if (scanStatus) scanStatus.textContent=`Read-only job #${result.job_id} saved: ${cleanCount(result.scanned_members)} scanned, ${cleanCount(result.affected_members)} affected. No roles changed.`;
+      await load();
+    } catch(error) {
+      if (scanStatus) scanStatus.textContent=String(error?.message || 'Full roster scan failed; no role changes made.');
+    } finally {scanBusy=false;scanButton.disabled=false;}
+  });
   refresh?.addEventListener('click',()=>load());
   memberForm?.addEventListener('submit',(event)=>{
     event.preventDefault();

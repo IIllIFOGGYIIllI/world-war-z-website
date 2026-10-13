@@ -50,3 +50,13 @@
 .world-role-warnings{margin:.1rem 0;padding-left:1.3rem;font-size:.8rem;line-height:1.5;color:#efc980}
 @media(max-width:720px){.world-role-plan-grid{grid-template-columns:1fr}}
 @media(max-width:460px){.world-role-plan>div{grid-template-columns:1fr 1fr}}
+
+/* Stage 2C-2: Admin-only full-roster scan; no role execution controls. */
+.world-role-scan-control{display:grid;gap:.65rem;padding:1rem;border:1px solid rgba(255,255,255,.10);border-radius:12px;background:rgba(0,0,0,.1)}
+.world-role-scan-control h4{font-size:.94rem;margin:0}
+.world-role-scan-actions{display:flex;flex-wrap:wrap;align-items:center;gap:.65rem}
+.world-role-scan-actions label{font-size:.82rem;opacity:.8}
+.world-role-scan-actions select{min-width:12rem;max-width:100%;padding:.55rem;border-radius:.5rem;background:#181d25;color:inherit;border:1px solid rgba(255,255,255,.18)}
+.world-role-job-history{display:grid;gap:.5rem}
+.world-role-job-history>div{padding:.65rem .8rem;border:1px solid rgba(255,255,255,.08);border-radius:.55rem;display:grid;gap:.25rem;font-size:.81rem}
+.world-role-job-history small{opacity:.7}

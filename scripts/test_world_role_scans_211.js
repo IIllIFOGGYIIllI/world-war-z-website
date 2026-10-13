@@ -1,0 +1,12 @@
+'use strict';
+const fs=require('node:fs'),assert=require('node:assert/strict'),path=require('node:path');
+const read=(n)=>fs.readFileSync(path.resolve(__dirname,'..',n),'utf8');
+const html=read('dashboard.html'),js=read('assets/js/dashboard/world-manager.js'),log=read('changelog.html'),sw=read('sw.js'),index=read('index.html'),lazy=read('assets/js/dashboard/lazy-assets.js');
+for(const name of ['data-world-role-scan','data-world-role-target','data-world-role-scan-status','data-world-role-job-history']) assert(html.includes(name),name);
+for(const x of ['stage_dry_run','/api/admin/world-profiles/role-dry-run','roleSync.jobs','No roles changed.']) assert(js.includes(x),x);
+assert(!js.includes('add_roles(') && !js.includes('remove_roles('));
+assert(log.includes('Version 2.11.0')&&log.includes('Version 2.10.0'));
+assert(index.includes('Website v2.11.0 · Bot v1.74.0'));
+assert(sw.includes("WWZ_PWA_VERSION = '2.11.0'"));
+assert(lazy.includes('world-manager.js?v=2.11.0'));
+console.log('Stage 2C-2 admin full-roster dry runs: structure/version checks passed');
