@@ -1,3 +1,8 @@
+## Stage 2D Phase 2 — Managed Discord message registry · Website v2.13.0 / Bot v1.76.0
+- Newly published WWZ event/calendar and server-status messages are indexed by guild, map, type and Discord message ID. Replacements produce audit entries; existing messages stay untouched.
+- Admin World Manager shows registry inventory and explicit refresh blockers. No author verification, bulk refresh, Discord channel rename, role update or Badlands activation is enabled.
+- Future: validate Bot ownership and permissions, plan controlled edits/replacements, reconcile old panels, implement rollback. Continue protecting historical Chernarus and Livonia.
+
 ## Stage 2D Phase 1 — Dynamic active-world branding · Website v2.12.0 + Bot v1.75.0
 - **Built:** registry-derived, public read-only world-branding API; live homepage/current-world labels; dashboard/admin World Manager preview; new managed Bot server-status and community-event map labels.
 - **Blocked:** rewriting historical references, renaming Discord guild/channels, updating existing persistent embeds (requires tracked message IDs and permission preflight), renaming custom rules, Badlands maps/coordinates/deliveries, live gameplay migration and activation.

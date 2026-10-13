@@ -1,3 +1,6 @@
+
+- [x] Stage 2D2: Admin-managed Discord message registry, per-world audit and safety checks documented; no message-edit or world-activation controls.
+- [x] Paired Bot v1.76.0 / Website v2.13.0 changelogs and World Manager roadmap updated; preserve all server data.
 # WWZ release checklist — mandatory for every release
 
 - [ ] Version the Bot and Website consistently; record exact pairing and deployment order.

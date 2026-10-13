@@ -66,3 +66,9 @@
 .world-role-job-older{padding:.45rem .75rem;border:1px solid rgba(255,255,255,.08);border-radius:.55rem}
 .world-role-job-older summary{cursor:pointer;font-size:.8rem;opacity:.82;padding:.25rem}
 .world-role-job-older[open] .world-role-job-entry{margin-top:.45rem}
+
+/* Stage 2D Phase 2: Admin-only read-only registry, no execution controls. */
+.world-managed-message-summary{font-weight:700;font-size:.88rem;padding:.7rem .8rem;border-radius:10px;background:rgba(0,0,0,.15)}
+.world-managed-message-items{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:.6rem;max-height:23rem;overflow-y:auto}
+.world-managed-message{display:grid;gap:.3rem;padding:.8rem;border:1px solid rgba(255,255,255,.09);border-radius:10px;background:rgba(0,0,0,.12);overflow-wrap:anywhere}
+.world-managed-message small{font-size:.75rem;opacity:.72}

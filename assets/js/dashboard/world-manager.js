@@ -39,6 +39,29 @@
     const brandingPreview = find('[data-world-branding-preview]');
     if (brandingLive) brandingLive.textContent = `Primary world: ${brandedPrimary.world_name || 'Chernarus'} · Secondary world: Livonia`;
     if (brandingPreview) brandingPreview.textContent = `Badlands name preview: ${branding.badlands_preview?.server_name || 'World War Z | Badlands'} (staging only; no activation)`;
+    const inventory = payload.managed_messages || {};
+    const inventoryPanel = find('[data-world-managed-messages]');
+    if (inventoryPanel) {
+      inventoryPanel.hidden = payload.primary !== true;
+      const summary = find('[data-world-managed-message-summary]');
+      const refreshLocked = inventory.refresh_execution_enabled !== true;
+      // No execute control exists even if an API incorrectly claims readiness.
+      if (summary) summary.textContent = `${cleanCount(inventory.tracked_messages ?? 0)} tracked message(s) · ${cleanCount(inventory.audit_entries ?? 0)} registry audit entry/entries · ${refreshLocked ? 'Refresh locked' : 'Preview only'}`;
+      const itemsRoot = find('[data-world-managed-message-items]');
+      if (itemsRoot) {
+        itemsRoot.replaceChildren();
+        (Array.isArray(inventory.items) ? inventory.items : []).forEach((item) => {
+          const card = element('div','world-managed-message');
+          card.append(element('strong','',String(item.surface_key || 'Unknown managed surface')));
+          card.append(element('small','',`Channel ${item.channel_id || '—'} · Message ${item.message_id || '—'}`));
+          card.append(element('small','',`World ${item.world_key || '—'} · Last registered ${item.updated_at || '—'}`));
+          itemsRoot.append(card);
+        });
+        if (!itemsRoot.children.length) itemsRoot.append(element('p','world-muted','No Bot-owned messages have been recorded yet. Existing panels remain untouched until their next verified publication.'));
+      }
+      const safety = find('[data-world-managed-message-safety]');
+      if (safety) safety.textContent = 'Preview only: no Discord edits, channel changes, migration execution or historical message rewriting. Fresh author and permission verification is required before a future refresh.';
+    }
     const primary = payload.primary === true;
     find('[data-world-mode]').textContent = primary ? `Primary server · ${brandedPrimary.world_name || 'Chernarus'} live` : 'Independent server · Livonia';
     find('[data-world-activation]').textContent = 'Activation locked — preparation only';
