@@ -1,3 +1,9 @@
+## Website v2.18.0 / Bot v1.81.0 — Badlands role cutover & identity bootstrapping
+
+- Private journalled Badlands managed-role transition and Chernarus rollback from the Admin World Manager, with full-guild re-fetch, explicit confirmation, bot hierarchy checks and protected-role exclusions.
+- Badlands identity-only bootstrap from existing legacy DB, without copying player wallet, XP, shop orders or factions.
+- The map switch still requires the official Nasdara mission and independently checked off-server backups; no automatic Nitrado map switch.
+
 ## Website v2.17.0 / Bot v1.80.0 — Badlands cutover quarantine
 - World Manager now clearly separates check labels and detailed blockers for easier reading.
 - Supports displaying Badlands as a quarantined primary world when the Bot is explicitly configured for the verified new mission.

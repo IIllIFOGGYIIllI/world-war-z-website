@@ -96,3 +96,10 @@
 .world-check-list[data-world-launch-checks] > li > span { display: block; opacity: .84; }
 .world-check-list[data-world-launch-checks] > li[data-status="completed"] > strong { color: #6de0aa; }
 .world-check-list[data-world-launch-checks] > li[data-status="blocked"] > strong { color: #ffbd82; }
+
+/* Badlands role cutover: isolated admin action, readable confirmation controls */
+[data-world-role-executor] {display:grid;gap:.7rem;}
+[data-world-role-executor][hidden] {display:none;}
+[data-world-role-executor] input {padding:.62rem .7rem;min-width:0;max-width:100%;border:1px solid rgba(255,255,255,.2);border-radius:8px;background:rgba(0,0,0,.22);color:inherit;}
+[data-world-role-executor] label{font-size:.85rem;}
+[data-world-role-executor] [data-world-role-execution-status]{overflow-wrap:anywhere;}

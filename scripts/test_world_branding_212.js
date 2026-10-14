@@ -14,7 +14,7 @@ assert(home.includes('data-wwz-primary-world') && home.includes('data-wwz-networ
 assert(dash.includes('data-world-branding-card') && dash.includes('world-branding.js?v=1.22.93&rev=world-branding-212'));
 assert(rules.includes('data-wwz-rules-worlds'));
 assert(world.includes('payload.world_branding'));
-assert(sw.includes("WWZ_PWA_VERSION = '2.16.0'"));
+assert(sw.includes("WWZ_PWA_VERSION = '2.18.0'"));
 console.log('World branding frontend checks passed');
 const vm = require('vm');
 (async () => {

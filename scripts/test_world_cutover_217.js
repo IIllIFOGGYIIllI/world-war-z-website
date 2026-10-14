@@ -2,11 +2,11 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs');const path=require('node:path');
 const read=p=>fs.readFileSync(path.resolve(__dirname,'..',p),'utf8');
-assert(read('dashboard.html').includes('v2.17.0</strong>'));
+assert(read('dashboard.html').includes('v2.18.0</strong>'));
 assert(read('assets/css/dashboard/world-manager.css').includes('world-check-list[data-world-launch-checks] > li > strong'));
 const manager=read('assets/js/dashboard/world-manager.js');
 assert(manager.includes('payload.quarantined'));
 assert(manager.includes("element('li', 'world-launch-check')"));
-assert(read('sw.js').includes("WWZ_PWA_VERSION = '2.17.0'"));
+assert(read('sw.js').includes("WWZ_PWA_VERSION = '2.18.0'"));
 assert(read('BADLANDS_RELEASE_READINESS.md').includes('Livonia'));
-console.log('Website v2.17.0 world cutover regression passed');
+console.log('Website v2.18.0 world cutover regression passed');

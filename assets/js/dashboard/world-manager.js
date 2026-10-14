@@ -17,6 +17,22 @@
   const scanTarget = find('[data-world-role-target]');
   const scanStatus = find('[data-world-role-scan-status]');
   const scanHistory = find('[data-world-role-job-history]');
+  const roleExecutor = find('[data-world-role-executor]');
+  const roleAction = find('[data-world-role-action]');
+  const roleJournal = find('[data-world-role-journal]');
+  const roleConfirm = find('[data-world-role-confirm]');
+  const roleInstruction = find('[data-world-role-confirm-instructions]');
+  const roleExecuteButton = find('[data-world-role-apply]');
+  const roleExecutionStatus = find('[data-world-role-execution-status]');
+  let roleExecuting = false;
+  const requiredRoleConfirmation = () => roleAction?.value === 'rollback' ? 'RESTORE CHERNARUS ROLES' : 'MIGRATE BADLANDS ROLES';
+  const refreshRoleExecutor = () => {
+    if (roleInstruction) roleInstruction.textContent = requiredRoleConfirmation();
+    if (roleExecuteButton) roleExecuteButton.disabled = roleExecuting || (roleConfirm?.value?.trim() !== requiredRoleConfirmation()) || (roleAction?.value === 'rollback' && !/^wwz-roles-[0-9a-f]{32}\.json$/.test(roleJournal?.value?.trim() || ''));
+  };
+  roleAction?.addEventListener('change', () => { if (roleConfirm) roleConfirm.value=''; refreshRoleExecutor(); });
+  roleConfirm?.addEventListener('input',refreshRoleExecutor);
+  roleJournal?.addEventListener('input',refreshRoleExecutor);
   const memberForm = find('[data-world-member-form]');
   const memberInput = find('[data-world-member-id]');
   const memberResult = find('[data-world-member-preview]');
@@ -80,6 +96,11 @@
     checksRoot.replaceChildren();
     domainsRoot.replaceChildren();
     renderLaunchAudit(payload.launch_audit);
+    if (roleExecutor) roleExecutor.hidden = !(payload.primary === true && payload.server_map === 'badlands' && payload.quarantined === true);
+    refreshRoleExecutor();
+    const journals=Array.isArray(payload.role_transition_journals)?payload.role_transition_journals:[];
+    if(roleExecutionStatus && journals.length && !roleExecuting) roleExecutionStatus.textContent=`Last private cutover: ${journals[0].state} · ${journals[0].journal} · ${cleanCount(journals[0].changed_members)} members started. Retain this name for rollback.`;
+    if(roleJournal && !roleJournal.value && journals.length) roleJournal.value=journals[0].journal;
     const branding = payload.world_branding || {};
     const brandedPrimary = branding.primary || {};
     const brandingLive = find('[data-world-branding-current]');
@@ -344,6 +365,28 @@
       scanBusy=false;
       if (scanButton) scanButton.disabled = !scanAvailable;
     }
+  });
+  roleExecuteButton?.addEventListener('click',async () => {
+    if (roleExecutor?.hidden || roleExecuting || roleConfirm?.value?.trim() !== requiredRoleConfirmation()) return;
+    const token=typeof storageGet==='function'?storageGet(AUTH_SESSION_KEY):'';
+    if (!token || (typeof hasServerActionAccess==='function' && !hasServerActionAccess())) return;
+    const action=String(roleAction?.value || 'apply');
+    if (!window.confirm(action === 'apply' ? 'Change primary-world XP/prestige/faction roles for the full Discord roster? A private rollback journal will be written.' : 'Restore managed roles from the selected private migration journal?')) return;
+    roleExecuting=true;refreshRoleExecutor();
+    if (roleExecutionStatus) roleExecutionStatus.textContent='Checking complete Discord roster and processing protected, journalled role changes…';
+    try {
+      const response=await authFetch(`${DASHBOARD_API_BASE}/api/admin/world-profiles/roles/transition`,{
+        method:'POST',headers:{Accept:'application/json',Authorization:`Bearer ${token}`,'Content-Type':'application/json'},
+        body:JSON.stringify({action,confirmation:requiredRoleConfirmation(),...(action==='rollback'?{journal:String(roleJournal?.value || '').trim()}:{})}),
+      });
+      const result=await response.json().catch(()=>({}));
+      if (!response.ok || result.status !== 'ok') throw new Error(result.message || `Role operation returned HTTP ${response.status}`);
+      if (roleExecutionStatus) roleExecutionStatus.textContent=`${result.state} · ${result.members_changed ?? result.members_restored ?? 0} members · private journal ${result.journal}. Keep this journal filename for rollback.`;
+      if (roleJournal && result.journal) roleJournal.value=result.journal;
+      if (roleConfirm) roleConfirm.value='';
+    }catch(error){
+      if (roleExecutionStatus) roleExecutionStatus.textContent=`Role operation stopped: ${String(error?.message || 'Unavailable')}. Review the private journal before retrying.`;
+    }finally{roleExecuting=false;refreshRoleExecutor();}
   });
   refresh?.addEventListener('click',()=>load());
   memberForm?.addEventListener('submit',(event)=>{
