@@ -16,6 +16,6 @@ assert(client.includes('MIGRATE BADLANDS ROLES'));
 assert(client.includes('RESTORE CHERNARUS ROLES'));
 assert(client.includes('/api/admin/world-profiles/roles/transition'));
 assert(client.includes('roleConfirm?.value?.trim() !== requiredRoleConfirmation()'));
-assert(lazy.includes('world-manager.js?v=2.18.0'));
-assert(sw.includes("WWZ_PWA_VERSION = '2.18.0'"));
+assert(lazy.includes('world-manager.js?v=2.19.0'));
+assert(sw.includes("WWZ_PWA_VERSION = '2.19.0'"));
 console.log('Badlands journalled role cutover UI regression passed');

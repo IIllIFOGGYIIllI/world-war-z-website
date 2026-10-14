@@ -16,7 +16,7 @@ for (const selector of ['data-world-launch-audit','data-world-launch-summary',
 assert(js.includes('renderLaunchAudit(payload.launch_audit)'));
 assert(js.includes('items.replaceChildren()'));
 assert(!dash.includes('data-world-activate-button'));
-assert(sw.includes("WWZ_PWA_VERSION = '2.18.0'"));
-assert(lazy.includes('world-manager.js?v=2.18.0'));
+assert(sw.includes("WWZ_PWA_VERSION = '2.19.0'"));
+assert(lazy.includes('world-manager.js?v=2.19.0'));
 assert(dash.includes('Read-only: this section never updates Nitrado'));
 console.log('Badlands launch gate UI regression passed');

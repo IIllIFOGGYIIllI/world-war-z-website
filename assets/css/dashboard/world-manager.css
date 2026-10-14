@@ -103,3 +103,13 @@
 [data-world-role-executor] input {padding:.62rem .7rem;min-width:0;max-width:100%;border:1px solid rgba(255,255,255,.2);border-radius:8px;background:rgba(0,0,0,.22);color:inherit;}
 [data-world-role-executor] label{font-size:.85rem;}
 [data-world-role-executor] [data-world-role-execution-status]{overflow-wrap:anywhere;}
+
+/* Owner-only, manually acknowledged Badlands runtime gate. */
+[data-world-activation-executor] {display:grid;gap:.85rem}
+[data-world-activation-executor][hidden] {display:none}
+[data-world-activation-executor] input:not([type="checkbox"]),
+[data-world-activation-executor] select {padding:.66rem .75rem;max-width:100%;min-width:0;color:inherit;border:1px solid rgba(255,255,255,.2);border-radius:8px;background:#1a2029}
+.world-activation-proof {display:grid;gap:.6rem;border:1px solid rgba(255,255,255,.1);padding:.85rem;border-radius:10px}
+.world-activation-proof label {display:flex;align-items:flex-start;gap:.6rem;font-size:.82rem;line-height:1.4;cursor:pointer}
+.world-activation-proof label input {flex-shrink:0;margin-top:.2rem}
+[data-world-activation-execution-status] {overflow-wrap:anywhere}

@@ -11,6 +11,6 @@ assert(ui.includes('replaceChildren()') && ui.includes('textContent'));
 assert(!ui.includes('refresh_managed_message') && !ui.includes('execute_managed_message'));
 assert(roadmap.includes('Chernarus Radio Zenit Trader'));
 assert(changelog.includes('Version 2.14.0'));
-assert(home.includes('Website v2.18.0 · Bot v1.81.0'));
-assert(sw.includes("WWZ_PWA_VERSION = '2.18.0'"));
+assert(home.includes('Website v2.19.0 · Bot v1.82.0'));
+assert(sw.includes("WWZ_PWA_VERSION = '2.19.0'"));
 console.log('Stage 2D3 transition UI assertions passed');

@@ -1,0 +1,16 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const read = p => fs.readFileSync(p, 'utf8');
+const context = read('assets/js/dashboard/server-context.js');
+const map = read('assets/js/map/wwz-map.js');
+const my = read('assets/js/dashboard/my-wwz.js');
+assert(context.includes("['chernarus', 'livonia', 'badlands'].includes(mapKey)"));
+assert(context.includes("world_size: mapKey === 'badlands' ? 0"));
+assert(context.includes("mapPreview.removeAttribute('src')"));
+assert(map.includes("|| null;"), 'Unknown maps must never fall back to Chernarus');
+assert(map.includes('Badlands map imagery and verified coordinates are not yet available'));
+assert(map.includes('if (!config) return null;'));
+assert(my.includes("server.map_key === 'badlands' ? Promise.resolve(null)"));
+assert(my.includes('Badlands · Fresh Start'));
+assert(my.includes("...(mapKey === 'badlands' ? []"));
+console.log('Badlands map and API fallback isolation passed');

@@ -140,6 +140,12 @@
 
   const createMap = (container, options = {}) => {
     if (!container || !window.WWZMap?.create) return null;
+    if (!window.WWZMap?.getConfig?.(options.mapKey || selectedMapKey())) {
+      container.dataset.mapUnavailable = 'true';
+      container.setAttribute('aria-label', 'Badlands zone map unavailable until verified map data is published.');
+      return null;
+    }
+    container.removeAttribute('data-map-unavailable');
     const controls = makeControls(container);
     const instance = window.WWZMap.create(container, {
       mapKey: options.mapKey || selectedMapKey(),
@@ -260,7 +266,7 @@
     const count = $('[data-zone-map-count]');
     if (count) count.textContent = String(state.zones.length);
     const name = $('[data-zone-map-name]');
-    if (name) name.textContent = state.mapName || window.WWZMap.getConfig(selectedMapKey()).name;
+    if (name) name.textContent = state.mapName || window.WWZMap.getConfig(selectedMapKey())?.name || 'Map unavailable';
   };
 
   const checkboxPill = (labelText, checked, className = '') => {

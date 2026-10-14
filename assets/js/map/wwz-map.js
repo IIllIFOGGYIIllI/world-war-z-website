@@ -84,10 +84,11 @@
     return number.toFixed(decimals);
   };
 
-  const getConfig = (mapKey = 'chernarus') => MAP_CONFIGS[String(mapKey || '').toLowerCase()] || MAP_CONFIGS.chernarus;
+  const getConfig = (mapKey = 'chernarus') => MAP_CONFIGS[String(mapKey || '').toLowerCase()] || null;
 
   const worldToLeaflet = (coordinate, mapKey = 'chernarus') => {
     const config = getConfig(mapKey);
+    if (!config) return null;
     const scale = config.mapUnits / config.mapMetres;
     const x = Number(coordinate?.[0]);
     const z = Number(coordinate?.[1]);
@@ -97,6 +98,7 @@
 
   const leafletToWorld = (latlng, mapKey = 'chernarus') => {
     const config = getConfig(mapKey);
+    if (!config) return null;
     const scale = config.mapUnits / config.mapMetres;
     const lat = Number(latlng?.lat);
     const lng = Number(latlng?.lng);
@@ -278,11 +280,12 @@
 
   const create = (container, options = {}) => {
     if (!container) throw new Error('A DayZ map container is required.');
+    const config = getConfig(options.mapKey || window.WWZServerContext?.getMapKey?.());
+    if (!config) throw new Error('Badlands map imagery and verified coordinates are not yet available. Chernarus/Livonia tiles are never substituted.');
     if (!window.L?.map) throw new Error('Leaflet is not available.');
     if (container._wwzMapInstance) return container._wwzMapInstance;
 
     const L = window.L;
-    const config = getConfig(options.mapKey || window.WWZServerContext?.getMapKey?.());
     const MAP_METRES = config.mapMetres;
     const MAP_UNITS = config.mapUnits;
     const ROAD_ORDER = config.roadOrder;

@@ -1,6 +1,6 @@
 'use strict';
 
-const WWZ_PWA_VERSION = '2.18.0';
+const WWZ_PWA_VERSION = '2.19.0';
 const CACHE_PREFIX = 'wwz-pwa-';
 const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 // Public release versions can advance without discarding the bounded map caches.
@@ -8,7 +8,7 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-10-15-website-v2-18-0-role-cutover-1';
+const WWZ_PWA_UPDATE_REVISION = '2026-10-15-website-v2-19-0-activation-gate-1';
 const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-world-branding-1`;
 const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${APP_CACHE_RELEASE}`;

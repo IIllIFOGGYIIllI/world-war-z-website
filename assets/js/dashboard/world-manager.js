@@ -24,6 +24,27 @@
   const roleInstruction = find('[data-world-role-confirm-instructions]');
   const roleExecuteButton = find('[data-world-role-apply]');
   const roleExecutionStatus = find('[data-world-role-execution-status]');
+  const activationPanel = find('[data-world-activation-executor]');
+  const activationAction = find('[data-world-activation-action]');
+  const activationProof = find('[data-world-activation-proof]');
+  const activationCheckBoxes = Array.from(root.querySelectorAll('[data-activation-attestation]'));
+  const activationConfirm = find('[data-world-activation-confirm]');
+  const activationConfirmLabel = find('[data-world-activation-confirm-label]');
+  const activationExecute = find('[data-world-activation-execute]');
+  const activationExecutionStatus = find('[data-world-activation-execution-status]');
+  const activationGate = find('[data-world-activation-gate]');
+  let activationBusy = false;
+  const activationPhrase = () => activationAction?.value === 'revoke' ? 'REVOKE BADLANDS GAMEPLAY' : 'AUTHORIZE BADLANDS GAMEPLAY';
+  const refreshActivationControl = () => {
+    if (activationProof) activationProof.hidden = activationAction?.value === 'revoke';
+    if (activationConfirmLabel) activationConfirmLabel.textContent = activationPhrase();
+    if (activationExecute) activationExecute.disabled = activationBusy ||
+      activationConfirm?.value?.trim() !== activationPhrase() ||
+      (activationAction?.value !== 'revoke' && !activationCheckBoxes.every(input => input.checked));
+  };
+  activationAction?.addEventListener('change', () => {if (activationConfirm) activationConfirm.value='';refreshActivationControl();});
+  activationConfirm?.addEventListener('input',refreshActivationControl);
+  activationCheckBoxes.forEach(input => input.addEventListener('change',refreshActivationControl));
   let roleExecuting = false;
   const requiredRoleConfirmation = () => roleAction?.value === 'rollback' ? 'RESTORE CHERNARUS ROLES' : 'MIGRATE BADLANDS ROLES';
   const refreshRoleExecutor = () => {
@@ -81,7 +102,7 @@
       if (note) note.textContent = 'No evidence is equivalent to blocked readiness.';
       return;
     }
-    summary.textContent = `${cleanCount(audit.verified)} / ${cleanCount(audit.total)} checks verified · ${cleanCount(audit.blockers)} blockers · Activation locked`;
+    summary.textContent = `${cleanCount(audit.verified)} / ${cleanCount(audit.total)} checks verified · ${cleanCount(audit.blockers)} blockers · ${audit.state === 'active' ? 'Badlands runtime active' : 'Activation locked'}`;
     audit.checks.forEach(check => {
       const item = element('li', 'world-launch-check');
       item.dataset.status = check.status === 'verified' ? 'completed' : 'blocked';
@@ -96,6 +117,14 @@
     checksRoot.replaceChildren();
     domainsRoot.replaceChildren();
     renderLaunchAudit(payload.launch_audit);
+    if (activationPanel) activationPanel.hidden = !(payload.primary === true && payload.server_map === 'badlands');
+    if (activationGate && payload.server_map === 'badlands') {
+      const auth = payload.runtime_gate || {};
+      activationGate.textContent = payload.quarantined
+        ? `QUARANTINE · ${Array.isArray(auth.reasons) && auth.reasons.length ? auth.reasons.join(' · ') : 'External launch checks remain required.'}`
+        : 'LIVE · Badlands is active on its physically separate database. Livonia remains independent.';
+    }
+    refreshActivationControl();
     if (roleExecutor) roleExecutor.hidden = !(payload.primary === true && payload.server_map === 'badlands' && payload.quarantined === true);
     refreshRoleExecutor();
     const journals=Array.isArray(payload.role_transition_journals)?payload.role_transition_journals:[];
@@ -150,7 +179,9 @@
     }
     const primary = payload.primary === true;
     find('[data-world-mode]').textContent = payload.quarantined ? 'Primary server · Badlands in gameplay quarantine' : primary ? `Primary server · ${brandedPrimary.world_name || 'Chernarus'} live` : 'Independent server · Livonia';
-    find('[data-world-activation]').textContent = payload.quarantined ? 'Badlands gameplay quarantined — never auto-unlock' : 'Activation locked — preparation only';
+    find('[data-world-activation]').textContent = payload.server_map === 'badlands'
+      ? (payload.quarantined ? 'Badlands gameplay quarantined · owner approval required' : 'Badlands gameplay active · isolated database')
+      : 'Activation locked — preparation only';
     find('[data-world-notice]').textContent = String(payload.message || 'No activation in this version.');
     (Array.isArray(payload.profiles) ? payload.profiles : []).forEach((profile) => {
       const card = element('article', 'world-profile-card');
@@ -307,6 +338,33 @@
       return null;
     } finally {loading=false;if(refresh) refresh.disabled=false;if(memberSubmit) memberSubmit.disabled=false;}
   };
+  activationExecute?.addEventListener('click', async () => {
+    const token=typeof storageGet==='function'?storageGet(AUTH_SESSION_KEY):'';
+    if (!token || activationBusy || activationExecute.disabled ||
+        (typeof hasServerActionAccess==='function' && !hasServerActionAccess())) return;
+    const action=String(activationAction?.value || 'authorize');
+    const message = action === 'revoke'
+      ? 'Revoke the private Badlands authorization for the next Bot restart? This does NOT stop the already-running Bot or change Nitrado.'
+      : 'Only proceed if the actual Badlands mission is running, your off-server backups are verified, and all six statements are true. This prepares the NEXT Bot restart, not an immediate world switch.';
+    if (!window.confirm(message)) return;
+    activationBusy=true;refreshActivationControl();
+    if (activationExecutionStatus) activationExecutionStatus.textContent='Checking protected world cutover…';
+    try {
+      const attestations=Object.fromEntries(activationCheckBoxes.map(input => [input.dataset.activationAttestation, input.checked]));
+      const response=await authFetch(`${DASHBOARD_API_BASE}/api/admin/world-profiles/activation`,{
+        method:'POST',headers:{Accept:'application/json',Authorization:`Bearer ${token}`,'Content-Type':'application/json'},
+        body:JSON.stringify({action,confirmation:activationConfirm?.value?.trim(),
+          ...(action === 'authorize' ? {attestations} : {})}),
+      });
+      const result=await response.json().catch(()=>({}));
+      if (!response.ok || result.status!=='ok') throw new Error(result.message || `Cutover returned HTTP ${response.status}`);
+      if (activationExecutionStatus) activationExecutionStatus.textContent=result.instructions || result.message || 'Cutover authorization updated. Verify state after the next Bot restart.';
+      if (activationConfirm) activationConfirm.value='';
+      await load();
+    } catch(error) {
+      if (activationExecutionStatus) activationExecutionStatus.textContent=`Not authorized: ${String(error?.message || 'The live cutover could not be confirmed')}. No world was changed.`;
+    } finally {activationBusy=false;refreshActivationControl();}
+  });
   verifyButton?.addEventListener('click', async () => {
     const token=typeof storageGet==='function'?storageGet(AUTH_SESSION_KEY):'';
     if (!token || verificationBusy || (typeof hasServerActionAccess==='function' && !hasServerActionAccess())) return;

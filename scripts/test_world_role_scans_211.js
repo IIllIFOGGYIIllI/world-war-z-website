@@ -6,7 +6,7 @@ for(const name of ['data-world-role-scan','data-world-role-target','data-world-r
 for(const x of ['stage_dry_run','/api/admin/world-profiles/role-dry-run','roleSync.jobs','No roles changed.']) assert(js.includes(x),x);
 assert(!js.includes('add_roles(') && !js.includes('remove_roles('));
 assert(log.includes('Version 2.11.0')&&log.includes('Version 2.10.0'));
-assert(index.includes('Website v2.18.0 · Bot v1.81.0'));
-assert(sw.includes("WWZ_PWA_VERSION = '2.18.0'"));
-assert(lazy.includes('world-manager.js?v=2.18.0'));
+assert(index.includes('Website v2.19.0 · Bot v1.82.0'));
+assert(sw.includes("WWZ_PWA_VERSION = '2.19.0'"));
+assert(lazy.includes('world-manager.js?v=2.19.0'));
 console.log('Stage 2C-2 admin full-roster dry runs: structure/version checks passed');

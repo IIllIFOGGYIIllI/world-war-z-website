@@ -7,7 +7,7 @@ for (const needle of ['/api/admin/world-profiles/messages/verify','verify_regist
 assert(ui.includes("action:'verify_registered',offset:nextVerificationOffset"));
 assert(!ui.includes('refresh_managed_message')&&!ui.includes('execute_managed_message'));
 assert(dash.includes('Execution locked') || dash.includes('Refresh and activation are locked'));
-assert(sw.includes("WWZ_PWA_VERSION = '2.18.0'"));
-assert(file('index.html').includes('Website v2.18.0 · Bot v1.81.0'));
+assert(sw.includes("WWZ_PWA_VERSION = '2.19.0'"));
+assert(file('index.html').includes('Website v2.19.0 · Bot v1.82.0'));
 assert(file('changelog.html').includes('Version 2.15.0'));
 console.log('Stage 2D Phase 4 read-only verification UI passed');

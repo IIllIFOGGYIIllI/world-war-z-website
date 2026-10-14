@@ -1,4 +1,12 @@
-## Website v2.18.0 / Bot v1.81.0 — Badlands role cutover & identity bootstrapping
+## Website v2.19.0 / Bot v1.82.0 — Exact-mission Badlands runtime activation
+- [x] Owner-only explicit release/revoke interface and Bot authorisation endpoint.
+- [x] Badlands server selection without aliasing Chernarus map coordinates or PvP intelligence.
+- [x] Badlands map imagery is unavailable (not substituted) until confirmed native assets are provided.
+- [x] World Manager reports whether activation is quarantined and why.
+- [ ] Actual Nitrado mission, off-server backups, independent restore test and live cutover are externally verified.
+- [ ] Map-native assets, live gameplay regression and full role rollback are externally tested.
+
+## Website v2.19.0 / Bot v1.82.0 — Badlands role cutover & identity bootstrapping
 
 - Private journalled Badlands managed-role transition and Chernarus rollback from the Admin World Manager, with full-guild re-fetch, explicit confirmation, bot hierarchy checks and protected-role exclusions.
 - Badlands identity-only bootstrap from existing legacy DB, without copying player wallet, XP, shop orders or factions.

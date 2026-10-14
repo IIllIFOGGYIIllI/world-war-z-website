@@ -1,0 +1,11 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const read=p=>fs.readFileSync(p,'utf8');
+const page=read('dashboard.html');
+const js=read('assets/js/dashboard/world-manager.js');
+const css=read('assets/css/dashboard/world-manager.css');
+for (const key of ['data-world-activation-executor','data-world-activation-proof','data-world-activation-execute','data-world-activation-confirm']) assert(page.includes(key),key);
+for (const token of ['/api/admin/world-profiles/activation','AUTHORIZE BADLANDS GAMEPLAY','REVOKE BADLANDS GAMEPLAY']) assert(js.includes(token),token);
+for (const key of ['off_server_backups_restored','chernarus_nitrado_backup','badlands_map_files_validated','discord_messages_validated','rollback_procedure_tested','open_orders_reconciled']) assert(page.includes(key),key);
+assert(css.includes('[data-world-activation-executor]'));
+console.log('Badlands activation controls v2.19.0 verified');

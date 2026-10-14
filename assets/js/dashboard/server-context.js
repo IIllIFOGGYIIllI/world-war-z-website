@@ -91,8 +91,8 @@
   const normalizeServer = (value) => {
     const mapKey = String(value?.map_key || '').trim().toLowerCase();
     const key = String(value?.key || '').trim().toLowerCase();
-    if (!SERVER_KEY_PATTERN.test(key) || !['chernarus', 'livonia'].includes(mapKey)) return null;
-    const mapName = mapKey === 'livonia' ? 'Livonia' : 'Chernarus';
+    if (!SERVER_KEY_PATTERN.test(key) || !['chernarus', 'livonia', 'badlands'].includes(mapKey)) return null;
+    const mapName = mapKey === 'badlands' ? 'Badlands' : (mapKey === 'livonia' ? 'Livonia' : 'Chernarus');
     return {
       key,
       name: String(value.name || value.discord_name || 'World War Z'),
@@ -100,7 +100,7 @@
       icon_url: value.icon_url ? String(value.icon_url) : null,
       map_key: mapKey,
       map_name: String(value.map_name || mapName),
-      world_size: mapKey === 'livonia' ? 12800 : 15360,
+      world_size: mapKey === 'badlands' ? 0 : (mapKey === 'livonia' ? 12800 : 15360),
       platform: String(value.platform || 'PlayStation 4 & 5'),
       player_capacity: Math.max(1, Math.trunc(Number(value.player_capacity) || 26)),
       access_level: String(value.access_level || 'member'),
@@ -165,19 +165,34 @@
     });
     const mapPreview = document.querySelector('.map-live-preview img');
     if (mapPreview) {
-      mapPreview.src = server.map_key === 'livonia'
-        ? 'assets/maps/livonia/tiles/0/0/0.webp?v=1.22.93'
-        : 'assets/maps/chernarus/tiles/z0/0/0.webp?v=1.22.93';
-      mapPreview.alt = `${server.map_name} satellite map preview`;
+      const hasMapTiles = server.map_key === 'chernarus' || server.map_key === 'livonia';
+      if (hasMapTiles) {
+        mapPreview.src = server.map_key === 'livonia'
+          ? 'assets/maps/livonia/tiles/0/0/0.webp?v=1.22.93'
+          : 'assets/maps/chernarus/tiles/z0/0/0.webp?v=1.22.93';
+        mapPreview.alt = `${server.map_name} satellite map preview`;
+      } else {
+        mapPreview.removeAttribute('src');
+        mapPreview.alt = 'Badlands map tiles are unavailable; Chernarus maps are not substituted.';
+      }
     }
     document.querySelectorAll('[data-map-frame], [data-location-map], [data-shop-coordinate-map]').forEach((element) => {
       element.setAttribute('aria-label', `${server.map_name} coordinate map. Drag to pan, scroll or pinch to zoom, and click to select X and Z.`);
     });
     document.querySelectorAll('[data-map-custom-x], [data-map-custom-z], [data-location-x], [data-location-z], [data-shop-delivery-x], [data-shop-delivery-z]').forEach((input) => {
-      input.max = String(server.world_size);
+      if (server.world_size > 0) {
+        input.max = String(server.world_size);
+        input.disabled = false;
+      } else {
+        input.removeAttribute('max');
+        input.disabled = true;
+      }
     });
     const mapNavigation = document.querySelector('[data-view="map"][data-section="explorer"]');
-    if (mapNavigation) mapNavigation.dataset.navLabel = `${server.map_name} Map`;
+    if (mapNavigation) {
+      mapNavigation.dataset.navLabel = server.world_size > 0 ? `${server.map_name} Map` : 'Badlands Map Unavailable';
+      mapNavigation.setAttribute('aria-disabled', String(server.world_size === 0));
+    }
     document.querySelectorAll('[data-livonia-only]').forEach((element) => {
       element.hidden = server.map_key !== 'livonia';
     });

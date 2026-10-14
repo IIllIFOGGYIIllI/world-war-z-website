@@ -1,4 +1,13 @@
-## Website v2.18.0 / Bot v1.81.0 — Badlands role cutover & identity bootstrapping
+## Website v2.19.0 — Badlands runtime and map selection safety
+- Badlands appears as a distinct primary world when configured by the live Bot.
+- No Chernarus fallback map, map tile, hotspot, coordinate size or expedition card for Badlands.
+- Owner-only approval controls are conditional on six independently verified launch prerequisites; Railway and Nitrado operations stay external.
+
+## Badlands Runtime Authorization (v2.19.0)
+
+Protected owner-only authorization after a live Nitrado mission match, successful independent database checks and complete role transition journal. Operator confirms off-server backups, actual map assets, pending obligations and rollback. Activation applies after the next Railway Bot restart when `WWZ_BADLANDS_LIVE=1` is set, not from loading the page.
+
+## Website v2.19.0 / Bot v1.82.0 — Badlands role cutover & identity bootstrapping
 
 - Private journalled Badlands managed-role transition and Chernarus rollback from the Admin World Manager, with full-guild re-fetch, explicit confirmation, bot hierarchy checks and protected-role exclusions.
 - Badlands identity-only bootstrap from existing legacy DB, without copying player wallet, XP, shop orders or factions.
