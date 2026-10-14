@@ -11,5 +11,5 @@ for(const needle of ['payload.managed_messages','refresh_execution_enabled','reg
 assert(js.includes('element(\'small\'') && js.includes('itemsRoot.replaceChildren()'));
 assert(!js.includes('refresh_managed_message') && !js.includes('execute_managed_message'));
 assert(changelog.includes('Version 2.13.0'));
-assert(sw.includes("WWZ_PWA_VERSION = '2.15.0'"));
+assert(sw.includes("WWZ_PWA_VERSION = '2.16.0'"));
 console.log('Stage 2D2 website registry assertions passed');

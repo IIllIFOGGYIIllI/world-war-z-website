@@ -1,3 +1,10 @@
+## Website v2.16.0 — Badlands urgent launch preflight
+- [x] Show Admin-only critical blockers from Bot v1.79.0 API.
+- [x] Preserve read-only Discord verification and existing staged world views.
+- [x] Update roadmap, changelog and PWA cache to current release.
+- [ ] Live Railway/Discord verify launch-audit response and full regression.
+- [ ] Do not unlock Badlands until map verified and all cross-world write paths tested.
+
 ## Stage 2D Phase 4 (Bot v1.78.0 / Website v2.15.0)
 - [x] Admin-only verification endpoint, bounded to 25 records, live Discord read checks
 - [x] Fail-closed results for author/permission/message/guild mismatches

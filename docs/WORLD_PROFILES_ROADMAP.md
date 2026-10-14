@@ -1,3 +1,8 @@
+## Urgent launch gate — Website v2.16.0 / Bot v1.79.0
+- Adds Admin launch preflight with checked blockers for production isolation, off-server backups, pending deliveries, console mission, roles, historical messages, Badlands map assets and tested rollback.
+- A status is only marked verified when backed by existing evidence; absent proof is blocked. This is a read-only launch dashboard, **not an activation feature**.
+- Remaining critical work: finish actual Badlands production gameplay routing and safe rollback, verify the PlayStation/Nitrado mission and new map geometry, test off-server restore and live integrations.
+
 ## Stage 2D Phase 4 — Discord message read-only preflight · Website v2.15.0 / Bot v1.78.0
 - Admin World Manager includes a manual Verify registered messages action against the current active Chernarus Bot guild. Checks at most 25 saved registry entries, not arbitrary Discord messages.
 - Bot verifies guild/channel, message existence, actual Bot author, view/history/send/embed permissions and whether saved references changed mid-check. Reports failures without changes.

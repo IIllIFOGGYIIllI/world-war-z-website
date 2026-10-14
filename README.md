@@ -1,3 +1,5 @@
+**Current release: Website v2.16.0 — Badlands Launch Safety Gate.** The Admin World Manager displays precise cutover blockers from the Bot v1.79.0 readiness endpoint. No activation, destructive operations or assumption of verified Nitrado mission. **This does not complete production Badlands cutover.**
+
 **Current release: Website v2.15.0 — Stage 2D Phase 4 Discord Message Verification.** Admin-only, on-demand read-only live Discord checks; no activation or Discord edits.
 
 **Previous release: Website v2.14.0 — Stage 2D Phase 3 Managed Message Transition Planning.** Read-only preview; no Discord edits or world activation.

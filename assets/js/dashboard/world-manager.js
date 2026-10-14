@@ -53,10 +53,33 @@
     nextVerificationOffset = Number.isInteger(report.next_offset) ? report.next_offset : 0;
     if (verifyButton) verifyButton.textContent = nextVerificationOffset ? 'Verify next batch' : 'Verify registered messages';
   };
+  const renderLaunchAudit = (audit) => {
+    const panel = find('[data-world-launch-audit]');
+    const summary = find('[data-world-launch-summary]');
+    const items = find('[data-world-launch-checks]');
+    const note = find('[data-world-launch-note]');
+    if (!panel || !summary || !items) return;
+    items.replaceChildren();
+    if (!audit || !Array.isArray(audit.checks)) {
+      summary.textContent = 'Preflight unavailable · activation is not authorised.';
+      if (note) note.textContent = 'No evidence is equivalent to blocked readiness.';
+      return;
+    }
+    summary.textContent = `${cleanCount(audit.verified)} / ${cleanCount(audit.total)} checks verified · ${cleanCount(audit.blockers)} blockers · Activation locked`;
+    audit.checks.forEach(check => {
+      const item = element('li');
+      item.dataset.status = check.status === 'verified' ? 'completed' : 'blocked';
+      item.append(element('strong', '', `${check.status === 'verified' ? 'Verified' : 'BLOCKED'} · ${String(check.label || '')}`));
+      item.append(element('span', '', String(check.detail || 'No evidence available.')));
+      items.append(item);
+    });
+    if (note) note.textContent = String(audit.message || 'An audit never authorises activation.');
+  };
   const render = (payload) => {
     profilesRoot.replaceChildren();
     checksRoot.replaceChildren();
     domainsRoot.replaceChildren();
+    renderLaunchAudit(payload.launch_audit);
     const branding = payload.world_branding || {};
     const brandedPrimary = branding.primary || {};
     const brandingLive = find('[data-world-branding-current]');
