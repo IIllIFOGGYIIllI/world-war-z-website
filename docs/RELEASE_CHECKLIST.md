@@ -1,3 +1,10 @@
+## Stage 2D Phase 4 (Bot v1.78.0 / Website v2.15.0)
+- [x] Admin-only verification endpoint, bounded to 25 records, live Discord read checks
+- [x] Fail-closed results for author/permission/message/guild mismatches
+- [x] Page shows explicit on-demand verification without any execution button
+- [ ] Live Railway/Discord smoke test and release deployment
+- [ ] World migration remains blocked pending backups, map support and role/data cutover
+
 - [x] Website v2.14.0 / Bot v1.77.0 public Roadmap, Dashboard Roadmap, Changelog, documentation and read-only World Manager updated.
 
 - [x] Stage 2D2: Admin-managed Discord message registry, per-world audit and safety checks documented; no message-edit or world-activation controls.

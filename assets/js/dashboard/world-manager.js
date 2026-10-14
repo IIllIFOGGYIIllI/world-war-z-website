@@ -29,6 +29,30 @@
     if (value !== undefined) node.textContent = String(value);
     return node;
   };
+  let verificationBusy = false;
+  let nextVerificationOffset = 0;
+  const verifyButton = find('[data-world-verify-messages]');
+  const verifyStatus = find('[data-world-verify-status]');
+  const verifyResults = find('[data-world-verify-results]');
+  const showVerification = (report) => {
+    if (!verifyStatus || !verifyResults) return;
+    verifyResults.replaceChildren();
+    if (!report) {
+      verifyStatus.textContent = 'Not checked. Click to perform a live, temporary Discord verification.';
+      return;
+    }
+    verifyStatus.textContent = `Batch starting at ${cleanCount(report.offset ?? 0)} · ${cleanCount(report.checked)} checked · ${cleanCount(report.verified)} verified · ${cleanCount(report.blocked)} need attention · ${cleanCount(report.remaining)} not checked · ${report.checked_at || 'Time unknown'}. Execution remains locked.`;
+    (Array.isArray(report.items) ? report.items : []).forEach(item => {
+      const card = element('div', 'world-managed-message');
+      card.dataset.verification = String(item.state || 'not_verified');
+      card.append(element('strong', '', `${item.surface_key || 'Unknown'} — ${String(item.state || 'not_verified').replaceAll('_', ' ')}`));
+      card.append(element('small', '', String(item.detail || 'No check information')));
+      verifyResults.append(card);
+    });
+    if (!verifyResults.children.length) verifyResults.append(element('p','world-muted','No registered messages in this world to verify.'));
+    nextVerificationOffset = Number.isInteger(report.next_offset) ? report.next_offset : 0;
+    if (verifyButton) verifyButton.textContent = nextVerificationOffset ? 'Verify next batch' : 'Verify registered messages';
+  };
   const render = (payload) => {
     profilesRoot.replaceChildren();
     checksRoot.replaceChildren();
@@ -45,6 +69,7 @@
     const inventoryPanel = find('[data-world-managed-messages]');
     if (inventoryPanel) {
       inventoryPanel.hidden = payload.primary !== true;
+      if (verifyButton) verifyButton.disabled = verificationBusy || payload.primary !== true;
       const summary = find('[data-world-managed-message-summary]');
       const refreshLocked = inventory.refresh_execution_enabled !== true;
       // No execute control exists even if an API incorrectly claims readiness.
@@ -238,6 +263,30 @@
       return null;
     } finally {loading=false;if(refresh) refresh.disabled=false;if(memberSubmit) memberSubmit.disabled=false;}
   };
+  verifyButton?.addEventListener('click', async () => {
+    const token=typeof storageGet==='function'?storageGet(AUTH_SESSION_KEY):'';
+    if (!token || verificationBusy || (typeof hasServerActionAccess==='function' && !hasServerActionAccess())) return;
+    verificationBusy=true;
+    verifyButton.disabled=true;
+    if (verifyStatus) verifyStatus.textContent='Checking registered messages directly with Discord…';
+    if (verifyResults) verifyResults.replaceChildren();
+    try {
+      const response=await authFetch(`${DASHBOARD_API_BASE}/api/admin/world-profiles/messages/verify`,{
+        method:'POST',headers:{Accept:'application/json',Authorization:`Bearer ${token}`,'Content-Type':'application/json'},
+        body:JSON.stringify({action:'verify_registered',offset:nextVerificationOffset}),
+      });
+      const result=await response.json().catch(()=>({}));
+      if (response.status===401 || response.status===403) {
+        storageRemove(AUTH_SESSION_KEY);applySignedOutState();return;
+      }
+      if (!response.ok || result.status!=='ok') throw new Error(result.message||`Verification returned HTTP ${response.status}`);
+      showVerification(result.verification);
+    } catch(error) {
+      if (verifyStatus) verifyStatus.textContent=`Verification failed: ${String(error?.message||'Discord temporarily unavailable')}. No messages changed.`;
+    } finally {
+      verificationBusy=false;verifyButton.disabled=false;
+    }
+  });
   scanButton?.addEventListener('click',async ()=>{
     const token=typeof storageGet==='function'?storageGet(AUTH_SESSION_KEY):'';
     if (!token || scanBusy || (typeof hasServerActionAccess==='function' && !hasServerActionAccess())) return;

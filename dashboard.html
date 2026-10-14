@@ -195,7 +195,7 @@
 <span aria-hidden="true" class="access-icon" data-access-icon="">⌁</span>
 <div><strong data-access-card-title="">Guest access</strong><small data-access-card-copy="">Sign in will securely verify your community access.</small></div>
 </div>
-<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v2.14.0</strong></div>
+<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v2.15.0</strong></div>
 <div class="sidebar-footer"><a href="index.html">Website</a><a href="legal.html">Policies</a><a href="privacy.html">Privacy</a></div>
 </aside>
 <button aria-label="Close dashboard menu" class="sidebar-scrim" data-sidebar-scrim="" type="button"></button>
@@ -1276,14 +1276,20 @@ Participation | 50000 | 0"></textarea><small>One line per prize: Prize name | Cu
 <article class="panel" data-admin-server-controls="" data-dashboard-section="server-controls" data-staff-only="" hidden="" id="dashboard-admin-server-controls"><div class="panel-heading"><div><p class="panel-kicker">Admin operations</p><h2>Protected Server Controls</h2></div><span class="lock-label" data-server-control-status="">Admin verified · controls connected</span></div><div class="operation-grid"><button data-server-action="restart" type="button"><strong>Restart server</strong><small data-server-action-note="">Checking live server state</small></button><button data-server-action="stop" type="button"><strong>Stop server</strong><small data-server-action-note="">Checking live server state</small></button><button data-server-action="start" type="button"><strong>Start server</strong><small data-server-action-note="">Checking live server state</small></button></div></article>
 <article class="panel world-manager-panel" data-dashboard-section="world-manager" data-staff-only="" hidden="" id="dashboard-admin-world-manager">
   <div class="panel-heading world-manager-heading"><div><p class="panel-kicker">Admin operations · No destructive actions</p><h2>World Manager</h2><p>Prepare Badlands as a fresh world while keeping Chernarus economy, progression, factions and map data untouched. Livonia remains independent.</p></div><div class="panel-heading-actions"><span class="muted-label" data-world-updated>Not checked</span><button type="button" class="secondary-action compact-action" data-world-refresh>Refresh Readiness</button></div></div>
-  <section class="world-manager-banner" aria-label="Migration activation status"><strong data-world-activation>Activation locked — preparation only</strong><div class="world-profile-card" data-world-branding-card><strong>Active-world branding · Stage 2D Phase 3</strong><p data-world-branding-current>Primary world: Chernarus · Secondary world: Livonia</p><p class="world-muted" data-world-branding-preview>Badlands name preview: World War Z | Badlands (staging only)</p><p class="world-muted">Active-world naming is shared by the Website and selected Bot output. The new owned-message registry tracks newly published panels and events; historic messages, editing, channels, maps and activation remain blocked.</p></div>
+  <section class="world-manager-banner" aria-label="Migration activation status"><strong data-world-activation>Activation locked — preparation only</strong><div class="world-profile-card" data-world-branding-card><strong>Active-world branding · Stage 2D Phase 4</strong><p data-world-branding-current>Primary world: Chernarus · Secondary world: Livonia</p><p class="world-muted" data-world-branding-preview>Badlands name preview: World War Z | Badlands (staging only)</p><p class="world-muted">Active-world naming is shared by the Website and selected Bot output. The new owned-message registry tracks newly published panels and events; historic messages, editing, channels, maps and activation remain blocked.</p></div>
 <p data-world-notice>Reading world migration status…</p><small data-world-mode>Primary world status</small></section>
   <div class="world-profile-grid" data-world-profiles><p class="table-note">Loading world profiles…</p></div>
   <section class="world-manager-section" data-world-managed-messages aria-label="Managed Discord message inventory">
-    <h3>Managed Discord Messages · Stage 2D Phase 3</h3>
+    <h3>Managed Discord Messages · Stage 2D Phase 4</h3>
     <p class="world-muted">Read-only inventory of Bot-owned messages recorded when WWZ publishes or updates them. Historical messages are not automatically registered; no Discord messages are edited by this tool.</p>
     <div class="world-managed-message-summary" data-world-managed-message-summary>Loading managed message inventory…</div>
     <div class="world-managed-message-items" data-world-managed-message-items></div>
+    <div class="world-profile-card" data-world-message-verification>
+      <div class="panel-heading-actions"><strong>Live Discord verification · Read only</strong><button type="button" class="secondary-action compact-action" data-world-verify-messages>Verify registered messages</button></div>
+      <p class="world-muted">Checks current Discord message existence, author and Bot channel permissions. Limited to 25 known registrations per request. Does not publish, edit or delete messages.</p>
+      <p class="world-muted" aria-live="polite" data-world-verify-status>Not checked. Click to perform a live, temporary Discord verification.</p>
+      <div class="world-managed-message-items" data-world-verify-results></div>
+    </div>
     <h4>Badlands Transition · Read-only Message Plan</h4>
     <p class="world-muted">These actions are suggestions derived only from saved publication metadata, not live Discord permission or ownership checks. Chernarus-only Trader coordinates and historical event content must never be relabelled as Badlands.</p>
     <div class="world-managed-message-summary" data-world-managed-refresh-plan-summary>Loading transition planning…</div>
@@ -1292,13 +1298,13 @@ Participation | 50000 | 0"></textarea><small>One line per prize: Prize name | Cu
   </section>
   <section class="world-manager-section" aria-label="Migration roadmap" data-world-roadmap>
     <h3>Migration roadmap</h3>
-    <p class="world-muted">Stage 2D Phase 3 adds Chernarus Trader panel tracking and a metadata-only Badlands Discord message transition plan. Live Discord permission checks, all refresh execution, remaining gameplay migration and activation stay blocked.</p>
+    <p class="world-muted">Stage 2D Phase 4 adds manual live Discord message existence, authorship and permission checks for registered panels. These diagnostics do not authorise edits. Refresh execution, historical imports, gameplay migration and activation remain blocked.</p>
     <ol class="world-roadmap-steps">
       <li data-status="completed"><strong>Stage 1 · World Profiles</strong><span>Confirmed — Admin World Manager and safe profile staging</span></li>
       <li data-status="staged"><strong>Stage 2A · Data foundation</strong><span>Isolated XP, wallet, bank and faction storage; production still unchanged</span></li>
       <li data-status="staged"><strong>Stage 2B · Gameplay routing</strong><span>Phase 2: guarded write adapters built for XP/prestige and wallet/bank; integration into live commands, quests, factions, shop, rentals, deliveries and workers still pending</span></li>
       <li data-status="staged"><strong>Stage 2C · Discord roles</strong><span>Full-member plans, duplicate protection and audit safety ready; role mutations and retry worker still locked</span></li>
-<li data-status="staged"><strong>Stage 2D · Active-world branding</strong><span>Phase 3: newly published Trader/status panels join event and calendar tracking, with read-only Badlands transition actions. Discord edits, preflight, historic imports and map assets remain blocked.</span></li>
+<li data-status="staged"><strong>Stage 2D · Active-world branding</strong><span>Phase 4: explicit Discord read-only author, message and permission diagnostics for known records. Discord changes, historical imports, map assets and activation remain blocked.</span></li>
       <li data-status="pending"><strong>Stages 3–4 · Map, backups, activation</strong><span>Official PlayStation/Nitrado support, verified restore, Admin-confirmed switch</span></li>
     </ol>
   </section>

@@ -1,4 +1,6 @@
-**Current release: Website v2.14.0 — Stage 2D Phase 3 Managed Message Transition Planning.** Read-only preview; no Discord edits or world activation.
+**Current release: Website v2.15.0 — Stage 2D Phase 4 Discord Message Verification.** Admin-only, on-demand read-only live Discord checks; no activation or Discord edits.
+
+**Previous release: Website v2.14.0 — Stage 2D Phase 3 Managed Message Transition Planning.** Read-only preview; no Discord edits or world activation.
 
 **Previous release: Website v2.13.0 — Stage 2D Phase 2 Managed Discord Message Registry.** Read-only panel inventory and audit metadata; activation remains locked.
 

@@ -1,3 +1,9 @@
+## Stage 2D Phase 4 — Discord message read-only preflight · Website v2.15.0 / Bot v1.78.0
+- Admin World Manager includes a manual Verify registered messages action against the current active Chernarus Bot guild. Checks at most 25 saved registry entries, not arbitrary Discord messages.
+- Bot verifies guild/channel, message existence, actual Bot author, view/history/send/embed permissions and whether saved references changed mid-check. Reports failures without changes.
+- Verification is transient. No Discord edits, bulk refreshes, historical imports, world activation, role changes, new map coordinates or website map changes. Recheck permissions/ownership before any future operation.
+- Radio Zenit is registered only on its next supported publish/refresh. Preserve all historical Chernarus content and keep Livonia isolated.
+
 ## Stage 2D Phase 3 — Managed Discord transition planning · Website v2.14.0 / Bot v1.77.0
 - Add Bot-owned Radio Zenit Trader panel publications/refreshes and periodic server-status updates to the guild/world-scoped message registry. Existing event/calendar and ownership checks remain.
 - Admin World Manager now displays a *metadata-only* Badlands transition plan: rebuild primary server status after verified activation, publish a new Badlands event calendar rather than rewriting Chernarus history, preserve historical event announcements and Chernarus Radio Zenit Trader location/coordinates.

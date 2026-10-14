@@ -1,0 +1,13 @@
+'use strict';
+const fs = require('node:fs');const path = require('node:path');const assert=require('node:assert/strict');
+const root=path.resolve(__dirname,'..');const file=p=>fs.readFileSync(path.join(root,p),'utf8');
+const dash=file('dashboard.html'), ui=file('assets/js/dashboard/world-manager.js'), sw=file('sw.js');
+for (const needle of ['data-world-verify-messages','data-world-verify-status','data-world-verify-results']) assert(dash.includes(needle),needle);
+for (const needle of ['/api/admin/world-profiles/messages/verify','verify_registered','report.items','showVerification']) assert(ui.includes(needle),needle);
+assert(ui.includes("action:'verify_registered',offset:nextVerificationOffset"));
+assert(!ui.includes('refresh_managed_message')&&!ui.includes('execute_managed_message'));
+assert(dash.includes('Execution locked') || dash.includes('Refresh and activation are locked'));
+assert(sw.includes("WWZ_PWA_VERSION = '2.15.0'"));
+assert(file('index.html').includes('Website v2.15.0 · Bot v1.78.0'));
+assert(file('changelog.html').includes('Version 2.15.0'));
+console.log('Stage 2D Phase 4 read-only verification UI passed');
