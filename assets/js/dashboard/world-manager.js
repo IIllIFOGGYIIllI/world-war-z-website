@@ -67,7 +67,7 @@
     }
     summary.textContent = `${cleanCount(audit.verified)} / ${cleanCount(audit.total)} checks verified · ${cleanCount(audit.blockers)} blockers · Activation locked`;
     audit.checks.forEach(check => {
-      const item = element('li');
+      const item = element('li', 'world-launch-check');
       item.dataset.status = check.status === 'verified' ? 'completed' : 'blocked';
       item.append(element('strong', '', `${check.status === 'verified' ? 'Verified' : 'BLOCKED'} · ${String(check.label || '')}`));
       item.append(element('span', '', String(check.detail || 'No evidence available.')));
@@ -84,8 +84,8 @@
     const brandedPrimary = branding.primary || {};
     const brandingLive = find('[data-world-branding-current]');
     const brandingPreview = find('[data-world-branding-preview]');
-    if (brandingLive) brandingLive.textContent = `Primary world: ${brandedPrimary.world_name || 'Chernarus'} · Secondary world: Livonia`;
-    if (brandingPreview) brandingPreview.textContent = `Badlands name preview: ${branding.badlands_preview?.server_name || 'World War Z | Badlands'} (staging only; no activation)`;
+    if (brandingLive) brandingLive.textContent = `Primary world: ${brandedPrimary.world_name || 'Chernarus'}${payload.quarantined ? ' (gameplay quarantined)' : ''} · Secondary world: Livonia`;
+    if (brandingPreview) brandingPreview.textContent = payload.quarantined ? 'Badlands mission configured · WWZ gameplay quarantined pending live validation' : `Badlands name preview: ${branding.badlands_preview?.server_name || 'World War Z | Badlands'} (staging only; no activation)`;
     const inventory = payload.managed_messages || {};
     const refreshPlan = inventory.refresh_plan || {};
     const planItems = Array.isArray(refreshPlan.items) ? refreshPlan.items : [];
@@ -128,8 +128,8 @@
       }
     }
     const primary = payload.primary === true;
-    find('[data-world-mode]').textContent = primary ? `Primary server · ${brandedPrimary.world_name || 'Chernarus'} live` : 'Independent server · Livonia';
-    find('[data-world-activation]').textContent = 'Activation locked — preparation only';
+    find('[data-world-mode]').textContent = payload.quarantined ? 'Primary server · Badlands in gameplay quarantine' : primary ? `Primary server · ${brandedPrimary.world_name || 'Chernarus'} live` : 'Independent server · Livonia';
+    find('[data-world-activation]').textContent = payload.quarantined ? 'Badlands gameplay quarantined — never auto-unlock' : 'Activation locked — preparation only';
     find('[data-world-notice]').textContent = String(payload.message || 'No activation in this version.');
     (Array.isArray(payload.profiles) ? payload.profiles : []).forEach((profile) => {
       const card = element('article', 'world-profile-card');

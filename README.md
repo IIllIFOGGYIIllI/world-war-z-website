@@ -1,3 +1,9 @@
+## Website v2.17.0 / Bot v1.80.0 — Badlands cutover quarantine
+- World Manager now clearly separates check labels and detailed blockers for easier reading.
+- Supports displaying Badlands as a quarantined primary world when the Bot is explicitly configured for the verified new mission.
+- Bot keeps old Chernarus/Livonia DB and routes Badlands to a new private SQLite file. Bot gameplay, map-dependent workers and write operations remain locked pending validation.
+- No Nitrado actions, discord role edits, historical message rewrites or off-server backups are performed by this release.
+
 **Current release: Website v2.16.0 — Badlands Launch Safety Gate.** The Admin World Manager displays precise cutover blockers from the Bot v1.79.0 readiness endpoint. No activation, destructive operations or assumption of verified Nitrado mission. **This does not complete production Badlands cutover.**
 
 **Current release: Website v2.15.0 — Stage 2D Phase 4 Discord Message Verification.** Admin-only, on-demand read-only live Discord checks; no activation or Discord edits.

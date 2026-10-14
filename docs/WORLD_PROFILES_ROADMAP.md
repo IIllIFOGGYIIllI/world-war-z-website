@@ -1,3 +1,9 @@
+## Website v2.17.0 / Bot v1.80.0 — Badlands cutover quarantine
+- World Manager now clearly separates check labels and detailed blockers for easier reading.
+- Supports displaying Badlands as a quarantined primary world when the Bot is explicitly configured for the verified new mission.
+- Bot keeps old Chernarus/Livonia DB and routes Badlands to a new private SQLite file. Bot gameplay, map-dependent workers and write operations remain locked pending validation.
+- No Nitrado actions, discord role edits, historical message rewrites or off-server backups are performed by this release.
+
 ## Urgent launch gate — Website v2.16.0 / Bot v1.79.0
 - Adds Admin launch preflight with checked blockers for production isolation, off-server backups, pending deliveries, console mission, roles, historical messages, Badlands map assets and tested rollback.
 - A status is only marked verified when backed by existing evidence; absent proof is blocked. This is a read-only launch dashboard, **not an activation feature**.

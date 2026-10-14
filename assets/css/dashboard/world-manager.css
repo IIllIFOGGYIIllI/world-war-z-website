@@ -72,3 +72,27 @@
 .world-managed-message-items{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:.6rem;max-height:23rem;overflow-y:auto}
 .world-managed-message{display:grid;gap:.3rem;padding:.8rem;border:1px solid rgba(255,255,255,.09);border-radius:10px;background:rgba(0,0,0,.12);overflow-wrap:anywhere}
 .world-managed-message small{font-size:.75rem;opacity:.72}
+
+/* v2.17 launch-gate accessibility: readable state, label and diagnostic detail */
+.world-check-list[data-world-launch-checks] {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  margin: 16px 0;
+  list-style: none;
+}
+.world-check-list[data-world-launch-checks] > li {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+  padding: 12px 14px;
+  border: 1px solid rgba(150, 163, 183, .17);
+  border-radius: 10px;
+}
+.world-check-list[data-world-launch-checks] > li > strong { display: block; }
+.world-check-list[data-world-launch-checks] > li > span { display: block; opacity: .84; }
+.world-check-list[data-world-launch-checks] > li[data-status="completed"] > strong { color: #6de0aa; }
+.world-check-list[data-world-launch-checks] > li[data-status="blocked"] > strong { color: #ffbd82; }
