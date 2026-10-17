@@ -489,10 +489,63 @@ const filteredModeItems = ({ ignoreCategory = false } = {}) => {
     return !query || itemHaystack(item).includes(query);
   });
 };
+// Curated vehicle lineup, grouped by model, then by colour. Does not
+// alter real DayZ classnames, prices, delivery templates or database order.
+const WWZ_VEHICLE_LINEUP = [
+  ['motorbike01', 'janamoped', 'motorbike1'], // Jana mopeds
+  ['motorbike02', 'endurodirtbike', 'motorbike2'], // Dirt bikes
+  ['offroadhatchback', 'ada4x4'], // Ada 4x4
+  ['hatchback02', 'gunter2'], // Gunter 2
+  ['sedan02', 'sarka120'], // Sarka 120
+  ['civiliansedan', 'olga24'], // Olga 24
+  ['truck01covered', 'm3scovered'], // M3S truck
+  ['offroad02', 'm1025'] // M1025 military vehicle
+];
+const WWZ_VEHICLE_COLOUR_ORDER = [
+  'standard', 'red', 'blue', 'green', 'yellow', 'black', 'grey',
+  'gray', 'white', 'orange', 'wine', 'beige', 'brown'
+];
+const wwzVehicleSortKey = (item) => {
+  const profile = String(item?.delivery_profile?.child_type || item?.child_type || '');
+  const description = String(item?.description || '');
+  const classnameInDescription = description.match(/\(([A-Za-z0-9_]+)\)/)?.[1] || '';
+  const name = String(item?.name || '');
+  const classText = [profile, classnameInDescription, item?.source_key || '', item?.sku || '', name]
+    .join(' ').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const model = WWZ_VEHICLE_LINEUP.findIndex((aliases) => aliases.some((alias) => classText.includes(alias)));
+  // Prefer human-friendly colour names; the classname is retained as fallback.
+  const colorText = `${name} ${profile} ${classnameInDescription}`.toLowerCase();
+  const color = WWZ_VEHICLE_COLOUR_ORDER.findIndex((value) =>
+    new RegExp(`\\b${value}\\b`, 'i').test(colorText.replace(/_/g, ' '))
+  );
+  const baseClass = profile || classnameInDescription;
+  const isBaseModel = ['OffroadHatchback', 'Hatchback_02', 'Sedan_02', 'CivilianSedan', 'Truck_01_Covered']
+    .some((classname) => classname.toLowerCase() === baseClass.toLowerCase());
+  return [model < 0 ? WWZ_VEHICLE_LINEUP.length : model,
+    color < 0 ? (isBaseModel ? 0 : WWZ_VEHICLE_COLOUR_ORDER.length + 1) : color + 1];
+};
+const compareWWZVehicleLineup = (a, b) => {
+  const first = wwzVehicleSortKey(a), second = wwzVehicleSortKey(b);
+  return first[0] - second[0] || first[1] - second[1]
+    || String(a?.name || '').localeCompare(String(b?.name || ''), undefined, { numeric: true, sensitivity: 'base' })
+    || Number(a?.item_id || 0) - Number(b?.item_id || 0);
+};
+
+// Keep inventory alphabetic, but present rentals in the curated vehicle lineup.
+if (elements.sort) {
+  const choice = document.createElement('option');
+  choice.value = 'vehicle-order';
+  choice.textContent = 'Vehicle lineup (model and colour)';
+  const first = elements.sort.querySelector('option');
+  elements.sort.insertBefore(choice, first);
+  elements.sort.value = state.mode === 'event' ? 'vehicle-order' : 'name-asc';
+  state.catalogueSort = elements.sort.value;
+}
 const sortCatalogueItems = (items) => {
-  const sort = state.catalogueSort || 'name-asc';
+  const sort = state.catalogueSort || (state.mode === 'event' ? 'vehicle-order' : 'name-asc');
   return items.map((item, index) => ({ item, index })).sort((left, right) => {
     const a = left.item, b = right.item;
+    if (state.mode === 'event' && (sort === 'vehicle-order' || sort === 'recommended')) return compareWWZVehicleLineup(a, b);
     if (sort === 'name-asc') return String(a.name).localeCompare(String(b.name));
     if (sort === 'name-desc') return String(b.name).localeCompare(String(a.name));
     if (sort === 'price-asc') return Number(a.price || 0) - Number(b.price || 0) || String(a.name).localeCompare(String(b.name));
@@ -1215,6 +1268,8 @@ elements.cancelForm?.addEventListener('submit', submitRentalCancellation);
 $$('[data-member-rental-cancel-close]').forEach((button) => button.addEventListener('click', () => { if (!state.rentalActionBusy) { elements.cancelDialog?.close(); state.selectedRental = null; } }));
 $$('[data-member-shop-mode]').forEach((button) => button.addEventListener('click', () => {
   state.mode = button.dataset.memberShopMode === 'event' ? 'event' : 'manual';
+  if (elements.sort) elements.sort.value = state.mode === 'event' ? 'vehicle-order' : 'name-asc';
+  state.catalogueSort = elements.sort?.value || 'name-asc';
   $$('[data-member-shop-mode]').forEach((entry) => { const active = entry === button; entry.classList.toggle('active', active); entry.setAttribute('aria-selected', String(active)); });
   elements.modeLabel.textContent = state.mode === 'event' ? 'Event items' : 'Items'; elements.search.value = ''; resetCataloguePage(); populateCategories(); renderCatalogue();
 }));
@@ -1224,8 +1279,8 @@ elements.category.addEventListener('change', () => { resetCataloguePage(); rende
 elements.sort?.addEventListener('change', () => { state.catalogueSort = elements.sort.value; resetCataloguePage(); renderCatalogue(); });
 elements.pageSize?.addEventListener('change', () => { state.cataloguePageSize = Number(elements.pageSize.value || 24); resetCataloguePage(); renderCatalogue(); });
 elements.resetFilters?.addEventListener('click', () => {
-  elements.search.value = ''; elements.category.value = 'all'; if (elements.sort) elements.sort.value = 'recommended'; if (elements.pageSize) elements.pageSize.value = '24';
-  state.catalogueSort = 'name-asc'; state.cataloguePageSize = 24; resetCataloguePage(); renderCatalogue(); elements.search.focus();
+  elements.search.value = ''; elements.category.value = 'all'; if (elements.sort) elements.sort.value = state.mode === 'event' ? 'vehicle-order' : 'name-asc'; if (elements.pageSize) elements.pageSize.value = '24';
+  state.catalogueSort = elements.sort?.value || 'name-asc'; state.cataloguePageSize = 24; resetCataloguePage(); renderCatalogue(); elements.search.focus();
 });
 $$('[data-member-item-detail-close]').forEach((button) => button.addEventListener('click', () => elements.detailDialog?.close()));
 elements.detailBuy?.addEventListener('click', () => {

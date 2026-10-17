@@ -540,7 +540,8 @@ const renderShopCatalogue = () => {
     const matchesCategory = category === 'all' || String(item.category) === category;
     const haystack = `${item.item_id} ${item.name} ${item.sku} ${item.category} ${item.description}`.toLowerCase();
     return matchesMode && matchesCategory && (!query || haystack.includes(query));
-  }).sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), undefined, { sensitivity: 'base', numeric: true }));
+  }).sort((a, b) => shopCatalogueMode === 'event' ? compareWWZVehicleLineup(a, b)
+    : String(a.name || '').localeCompare(String(b.name || ''), undefined, { sensitivity: 'base', numeric: true }));
   shopCatalogue.replaceChildren();
   visible.forEach((item) => {
     const card = document.createElement('article');
@@ -1105,12 +1106,55 @@ const getOwnerManualFilteredItems = () => {
   });
 };
 
+// Curated vehicle lineup, grouped by model, then by colour. Does not
+// alter real DayZ classnames, prices, delivery templates or database order.
+const WWZ_VEHICLE_LINEUP = [
+  ['motorbike01', 'janamoped', 'motorbike1'], // Jana mopeds
+  ['motorbike02', 'endurodirtbike', 'motorbike2'], // Dirt bikes
+  ['offroadhatchback', 'ada4x4'], // Ada 4x4
+  ['hatchback02', 'gunter2'], // Gunter 2
+  ['sedan02', 'sarka120'], // Sarka 120
+  ['civiliansedan', 'olga24'], // Olga 24
+  ['truck01covered', 'm3scovered'], // M3S truck
+  ['offroad02', 'm1025'] // M1025 military vehicle
+];
+const WWZ_VEHICLE_COLOUR_ORDER = [
+  'standard', 'red', 'blue', 'green', 'yellow', 'black', 'grey',
+  'gray', 'white', 'orange', 'wine', 'beige', 'brown'
+];
+const wwzVehicleSortKey = (item) => {
+  const profile = String(item?.delivery_profile?.child_type || item?.child_type || '');
+  const description = String(item?.description || '');
+  const classnameInDescription = description.match(/\(([A-Za-z0-9_]+)\)/)?.[1] || '';
+  const name = String(item?.name || '');
+  const classText = [profile, classnameInDescription, item?.source_key || '', item?.sku || '', name]
+    .join(' ').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const model = WWZ_VEHICLE_LINEUP.findIndex((aliases) => aliases.some((alias) => classText.includes(alias)));
+  // Prefer human-friendly colour names; the classname is retained as fallback.
+  const colorText = `${name} ${profile} ${classnameInDescription}`.toLowerCase();
+  const color = WWZ_VEHICLE_COLOUR_ORDER.findIndex((value) =>
+    new RegExp(`\\b${value}\\b`, 'i').test(colorText.replace(/_/g, ' '))
+  );
+  const baseClass = profile || classnameInDescription;
+  const isBaseModel = ['OffroadHatchback', 'Hatchback_02', 'Sedan_02', 'CivilianSedan', 'Truck_01_Covered']
+    .some((classname) => classname.toLowerCase() === baseClass.toLowerCase());
+  return [model < 0 ? WWZ_VEHICLE_LINEUP.length : model,
+    color < 0 ? (isBaseModel ? 0 : WWZ_VEHICLE_COLOUR_ORDER.length + 1) : color + 1];
+};
+const compareWWZVehicleLineup = (a, b) => {
+  const first = wwzVehicleSortKey(a), second = wwzVehicleSortKey(b);
+  return first[0] - second[0] || first[1] - second[1]
+    || String(a?.name || '').localeCompare(String(b?.name || ''), undefined, { numeric: true, sensitivity: 'base' })
+    || Number(a?.item_id || 0) - Number(b?.item_id || 0);
+};
+
 const getOwnerEventFilteredItems = () => {
   const query = String(ownerEventSearch?.value || '').trim().toLowerCase();
   const category = ownerEventCategory?.value || 'all';
   return ownerShopItems.filter((item) => item.fulfilment_type === 'event'
     && (category === 'all' || item.category === category)
-    && (!query || `${item.item_id} ${item.name} ${item.sku} ${item.category} ${item.delivery_profile?.child_type || ''}`.toLowerCase().includes(query)));
+    && (!query || `${item.item_id} ${item.name} ${item.sku} ${item.category} ${item.delivery_profile?.child_type || ''}`.toLowerCase().includes(query)))
+    .sort(compareWWZVehicleLineup);
 };
 
 const readOwnerBulkAction = ({ strict = false } = {}) => {
