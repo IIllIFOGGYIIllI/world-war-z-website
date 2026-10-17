@@ -1,3 +1,11 @@
+// Delivery controls must not depend on the separately lazy-loaded Appeals controller.
+const showDeliveryInlineMessage = (element, message, state = 'error') => {
+  if (!element) return;
+  element.textContent = String(message || '');
+  element.dataset.state = state;
+  element.hidden = !message;
+};
+
 // Saved coordinates, event-delivery operations and Owner mission-file workspace.
 const deliveryLocationForm = document.querySelector('[data-location-form]');
 const deliveryLocationId = document.querySelector('[data-location-id]');
@@ -78,7 +86,7 @@ const resetDeliveryLocationForm = () => {
   if (deliveryLocationRotation) deliveryLocationRotation.value = '0';
   setText('[data-location-form-title]', 'Save a location');
   cancelDeliveryLocationEditButton?.setAttribute('hidden', '');
-  showInlineMessage(deliveryLocationMessage, '');
+  showDeliveryInlineMessage(deliveryLocationMessage, '');
   deliveryLocationMapInstance?.clearSelection({ notify: false });
   deliveryLocationMapInstance?.reset();
   if (deliveryLocationMapReadout) deliveryLocationMapReadout.textContent = 'No coordinates selected';
@@ -179,7 +187,7 @@ const saveDeliveryLocationAction = async (body) => {
   if (!sessionToken || deliveryLocationRequestInProgress) return false;
   deliveryLocationRequestInProgress = true;
   saveDeliveryLocationButton?.setAttribute('disabled', '');
-  showInlineMessage(deliveryLocationMessage, body.action === 'delete' ? 'Deleting saved location…' : 'Saving coordinates…', 'info');
+  showDeliveryInlineMessage(deliveryLocationMessage, body.action === 'delete' ? 'Deleting saved location…' : 'Saving coordinates…', 'info');
   try {
     const response = await protectedActionFetch(ACCOUNT_DELIVERY_LOCATION_ACTION_URL, {
       method: 'POST',
@@ -193,13 +201,13 @@ const saveDeliveryLocationAction = async (body) => {
       return false;
     }
     if (!response.ok) throw new Error(payload.message || 'The saved location could not be updated.');
-    showInlineMessage(deliveryLocationMessage, payload.message || 'Saved location updated.', 'success');
+    showDeliveryInlineMessage(deliveryLocationMessage, payload.message || 'Saved location updated.', 'success');
     deliveryLocationRequestInProgress = false;
     resetDeliveryLocationForm();
     await loadDeliveryLocations(sessionToken);
     return true;
   } catch (error) {
-    showInlineMessage(deliveryLocationMessage, error.message || 'The saved location could not be updated.');
+    showDeliveryInlineMessage(deliveryLocationMessage, error.message || 'The saved location could not be updated.');
     return false;
   } finally {
     deliveryLocationRequestInProgress = false;
@@ -480,7 +488,7 @@ const loadServerConfigOverview = async (token = storageGet(AUTH_SESSION_KEY)) =>
     applyServerConfigOverview(payload);
     return true;
   } catch (error) {
-    showInlineMessage(configFileMessage, error.message || 'Configuration overview unavailable.');
+    showDeliveryInlineMessage(configFileMessage, error.message || 'Configuration overview unavailable.');
     return false;
   } finally {
     ownerServerConfigRequestInProgress = false;
@@ -494,7 +502,7 @@ const loadSelectedConfigFile = async () => {
   if (!token || dashboardAccessLevel !== 'owner' || !fileKey || ownerServerConfigRequestInProgress) return;
   ownerServerConfigRequestInProgress = true;
   loadConfigFileButton?.setAttribute('disabled', '');
-  showInlineMessage(configFileMessage, 'Loading the live Nitrado file…', 'info');
+  showDeliveryInlineMessage(configFileMessage, 'Loading the live Nitrado file…', 'info');
   try {
     const response = await authFetch(`${OWNER_SERVER_CONFIG_FILE_URL}?file=${encodeURIComponent(fileKey)}`, { headers: { Accept: 'application/json', Authorization: `Bearer ${token}` } });
     const payload = await response.json().catch(() => ({}));
@@ -506,9 +514,9 @@ const loadSelectedConfigFile = async () => {
     setText('[data-config-file-sha]', String(file.sha256 || '').slice(0, 16) || '—');
     setText('[data-config-file-size]', readableBytes(file.size_bytes));
     if (configFileDiff) configFileDiff.textContent = 'No diff generated.';
-    showInlineMessage(configFileMessage, `${file.label || fileKey} loaded from Nitrado.`, 'success');
+    showDeliveryInlineMessage(configFileMessage, `${file.label || fileKey} loaded from Nitrado.`, 'success');
   } catch (error) {
-    showInlineMessage(configFileMessage, error.message || 'The file could not be loaded.');
+    showDeliveryInlineMessage(configFileMessage, error.message || 'The file could not be loaded.');
   } finally {
     ownerServerConfigRequestInProgress = false;
     loadConfigFileButton?.removeAttribute('disabled');
@@ -521,7 +529,7 @@ const submitConfigFileAction = async (action) => {
   if (!token || dashboardAccessLevel !== 'owner' || !fileKey || ownerServerConfigRequestInProgress) return;
   if (action === 'apply') {
     if ((configFileReason?.value.trim() || '').length < 5) {
-      showInlineMessage(configFileMessage, 'Enter a deployment reason of at least five characters.');
+      showDeliveryInlineMessage(configFileMessage, 'Enter a deployment reason of at least five characters.');
       return;
     }
     if (!window.confirm('Create a live backup and upload this exact file to Nitrado?')) return;
@@ -530,7 +538,7 @@ const submitConfigFileAction = async (action) => {
   ownerServerConfigRequestInProgress = true;
   validateConfigFileButton?.setAttribute('disabled', '');
   applyConfigFileButton?.setAttribute('disabled', '');
-  showInlineMessage(configFileMessage, action === 'apply' ? 'Backing up and applying the file…' : 'Validating and comparing the file…', 'info');
+  showDeliveryInlineMessage(configFileMessage, action === 'apply' ? 'Backing up and applying the file…' : 'Validating and comparing the file…', 'info');
   try {
     const response = await protectedActionFetch(OWNER_SERVER_CONFIG_FILE_ACTION_URL, {
       method: 'POST',
@@ -541,10 +549,10 @@ const submitConfigFileAction = async (action) => {
     if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: action === 'apply' })) return;
     if (!response.ok) throw new Error(payload.message || 'The configuration operation failed.');
     if (configFileDiff && 'diff' in payload) configFileDiff.textContent = payload.diff || 'No changes detected.';
-    showInlineMessage(configFileMessage, payload.message || 'Configuration operation completed.', 'success');
+    showDeliveryInlineMessage(configFileMessage, payload.message || 'Configuration operation completed.', 'success');
     refreshAfterApply = action === 'apply';
   } catch (error) {
-    showInlineMessage(configFileMessage, error.message || 'The configuration operation failed.');
+    showDeliveryInlineMessage(configFileMessage, error.message || 'The configuration operation failed.');
   } finally {
     ownerServerConfigRequestInProgress = false;
     validateConfigFileButton?.removeAttribute('disabled');
@@ -630,7 +638,7 @@ const loadConfigBackups = async (token = storageGet(AUTH_SESSION_KEY)) => {
     return true;
   } catch (error) {
     if (configBackupError) configBackupError.hidden = false;
-    showInlineMessage(configBackupMessage, error.message || 'Configuration backups are unavailable.');
+    showDeliveryInlineMessage(configBackupMessage, error.message || 'Configuration backups are unavailable.');
     return false;
   } finally {
     ownerConfigBackupRequestInProgress = false;
@@ -643,11 +651,11 @@ const submitConfigBackupAction = async (action, backup = null) => {
   if (!token || dashboardAccessLevel !== 'owner' || ownerConfigBackupRequestInProgress) return;
   const reason = String(configBackupReason?.value || '').trim();
   if (action === 'create' && !configBackupCreateFile?.value) {
-    showInlineMessage(configBackupMessage, 'Select a managed file to back up.');
+    showDeliveryInlineMessage(configBackupMessage, 'Select a managed file to back up.');
     return;
   }
   if (['create', 'restore'].includes(action) && reason.length < 5) {
-    showInlineMessage(configBackupMessage, 'Enter a backup or restore reason of at least five characters.');
+    showDeliveryInlineMessage(configBackupMessage, 'Enter a backup or restore reason of at least five characters.');
     return;
   }
   if (action === 'restore' && !window.confirm(`Restore backup #${backup?.id} to the live Nitrado file? A recovery backup will be created first when the live file differs.`)) return;
@@ -655,7 +663,7 @@ const submitConfigBackupAction = async (action, backup = null) => {
   ownerConfigBackupRequestInProgress = true;
   createConfigBackupButton?.setAttribute('disabled', '');
   refreshConfigBackupsButton?.setAttribute('disabled', '');
-  showInlineMessage(configBackupMessage, action === 'diff' ? 'Comparing the backup with the live file…' : action === 'restore' ? 'Restoring and verifying the selected backup…' : 'Creating and validating the live backup…', 'info');
+  showDeliveryInlineMessage(configBackupMessage, action === 'diff' ? 'Comparing the backup with the live file…' : action === 'restore' ? 'Restoring and verifying the selected backup…' : 'Creating and validating the live backup…', 'info');
   try {
     const body = { action, reason };
     if (action === 'create') body.file_key = configBackupCreateFile?.value || '';
@@ -672,10 +680,10 @@ const submitConfigBackupAction = async (action, backup = null) => {
       const header = payload.different ? `Backup #${backup.id} differs from the live file.` : `Backup #${backup.id} matches the live file.`;
       configBackupDiff.textContent = `${header}\n\n${payload.diff || 'No changes detected.'}`;
     }
-    showInlineMessage(configBackupMessage, payload.message || 'Configuration backup operation completed.', 'success');
+    showDeliveryInlineMessage(configBackupMessage, payload.message || 'Configuration backup operation completed.', 'success');
     refreshAfterWrite = action !== 'diff';
   } catch (error) {
-    showInlineMessage(configBackupMessage, error.message || 'The configuration backup operation failed.');
+    showDeliveryInlineMessage(configBackupMessage, error.message || 'The configuration backup operation failed.');
   } finally {
     ownerConfigBackupRequestInProgress = false;
     createConfigBackupButton?.removeAttribute('disabled');

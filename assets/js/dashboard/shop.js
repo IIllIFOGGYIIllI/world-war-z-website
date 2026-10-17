@@ -1,3 +1,11 @@
+// Self-contained message rendering: Shop must work without the Appeals controller.
+const showShopInlineMessage = (element, message, state = 'error') => {
+  if (!element) return;
+  element.textContent = String(message || '');
+  element.dataset.state = state;
+  element.hidden = !message;
+};
+
 const shopCatalogue = document.querySelector('[data-shop-catalogue]');
 const shopSearch = document.querySelector('[data-shop-search]');
 const shopCategory = document.querySelector('[data-shop-category]');
@@ -448,7 +456,7 @@ const openShopPurchase = (item) => {
   setText('[data-shop-purchase-item]', `${item.name} · ${item.sku}`);
   const deliveryText = isEvent ? 'Restart-Bound Event Spawn' : 'Automatic coordinate delivery';
   setText('[data-shop-purchase-price]', `${formatMoney(item.price)} ${isEvent ? 'per restart' : 'each'} · ${shopStockText(item)} · ${deliveryText}`);
-  showInlineMessage(shopPurchaseMessage, '');
+  showShopInlineMessage(shopPurchaseMessage, '');
   updateDashboardPaymentHelp();
   updateShopPurchaseTotal();
   if (typeof shopPurchaseDialog?.showModal === 'function') shopPurchaseDialog.showModal();
@@ -488,7 +496,7 @@ const openDashboardCartCheckout = () => {
     dashboardCartDeliveryPlan?.refreshLocations(savedDeliveryLocations);
   }); syncShopDeliveryForm();
   const units = dashboardCartUnitCount(); setText('[data-shop-purchase-title]', 'Checkout Shopping Cart'); setText('[data-shop-purchase-item]', `${entries.length} different items · ${units.toLocaleString()} total units`); setText('[data-shop-purchase-price]', 'One payment · per-product delivery locations');
-  showInlineMessage(shopPurchaseMessage, ''); updateDashboardPaymentHelp(); updateShopPurchaseTotal();
+  showShopInlineMessage(shopPurchaseMessage, ''); updateDashboardPaymentHelp(); updateShopPurchaseTotal();
   if (typeof shopPurchaseDialog?.showModal === 'function') shopPurchaseDialog.showModal(); else shopPurchaseDialog?.setAttribute('open', '');
   window.setTimeout(() => { const instance = ensureShopCoordinateMap(); resetCoordinatePicker(); updateCoordinateMarker(); instance?.invalidateSize(); }, 0);
 };
@@ -739,7 +747,7 @@ shopPurchaseForm?.addEventListener('submit', async (event) => {
   if (!sessionToken || (!selectedShopItem && !shopCartCheckout) || shopPurchaseInProgress) return;
   shopPurchaseInProgress = true;
   confirmShopPurchaseButton?.setAttribute('disabled', '');
-  showInlineMessage(shopPurchaseMessage, 'Railway is validating stock, purchase limits and your selected payment source.', 'info');
+  showShopInlineMessage(shopPurchaseMessage, 'Railway is validating stock, purchase limits and your selected payment source.', 'info');
   try {
     const response = await protectedActionFetch(ACCOUNT_SHOP_PURCHASE_URL, {
       method: 'POST',
@@ -770,12 +778,12 @@ shopPurchaseForm?.addEventListener('submit', async (event) => {
       return;
     }
     if (!response.ok) throw new Error(payload.message || 'The purchase could not be completed.');
-    showInlineMessage(shopPurchaseMessage, payload.message || 'Order placed.', 'success');
+    showShopInlineMessage(shopPurchaseMessage, payload.message || 'Order placed.', 'success');
     if (shopCartCheckout) clearDashboardShopCart();
     await loadMemberShop(sessionToken);
     window.setTimeout(() => { shopPurchaseDialog?.close?.(); shopCartCheckout = false; }, 900);
   } catch (error) {
-    showInlineMessage(shopPurchaseMessage, error.message || 'The purchase could not be completed.');
+    showShopInlineMessage(shopPurchaseMessage, error.message || 'The purchase could not be completed.');
   } finally {
     shopPurchaseInProgress = false;
     confirmShopPurchaseButton?.removeAttribute('disabled');
@@ -805,7 +813,7 @@ const adminShopActionButton = (label, action, order, danger = false) => {
     setText('[data-shop-order-action-target]', `${order.buyer.psn_id} · ${order.quantity} × ${order.item.name}`);
     setText('[data-shop-order-action-detail]', `${formatMoney(order.total_price)} · ${shopStatusLabel(order.status)}`);
     setText('[data-shop-order-action-warning]', ['cancel', 'refund'].includes(action) ? 'Full economy refund and stock restoration' : 'Permanent order audit entry');
-    showInlineMessage(shopOrderActionMessage, '');
+    showShopInlineMessage(shopOrderActionMessage, '');
     if (typeof shopOrderActionDialog?.showModal === 'function') shopOrderActionDialog.showModal();
     else shopOrderActionDialog?.setAttribute('open', '');
   });
@@ -929,7 +937,7 @@ shopOrderActionForm?.addEventListener('submit', async (event) => {
   if (!sessionToken || !selectedShopOrder || !selectedShopOrderAction || shopOrderActionInProgress) return;
   shopOrderActionInProgress = true;
   confirmShopOrderActionButton?.setAttribute('disabled', '');
-  showInlineMessage(shopOrderActionMessage, 'Railway is updating the order and economy audit.', 'info');
+  showShopInlineMessage(shopOrderActionMessage, 'Railway is updating the order and economy audit.', 'info');
   try {
     const response = await protectedActionFetch(ADMIN_SHOP_ORDER_ACTION_URL, {
       method: 'POST',
@@ -939,11 +947,11 @@ shopOrderActionForm?.addEventListener('submit', async (event) => {
     const payload = await response.json().catch(() => ({}));
     if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: true })) return;
     if (!response.ok) throw new Error(payload.message || 'The order could not be updated.');
-    showInlineMessage(shopOrderActionMessage, payload.message || 'Order updated.', 'success');
+    showShopInlineMessage(shopOrderActionMessage, payload.message || 'Order updated.', 'success');
     await Promise.all([loadAdminShopOrders(sessionToken), loadDeliveryQueue(sessionToken), loadMemberShop(sessionToken)]);
     window.setTimeout(() => shopOrderActionDialog?.close?.(), 800);
   } catch (error) {
-    showInlineMessage(shopOrderActionMessage, error.message || 'The order could not be updated.');
+    showShopInlineMessage(shopOrderActionMessage, error.message || 'The order could not be updated.');
   } finally {
     shopOrderActionInProgress = false;
     confirmShopOrderActionButton?.removeAttribute('disabled');
@@ -973,12 +981,12 @@ const performOwnerCatalogueAction = async (body, { confirmText = '', messageElem
     const payload = await response.json().catch(() => ({}));
     if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: true })) return null;
     if (!response.ok) throw new Error(payload.message || 'The catalogue action could not be completed.');
-    showInlineMessage(messageElement, payload.message || 'Catalogue updated.', 'success');
+    showShopInlineMessage(messageElement, payload.message || 'Catalogue updated.', 'success');
     ownerShopRequestInProgress = false;
     await Promise.all([loadOwnerShopConfig(sessionToken), loadMemberShop(sessionToken)]);
     return payload;
   } catch (error) {
-    showInlineMessage(messageElement, error.message || 'The catalogue action could not be completed.');
+    showShopInlineMessage(messageElement, error.message || 'The catalogue action could not be completed.');
     return null;
   } finally {
     ownerShopRequestInProgress = false;
@@ -1302,14 +1310,14 @@ ownerShopApplyBulkButton?.addEventListener('click', async () => {
   const selectedItems = ownerShopItems.filter((item) => item.fulfilment_type !== 'event' && ownerShopSelectedIds.has(Number(item.item_id)));
   if (!selectedItems.length) return;
   let action;
-  try { action = readOwnerBulkAction({ strict: true }); } catch (error) { showInlineMessage(ownerShopBulkMessage, error.message || 'Complete the bulk action fields.'); return; }
-  if (!action) { showInlineMessage(ownerShopBulkMessage, 'Choose a bulk action first.'); return; }
+  try { action = readOwnerBulkAction({ strict: true }); } catch (error) { showShopInlineMessage(ownerShopBulkMessage, error.message || 'Complete the bulk action fields.'); return; }
+  if (!action) { showShopInlineMessage(ownerShopBulkMessage, 'Choose a bulk action first.'); return; }
   const categoryCount = new Set(selectedItems.map((item) => String(item.category))).size;
   const confirmation = `Apply this bulk catalogue change?\n\n${selectedItems.length.toLocaleString()} item(s) across ${categoryCount.toLocaleString()} categor${categoryCount === 1 ? 'y' : 'ies'}\nAction: ${action.description}\n\nExisting orders are not rewritten.`;
   if (!window.confirm(confirmation)) return;
   ownerShopBulkInProgress = true;
   ownerShopApplyBulkButton.setAttribute('disabled', '');
-  showInlineMessage(ownerShopBulkMessage, `Applying bulk change to ${selectedItems.length.toLocaleString()} item(s)…`, 'info');
+  showShopInlineMessage(ownerShopBulkMessage, `Applying bulk change to ${selectedItems.length.toLocaleString()} item(s)…`, 'info');
   try {
     const response = await protectedActionFetch(OWNER_SHOP_BULK_URL, {
       method: 'POST',
@@ -1319,11 +1327,11 @@ ownerShopApplyBulkButton?.addEventListener('click', async () => {
     const payload = await response.json().catch(() => ({}));
     if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: true })) return;
     if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Bulk catalogue change failed.');
-    showInlineMessage(ownerShopBulkMessage, payload.message || 'Bulk catalogue change applied.', 'success');
+    showShopInlineMessage(ownerShopBulkMessage, payload.message || 'Bulk catalogue change applied.', 'success');
     ownerShopSelectedIds.clear();
     await Promise.all([loadOwnerShopConfig(sessionToken), loadMemberShop(sessionToken)]);
   } catch (error) {
-    showInlineMessage(ownerShopBulkMessage, error.message || 'Bulk catalogue change failed.');
+    showShopInlineMessage(ownerShopBulkMessage, error.message || 'Bulk catalogue change failed.');
   } finally {
     ownerShopBulkInProgress = false;
     ownerShopApplyBulkButton?.removeAttribute('disabled');
@@ -1538,7 +1546,7 @@ const openShopItemEditor = (item = null, { forceEvent = false } = {}) => {
   syncShopItemDeliveryEditor();
   updateEventEditorCounts();
   if (isEventEditor) validateEventTemplateEditors();
-  showInlineMessage(shopItemMessage, '');
+  showShopInlineMessage(shopItemMessage, '');
   if (typeof shopItemDialog?.showModal === 'function') shopItemDialog.showModal();
   else shopItemDialog?.setAttribute('open', '');
 };
@@ -1556,9 +1564,9 @@ shopEventChildReadout?.addEventListener('change', () => {
     shopEventXml.value = replaceEventXmlChildType(shopEventXml.value, classname);
     updateEventEditorCounts();
     validateEventTemplateEditors({ throwOnError: true });
-    showInlineMessage(shopItemMessage, `Event child classname updated to ${classname}. Save the item to apply it.`, 'info');
+    showShopInlineMessage(shopItemMessage, `Event child classname updated to ${classname}. Save the item to apply it.`, 'info');
   } catch (error) {
-    showInlineMessage(shopItemMessage, error.message || 'The Event XML classname could not be updated.');
+    showShopInlineMessage(shopItemMessage, error.message || 'The Event XML classname could not be updated.');
     validateEventTemplateEditors();
   }
 });
@@ -1664,7 +1672,7 @@ const renderShopItemDiscounts = () => {
 
 addShopItemDiscountButton?.addEventListener('click', () => {
   if (editingShopItemDiscounts.length >= 15) {
-    showInlineMessage(shopItemMessage, 'A maximum of 15 role discounts is supported per item.');
+    showShopInlineMessage(shopItemMessage, 'A maximum of 15 role discounts is supported per item.');
     return;
   }
   editingShopItemDiscounts.push({
@@ -1738,7 +1746,7 @@ const renderOwnerShopDiscounts = () => {
 
 addShopDiscountButton?.addEventListener('click', () => {
   if (ownerShopDiscounts.length >= 25) {
-    showInlineMessage(ownerShopMessage, 'A maximum of 25 role discounts is supported.');
+    showShopInlineMessage(ownerShopMessage, 'A maximum of 25 role discounts is supported.');
     return;
   }
   ownerShopDiscounts.push({ role_id: '', role_name: '', amount: 10, is_percentage: true, active: true });
@@ -1799,7 +1807,7 @@ refreshShopSettingsButton?.addEventListener('click', () => loadOwnerShopConfig()
 ownerShopAddExclusion?.addEventListener('click', async () => {
   const pattern = String(ownerShopExclusionPattern?.value || '').trim();
   const reason = String(ownerShopExclusionReason?.value || '').trim();
-  if (!pattern) { showInlineMessage(ownerShopExclusionMessage, 'Enter an exact DayZ classname or wildcard pattern first.'); return; }
+  if (!pattern) { showShopInlineMessage(ownerShopExclusionMessage, 'Enter an exact DayZ classname or wildcard pattern first.'); return; }
   const payload = await performOwnerCatalogueAction(
     { action: 'add_exclusion', pattern, reason },
     { confirmText: `Exclude ${pattern} from future DayZ catalogue syncs? Any matching source-backed shop entries will be hidden now.`, messageElement: ownerShopExclusionMessage }
@@ -1814,7 +1822,7 @@ saveShopSettingsButton?.addEventListener('click', async () => {
   if (!sessionToken || dashboardAccessLevel !== 'owner' || ownerShopRequestInProgress) return;
   ownerShopRequestInProgress = true;
   saveShopSettingsButton.setAttribute('disabled', '');
-  showInlineMessage(ownerShopMessage, 'Saving shop settings…', 'info');
+  showShopInlineMessage(ownerShopMessage, 'Saving shop settings…', 'info');
   try {
     const response = await protectedActionFetch(OWNER_SHOP_SETTINGS_URL, {
       method: 'POST',
@@ -1842,11 +1850,11 @@ saveShopSettingsButton?.addEventListener('click', async () => {
     const payload = await response.json().catch(() => ({}));
     if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: true })) return;
     if (!response.ok) throw new Error(payload.message || 'Settings could not be saved.');
-    showInlineMessage(ownerShopMessage, payload.message || 'Shop settings saved.', 'success');
+    showShopInlineMessage(ownerShopMessage, payload.message || 'Shop settings saved.', 'success');
     ownerShopRequestInProgress = false;
     await Promise.all([loadOwnerShopConfig(sessionToken), loadMemberShop(sessionToken)]);
   } catch (error) {
-    showInlineMessage(ownerShopMessage, error.message || 'Settings could not be saved.');
+    showShopInlineMessage(ownerShopMessage, error.message || 'Settings could not be saved.');
   } finally {
     ownerShopRequestInProgress = false;
     saveShopSettingsButton.removeAttribute('disabled');
@@ -1859,13 +1867,13 @@ syncDayzCatalogueButton?.addEventListener('click', async () => {
   if (!window.confirm('Sync the live DayZ types.xml and vehicle events into the Survivor Shop? Live classnames are authoritative, configured exclusions are skipped, Owner type/label overrides are preserved, and rental vehicle prices remain $1 per restart.')) return;
   ownerShopRequestInProgress = true;
   syncDayzCatalogueButton.setAttribute('disabled', '');
-  showInlineMessage(ownerShopSyncMessage, 'Reading live DayZ Central Economy files and synchronising the catalogue…', 'info');
+  showShopInlineMessage(ownerShopSyncMessage, 'Reading live DayZ Central Economy files and synchronising the catalogue…', 'info');
   try {
-    const response = await protectedActionFetch(OWNER_SHOP_SYNC_URL, {
+    const response = await window.WWZHttp.request(OWNER_SHOP_SYNC_URL, {
       method: 'POST',
       headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken}` },
       body: '{}'
-    });
+    }, 120_000);
     const payload = await response.json().catch(() => ({}));
     if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: true })) return;
     if (!response.ok) throw new Error(payload.message || 'Catalogue sync failed.');
@@ -1875,10 +1883,13 @@ syncDayzCatalogueButton?.addEventListener('click', async () => {
     const excluded = Number(summary.excluded_types_skipped || 0) + Number(summary.excluded_vehicles_skipped || 0);
     const deactivated = Number(summary.excluded_deactivated || 0);
     const labels = Number(summary.labels_corrected || 0);
-    showInlineMessage(ownerShopSyncMessage, `${payload.message || 'DayZ catalogue synced.'} ${Number(summary.items_existing || 0).toLocaleString()} existing item(s) preserved; ${Number(summary.rentals_existing || 0).toLocaleString()} existing rental(s) preserved; ${repaired.toLocaleString()} classname value(s) repaired; ${labels.toLocaleString()} synced label(s) refreshed; ${excluded.toLocaleString()} excluded live type(s) skipped${deactivated ? `; ${deactivated.toLocaleString()} matching existing item(s) hidden` : ''}${unresolved ? `; ${unresolved.toLocaleString()} unresolved value(s) need Owner review` : ''}.`, unresolved ? 'info' : 'success');
+    showShopInlineMessage(ownerShopSyncMessage, `${payload.message || 'DayZ catalogue synced.'} ${Number(summary.items_existing || 0).toLocaleString()} existing item(s) preserved; ${Number(summary.rentals_existing || 0).toLocaleString()} existing rental(s) preserved; ${repaired.toLocaleString()} classname value(s) repaired; ${labels.toLocaleString()} synced label(s) refreshed; ${excluded.toLocaleString()} excluded live type(s) skipped${deactivated ? `; ${deactivated.toLocaleString()} matching existing item(s) hidden` : ''}${unresolved ? `; ${unresolved.toLocaleString()} unresolved value(s) need Owner review` : ''}.`, unresolved ? 'info' : 'success');
     await Promise.all([loadOwnerShopConfig(sessionToken), loadMemberShop(sessionToken)]);
   } catch (error) {
-    showInlineMessage(ownerShopSyncMessage, error.message || 'Catalogue sync failed.');
+    const timedOut = error?.name === 'AbortError' || /aborted|timeout/i.test(String(error?.message || ''));
+    showShopInlineMessage(ownerShopSyncMessage, timedOut
+      ? 'The catalogue request exceeded 120 seconds. Railway may still be importing. Refresh the catalogue and verify its contents before attempting another sync.'
+      : (error.message || 'Catalogue sync failed.'));
   } finally {
     ownerShopRequestInProgress = false;
     syncDayzCatalogueButton.removeAttribute('disabled');
@@ -1891,7 +1902,7 @@ shopItemForm?.addEventListener('submit', async (event) => {
   if (!sessionToken || dashboardAccessLevel !== 'owner' || ownerShopRequestInProgress) return;
   ownerShopRequestInProgress = true;
   document.querySelector('[data-save-shop-item]')?.setAttribute('disabled', '');
-  showInlineMessage(shopItemMessage, 'Saving catalogue item…', 'info');
+  showShopInlineMessage(shopItemMessage, 'Saving catalogue item…', 'info');
   const value = (selector) => document.querySelector(selector)?.value ?? '';
   try {
     const isEvent = shopItemDeliveryType?.value === 'event';
@@ -1946,12 +1957,12 @@ shopItemForm?.addEventListener('submit', async (event) => {
     const payload = await response.json().catch(() => ({}));
     if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: true })) return;
     if (!response.ok) throw new Error(payload.message || 'The item could not be saved.');
-    showInlineMessage(shopItemMessage, payload.message || 'Item saved.', 'success');
+    showShopInlineMessage(shopItemMessage, payload.message || 'Item saved.', 'success');
     ownerShopRequestInProgress = false;
     await Promise.all([loadOwnerShopConfig(sessionToken), loadMemberShop(sessionToken)]);
     window.setTimeout(() => shopItemDialog?.close?.(), 800);
   } catch (error) {
-    showInlineMessage(shopItemMessage, error.message || 'The item could not be saved.');
+    showShopInlineMessage(shopItemMessage, error.message || 'The item could not be saved.');
   } finally {
     ownerShopRequestInProgress = false;
     document.querySelector('[data-save-shop-item]')?.removeAttribute('disabled');
