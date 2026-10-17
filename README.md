@@ -1,3 +1,33 @@
+## Nasdara primary-map migration — production status (17 October 2026)
+
+**Official player-facing map name: Nasdara** (historically marketed as Badlands).
+The bot's internal map selector remains `badlands` until its dependencies have
+been migrated and tested. **The live Bot is still configured for Chernarus** in
+Railway as of its latest checked startup: the website's Chernarus primary labels
+are therefore a reflection of backend state, not evidence that the already
+running PlayStation game server remains on Chernarus.
+
+World Manager's launch gate currently reports **1/9 checks verified**, with
+**8 blockers**, including an outstanding rental delivery and missing off-server
+restore evidence, full feature routing confirmation, role-transition completion,
+official live Nasdara mission verification, geographic validation and rollback.
+This is a read-only diagnostics section; website deployment cannot activate a
+map or authorise unsafe shop/XP/rental writes.
+
+**Migration path:** back up and restore-test first; reconcile old obligations;
+verify actual Nitrado mission; configure the primary Railway entry as
+`map=badlands` + verified mission + `paused=true`; verify the fresh database;
+then use the protected Discord role migration and complete mission-bound
+activation checks; only then enable
+Nasdara's supported gameplay. Preserve Chernarus history/assets for rollback
+and leave Livonia unchanged. Shop checkout, rentals and geography-dependent
+systems require separate live tests before activation.
+
+Read the operator runbook in the Bot repository:
+`docs/NASDARA_PRIMARY_CUTOVER_20261017.md`.
+
+---
+
 **Current release: Website v2.19.0 — owner-controlled Badlands runtime authorization UI, separate-world selection, and fail-closed map handling.** Chernarus and Livonia map imagery is preserved; no unverified map is shown for Badlands. Live Nitrado activation and external backups remain operator-verification steps.
 
 ## Badlands release cutover (Website v2.19.0 / Bot v1.82.0)
