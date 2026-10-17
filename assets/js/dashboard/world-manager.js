@@ -102,7 +102,7 @@
       if (note) note.textContent = 'No evidence is equivalent to blocked readiness.';
       return;
     }
-    summary.textContent = `${cleanCount(audit.verified)} / ${cleanCount(audit.total)} checks verified · ${cleanCount(audit.blockers)} blockers · ${audit.state === 'active' ? 'Badlands runtime active' : 'Activation locked'}`;
+    summary.textContent = `${cleanCount(audit.verified)} / ${cleanCount(audit.total)} checks verified · ${cleanCount(audit.blockers)} blockers · ${audit.state === 'active' ? 'Nasdara runtime active' : 'Activation locked'}`;
     audit.checks.forEach(check => {
       const item = element('li', 'world-launch-check');
       item.dataset.status = check.status === 'verified' ? 'completed' : 'blocked';
@@ -122,7 +122,7 @@
       const auth = payload.runtime_gate || {};
       activationGate.textContent = payload.quarantined
         ? `QUARANTINE · ${Array.isArray(auth.reasons) && auth.reasons.length ? auth.reasons.join(' · ') : 'External launch checks remain required.'}`
-        : 'LIVE · Badlands is active on its physically separate database. Livonia remains independent.';
+        : 'LIVE · Nasdara is active on its physically separate database. Livonia remains independent.';
     }
     refreshActivationControl();
     if (roleExecutor) roleExecutor.hidden = !(payload.primary === true && payload.server_map === 'badlands' && payload.quarantined === true);
@@ -135,7 +135,7 @@
     const brandingLive = find('[data-world-branding-current]');
     const brandingPreview = find('[data-world-branding-preview]');
     if (brandingLive) brandingLive.textContent = `Primary world: ${brandedPrimary.world_name || 'Chernarus'}${payload.quarantined ? ' (gameplay quarantined)' : ''} · Secondary world: Livonia`;
-    if (brandingPreview) brandingPreview.textContent = payload.quarantined ? 'Badlands mission configured · WWZ gameplay quarantined pending live validation' : `Badlands name preview: ${branding.badlands_preview?.server_name || 'World War Z | Badlands'} (staging only; no activation)`;
+    if (brandingPreview) brandingPreview.textContent = payload.quarantined ? 'Nasdara mission configured · WWZ gameplay quarantined pending live validation' : `Nasdara name preview: ${branding.badlands_preview?.server_name || 'World War Z | Badlands'} (staging only; no activation)`;
     const inventory = payload.managed_messages || {};
     const refreshPlan = inventory.refresh_plan || {};
     const planItems = Array.isArray(refreshPlan.items) ? refreshPlan.items : [];
@@ -345,7 +345,7 @@
     const action=String(activationAction?.value || 'authorize');
     const message = action === 'revoke'
       ? 'Revoke the private Badlands authorization for the next Bot restart? This does NOT stop the already-running Bot or change Nitrado.'
-      : 'Only proceed if the actual Badlands mission is running, your off-server backups are verified, and all six statements are true. This prepares the NEXT Bot restart, not an immediate world switch.';
+      : 'Only proceed if the actual Nasdara mission is running, your off-server backups are verified, and all six statements are true. This prepares the NEXT Bot restart, not an immediate world switch.';
     if (!window.confirm(message)) return;
     activationBusy=true;refreshActivationControl();
     if (activationExecutionStatus) activationExecutionStatus.textContent='Checking protected world cutover…';

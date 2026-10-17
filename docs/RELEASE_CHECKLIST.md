@@ -1,3 +1,12 @@
+## Nasdara primary cutover release — 18 October 2026
+
+- [x] Preserve existing Chernarus historical data and independent Livonia runtime.
+- [x] Update Website README and world roadmap with verified Nasdara quarantined status.
+- [x] Use Nasdara for user-facing World Manager runtime labels. Preserve internal `badlands` API keys and protected confirmation phrases.
+- [x] Pair with Bot readiness fix; no unverified backend launch claims.
+- [ ] Owner complete protected role transition and external backup/restore verification.
+- [ ] Test catalogue, item classes, rentals, physical deliveries, traders, PvP coordinates, events and payment integration before enabling.
+
 ## Nasdara primary-map migration — production status (17 October 2026)
 
 **Official player-facing map name: Nasdara** (historically marketed as Badlands).
