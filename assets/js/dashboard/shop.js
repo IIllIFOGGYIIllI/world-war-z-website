@@ -1884,6 +1884,10 @@ syncDayzCatalogueButton?.addEventListener('click', async () => {
     const deactivated = Number(summary.excluded_deactivated || 0);
     const labels = Number(summary.labels_corrected || 0);
     showShopInlineMessage(ownerShopSyncMessage, `${payload.message || 'DayZ catalogue synced.'} ${Number(summary.items_existing || 0).toLocaleString()} existing item(s) preserved; ${Number(summary.rentals_existing || 0).toLocaleString()} existing rental(s) preserved; ${repaired.toLocaleString()} classname value(s) repaired; ${labels.toLocaleString()} synced label(s) refreshed; ${excluded.toLocaleString()} excluded live type(s) skipped${deactivated ? `; ${deactivated.toLocaleString()} matching existing item(s) hidden` : ''}${unresolved ? `; ${unresolved.toLocaleString()} unresolved value(s) need Owner review` : ''}.`, unresolved ? 'info' : 'success');
+    // The Owner loader refuses to run while a write is flagged in progress.
+    // Release the lock BEFORE fetching updated catalogue state; otherwise the
+    // user continues to see items deleted by the successful sync.
+    ownerShopRequestInProgress = false;
     await Promise.all([loadOwnerShopConfig(sessionToken), loadMemberShop(sessionToken)]);
   } catch (error) {
     const timedOut = error?.name === 'AbortError' || /aborted|timeout/i.test(String(error?.message || ''));

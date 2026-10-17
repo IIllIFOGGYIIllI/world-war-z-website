@@ -3,7 +3,7 @@
 
   const WIKI_BASE = 'https://dayz.fandom.com';
   const API_URL = `${WIKI_BASE}/api.php`;
-  const CACHE_KEY = 'wwz_dayz_wiki_previews_v2';
+  const CACHE_KEY = 'wwz_dayz_wiki_previews_v3';
   const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
   const NEGATIVE_TTL_MS = 24 * 60 * 60 * 1000;
   const MAX_CACHE_ENTRIES = 2500;
@@ -14,10 +14,13 @@
     offroadhatchback: 'Ada 4x4',
     civiliansedan: 'Olga 24',
     hatchback02: 'Gunter 2',
+    motorbike01: 'Motorbike',
+    motorbike02: 'Motorbike',
     sedan02: 'Sarka 120',
     offroad02: 'M1025',
     truck01covered: 'M3S',
     truck01chassis: 'M3S',
+    truck01: 'M3S',
     m4a1: 'M4-A1',
     akm: 'KA-M',
     ak101: 'KA-101',
@@ -122,6 +125,10 @@
   const itemClassname = (item) => {
     const type = Array.isArray(item?.types) ? item.types.find(Boolean) : '';
     if (type) return String(type).trim();
+    const child = item?.delivery_profile?.child_type || '';
+    if (child) return String(child).trim();
+    const source = String(item?.source_key || '').trim();
+    if (/^dayz:(type|vehicle):/i.test(source)) return source.replace(/^dayz:(type|vehicle):/i, '');
     // Restart-bound rentals deliberately have no normal item types. Their live
     // DayZ vehicle classname is included in the generated public description,
     // e.g. "Restart-bound Gunter 2 rental (Hatchback_02_Blue)."
@@ -147,9 +154,54 @@
   const canonicalArticleTitle = (item) => {
     const cls = itemClassname(item);
     const stripped = stripVariant(cls);
-    return CLASS_ALIASES.get(normalize(stripped))
-      || CLASS_ALIASES.get(normalize(cls))
-      || '';
+    const direct = CLASS_ALIASES.get(normalize(stripped)) || CLASS_ALIASES.get(normalize(cls));
+    if (direct) return direct;
+    // Some item classnames contain a model prefix plus a usable part name;
+    // only rentals can safely share a whole-vehicle article image.
+    if (isVehicleRental(item)) {
+      const prefix = /^(OffroadHatchback|CivilianSedan|Hatchback_02|Sedan_02|Offroad_02|Truck_01)/i.exec(cls)?.[1];
+      if (prefix) return CLASS_ALIASES.get(normalize(prefix)) || '';
+    }
+    return '';
+  };
+
+  // Local no-network illustrative vehicle preview: exact colours/classnames
+  // are retained, and the label explicitly distinguishes illustration from a
+  // verified screenshot. Third-party Wiki thumbnails replace it if available.
+  const vehicleVariantPreview = (item, previous) => {
+    if (!isVehicleRental(item)) return previous;
+    const cls = itemClassname(item);
+    const name = String(item?.name || '').trim();
+    const colourWord = cls.match(/_(Black|Blue|Red|White|Grey|Gray|Green|Orange|Yellow|Wine|Beige)$/i)?.[1]
+      || (/^Hatchback_02$/i.test(cls) ? 'Red' : '');
+    const paints = { black:'#353b48', blue:'#3679ba', red:'#b83b3d', white:'#dce5ed',
+      grey:'#87919d', gray:'#87919d', green:'#58836c', orange:'#e88442',
+      yellow:'#e2b44a', wine:'#764a58', beige:'#bb9f72' };
+    const paint = paints[colourWord.toLowerCase()] || '#9aa2ad';
+    const model = /Gunter 2|Sarka 120|Ada 4x4|Olga 24|M1025|M3S|Motorbike\s*\d*/i.exec(name)?.[0]
+      || (/Motorbike/i.test(cls) ? 'Motorbike' : 'Vehicle');
+    const safe = (v) => String(v).replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[char]));
+    const motorbike = /motorbike/i.test(model);
+    const truck = /m3s/i.test(model);
+    const wheels = motorbike
+      ? '<circle cx="136" cy="183" r="32"/><circle cx="343" cy="183" r="32"/>'
+      : '<circle cx="132" cy="182" r="31"/><circle cx="348" cy="182" r="31"/>';
+    const outline = motorbike
+      ? `<path d="M137 181 L198 114 L255 181 L342 181 L288 117 L261 99 L233 99 M192 115 L168 112 M290 117 L308 88 L324 88"/>`
+      : truck
+        ? `<path d="M62 175 L62 118 L237 118 L237 136 L299 136 L327 95 L402 95 L425 145 L425 175 Z"/>`
+        : `<path d="M59 173 L63 148 L113 136 L160 99 L301 99 L347 136 L407 146 L424 173 Z"/>`;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 270" role="img" aria-label="${safe(name || model)} illustrative preview">
+      <rect width="480" height="270" fill="#101923"/>
+      <path d="M0 217 H480" stroke="#354455" stroke-width="2"/>
+      <text x="22" y="31" fill="#b7c7d8" font-size="13" font-family="Arial,sans-serif" letter-spacing="2">WORLD WAR Z  /  VEHICLE RENTAL</text>
+      <g stroke="#d6e2ec" stroke-width="5" stroke-linejoin="round" stroke-linecap="round" fill="${paint}">${outline}</g>
+      <g fill="#182431" stroke="#aabacc" stroke-width="8">${wheels}</g>
+      <text x="24" y="236" fill="#ffffff" font-size="24" font-family="Arial,sans-serif" font-weight="bold">${safe(model)}</text>
+      <text x="456" y="235" fill="#f6f6f6" text-anchor="end" font-size="13" font-family="Arial,sans-serif">${safe(colourWord || 'Standard')}</text>
+      <text x="24" y="258" fill="#90a3b5" font-size="11" font-family="Arial,sans-serif">ILLUSTRATIVE PREVIEW · ${safe(cls)}</text>
+    </svg>`;
+    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
   };
 
   const loadCache = () => {
@@ -507,9 +559,9 @@
     image.decoding = 'async';
     image.referrerPolicy = 'no-referrer';
     image.alt = `${item?.name || 'DayZ item'} preview`;
-    image.src = fallback;
+    image.src = vehicleVariantPreview(item, fallback);
     image.__wwzPreviewItem = item;
-    image.__wwzPreviewFallback = fallback;
+    image.__wwzPreviewFallback = vehicleVariantPreview(item, fallback);
     if (observer) observer.observe(image);
     else resolveImage(image);
     return image;
