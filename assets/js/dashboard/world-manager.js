@@ -430,20 +430,51 @@
     if (!token || (typeof hasServerActionAccess==='function' && !hasServerActionAccess())) return;
     const action=String(roleAction?.value || 'apply');
     if (!window.confirm(action === 'apply' ? 'Change primary-world XP/prestige/faction roles for the full Discord roster? A private rollback journal will be written.' : 'Restore managed roles from the selected private migration journal?')) return;
+    const startedAt=Date.now();
     roleExecuting=true;refreshRoleExecutor();
-    if (roleExecutionStatus) roleExecutionStatus.textContent='Checking complete Discord roster and processing protected, journalled role changes…';
+    if (roleExecutionStatus) roleExecutionStatus.textContent='Checking complete Discord roster and processing protected, journalled role changes… This can take up to two minutes. Do not close the dashboard.';
     try {
-      const response=await authFetch(`${DASHBOARD_API_BASE}/api/admin/world-profiles/roles/transition`,{
+      // A complete Discord roster scan + individual, rate-limited role changes cannot
+      // finish within the ordinary dashboard's 10-second read timeout.
+      const response=await window.WWZHttp.request(`${DASHBOARD_API_BASE}/api/admin/world-profiles/roles/transition`,{
         method:'POST',headers:{Accept:'application/json',Authorization:`Bearer ${token}`,'Content-Type':'application/json'},
         body:JSON.stringify({action,confirmation:requiredRoleConfirmation(),...(action==='rollback'?{journal:String(roleJournal?.value || '').trim()}:{})}),
-      });
+      },120_000);
       const result=await response.json().catch(()=>({}));
       if (!response.ok || result.status !== 'ok') throw new Error(result.message || `Role operation returned HTTP ${response.status}`);
-      if (roleExecutionStatus) roleExecutionStatus.textContent=`${result.state} · ${result.members_changed ?? result.members_restored ?? 0} members · private journal ${result.journal}. Keep this journal filename for rollback.`;
       if (roleJournal && result.journal) roleJournal.value=result.journal;
       if (roleConfirm) roleConfirm.value='';
+      // Don't let a subsequent refresh overwrite the completed result.
+      await load();
+      if (roleExecutionStatus) roleExecutionStatus.textContent=`${result.state} · ${result.members_changed ?? result.members_restored ?? 0} members · private journal ${result.journal}. Keep this journal filename for rollback.`;
     }catch(error){
-      if (roleExecutionStatus) roleExecutionStatus.textContent=`Role operation stopped: ${String(error?.message || 'Unavailable')}. Review the private journal before retrying.`;
+      const message=String(error?.message || 'Unavailable');
+      const mayHaveContinued=error?.name==='AbortError' || /abort|timeout|network|failed to fetch/i.test(message);
+      if (action==='apply' && mayHaveContinued) {
+        // The browser losing the response does not tell us whether the server
+        // completed its Discord changes. Check the persisted journal before retry.
+        let journal=null;
+        try {
+          const check=await window.WWZHttp.request(`${DASHBOARD_API_BASE}/api/admin/world-profiles`,{
+            method:'GET',headers:{Accept:'application/json',Authorization:`Bearer ${token}`},
+          },60_000);
+          const snapshot=await check.json().catch(()=>({}));
+          if (check.ok && snapshot.status==='ok') {
+            render(snapshot);
+            const rows=Array.isArray(snapshot.role_transition_journals)?snapshot.role_transition_journals:[];
+            journal=rows.find(row=>row.target_world==='badlands' &&
+              Number.isFinite(Date.parse(row.started_utc||'')) && Date.parse(row.started_utc)>=startedAt-15_000) || null;
+          }
+        }catch(_recoveryError){ /* Never reissue a state-changing POST automatically. */ }
+        if (journal && roleJournal) roleJournal.value=journal.journal;
+        if (roleExecutionStatus) roleExecutionStatus.textContent=journal?.state==='complete'
+          ? `Role transition COMPLETED despite interrupted connection · ${journal.changed_members ?? 0} members started · journal ${journal.journal}.`
+          : journal
+            ? `Connection interrupted; journal ${journal.journal} is ${journal.state}. Do not retry. Check World Manager and review this private journal first.`
+            : 'Connection interrupted while processing Discord roles. Completion is not confirmed. Refresh World Manager to inspect saved journals before retrying; do not assume no roles changed.';
+      } else if (roleExecutionStatus) {
+        roleExecutionStatus.textContent=`Role operation stopped: ${message}. Review any private journal before retrying.`;
+      }
     }finally{roleExecuting=false;refreshRoleExecutor();}
   });
   refresh?.addEventListener('click',()=>load());
