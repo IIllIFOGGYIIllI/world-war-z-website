@@ -2103,10 +2103,10 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
         "const WWZ_PWA_VERSION = '2.19.0'",
-        "const WWZ_PWA_UPDATE_REVISION = '2026-10-17-badlands-nasdara-paper-1'",
+        "const WWZ_PWA_UPDATE_REVISION = '2026-10-17-badlands-public-embed-migration-1'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
-        "const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-world-branding-1`;",
+        "const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-badlands-public-embeds-1`;",
         "const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;",
         "if (request.method !== 'GET') return;",
         "if (url.origin !== self.location.origin) return;",

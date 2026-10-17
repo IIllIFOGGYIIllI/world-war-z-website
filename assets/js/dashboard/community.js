@@ -54,7 +54,7 @@
     if(!parts.length && (Number(e.winner_xp||0) || Number(e.winner_money||0))) parts.push(`Winner: ${Number(e.winner_xp||0)?`${money(e.winner_xp)} XP`:''}${Number(e.winner_xp||0)&&Number(e.winner_money||0)?' + ':''}${Number(e.winner_money||0)?`$${money(e.winner_money)}`:''}`);
     return parts.join(' · ');
   };
-  const eventMapUrl=(e)=>{if(e.x==null||e.z==null)return '';const map=encodeURIComponent(e.map_key||overview?.map_key||'chernarus');return `map-link.html?map=${map}&x=${encodeURIComponent(e.x)}&z=${encodeURIComponent(e.z)}&marker=${encodeURIComponent(e.location_label||e.title||'WWZ Event')}&source=event-calendar${e.zone_id?`&zone=${encodeURIComponent(e.zone_id)}`:""}`;};
+  const eventMapUrl=(e)=>{if(e.x==null||e.z==null)return '';const key=e.map_key||overview?.map_key;if(!key)return '';const map=encodeURIComponent(key);return `map-link.html?map=${map}&x=${encodeURIComponent(e.x)}&z=${encodeURIComponent(e.z)}&marker=${encodeURIComponent(e.location_label||e.title||'WWZ Event')}&source=event-calendar${e.zone_id?`&zone=${encodeURIComponent(e.zone_id)}`:""}`;};
   const sameDay=(a,b)=>a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();
   const startOfWeek=(value)=>{const d=new Date(value);d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d;};
   const calendarRows=()=>['staff','owner'].includes(dashboardAccessLevel)&&adminPayload?adminPayload.runs||[]:overview?.events||[];

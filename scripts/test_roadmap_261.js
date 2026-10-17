@@ -19,7 +19,7 @@ for(const token of ['Badlands storage','Gameplay integration','Discord role sync
 assert(!mini.includes('Natural XP &amp; Prestige QA'));
 assert(dash.includes('v2.19.0</strong>'));
 assert(sw.includes("WWZ_PWA_VERSION = '2.19.0'"));
-assert(sw.includes('2026-10-17-badlands-nasdara-paper-1'));
+assert(sw.includes('2026-10-17-badlands-public-embed-migration-1'));
 assert(sw.includes("WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'"));
 assert(sw.includes('wwz-pwa-'));
 console.log('Website v2.11.0 public/dashboard roadmap assertions passed');
