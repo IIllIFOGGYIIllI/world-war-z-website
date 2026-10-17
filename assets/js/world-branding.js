@@ -26,7 +26,7 @@
       const response = await fetch(ENDPOINT, { method: 'GET', mode: 'cors', cache: 'no-store', headers: { Accept: 'application/json' } });
       if (!response.ok) return false;
       return update(await response.json());
-    } catch (_) { return false; } // Preserve truthful Chernarus labels when API is offline.
+    } catch (_) { return false; } // Retain neutral placeholders if the live world registry is offline.
   };
   window.WWZWorldBranding = Object.freeze({refresh, getSnapshot: () => snapshot});
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', refresh, { once: true });

@@ -97,7 +97,7 @@
   const refreshMapContext = () => {
     const selected = window.WWZServerContext?.getSelectedServer?.();
     activeMapKey = selected?.map_key || null;
-    if (!activeMapKey || !['chernarus', 'livonia'].includes(activeMapKey)) {
+    if (!activeMapKey || !['chernarus', 'livonia', 'badlands'].includes(activeMapKey)) {
       mapConfig = null;
       throw new Error('Select a World War Z server before opening the map.');
     }
@@ -776,7 +776,7 @@
 
       const [, placeResponse] = await Promise.all([
         loadPublicMarkers(),
-        fetch(mapConfig.labelUrl, { headers: { Accept: 'application/json' }, cache: 'force-cache' }).catch(() => null)
+        mapConfig.labelUrl ? fetch(mapConfig.labelUrl, { headers: { Accept: 'application/json' }, cache: 'force-cache' }).catch(() => null) : Promise.resolve(null)
       ]);
       if (placeResponse?.ok) {
         const placePayload = await placeResponse.json();
@@ -826,6 +826,12 @@
         }
       });
       syncMapAppearance();
+      if (activeMapKey === 'badlands') {
+        // The road/name layers are already embedded in the official paper map.
+        for (const element of [
+          ...document.querySelectorAll('[data-map-road-toggle], [data-map-trail-toggle], [data-map-road-group], [data-map-place-names-toggle]')
+        ]) element.hidden = true;
+      }
 
       if (!mapInstance.map.getPane('wwzPlaceNames')) {
         const placeNamePane = mapInstance.map.createPane('wwzPlaceNames');

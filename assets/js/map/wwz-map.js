@@ -36,6 +36,19 @@
         trail:           { label: 'Trails / paths',  minZoom: 0, width: 1.50, colour: '#8d9661', casing: '#353128', opacity: 0.72 }
       })
     }),
+    badlands: Object.freeze({
+      key: 'badlands',
+      name: 'Badlands / Nasdara',
+      mapMetres: 16384,
+      mapUnits: 240,
+      // The v1.2 paper map is our only approved primary Badlands imagery.
+      // Printed roads and place names are in the source image; no invented vectors.
+      paperUrl: 'nasdara/Nasdara_Enhanced_Paper_Map.webp?v=1.2',
+      // Image coordinates at the original 2600x2600 pixel scale, independently
+      // calibrated against the printed 1 km grid and one Nitrado log position.
+      paperGrid: Object.freeze({width:2600,height:2600,originX:24.63,yAtZ16000:81.2,pxPerKmX:156.05,pxPerKmY:154.75}),
+      roadOrder: [], roadGroups: Object.freeze({}), trailGroups: [], roadStyles: Object.freeze({})
+    }),
     livonia: Object.freeze({
       key: 'livonia',
       name: 'Livonia',
@@ -281,7 +294,7 @@
   const create = (container, options = {}) => {
     if (!container) throw new Error('A DayZ map container is required.');
     const config = getConfig(options.mapKey || window.WWZServerContext?.getMapKey?.());
-    if (!config) throw new Error('Badlands map imagery and verified coordinates are not yet available. Chernarus/Livonia tiles are never substituted.');
+    if (!config) throw new Error('The selected DayZ world is not configured. No other world imagery will be substituted.');
     if (!window.L?.map) throw new Error('Leaflet is not available.');
     if (container._wwzMapInstance) return container._wwzMapInstance;
 
@@ -332,17 +345,31 @@
       L.DomEvent.disableScrollPropagation(element);
     });
 
-    const satellite = L.tileLayer(config.satelliteUrl, {
-      tileSize: 256,
-      minZoom: MIN_ZOOM,
-      maxNativeZoom: MAX_NATIVE_ZOOM,
-      maxZoom: MAX_ZOOM,
-      noWrap: true,
-      bounds,
-      keepBuffer: options.keepBuffer ?? 3,
-      updateWhenIdle: true,
-      className: 'wwz-chernarus-satellite'
-    }).addTo(map);
+    // Do not assume the paper-image edges coincide with the DayZ world edges.
+    // Use the exact transform from the validated offline Nasdara atlas.
+    const paperBounds = config.paperGrid ? (() => {
+      const g = config.paperGrid;
+      const atPixel = (px, py) => projectWorld([
+        (px - g.originX) * 1000 / g.pxPerKmX,
+        16000 - (py - g.yAtZ16000) * 1000 / g.pxPerKmY
+      ]);
+      return L.latLngBounds(atPixel(0, g.height), atPixel(g.width, 0));
+    })() : null;
+    const satellite = config.paperUrl
+      ? L.imageOverlay(config.paperUrl, paperBounds, {
+          opacity: 1, interactive: false, className: 'wwz-nasdara-paper'
+        }).addTo(map)
+      : L.tileLayer(config.satelliteUrl, {
+          tileSize: 256,
+          minZoom: MIN_ZOOM,
+          maxNativeZoom: MAX_NATIVE_ZOOM,
+          maxZoom: MAX_ZOOM,
+          noWrap: true,
+          bounds,
+          keepBuffer: options.keepBuffer ?? 3,
+          updateWhenIdle: true,
+          className: 'wwz-chernarus-satellite'
+        }).addTo(map);
 
     const roadLayers = new Map();
     const roadGroupForClass = (roadClass) => Object.entries(config.roadGroups)
@@ -531,6 +558,9 @@
     };
 
     const loadRoads = () => {
+      // Nasdara roads are printed on the paper itself. Never fetch the
+      // unfinished vector data or a Chernarus/Livonia GeoJSON substitute.
+      if (config.paperUrl) { roadsReady = true; setLoading(''); return Promise.resolve(); }
       if (options.loadRoads === false || roadsReady) return Promise.resolve();
       setLoading('Loading production road network…');
       return loadRoadGeometry(config)
@@ -719,8 +749,9 @@
     satellite.on('load', () => {
       if (!roadsReady && options.loadRoads === false) setLoading('');
     });
-    satellite.on('tileerror', () => {
+    satellite.on(config.paperUrl ? 'error' : 'tileerror', () => {
       options.onTileError?.();
+      if (config.paperUrl) setLoading('Nasdara paper-map image missing. Check /nasdara/ assets.', 'error');
     });
 
     const api = {

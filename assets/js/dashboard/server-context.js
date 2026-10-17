@@ -25,9 +25,9 @@
     const x = Number(params.get('x'));
     const z = Number(params.get('z'));
     const poi = String(params.get('poi') || '').trim().slice(0, 100);
-    if (!['chernarus', 'livonia'].includes(mapKey)) return null;
+    if (!['chernarus', 'livonia', 'badlands'].includes(mapKey)) return null;
     const hasCoordinates = Number.isFinite(x) && Number.isFinite(z);
-    const worldSize = mapKey === 'livonia' ? 12800 : 15360;
+    const worldSize = mapKey === 'livonia' ? 12800 : mapKey === 'badlands' ? 16384 : 15360;
     if (!hasCoordinates && !poi) return null;
     if (hasCoordinates && (x < 0 || x > worldSize || z < 0 || z > worldSize)) return null;
     return {
@@ -100,7 +100,7 @@
       icon_url: value.icon_url ? String(value.icon_url) : null,
       map_key: mapKey,
       map_name: String(value.map_name || mapName),
-      world_size: mapKey === 'badlands' ? 0 : (mapKey === 'livonia' ? 12800 : 15360),
+      world_size: mapKey === 'badlands' ? 16384 : (mapKey === 'livonia' ? 12800 : 15360),
       platform: String(value.platform || 'PlayStation 4 & 5'),
       player_capacity: Math.max(1, Math.trunc(Number(value.player_capacity) || 26)),
       access_level: String(value.access_level || 'member'),
@@ -165,16 +165,12 @@
     });
     const mapPreview = document.querySelector('.map-live-preview img');
     if (mapPreview) {
-      const hasMapTiles = server.map_key === 'chernarus' || server.map_key === 'livonia';
-      if (hasMapTiles) {
-        mapPreview.src = server.map_key === 'livonia'
+      mapPreview.src = server.map_key === 'badlands'
+        ? 'nasdara/Nasdara_Enhanced_Paper_Map.webp?v=1.2'
+        : server.map_key === 'livonia'
           ? 'assets/maps/livonia/tiles/0/0/0.webp?v=1.22.93'
           : 'assets/maps/chernarus/tiles/z0/0/0.webp?v=1.22.93';
-        mapPreview.alt = `${server.map_name} satellite map preview`;
-      } else {
-        mapPreview.removeAttribute('src');
-        mapPreview.alt = 'Badlands map tiles are unavailable; Chernarus maps are not substituted.';
-      }
+      mapPreview.alt = `${server.map_name} game map preview`;
     }
     document.querySelectorAll('[data-map-frame], [data-location-map], [data-shop-coordinate-map]').forEach((element) => {
       element.setAttribute('aria-label', `${server.map_name} coordinate map. Drag to pan, scroll or pinch to zoom, and click to select X and Z.`);

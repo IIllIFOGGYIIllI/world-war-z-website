@@ -8,7 +8,7 @@ const index=read('index.html'), dash=read('dashboard.html'), sw=read('sw.js');
 const section=index.split('id="roadmap"')[1]?.split('id="faq-title"')[0] || '';
 assert(section.includes('Badlands World Profiles Roadmap'));
 assert(section.includes('Website v2.19.0 · Bot v1.82.0'));
-assert(section.includes('15 October 2026'));
+assert(section.includes('17 October 2026'));
 for(const token of ['Stage 1 · verified','Stage 2A · deployed, verify live','Stage 2B · Phase 3 partial integration','Stage 2C · Phase 2 ready','Stage 3 · awaiting platform support','Stage 4 · activation locked','Level 1','XP 0','Prestige 0','Livonia','Chernarus','role reconciliation','Total Chaos']) {
   assert(section.toLowerCase().includes(token.toLowerCase()), `public roadmap: ${token}`);
 }
@@ -19,7 +19,7 @@ for(const token of ['Badlands storage','Gameplay integration','Discord role sync
 assert(!mini.includes('Natural XP &amp; Prestige QA'));
 assert(dash.includes('v2.19.0</strong>'));
 assert(sw.includes("WWZ_PWA_VERSION = '2.19.0'"));
-assert(sw.includes('2026-10-15-website-v2-19-0-activation-gate-1'));
+assert(sw.includes('2026-10-17-badlands-nasdara-paper-1'));
 assert(sw.includes("WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'"));
 assert(sw.includes('wwz-pwa-'));
 console.log('Website v2.11.0 public/dashboard roadmap assertions passed');

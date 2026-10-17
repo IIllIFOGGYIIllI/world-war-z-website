@@ -3,7 +3,7 @@
 
   const API_BASE = 'https://world-war-z.up.railway.app';
   const params = new URLSearchParams(window.location.search);
-  const mapKey = String(params.get('map') || 'chernarus').trim().toLowerCase();
+  const mapKey = String(params.get('map') || 'badlands').trim().toLowerCase();
   const serverKey = String(params.get('server') || (mapKey === 'livonia' ? 'livonia' : 'world-war-z')).trim().toLowerCase();
   const viewMode = String(params.get('view') || '').trim().toLowerCase();
   const requestedMarker = String(params.get('marker') || '').trim().slice(0, 80);
@@ -61,8 +61,12 @@
   };
 
   if (!container || !window.L || !window.WWZMap) { fail('The WWZ map runtime could not be loaded.'); return; }
-  if (!['chernarus','livonia'].includes(mapKey)) { fail('This link does not contain a valid WWZ map.'); return; }
+  if (!['chernarus','livonia','badlands'].includes(mapKey)) { fail('This link does not contain a valid WWZ map.'); return; }
   const config = window.WWZMap.getConfig(mapKey);
+  if (mapKey === 'badlands') {
+    // These roads and town names are intrinsic to the approved paper map.
+    roadsToggle?.closest('label')?.setAttribute('hidden', '');
+  }
   if (hasRequestedCoordinates && (requestedX < 0 || requestedZ < 0 || requestedX > config.mapMetres || requestedZ > config.mapMetres)) {
     fail(`This position is outside the ${config.name} map bounds.`); return;
   }
@@ -71,7 +75,7 @@
   if (title) title.textContent = hasRequestedCoordinates && requestedMarker ? requestedMarker : `${config.name} Interactive Map`;
   if (mapLabel) mapLabel.textContent = `${config.name} · WWZ public map hub`;
   if (dashboardLink) {
-    const centre = mapKey === 'livonia' ? 6400 : 7680;
+    const centre = mapKey === 'livonia' ? 6400 : mapKey === 'badlands' ? 8192 : 7680;
     dashboardLink.href = `dashboard.html?server=${encodeURIComponent(serverKey)}&map=${encodeURIComponent(mapKey)}&x=${centre.toFixed(1)}&z=${centre.toFixed(1)}&marker=${encodeURIComponent('WWZ Map Hub')}&source=map-hub#map`;
   }
 

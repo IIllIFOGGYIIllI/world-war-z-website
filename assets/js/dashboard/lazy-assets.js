@@ -97,7 +97,7 @@
     )
   ]).then(() => loadScriptOnce(
     'wwz-map-runtime',
-    'assets/js/map/wwz-map.js?v=1.22.93&rev=3',
+    'assets/js/map/wwz-map.js?v=1.22.93&rev=nasdara-paper-4',
     () => Boolean(window.WWZMap?.create)
   ));
 

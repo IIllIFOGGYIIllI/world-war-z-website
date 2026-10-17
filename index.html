@@ -58,7 +58,7 @@
 <div class="hero-copy-block">
 <p class="eyebrow"><span class="pulse"></span> World War Z operations network</p>
 <h1 id="hero-title">Survive The World.<br/><span>Control The Network.</span></h1>
-<p class="hero-copy">One connected operations platform for the World War Z PlayStation DayZ community — live server intelligence, survivor systems, economy, shop delivery, moderation and administration across <span data-wwz-primary-world>Chernarus</span> and Livonia.</p>
+<p class="hero-copy">One connected operations platform for the World War Z PlayStation DayZ community — live server intelligence, survivor systems, economy, shop delivery, moderation and administration across <span data-wwz-primary-world>Primary World</span> and Livonia.</p>
 <div class="hero-actions">
 <a class="button button-primary" href="dashboard.html">Enter Command Centre</a><a class="button button-secondary" href="shop.html">Survivor Shop</a><a class="button button-secondary" href="donations.html">Support WWZ</a>
 <a class="button button-secondary" href="https://discord.gg/worldwarzps" rel="noreferrer" target="_blank">Open Discord</a>
@@ -67,7 +67,7 @@
 <aside aria-label="World War Z network overview" class="hero-ops-board">
 <header><small>Operational summary</small><strong>World War Z Network</strong></header>
 <div class="hero-ops-grid">
-<div class="live"><span>Worlds</span><strong>2 Active</strong><small data-wwz-network-worlds>Chernarus + Livonia</small></div>
+<div class="live"><span>Worlds</span><strong>2 Active</strong><small data-wwz-network-worlds>Primary + Livonia</small></div>
 <div><span>Platform</span><strong>PS4 / PS5</strong><small>Console DayZ community</small></div>
 <div><span>Bot surface</span><strong>100 Commands</strong><small>Member + Admin operations</small></div>
 <div><span>Control layer</span><strong>Railway</strong><small>Secure API + automation</small></div>
@@ -93,7 +93,7 @@
 <div class="shell">
 <div class="status-strip reveal">
 <div><span>Platform</span><strong>PlayStation 4 &amp; 5</strong></div>
-<div><span>Maps</span><strong data-wwz-network-worlds>Chernarus + Livonia</strong></div>
+<div><span>Maps</span><strong data-wwz-network-worlds>Primary + Livonia</strong></div>
 <div><span>Capacity</span><strong>26 survivors</strong></div>
 <div><span>Community</span><strong>World War Z</strong></div>
 </div>
@@ -185,11 +185,11 @@
 <div>
 <p class="eyebrow">Development roadmap</p>
 <h2 id="roadmap-title">WWZ Live — Badlands World Profiles Roadmap</h2>
-<p>Chernarus and Livonia remain operational while we prepare Badlands as a fresh world. Stage 1 World Manager is verified, Stage 2A provides isolated Badlands staging storage, and Stage 2B Phase 3 now guards four live XP/reward producers (Chernarus expedition, Chernarus progression, Livonia hotspot and community event rewards), while remaining gameplay, banking and worker paths still require migration. Stage 2C Phase 2 adds Admin-only full-roster scans and audited dry-run plans (v2.11.1 hardens status, duplicate handling and audit logs); Stage 2D Phase 4 adds bounded on-demand live Discord message verification to the registered Trader/status/event planning inventory (v2.15.0), building on active-world branding (v2.12.0); the v2.16.0 launch gate exposes production blockers, and v2.17.0 adds a physically separate Badlands Bot database, explicit mission configuration and fail-closed gameplay quarantine; a protected role cutover and automatic identity-only import are now available; external backups, the official map mission and final gameplay activation remain gated. New owner-authorized runtime cutover is available after a live mission match, private database checks, role reconciliation, verified backup/rollback and map checks; the world stays quarantined until those gates pass.</p>
+<p>The primary Nitrado server is transitioning from Chernarus to Badlands, with Livonia continuing independently and Chernarus retained for rollback. The original Nasdara paper map v1.2 now provides town names, printed roads and a calibrated X/Z grid. Stage 1 World Manager is verified, Stage 2A provides isolated Badlands staging storage, and Stage 2B Phase 3 now guards four live XP/reward producers (Chernarus expedition, Chernarus progression, Livonia hotspot and community event rewards), while remaining gameplay, banking and worker paths still require migration. Stage 2C Phase 2 adds Admin-only full-roster scans and audited dry-run plans (v2.11.1 hardens status, duplicate handling and audit logs); Stage 2D Phase 4 adds bounded on-demand live Discord message verification to the registered Trader/status/event planning inventory (v2.15.0), building on active-world branding (v2.12.0); the v2.16.0 launch gate exposes production blockers, and v2.17.0 adds a physically separate Badlands Bot database, explicit mission configuration and fail-closed gameplay quarantine; a protected role cutover and automatic identity-only import are now available; external backups, the official map mission and final gameplay activation remain gated. New owner-authorized runtime cutover is available after a live mission match, private database checks, role reconciliation, verified backup/rollback and map checks; the world stays quarantined until those gates pass.</p>
 </div>
 <div aria-label="Current roadmap release" class="roadmap-release">
 <small>Roadmap updated</small>
-<strong>15 October 2026</strong>
+<strong>17 October 2026</strong>
 <span>Website v2.19.0 · Bot v1.82.0</span>
 </div>
 </div>
@@ -250,7 +250,7 @@
 <ul>
 <li>26 player slots on PlayStation 4 / PlayStation 5 with Full PvP, high loot and 91 random PvP loadouts.</li>
 <li>Heli crashes, convoys, WWZ combat sites, dynamic gas, PvP hotspots, Most Wanted and faction competition are active Livonia features.</li>
-<li>Livonia uses its own Nitrado service and <code>dayzOffline.enoch</code> mission while Chernarus remains on <code>dayzOffline.chernarusplus</code>.</li>
+<li>Livonia uses its own Nitrado service and <code>dayzOffline.enoch</code> mission. The primary Nitrado server runs the currently configured WWZ world; historic Chernarus files are preserved for rollback.</li>
 <li>Livonia progression, economy, PvP, tickets, factions, zones, feeds, donation orders, locations and configuration continue from their preserved Livonia-owned records.</li>
 <li>ADM, status, shop/delivery and moderation workers resume independently for Livonia when its runtime is active.</li>
 <li>Chernarus and Livonia can now operate simultaneously without sharing mutable gameplay or administration state.</li><li>Livonia includes the Deathmatch configuration rotation foundation with profile-matched Discord messaging and restart-safe JSON staging; activation remains Admin-controlled and now refuses to enable until its mission root and at least one valid arena profile are ready.</li>
@@ -293,7 +293,7 @@
 <div class="roadmap-card-heading"><span>09</span><div><small>Stage 1 · verified</small><h3>World Profiles &amp; Admin World Manager</h3></div></div>
 <p>World-profile readiness has been confirmed in live Admin testing (Bot v1.68.0 / Website v2.5.0). No map, player balance or Discord role changes were triggered.</p>
 <ul>
-<li>Chernarus remains the primary active world, and all Chernarus records and map data are retained for rollback.</li>
+<li>The primary world is selected through the live registry; all Chernarus records and map assets remain preserved for rollback.</li>
 <li>Badlands is a separate staged world profile; Livonia stays fully independent and unchanged.</li>
 <li>Admin-only World Manager displays profile readiness, migration blockers and a non-destructive Discord role-change preview.</li>
 </ul>

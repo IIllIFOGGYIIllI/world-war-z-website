@@ -85,7 +85,13 @@
     const left = document.createElement('span');
     left.innerHTML = '<strong>WWZ OPS NETWORK</strong> <span class="rail-divider">//</span> PLAYSTATION DAYZ';
     const right = document.createElement('span');
-    right.innerHTML = '<span class="rail-live">● DUAL-WORLD ACTIVE</span> <span class="rail-divider">//</span> CHERNARUS + LIVONIA';
+    right.innerHTML = '<span class="rail-live">● WWZ NETWORK</span> <span class="rail-divider">//</span> PRIMARY + LIVONIA';
+    const syncWorld = (event) => {
+      const world = event?.detail;
+      if (world?.primary && world?.secondary) right.textContent = `● WWZ NETWORK // ${world.primary} + ${world.secondary}`;
+    };
+    document.addEventListener('wwz:worldbranding', syncWorld);
+    syncWorld({detail:window.WWZWorldBranding?.getSnapshot?.()});
     rail.append(left, right);
     header.insertAdjacentElement('afterend', rail);
   };

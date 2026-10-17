@@ -1113,7 +1113,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         ("Leaflet stylesheet", "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"),
         ("Leaflet runtime", "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"),
         ("dashboard map styles", f"assets/css/components/wwz-map.css?v={EXPECTED_ASSET_VERSION}&rev=2"),
-        ("shared WWZ map runtime", f"assets/js/map/wwz-map.js?v={EXPECTED_ASSET_VERSION}&rev=3"),
+        ("shared WWZ map runtime", f"assets/js/map/wwz-map.js?v={EXPECTED_ASSET_VERSION}&rev=nasdara-paper-4"),
     )
     for label, asset_url in map_runtime_assets:
         if asset_url in dashboard:
@@ -1584,7 +1584,7 @@ def validate_checkout_compatibility(errors: list[str]) -> None:
             errors.append(f"Standalone Shop is missing v1.37 next-action behaviour/style: {token}")
     for token in (
         'assets/css/pages/shop.css?v=1.61.0&amp;rev=storefront-cart-1',
-        'assets/js/pages/shop.js?v=2.1.0&amp;rev=multi-destination-1',
+        'assets/js/pages/shop.js?v=2.1.0&amp;rev=badlands-shop-guard-1',
     ):
         if token not in shop_html:
             errors.append(f"shop.html: missing current v1.37 commerce asset: {token}")
@@ -1988,7 +1988,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     launch_requirements = {
         "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.69.0"),
-        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/server-context.js?v=1.60.0&amp;rev=event-calendar-overhaul-3", "assets/js/dashboard/lazy-assets.js?v=2.8.0&amp;rev=write-gateway-1"),
+        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/server-context.js?v=1.60.0&amp;rev=badlands-map-1", "assets/js/dashboard/lazy-assets.js?v=2.8.0&amp;rev=write-gateway-1"),
         "assets/js/dashboard/server-context.js": ("player_capacity", "Capacity', `${server.player_capacity} slots`"),
         "assets/js/dashboard/account.js": ("payload.server?.player_capacity",),
         "assets/js/dashboard/livonia-pvp.js": ("rotation.player_capacity", "players online"),
@@ -2103,7 +2103,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
         "const WWZ_PWA_VERSION = '2.19.0'",
-        "const WWZ_PWA_UPDATE_REVISION = '2026-10-15-website-v2-19-0-activation-gate-1'",
+        "const WWZ_PWA_UPDATE_REVISION = '2026-10-17-badlands-nasdara-paper-1'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
         "const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-world-branding-1`;",
