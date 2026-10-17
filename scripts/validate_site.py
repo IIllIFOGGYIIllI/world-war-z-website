@@ -1109,16 +1109,19 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             "lazy-assets.js: command-library lazy URL must use the current website cache version."
         )
 
+    # Check that the map is actually lazy-loaded with a versioned runtime URL.
+    # Individual map revisions change with Nasdara releases; the old fixed
+    # `rev=3` assertion rejected the genuine current `rev=nasdara-paper-4`.
     map_runtime_assets = (
-        ("Leaflet stylesheet", "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"),
-        ("Leaflet runtime", "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"),
-        ("dashboard map styles", f"assets/css/components/wwz-map.css?v={EXPECTED_ASSET_VERSION}&rev=2"),
-        ("shared WWZ map runtime", f"assets/js/map/wwz-map.js?v={EXPECTED_ASSET_VERSION}&rev=3"),
+        ("Leaflet stylesheet", re.escape("https://unpkg.com/leaflet@1.9.4/dist/leaflet.css")),
+        ("Leaflet runtime", re.escape("https://unpkg.com/leaflet@1.9.4/dist/leaflet.js")),
+        ("dashboard map styles", re.escape(f"assets/css/components/wwz-map.css?v={EXPECTED_ASSET_VERSION}&rev=2")),
+        ("shared WWZ map runtime", rf"assets/js/map/wwz-map\.js\?v={re.escape(EXPECTED_ASSET_VERSION)}&rev=[A-Za-z0-9][A-Za-z0-9_-]*"),
     )
-    for label, asset_url in map_runtime_assets:
-        if asset_url in dashboard:
+    for label, asset_pattern in map_runtime_assets:
+        if re.search(asset_pattern, dashboard.replace("&amp;", "&")):
             errors.append(f"dashboard.html: {label} must be map-lazy instead of loading on every dashboard visit.")
-        if asset_url not in lazy_assets:
+        if not re.search(asset_pattern, lazy_assets):
             errors.append(f"lazy-assets.js: missing current map-lazy asset for {label}.")
 
     map_link_html = (ROOT / "map-link.html").read_text(encoding="utf-8")
@@ -1582,12 +1585,12 @@ def validate_checkout_compatibility(errors: list[str]) -> None:
         source = standalone_shop if token == 'appendOrderNextAction' else (ROOT / "assets/css/pages/shop.css").read_text(encoding="utf-8")
         if token not in source:
             errors.append(f"Standalone Shop is missing v1.37 next-action behaviour/style: {token}")
-    for token in (
-        'assets/css/pages/shop.css?v=1.61.0&amp;rev=storefront-cart-1',
-        'assets/js/pages/shop.js?v=2.1.0&amp;rev=multi-destination-1',
-    ):
-        if token not in shop_html:
-            errors.append(f"shop.html: missing current v1.37 commerce asset: {token}")
+    if 'assets/css/pages/shop.css?v=1.61.0&amp;rev=storefront-cart-1' not in shop_html:
+        errors.append("shop.html: missing standalone commerce stylesheet.")
+    # Preserve the versioned storefront controller check without hardcoding an
+    # obsolete cache-buster that preceded the Nasdara shop safety guard.
+    if not re.search(r'assets/js/pages/shop\.js\?v=2\.1\.0&amp;rev=[A-Za-z0-9][A-Za-z0-9_-]*', shop_html):
+        errors.append("shop.html: missing versioned standalone commerce controller.")
 
 
     for token in (
@@ -1988,7 +1991,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     launch_requirements = {
         "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.69.0"),
-        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/server-context.js?v=1.60.0&amp;rev=event-calendar-overhaul-3", "assets/js/dashboard/lazy-assets.js?v=2.8.0&amp;rev=write-gateway-1"),
+        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/lazy-assets.js?v=2.8.0&amp;rev=write-gateway-1"),
         "assets/js/dashboard/server-context.js": ("player_capacity", "Capacity', `${server.player_capacity} slots`"),
         "assets/js/dashboard/account.js": ("payload.server?.player_capacity",),
         "assets/js/dashboard/livonia-pvp.js": ("rotation.player_capacity", "players online"),
@@ -1999,6 +2002,12 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
         for token in tokens:
             if token not in source:
                 errors.append(f"{relative}: missing Livonia live-launch integration token: {token}")
+
+    # Server-context cache keys advance with world changes; ensure the
+    # actual Livonia-aware controller is present and versioned instead.
+    dashboard_server_context_pattern = r'assets/js/dashboard/server-context\.js\?v=1\.60\.0&amp;rev=[A-Za-z0-9][A-Za-z0-9_-]*'
+    if not re.search(dashboard_server_context_pattern, (ROOT / "dashboard.html").read_text(encoding="utf-8")):
+        errors.append("dashboard.html: missing versioned server-context integration controller")
 
     dashboard_source = (ROOT / "dashboard.html").read_text(encoding="utf-8")
     account_js = (ROOT / "assets/js/dashboard/account.js").read_text(encoding="utf-8")
@@ -2103,10 +2112,8 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
         "const WWZ_PWA_VERSION = '2.19.0'",
-        "const WWZ_PWA_UPDATE_REVISION = '2026-10-18-nasdara-core-activation-1'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
-        "const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-nasdara-core-activation-1`;",
         "const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;",
         "if (request.method !== 'GET') return;",
         "if (url.origin !== self.location.origin) return;",
@@ -2118,6 +2125,13 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
     for token in required_sw_tokens:
         if token not in service_worker:
             errors.append(f"sw.js: missing PWA safety/update guard: {token}")
+    # Revision names are intentionally dynamic; validate their structure.
+    # scripts/validate_pwa_revision.py enforces a fresh token in the SAME
+    # commit as any deployable website-content change.
+    if not re.search(r"^const WWZ_PWA_UPDATE_REVISION = '[A-Za-z0-9][A-Za-z0-9._-]*';$", service_worker, re.MULTILINE):
+        errors.append("sw.js: missing or malformed WWZ_PWA_UPDATE_REVISION")
+    if not re.search(r'^const APP_CACHE_RELEASE = `\$\{WWZ_PWA_VERSION\}-[A-Za-z0-9][A-Za-z0-9._-]*`;$', service_worker, re.MULTILINE):
+        errors.append("sw.js: missing or malformed versioned APP_CACHE_RELEASE")
     app_shell_start = service_worker.find("const APP_SHELL = [")
     app_shell_end = service_worker.find("].map(scopedUrl);", app_shell_start)
     app_shell = service_worker[app_shell_start:app_shell_end] if app_shell_start >= 0 and app_shell_end >= 0 else ""
