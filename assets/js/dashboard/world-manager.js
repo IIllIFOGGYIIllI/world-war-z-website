@@ -27,6 +27,32 @@
   const activationPanel = find('[data-world-activation-executor]');
   const activationAction = find('[data-world-activation-action]');
   const activationProof = find('[data-world-activation-proof]');
+  if (activationPanel) {
+    const heading=activationPanel.querySelector('h3');
+    if (heading) heading.textContent='Nasdara core gameplay · Owner authorization';
+    const authorizeOption=activationAction?.querySelector('option[value="authorize"]');
+    if (authorizeOption) authorizeOption.textContent='Authorize Nasdara core gameplay for next Bot restart';
+  }
+  // Nasdara-only launch: replace obsolete six Chernarus-rollback completion
+  // attestations with explicit risk/deferral acknowledgements. Never send
+  // manufactured proof that the owner performed off-server restore tests.
+  if (activationProof) {
+    activationProof.replaceChildren();
+    const explain=document.createElement('p');
+    explain.className='world-muted';
+    explain.textContent='Nasdara-only core launch: your existing Chernarus data stays archived and Livonia remains independent. These are risk acknowledgements, NOT confirmations that backups or rollback tests occurred. The Bot independently checks the live Nasdara mission, both databases and the completed Discord role journal. Shop checkout and physical delivery remain disabled until separately approved.';
+    activationProof.append(explain);
+    for (const [key, description] of [
+      ['accept_untested_backup_and_rollback','I accept launching Nasdara core gameplay without a verified off-server restore or a rehearsed Chernarus rollback. I understand loss of the Railway volume could lose data.'],
+      ['defer_map_dependent_shop_and_services','I acknowledge Nasdara shop deliveries, rentals, old-coordinate locations and other unverified map-dependent actions are NOT certified for use.']
+    ]) {
+      const label=document.createElement('label');
+      const input=document.createElement('input');
+      input.type='checkbox'; input.dataset.activationAttestation=key;
+      label.append(input, document.createTextNode(' '+description));
+      activationProof.append(label);
+    }
+  }
   const activationCheckBoxes = Array.from(root.querySelectorAll('[data-activation-attestation]'));
   const activationConfirm = find('[data-world-activation-confirm]');
   const activationConfirmLabel = find('[data-world-activation-confirm-label]');
@@ -34,7 +60,7 @@
   const activationExecutionStatus = find('[data-world-activation-execution-status]');
   const activationGate = find('[data-world-activation-gate]');
   let activationBusy = false;
-  const activationPhrase = () => activationAction?.value === 'revoke' ? 'REVOKE BADLANDS GAMEPLAY' : 'AUTHORIZE BADLANDS GAMEPLAY';
+  const activationPhrase = () => activationAction?.value === 'revoke' ? 'REVOKE BADLANDS GAMEPLAY' : 'AUTHORIZE NASDARA GAMEPLAY';
   const refreshActivationControl = () => {
     if (activationProof) activationProof.hidden = activationAction?.value === 'revoke';
     if (activationConfirmLabel) activationConfirmLabel.textContent = activationPhrase();
@@ -345,7 +371,7 @@
     const action=String(activationAction?.value || 'authorize');
     const message = action === 'revoke'
       ? 'Revoke the private Badlands authorization for the next Bot restart? This does NOT stop the already-running Bot or change Nitrado.'
-      : 'Only proceed if the actual Nasdara mission is running, your off-server backups are verified, and all six statements are true. This prepares the NEXT Bot restart, not an immediate world switch.';
+      : 'Only proceed if you accept the Nasdara-only risk acknowledgements. The Bot must still validate Nitrado mission, both SQLite databases and private role journal. The shop stays separately locked. This prepares the NEXT Bot restart.';
     if (!window.confirm(message)) return;
     activationBusy=true;refreshActivationControl();
     if (activationExecutionStatus) activationExecutionStatus.textContent='Checking protected world cutover…';

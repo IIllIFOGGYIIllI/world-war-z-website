@@ -1,3 +1,9 @@
+## Nasdara-only owner cutover policy (18 October 2026)
+
+The World Manager now offers an explicit risk-acknowledged Nasdara-only core activation path with two honest statements instead of requiring unperformed Chernarus restore/rehearsal confirmations. Nitrado mission, both SQLite databases and completed private role journal remain mandatory backend checks. Shop checkout, rentals and physical deliveries retain the separate default-off release flag. See Bot `docs/NASDARA_CORE_ONLY_ACTIVATION_20261018.md`. This patch does not activate Railway or alter Livonia.
+
+---
+
 ## Nasdara runtime readiness — 18 October 2026
 
 **Verified in Railway:** Nasdara is the primary Bot identity (`map=badlands`, mission `dayzOffline.nasdara`), runtime is quarantined, the identity-only bootstrap imported 38 linked identities, and Livonia remains active. **No full gameplay activation has occurred.**
