@@ -82,8 +82,8 @@ const activeMapKey = () => String(state.server?.map_key || '').toLowerCase();
 const activeWorldSize = () => state.server?.map_key === 'livonia' ? 12800 : state.server?.map_key === 'chernarus' ? 15360 : state.server?.map_key === 'badlands' ? 16384 : null;
 // Badlands purchases require verified native coordinates, item compatibility and
 // a separate delivery database. Until that release gate is lifted, browse only.
-const isBadlandsDeliveryPending = () => activeMapKey() === 'badlands';
-const BADLANDS_CHECKOUT_NOTICE = 'Badlands shop is being prepared. Purchases and delivery coordinates are disabled until the map and delivery routing are verified.';
+// Preserve the separate Badlands cart namespace across the Chernarus migration.
+const isBadlandsWorld = () => activeMapKey() === 'badlands';
 
 const MAP_ASSETS = {
   leafletCss: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
@@ -356,14 +356,14 @@ const limitText = (item) => item.max_per_player == null
   ? 'No lifetime limit'
   : item.remaining_member_limit == null ? `${item.max_per_player} per player` : `${Math.max(0, item.remaining_member_limit)} remaining for you`;
 const canPurchase = (item) => Boolean(
-  !isBadlandsDeliveryPending() && state.server?.paused !== true &&
+  state.server?.paused !== true &&
   state.user && state.settings.enabled && state.settings.website_enabled !== false && state.access.can_purchase && item.available
 );
 
 // The primary Discord/Nitrado server key survives the Chernarus → Badlands cutover.
 // Namespace the NEW world cart so cached Chernarus items cannot carry across.
 // Retain the original key for Chernarus/Livonia backwards compatibility.
-const cartStorageKey = () => `wwz_shop_cart_v1:${state.server?.key || 'unselected'}${isBadlandsDeliveryPending() ? ':badlands' : ''}`;
+const cartStorageKey = () => `wwz_shop_cart_v1:${state.server?.key || 'unselected'}${isBadlandsWorld() ? ':badlands' : ''}`;
 const normalOrderMax = (item) => Math.max(0, Math.min(
   50,
   Math.max(0, Number(item?.max_per_order ?? 50) || 0),
@@ -426,7 +426,7 @@ const renderCart = () => {
   elements.cartList.hidden = !hasItems;
   if (elements.cartEmpty) elements.cartEmpty.hidden = hasItems;
   if (elements.cartSummary) elements.cartSummary.hidden = !hasItems;
-  [elements.cartCheckout, elements.cartCheckoutSecondary].forEach((button) => { if (button) button.disabled = !hasItems || isBadlandsDeliveryPending() || state.server?.paused === true; });
+  [elements.cartCheckout, elements.cartCheckoutSecondary].forEach((button) => { if (button) button.disabled = !hasItems || state.server?.paused === true; });
   if (elements.cartClear) elements.cartClear.disabled = !hasItems;
 };
 const addToCart = (item, quantity = 1) => {
@@ -470,7 +470,6 @@ const itemMode = (item) => item?.delivery_type === 'event' ? 'event' : 'manual';
 const itemHaystack = (item) => `${item?.name || ''} ${item?.category || ''} ${item?.sku || ''} ${item?.description || ''} ${(item?.types || []).join(' ')} ${(item?.required_roles || []).map((role) => role.name).join(' ')}`.toLowerCase();
 const catalogueModeItems = () => state.items.filter((item) => itemMode(item) === state.mode);
 const purchaseButtonLabel = (item) => {
-  if (isBadlandsDeliveryPending()) return 'Badlands shop preparing';
   if (!state.user) return 'Sign in to buy';
   if (!state.access.website_enabled) return 'Member shop disabled';
   if (!state.access.has_required_role) return 'Required role missing';
@@ -1004,8 +1003,8 @@ const applyPayload = (payload, member = false) => {
     } else if (!payload.linked) {
       elements.access.textContent = 'PSN link required'; elements.accessNote.textContent = 'Use /link in Discord';
     } else {
-      elements.access.textContent = isBadlandsDeliveryPending() ? 'Browse only' : (state.settings.enabled ? 'Ready to purchase' : 'Browse only');
-      elements.accessNote.textContent = isBadlandsDeliveryPending() ? 'Badlands delivery map not yet verified' : (state.settings.enabled ? 'Identity and wallet verified' : 'Purchases are paused');
+      elements.access.textContent = state.settings.enabled ? 'Ready to purchase' : 'Browse only';
+      elements.accessNote.textContent = state.settings.enabled ? 'Identity and wallet verified' : 'Purchases are paused';
     }
   }
   $$('[data-member-shop-mode]').forEach((button) => {
@@ -1104,7 +1103,6 @@ const syncLocationMode = () => {
   updateMarker();
 };
 const ensureCheckoutMap = () => {
-  if (isBadlandsDeliveryPending()) return null;
   if (checkoutMapInstance || !elements.coordinateMap || !window.WWZMap) return checkoutMapInstance;
   const worldSize = activeWorldSize();
   [elements.x, elements.z].forEach((input) => { if (input) input.max = String(worldSize); });
@@ -1159,7 +1157,7 @@ const updateTotal = () => {
 };
 let cartDeliveryPlan = null;
 const openCartCheckout = () => {
-  if (isBadlandsDeliveryPending() || state.server?.paused === true) { showMessage(BADLANDS_CHECKOUT_NOTICE); return; }
+  if (state.server?.paused === true) { showMessage('This DayZ server is currently paused.'); return; }
   normalizeCart();
   const entries = cartEntries();
   if (!state.user) { openLogin(); return; }
@@ -1191,7 +1189,7 @@ const openCartCheckout = () => {
   }, 0);
 };
 const openPurchase = (item) => {
-  if (isBadlandsDeliveryPending()) { showMessage(BADLANDS_CHECKOUT_NOTICE); return; }
+  
   if (!canPurchase(item)) return;
   if (elements.detailDialog?.open) elements.detailDialog.close();
   state.checkoutCart = false;
@@ -1227,7 +1225,7 @@ const openPurchase = (item) => {
 };
 const submitPurchase = async (event) => {
   event.preventDefault();
-  if (isBadlandsDeliveryPending() || state.server?.paused === true) { showMessage(BADLANDS_CHECKOUT_NOTICE); return; }
+  if (state.server?.paused === true) { showMessage('This DayZ server is currently paused.'); return; }
   if (!state.token || (!state.selectedItem && !state.checkoutCart) || state.purchasing) return;
   state.purchasing = true; elements.purchaseConfirm.disabled = true; showMessage('Railway is validating your wallet, stock and access.', 'info');
   try {
