@@ -1,3 +1,9 @@
+## Nasdara community campaign UI (20 October 2026)
+
+Added a mobile-friendly, read-only weekly Nasdara community campaign to Quest Career. Displays three guild-isolated, multi-player contribution targets from *confirmed claimed Nasdara quests* and reset countdown. No automatic group payouts or squad-proximity claims; individual rewards and military-area PvP remain unchanged. Paired Bot update required. Deploy first, then verify linked member dashboard and iPhone PWA update.
+
+---
+
 ## 20 October 2026: Nasdara PvE career extension
 
 The existing Objectives interface displays six badges returned by the Bot career payload for Nasdara only. Four additional daily and weekly Nasdara templates are available for future rotations; per-member telemetry, claim rewards and world isolation remain on existing paths. Community routes encourage team play but do not claim automated group verification. Military reconnaissance missions explicitly warn about military-area PvP. Live Railway deployment, PvP geometry and payout verification remain pending.

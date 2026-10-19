@@ -277,6 +277,41 @@
       : (Number(career.claimed || 0) ? 'All current Quest Career milestones achieved.' : 'Complete quests to begin your objective career.'));
   };
 
+  const renderNasdaraCommunity = (community) => {
+    const area = panel.querySelector('[data-nasdara-community]');
+    const grid = panel.querySelector('[data-nasdara-community-grid]');
+    if (!area || !grid) return;
+    const goals = Array.isArray(community?.goals) ? community.goals : [];
+    area.hidden = goals.length === 0;
+    grid.replaceChildren();
+    if (!goals.length) return;
+    const summary = panel.querySelector('[data-community-summary]');
+    if (summary) summary.textContent = `Community goals: ${number(goals.filter((goal) => goal.completed).length)} / ${number(goals.length)}`;
+    const reset = panel.querySelector('[data-community-reset]');
+    if (reset) reset.textContent = `Weekly reset in ${relative(community.resets_at)}`;
+    goals.forEach((goal) => {
+      const count = Math.max(0, Number(goal.progress) || 0);
+      const target = Math.max(1, Number(goal.target) || 1);
+      const people = Math.max(0, Number(goal.contributors) || 0);
+      const required = Math.max(1, Number(goal.contributors_target) || 1);
+      const card = document.createElement('div');
+      card.className = `quest-community-goal${goal.completed ? ' achieved' : ''}`;
+      const heading = document.createElement('strong');
+      heading.textContent = `${goal.completed ? '✓ ' : '◇ '}${String(goal.title || 'Community goal')}`;
+      const explanation = document.createElement('small');
+      explanation.textContent = String(goal.description || '');
+      const status = document.createElement('span');
+      status.textContent = `${number(count)} / ${number(target)} claims · ${number(people)} / ${number(required)} survivors`;
+      const track = document.createElement('div'); track.className = 'quest-achievement-track';
+      const bar = document.createElement('span');
+      // The second requirement (different contributors) is always visible in text.
+      bar.style.width = `${Math.min(100, count / target * 100)}%`;
+      track.append(bar);
+      card.append(heading, explanation, status, track);
+      grid.append(card);
+    });
+  };
+
   const renderMember = (payload) => {
     memberData = payload;
     const signedIn = Boolean(token());
@@ -286,6 +321,7 @@
     if (content) content.hidden = !linked;
     if (!linked) return;
     renderCareer(payload.quests?.career || {});
+    renderNasdaraCommunity(payload.quests?.community);
     renderQuestList(dailyList, payload.quests?.daily, '[data-objectives-daily-empty]');
     renderQuestList(weeklyList, payload.quests?.weekly, '[data-objectives-weekly-empty]');
     renderHistory(payload.quests?.history);

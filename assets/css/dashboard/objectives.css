@@ -20,3 +20,17 @@
 .quest-achievement-track>span{display:block;height:100%;background:linear-gradient(90deg,#a43232,#58bd75)}
 @media(max-width:880px){.quest-achievement-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){.quest-achievement-grid{grid-template-columns:1fr}}
+
+/* Nasdara-only weekly cooperative quest-claim milestones (read-only). */
+.quest-nasdara-community{display:grid;gap:11px;padding:14px 0;border-top:1px solid rgba(255,255,255,.08)}
+.quest-nasdara-community[hidden]{display:none}
+.quest-community-window{display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;color:var(--text-muted,#9ca0aa);font-size:.79rem}
+.quest-community-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.quest-community-goal{display:grid;gap:8px;padding:13px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.025)}
+.quest-community-goal.achieved{border-color:rgba(77,190,111,.4);background:rgba(52,139,78,.08)}
+.quest-community-goal strong{font-size:.92rem}
+.quest-community-goal small,.quest-community-note{color:var(--text-muted,#9ca0aa);line-height:1.45}
+.quest-community-goal>span{font-size:.77rem;font-weight:700}
+.quest-community-note{margin:0;font-size:.76rem}
+@media(max-width:900px){.quest-community-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.quest-community-grid{grid-template-columns:1fr}}

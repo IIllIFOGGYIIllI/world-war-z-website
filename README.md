@@ -1,3 +1,9 @@
+## Nasdara community campaign UI (20 October 2026)
+
+Added a mobile-friendly, read-only weekly Nasdara community campaign to Quest Career. Displays three guild-isolated, multi-player contribution targets from *confirmed claimed Nasdara quests* and reset countdown. No automatic group payouts or squad-proximity claims; individual rewards and military-area PvP remain unchanged. Paired Bot update required. Deploy first, then verify linked member dashboard and iPhone PWA update.
+
+---
+
 ## Nasdara PvE Career Expansion (20 October 2026)
 
 Objectives → Quest Career now displays six automatically derived Nasdara specialist achievements from the existing Bot quest-career response. These are read-only acknowledgments, not cash/XP rewards. They remain hidden on Chernarus/Livonia. Existing quest milestones and claim buttons remain unchanged. The PWA shell revision is bumped without rotating the shared map tile caches. The paired Bot adds four daily and four weekly Nasdara quest options, preserving existing active assignments and the 17+17 original templates.

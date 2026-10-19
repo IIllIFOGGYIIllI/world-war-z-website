@@ -161,7 +161,7 @@
 
   const ensureObjectivesStyles = () => loadStylesheetOnce(
     'objectives-css',
-    'assets/css/dashboard/objectives.css?v=1.37.1&rev=nasdara-pve-career-1'
+    'assets/css/dashboard/objectives.css?v=1.37.1&rev=nasdara-community-1'
   );
 
   const ensureFactionsStyles = () => loadStylesheetOnce(
@@ -343,7 +343,7 @@
 
   const ensureObjectives = () => ensureObjectivesStyles().then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
     'objectives',
-    'assets/js/dashboard/objectives.js?v=1.37.1&rev=nasdara-pve-career-1',
+    'assets/js/dashboard/objectives.js?v=1.37.1&rev=nasdara-community-1',
     () => window.__wwzObjectivesReady === true
   )));
 
