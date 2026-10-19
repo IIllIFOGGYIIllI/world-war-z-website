@@ -1,3 +1,9 @@
+## Nasdara PvE Career Expansion (20 October 2026)
+
+Objectives → Quest Career now displays six automatically derived Nasdara specialist achievements from the existing Bot quest-career response. These are read-only acknowledgments, not cash/XP rewards. They remain hidden on Chernarus/Livonia. Existing quest milestones and claim buttons remain unchanged. The PWA shell revision is bumped without rotating the shared map tile caches. The paired Bot adds four daily and four weekly Nasdara quest options, preserving existing active assignments and the 17+17 original templates.
+
+---
+
 ## Nasdara-only owner cutover policy (18 October 2026)
 
 The World Manager now offers an explicit risk-acknowledged Nasdara-only core activation path with two honest statements instead of requiring unperformed Chernarus restore/rehearsal confirmations. Nitrado mission, both SQLite databases and completed private role journal remain mandatory backend checks. Shop checkout, rentals and physical deliveries retain the separate default-off release flag. See Bot `docs/NASDARA_CORE_ONLY_ACTIVATION_20261018.md`. This patch does not activate Railway or alter Livonia.

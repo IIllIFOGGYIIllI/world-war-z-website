@@ -1,3 +1,9 @@
+## 20 October 2026: Nasdara PvE career extension
+
+The existing Objectives interface displays six badges returned by the Bot career payload for Nasdara only. Four additional daily and weekly Nasdara templates are available for future rotations; per-member telemetry, claim rewards and world isolation remain on existing paths. Community routes encourage team play but do not claim automated group verification. Military reconnaissance missions explicitly warn about military-area PvP. Live Railway deployment, PvP geometry and payout verification remain pending.
+
+---
+
 ## Nasdara-only owner cutover policy (18 October 2026)
 
 The World Manager now offers an explicit risk-acknowledged Nasdara-only core activation path with two honest statements instead of requiring unperformed Chernarus restore/rehearsal confirmations. Nitrado mission, both SQLite databases and completed private role journal remain mandatory backend checks. Shop checkout, rentals and physical deliveries retain the separate default-off release flag. See Bot `docs/NASDARA_CORE_ONLY_ACTIVATION_20261018.md`. This patch does not activate Railway or alter Livonia.

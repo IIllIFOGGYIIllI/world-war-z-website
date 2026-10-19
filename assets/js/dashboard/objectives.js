@@ -247,6 +247,30 @@
         milestones.append(badge);
       });
     }
+    const nasdaraArea = panel.querySelector('[data-nasdara-achievements]');
+    const achievementGrid = panel.querySelector('[data-nasdara-achievement-grid]');
+    const achievements = Array.isArray(career.nasdara_achievements) ? career.nasdara_achievements : [];
+    if (nasdaraArea) nasdaraArea.hidden = achievements.length === 0;
+    if (achievementGrid) {
+      achievementGrid.replaceChildren();
+      achievements.forEach((entry) => {
+        const target = Math.max(1, Number(entry.target) || 1);
+        const progress = Math.max(0, Math.min(target, Number(entry.progress) || 0));
+        const achieved = Boolean(entry.achieved);
+        const card = document.createElement('div');
+        card.className = `quest-achievement${achieved ? ' achieved' : ''}`;
+        const heading = document.createElement('strong');
+        heading.textContent = `${achieved ? '✓ ' : '◇ '}${String(entry.title || 'Achievement')}`;
+        const explanation = document.createElement('small');
+        explanation.textContent = String(entry.description || '');
+        const counter = document.createElement('span');
+        counter.textContent = achieved ? 'Earned' : `${number(progress)} / ${number(target)} quests`;
+        const track = document.createElement('div'); track.className = 'quest-achievement-track';
+        const bar = document.createElement('span'); bar.style.width = `${Math.min(100, progress / target * 100)}%`;
+        track.append(bar); card.append(heading, explanation, counter, track);
+        achievementGrid.append(card);
+      });
+    }
     const next = career.next_milestone;
     set('[data-quest-next-milestone]', next
       ? `${next.label}: ${number(career.claimed)} / ${number(next.target)} claimed quests`
