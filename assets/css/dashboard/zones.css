@@ -175,6 +175,10 @@
 .zone-dialog-header h2 { margin: .15rem 0 0; }
 .zone-dialog-header .panel-kicker { margin: 0; }
 .zone-dialog-footer { border-top: 1px solid rgba(255,255,255,.08); border-bottom: 0; justify-content: flex-end; }
+.zone-save-status { flex: 1; min-width: 0; max-height: 4.5rem; overflow-y: auto; font-size: .82rem; color: #d1d8e6; }
+.zone-save-status[data-kind="error"] { color: #ff8d8d; }
+.zone-save-status[data-kind="warning"] { color: #ffd080; }
+.zone-save-status[hidden] { display: none; }
 .zone-dialog-close { border: 0; background: transparent; color: #aeb8c8; font-size: 1.6rem; cursor: pointer; }
 .zone-dialog-body { overflow: auto; padding: 1rem 1.15rem; }
 .zone-editor-grid { display: grid; grid-template-columns: minmax(330px, .8fr) minmax(420px, 1.2fr); gap: 1rem; }

@@ -1081,7 +1081,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         errors.append(
             "dashboard.html: command library must be lazy-loaded instead of downloaded on every dashboard visit."
         )
-    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=2.8.0&amp;rev=write-gateway-1'
+    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=2.8.1&amp;rev=zone-save-fix-1'
     lazy_index = dashboard.find(lazy_script)
     shell_index = dashboard.find("assets/js/dashboard/shell.js")
     if lazy_index < 0:
@@ -1097,7 +1097,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         if token not in lazy_assets:
             errors.append(f"lazy-assets.js: missing command-library lazy-loading guard: {token}")
     for changed_asset in (
-        'assets/js/dashboard/zones.js?v=1.59.3&rev=killzone-runtime-1',
+        'assets/js/dashboard/zones.js?v=1.59.4&rev=zone-save-fix-1',
         'assets/js/dashboard/shop-helpers.js?v=1.54.2&rev=shop-classname-admin-1',
         'assets/js/dashboard/shop.js?v=2.1.0&rev=multi-destination-1',
     ):
@@ -1991,7 +1991,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     launch_requirements = {
         "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.69.0"),
-        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/lazy-assets.js?v=2.8.0&amp;rev=write-gateway-1"),
+        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/lazy-assets.js?v=2.8.1&amp;rev=zone-save-fix-1"),
         "assets/js/dashboard/server-context.js": ("player_capacity", "Capacity', `${server.player_capacity} slots`"),
         "assets/js/dashboard/account.js": ("payload.server?.player_capacity",),
         "assets/js/dashboard/livonia-pvp.js": ("rotation.player_capacity", "players online"),

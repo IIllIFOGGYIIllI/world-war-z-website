@@ -195,13 +195,13 @@
 
   const ensureZonesStyles = () => loadStylesheetOnce(
     'zones-css',
-    'assets/css/dashboard/zones.css?v=1.59.3&rev=killzone-runtime-1'
+    'assets/css/dashboard/zones.css?v=1.59.4&rev=zone-save-fix-1'
   );
 
   const ensureZones = () => Promise.all([ensureMapRuntime(), ensureZonesStyles()])
     .then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
       'zones',
-      'assets/js/dashboard/zones.js?v=1.59.3&rev=killzone-runtime-1',
+      'assets/js/dashboard/zones.js?v=1.59.4&rev=zone-save-fix-1',
       () => window.__wwzZonesReady === true
     )));
 

@@ -88,11 +88,15 @@
   };
 
   const editorMessage = (text = '', kind = 'info') => {
-    const element = $('[data-zone-editor-message]');
-    if (!element) return;
-    element.hidden = !text;
-    element.textContent = text;
-    element.dataset.kind = kind;
+    // The editor scrolls independently of its footer. Errors must remain
+    // visible next to Save Zone, not only inside the scrolled settings pane.
+    for (const selector of ['[data-zone-editor-message]', '[data-zone-save-status]']) {
+      const element = $(selector);
+      if (!element) continue;
+      element.hidden = !text;
+      element.textContent = text;
+      element.dataset.kind = kind;
+    }
   };
 
   const authenticatedJson = async (url, options = {}, timeout = 15_000) => {
@@ -385,7 +389,7 @@
       meta.append(
         ...(zone.managed ? [checkboxPill('Managed PvP Area', true, 'activity')] : []),
         checkboxPill(runtimeSuspended ? 'Suspended · Raid Weekend' : (zone.active ? 'Active' : 'Inactive'), zone.active && !runtimeSuspended, runtimeSuspended ? 'suspended' : 'activity'),
-        checkboxPill(runtimeSuspended ? 'Enforcement paused' : (zone.ping_on_detection ? `Radar ${Number(zone.radar_interval_minutes || 5)}m` : 'Radar off'), runtimeSuspended ? false : zone.ping_on_detection, 'activity'),
+        checkboxPill(runtimeSuspended ? 'Enforcement paused' : (!zone.channel_key && (zone.ping_on_detection || zone.alert_on_enter || zone.alert_on_exit || zone.kill_zone || zone.hit_zone) ? 'Alerts unrouted' : (zone.ping_on_detection ? `Radar ${Number(zone.radar_interval_minutes || 5)}m` : 'Radar off')), Boolean(zone.channel_key && zone.ping_on_detection && !runtimeSuspended), 'activity'),
         checkboxPill(zone.alert_on_enter ? 'Entry alerts' : 'Entry off', zone.alert_on_enter),
         checkboxPill(zone.alert_on_exit ? 'Exit alerts' : 'Exit off', zone.alert_on_exit),
         checkboxPill(zone.channel_key ? 'Channel set' : 'No channel', Boolean(zone.channel_key))
@@ -614,9 +618,9 @@
     state.dynamicLists = [];
     if ($('[data-zone-colour]')) $('[data-zone-colour]').value = '#d52b1e';
     if ($('[data-zone-active]')) $('[data-zone-active]').checked = true;
-    if ($('[data-zone-alert-enter]')) $('[data-zone-alert-enter]').checked = true;
+    if ($('[data-zone-alert-enter]')) $('[data-zone-alert-enter]').checked = false;
     if ($('[data-zone-include-location]')) $('[data-zone-include-location]').checked = true;
-    if ($('[data-zone-ping-on-detection]')) $('[data-zone-ping-on-detection]').checked = true;
+    if ($('[data-zone-ping-on-detection]')) $('[data-zone-ping-on-detection]').checked = false;
     if ($('[data-zone-radar-interval]')) $('[data-zone-radar-interval]').value = '5';
     if ($('[data-zone-temporary-ban-minutes]')) $('[data-zone-temporary-ban-minutes]').value = '60';
     if ($('[data-zone-radius]')) $('[data-zone-radius]').value = '150';
@@ -777,7 +781,7 @@
       renderZoneList();
       renderZoneOverlays();
       $('[data-zone-dialog]')?.close?.();
-      message(`${zone.name} was ${result.action === 'create' ? 'created' : 'updated'} successfully.`, 'success');
+      message(`${zone.name} was ${result.action === 'create' ? 'created' : 'updated'} successfully.${result.notice ? ` ${result.notice}` : ''}`, result.notice ? 'warning' : 'success');
     } catch (error) {
       editorMessage(error?.message || 'The zone could not be saved.', 'error');
     } finally {
@@ -834,9 +838,9 @@
       if (state.activeSection === 'map') renderZoneOverlays();
       const mapLabels = $$('[data-zone-world-name]');
       mapLabels.forEach((element) => { element.textContent = state.mapName; });
-      const radarWithoutChannel = state.zones.filter((zone) => zone.ping_on_detection && !zone.channel_key).length;
-      if (radarWithoutChannel) {
-        message(`${radarWithoutChannel} radar zone${radarWithoutChannel === 1 ? '' : 's'} need a Discord alert channel before detection pings can be delivered.`, 'warning');
+      const unroutedAlerts = state.zones.filter((zone) => !zone.channel_key && (zone.ping_on_detection || zone.alert_on_enter || zone.alert_on_exit || zone.kill_zone || zone.hit_zone)).length;
+      if (unroutedAlerts) {
+        message(`${unroutedAlerts} zone${unroutedAlerts === 1 ? '' : 's'} have alert settings without a Discord channel. Zone boundaries remain saved; select a channel to deliver alerts.`, 'warning');
       } else {
         message('');
       }
