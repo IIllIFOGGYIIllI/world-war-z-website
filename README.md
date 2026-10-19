@@ -1,3 +1,12 @@
+## Nasdara Community Event Operations (20 October 2026)
+
+- Event Planner: four prefilled Nasdara-specific activity templates. Desert Relief Run, Survivor Rescue Patrol, Shelter Challenge are PvE; Military Recon Clash uses an existing verified military KILLZONE. No event positions are invented; Admin selects actual site/boundary.
+- Presets use existing `custom` event processing, signup, announcements, and the existing Event Desk. No new backend event types, no new reward producer, no automatic extra XP/cash, and no external actions performed by installing this update.
+- Staff Objective Administration: read-only weekly community campaign progress sourced from the existing guild and Nasdara-scoped quest claim ledger. Livonia/Chernarus do not receive the panel or shared goals.
+- Event Planner presets appear only when the selected server is Nasdara; the preset action rejects other worlds; PvP events require a selected configured KILLZONE before scheduling.
+- Existing reward controls remain admin-managed and default OFF for these event presets.
+- This release leaves DayZ mission files, live event records, roles, bank balances and persistence unchanged. Live testing remains necessary before turning on payouts.
+
 ## Nasdara community campaign UI (20 October 2026)
 
 Added a mobile-friendly, read-only weekly Nasdara community campaign to Quest Career. Displays three guild-isolated, multi-player contribution targets from *confirmed claimed Nasdara quests* and reset countdown. No automatic group payouts or squad-proximity claims; individual rewards and military-area PvP remain unchanged. Paired Bot update required. Deploy first, then verify linked member dashboard and iPhone PWA update.

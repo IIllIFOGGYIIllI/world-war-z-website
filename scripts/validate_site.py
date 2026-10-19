@@ -1226,7 +1226,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         ("Appeals controller", f"assets/js/dashboard/appeals.js?v={EXPECTED_ASSET_VERSION}", "ensureAppeals", "__wwzAppealsReady", "assets/js/dashboard/appeals.js"),
         ("Tickets controller", f"assets/js/dashboard/tickets.js?v={EXPECTED_ASSET_VERSION}", "ensureTickets", "__wwzTicketsReady", "assets/js/dashboard/tickets.js"),
         ("Progression controller", "assets/js/dashboard/progression.js?v=1.37.0&rev=quest-progression-1", "ensureProgression", "__wwzProgressionReady", "assets/js/dashboard/progression.js"),
-        ("Objectives controller", "assets/js/dashboard/objectives.js?v=1.37.1&rev=nasdara-community-1", "ensureObjectives", "__wwzObjectivesReady", "assets/js/dashboard/objectives.js"),
+        ("Objectives controller", "assets/js/dashboard/objectives.js?v=1.37.2&rev=nasdara-eventdesk-1", "ensureObjectives", "__wwzObjectivesReady", "assets/js/dashboard/objectives.js"),
         ("Factions controller", "assets/js/dashboard/factions.js?v=1.47.0&rev=faction-registration-1", "ensureFactions", "__wwzFactionsReady", "assets/js/dashboard/factions.js"),
         ("Command Centre controller", "assets/js/dashboard/command-centre.js?v=1.46.0&rev=command-centre-security-1", "ensureCommandCentre", "__wwzCommandCentreReady", "assets/js/dashboard/command-centre.js"),
     )

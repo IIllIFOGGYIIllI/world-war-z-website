@@ -343,7 +343,7 @@
 
   const ensureObjectives = () => ensureObjectivesStyles().then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
     'objectives',
-    'assets/js/dashboard/objectives.js?v=1.37.1&rev=nasdara-community-1',
+    'assets/js/dashboard/objectives.js?v=1.37.2&rev=nasdara-eventdesk-1',
     () => window.__wwzObjectivesReady === true
   )));
 
@@ -385,7 +385,7 @@
     loadStylesheetOnce('community-css', 'assets/css/dashboard/community.css?v=2.4.2&rev=badlands-release-1'),
     loadAfterDashboardRuntime(() => loadScriptOnce(
       'community',
-      'assets/js/dashboard/community.js?v=2.4.2&rev=badlands-release-1',
+      'assets/js/dashboard/community.js?v=2.4.3&rev=nasdara-eventdesk-1',
       () => window.__wwzCommunityReady === true
     ))
   ]).then(() => undefined);

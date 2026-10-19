@@ -348,6 +348,26 @@
     setAdmin('[data-quest-admin-claimable]', number(analytics.current_claimable));
     setAdmin('[data-quest-admin-rate]', `${Number(analytics.thirty_day_completion_rate || 0).toFixed(Number(analytics.thirty_day_completion_rate || 0) % 1 ? 1 : 0)}%`);
     setAdmin('[data-quest-admin-rewards]', `${money(analytics.claimable_reward_money)} + ${number(analytics.claimable_reward_xp)} XP`);
+    // This staff snapshot is the same audited, read-only guild/world scoped ledger
+    // seen by survivors. Admin verification is manual; no payout action is attached.
+    const campaignPanel = panel.querySelector('[data-quest-admin-community]');
+    const campaignGrid = panel.querySelector('[data-quest-admin-community-grid]');
+    const community = payload.nasdara_community;
+    const campaignGoals = Array.isArray(community?.goals) ? community.goals : [];
+    if (campaignPanel) campaignPanel.hidden = !campaignGoals.length;
+    if (campaignGrid) {
+      campaignGrid.replaceChildren();
+      campaignGoals.forEach((goal) => {
+        const entry = document.createElement('div'); entry.className = `quest-community-goal${goal.completed ? ' achieved' : ''}`;
+        const heading = document.createElement('strong'); heading.textContent = `${goal.completed ? '✓ ' : '◇ '}${String(goal.title || 'Goal')}`;
+        const progress = document.createElement('span'); progress.textContent = `${number(goal.progress)} / ${number(goal.target)} confirmed claims · ${number(goal.contributors)} / ${number(goal.contributors_target)} survivors`;
+        const track = document.createElement('div'); track.className = 'quest-achievement-track';
+        const bar = document.createElement('span'); bar.style.width = `${Math.min(100, Math.max(0, Number(goal.progress) || 0) / Math.max(1, Number(goal.target) || 1) * 100)}%`;
+        track.append(bar); entry.append(heading, progress, track); campaignGrid.append(entry);
+      });
+    }
+    const campaignReset = panel.querySelector('[data-quest-admin-community-reset]');
+    if (campaignReset && community) campaignReset.textContent = `Weekly reset in ${relative(community.resets_at)}`;
     if (!adminList) return;
     adminList.replaceChildren();
 
