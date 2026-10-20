@@ -1086,7 +1086,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         errors.append(
             "dashboard.html: command library must be lazy-loaded instead of downloaded on every dashboard visit."
         )
-    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=2.8.0&amp;rev=write-gateway-1'
+    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=2.8.0&amp;rev=nasdara-stage2b-1'
     lazy_index = dashboard.find(lazy_script)
     shell_index = dashboard.find("assets/js/dashboard/shell.js")
     if lazy_index < 0:
@@ -1194,7 +1194,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append(f"lazy-assets.js: missing view-style lazy-loading guard: {token}")
 
     lazy_view_assets = (
-        ("dashboard map", f"assets/js/pages/dashboard-map-loader.js?v=1.55.0&rev=map-hub-1", "ensureDashboardMap"),
+        ("dashboard map", f"assets/js/pages/dashboard-map-loader.js?v=1.55.0&rev=nasdara-stage2b-1", "ensureDashboardMap"),
         ("structured configuration", f"assets/js/dashboard/configuration-studio.js?v={EXPECTED_ASSET_VERSION}", "ensureConfigurationStudio"),
         ("dashboard Shop wiki previews", f"assets/js/shop-wiki-previews.js?v={EXPECTED_ASSET_VERSION}", "ensureShopWikiPreviews"),
     )
@@ -1996,7 +1996,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     launch_requirements = {
         "index.html": ("PvE + PvP", "91 random spawn loadouts", "Fortnightly", "Full PvP"),
-        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/lazy-assets.js?v=2.8.0&amp;rev=write-gateway-1"),
+        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/lazy-assets.js?v=2.8.0&amp;rev=nasdara-stage2b-1"),
         "assets/js/dashboard/server-context.js": ("player_capacity", "Capacity', `${server.player_capacity} slots`"),
         "assets/js/dashboard/account.js": ("payload.server?.player_capacity",),
         "assets/js/dashboard/livonia-pvp.js": ("rotation.player_capacity", "players online"),

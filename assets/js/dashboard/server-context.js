@@ -22,12 +22,14 @@
     const params = value instanceof URLSearchParams ? value : new URLSearchParams(String(value ?? location.search));
     const mapKey = String(params.get('map') || '').trim().toLowerCase();
     const serverKey = String(params.get('server') || '').trim().toLowerCase();
-    const x = Number(params.get('x'));
-    const z = Number(params.get('z'));
+    const hasX = params.has('x') && String(params.get('x')).trim() !== '';
+    const hasZ = params.has('z') && String(params.get('z')).trim() !== '';
+    const x = hasX ? Number(params.get('x')) : null;
+    const z = hasZ ? Number(params.get('z')) : null;
     const poi = String(params.get('poi') || '').trim().slice(0, 100);
     if (mapKey !== 'badlands') return null;
-    const hasCoordinates = Number.isFinite(x) && Number.isFinite(z);
-    const worldSize = mapKey === 'livonia' ? 12800 : mapKey === 'badlands' ? 16384 : 15360;
+    const hasCoordinates = hasX && hasZ && Number.isFinite(x) && Number.isFinite(z);
+    const worldSize = 16384;
     if (!hasCoordinates && !poi) return null;
     if (hasCoordinates && (x < 0 || x > worldSize || z < 0 || z > worldSize)) return null;
     return {
@@ -49,18 +51,39 @@
   };
 
   const readMapDeepLink = () => {
-    const fromUrl = parseMapDeepLink();
+    const query = new URLSearchParams(location.search);
+    const fromUrl = parseMapDeepLink(query);
     if (fromUrl) {
       storeMapDeepLink(fromUrl);
       return fromUrl;
     }
+    // Invalid new links must not reactivate an unrelated link from an old session.
+    if (['map', 'server', 'x', 'z', 'poi'].some((key) => query.has(key))) {
+      storeMapDeepLink(null);
+      return null;
+    }
     try {
       const stored = sessionStorage.getItem(MAP_DEEP_LINK_STORAGE_KEY);
-      return stored ? parseMapDeepLink(new URLSearchParams(Object.entries(JSON.parse(stored)).map(([key, value]) => [key.replace(/_key$/, ''), value]))) : null;
+      if (!stored) return null;
+      const link = JSON.parse(stored);
+      const params = new URLSearchParams();
+      params.set('map', String(link.map_key || ''));
+      if (link.server_key) params.set('server', String(link.server_key));
+      if (link.x !== null && link.x !== undefined) params.set('x', String(link.x));
+      if (link.z !== null && link.z !== undefined) params.set('z', String(link.z));
+      if (link.poi) params.set('poi', String(link.poi));
+      if (link.marker) params.set('marker', String(link.marker));
+      if (link.source) params.set('source', String(link.source));
+      return parseMapDeepLink(params);
     } catch {
       return null;
     }
   };
+
+  const matchesMapDeepLink = (link) => Boolean(
+    selectedServer && link && link.map_key === selectedServer.map_key &&
+    (!link.server_key || link.server_key === selectedServer.key)
+  );
 
   const readStoredServer = () => {
     try {
@@ -372,6 +395,7 @@
     clearSelection,
     clearMapDeepLink: () => storeMapDeepLink(null),
     getMapDeepLink: () => readMapDeepLink(),
+    matchesMapDeepLink,
     getMapKey: () => selectedServer?.map_key || null,
     getSelectedServer: () => selectedServer,
     getWorldSize: () => selectedServer?.world_size || null,

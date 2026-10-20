@@ -341,7 +341,10 @@
   const applyMapDeepLink = () => {
     if (!mapInstance) return false;
     const link = window.WWZServerContext?.getMapDeepLink?.();
-    if (!link || link.map_key !== activeMapKey) return false;
+    // PvE and PvP use the same terrain. A link targeting one server must never
+    // be applied to the other server's dashboard merely because map keys match.
+    if (!link || link.map_key !== activeMapKey ||
+        !window.WWZServerContext?.matchesMapDeepLink?.(link)) return false;
     if (link.poi) {
       const requested = String(link.poi).trim().toLowerCase();
       const poi = publicPois.find((entry) => String(entry.id || '').toLowerCase() === requested || String(entry.name || '').toLowerCase() === requested);
