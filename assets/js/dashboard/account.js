@@ -470,7 +470,7 @@ const applyLiveStatus = (payload) => {
   const currentPlayers = Math.max(0, Math.trunc(Number(payload.players.current) || 0));
   const maximumPlayers = Math.max(1, Math.trunc(Number(payload.players.maximum) || Number(payload.server?.player_capacity) || 26));
   const serverName = String(payload.server.name || 'World War Z');
-  const serverMap = String(payload.server.map || 'Chernarus');
+  const serverMap = String(payload.server.map || window.WWZServerContext?.getSelectedServer?.()?.map_name || 'Nasdara');
   const platform = String(payload.server.platform || 'PlayStation 4 & 5');
   const updatedAt = formatUpdatedAt(payload.updated_at);
   const operations = window.WWZHttp?.normaliseRestartOperations?.(payload.operations || {}) || (payload.operations || {});

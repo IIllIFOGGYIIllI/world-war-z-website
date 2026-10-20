@@ -48,10 +48,10 @@ const canOpenView = (view) => {
 const parseNavigationKey = (value, explicitSection = '') => {
   const raw = String(value || '').replace(/^#/, '').trim();
   const [rawView = '', rawSection = ''] = raw.split('/', 2);
-  return {
-    view: rawView || 'overview',
-    section: String(explicitSection || rawSection || '').trim()
-  };
+  const view = rawView || 'overview';
+  const section = String(explicitSection || rawSection || '').trim();
+  // Previously shared migration deep links now open the active operational hub.
+  return { view, section: view === 'staff' && section === 'world-manager' ? 'server-audit' : section };
 };
 
 const defaultSectionForView = (view) =>
