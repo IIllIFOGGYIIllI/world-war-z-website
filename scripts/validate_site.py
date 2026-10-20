@@ -1097,7 +1097,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         if token not in lazy_assets:
             errors.append(f"lazy-assets.js: missing command-library lazy-loading guard: {token}")
     for changed_asset in (
-        'assets/js/dashboard/zones.js?v=1.59.3&rev=killzone-runtime-1',
+        'assets/js/dashboard/zones.js?v=1.59.4&rev=zone-save-fix-1',
         'assets/js/dashboard/shop-helpers.js?v=1.54.2&rev=shop-classname-admin-1',
         'assets/js/dashboard/shop.js?v=2.1.0&rev=multi-destination-1',
     ):
@@ -1169,7 +1169,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         ("Tickets styles", f"assets/css/dashboard/tickets.css?v={EXPECTED_ASSET_VERSION}", "ensureTicketsStyles"),
         ("Moderation/appeals styles", f"assets/css/dashboard/moderation.css?v={EXPECTED_ASSET_VERSION}", "ensureModerationStyles"),
         ("Progression styles", "assets/css/dashboard/progression.css?v=1.37.0&rev=quest-progression-1", "ensureProgressionStyles"),
-        ("Objectives styles", "assets/css/dashboard/objectives.css?v=1.37.0&rev=quest-progression-1", "ensureObjectivesStyles"),
+        ("Objectives styles", "assets/css/dashboard/objectives.css?v=1.37.1&rev=nasdara-community-1", "ensureObjectivesStyles"),
         ("Factions styles", "assets/css/dashboard/factions.css?v=1.47.0&rev=faction-registration-1", "ensureFactionsStyles"),
     )
     for label, asset_url, loader_name in lazy_view_styles:
@@ -1226,7 +1226,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         ("Appeals controller", f"assets/js/dashboard/appeals.js?v={EXPECTED_ASSET_VERSION}", "ensureAppeals", "__wwzAppealsReady", "assets/js/dashboard/appeals.js"),
         ("Tickets controller", f"assets/js/dashboard/tickets.js?v={EXPECTED_ASSET_VERSION}", "ensureTickets", "__wwzTicketsReady", "assets/js/dashboard/tickets.js"),
         ("Progression controller", "assets/js/dashboard/progression.js?v=1.37.0&rev=quest-progression-1", "ensureProgression", "__wwzProgressionReady", "assets/js/dashboard/progression.js"),
-        ("Objectives controller", "assets/js/dashboard/objectives.js?v=1.37.0&rev=quest-progression-1", "ensureObjectives", "__wwzObjectivesReady", "assets/js/dashboard/objectives.js"),
+        ("Objectives controller", "assets/js/dashboard/objectives.js?v=1.37.2&rev=nasdara-eventdesk-1", "ensureObjectives", "__wwzObjectivesReady", "assets/js/dashboard/objectives.js"),
         ("Factions controller", "assets/js/dashboard/factions.js?v=1.47.0&rev=faction-registration-1", "ensureFactions", "__wwzFactionsReady", "assets/js/dashboard/factions.js"),
         ("Command Centre controller", "assets/js/dashboard/command-centre.js?v=1.46.0&rev=command-centre-security-1", "ensureCommandCentre", "__wwzCommandCentreReady", "assets/js/dashboard/command-centre.js"),
     )
