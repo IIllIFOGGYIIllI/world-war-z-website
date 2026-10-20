@@ -405,8 +405,13 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     if '<div class="sidebar-version"><span>WWZ Command Centre</span><strong>v2.19.0</strong></div>' not in dashboard:
         errors.append("dashboard.html: command-centre footer release label is stale.")
 
-    if "Website v2.19.0 · Bot v1.82.0" not in index:
-        errors.append("index.html: public roadmap release pair is stale.")
+    if not all(token in index for token in (
+        'Two Nasdara Servers. Two Ways to Survive.',
+        'World War Z PvE', 'World War Z Full PvP',
+        '6 November 2026', '24 hours a day, seven days a week',
+        'Secondary Nitrado/Discord routing is being verified',
+    )):
+        errors.append('index.html: dual-Nasdara public content is missing or stale.')
     if 'assets/css/modern-foundation.css?v=1.62.0&amp;rev=modern-ui-1' not in dashboard or 'assets/css/modern-foundation.css?v=1.62.0&amp;rev=modern-ui-1' not in index:
         errors.append('Modern UI Foundation: shared stylesheet must load on dashboard and public home.')
     if 'assets/js/dashboard/modern-navigation.js?v=1.62.0&amp;rev=modern-ui-1' not in dashboard:
@@ -1990,7 +1995,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
         errors.append(f"Apple touch icon dimensions are {apple_dimensions}; expected (180, 180).")
 
     launch_requirements = {
-        "index.html": ("Live now · 26 slots", "91 random PvP loadouts", "Bot v1.69.0"),
+        "index.html": ("PvE + PvP", "91 random spawn loadouts", "Fortnightly", "Full PvP"),
         "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/lazy-assets.js?v=2.8.0&amp;rev=write-gateway-1"),
         "assets/js/dashboard/server-context.js": ("player_capacity", "Capacity', `${server.player_capacity} slots`"),
         "assets/js/dashboard/account.js": ("payload.server?.player_capacity",),
