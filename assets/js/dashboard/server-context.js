@@ -25,7 +25,7 @@
     const x = Number(params.get('x'));
     const z = Number(params.get('z'));
     const poi = String(params.get('poi') || '').trim().slice(0, 100);
-    if (!['chernarus', 'livonia', 'badlands'].includes(mapKey)) return null;
+    if (mapKey !== 'badlands') return null;
     const hasCoordinates = Number.isFinite(x) && Number.isFinite(z);
     const worldSize = mapKey === 'livonia' ? 12800 : mapKey === 'badlands' ? 16384 : 15360;
     if (!hasCoordinates && !poi) return null;
@@ -91,15 +91,20 @@
   const normalizeServer = (value) => {
     const mapKey = String(value?.map_key || '').trim().toLowerCase();
     const key = String(value?.key || '').trim().toLowerCase();
-    if (!SERVER_KEY_PATTERN.test(key) || !['chernarus', 'livonia', 'badlands'].includes(mapKey)) return null;
-    const mapName = mapKey === 'badlands' ? 'Badlands' : (mapKey === 'livonia' ? 'Livonia' : 'Chernarus');
+    if (!SERVER_KEY_PATTERN.test(key) || mapKey !== 'badlands') return null;
+    const mapName = 'Nasdara';
+    const configuredMode = String(value?.gameplay_mode || '').trim().toLowerCase();
+    const mode = ['pve', 'pvp'].includes(configuredMode) ? configuredMode :
+      (/\bpvp\b/i.test(String(value.name || '')) ? 'pvp' : 'pve');
     return {
       key,
       name: String(value.name || value.discord_name || 'World War Z'),
       discord_name: String(value.discord_name || value.name || 'World War Z'),
       icon_url: value.icon_url ? String(value.icon_url) : null,
       map_key: mapKey,
-      map_name: String(value.map_name || mapName),
+      map_name: mapName,
+      gameplay_mode: mode,
+      selector_label: mode === 'pvp' ? 'PvP' : 'PvE',
       world_size: mapKey === 'badlands' ? 16384 : (mapKey === 'livonia' ? 12800 : 15360),
       platform: String(value.platform || 'PlayStation 4 & 5'),
       player_capacity: Math.max(1, Math.trunc(Number(value.player_capacity) || 26)),
@@ -146,7 +151,7 @@
 
   const updateDashboardLabels = (server) => {
     document.querySelectorAll('[data-selected-server-name]').forEach((element) => {
-      element.textContent = server.name;
+      element.textContent = `Nasdara ${server.selector_label}`;
     });
     document.querySelectorAll('[data-selected-server-detail]').forEach((element) => {
       element.textContent = `${server.platform.replace(' 4 & 5', '')} · ${server.map_name} · ${server.player_capacity} slots`;
@@ -229,21 +234,21 @@
     card.type = 'button';
     card.className = 'wwz-server-card';
     card.disabled = !server.available;
-    card.setAttribute('aria-label', `Open ${server.name} on ${server.map_name}`);
+    card.setAttribute('aria-label', `Open Nasdara ${server.selector_label} server`);
 
     const heading = document.createElement('div');
     heading.className = 'wwz-server-card-heading';
     const icon = document.createElement('span');
     icon.className = 'wwz-server-icon';
     const iconImage = document.createElement('img');
-    iconImage.src = server.icon_url || 'assets/world-war-z-logo.webp?v=1.22.93';
+    iconImage.src = server.gameplay_mode === 'pvp' ? 'assets/branding/nasdara-pvp.webp' : 'assets/branding/nasdara-pve.webp';
     iconImage.alt = '';
     icon.append(iconImage);
     const headingCopy = document.createElement('div');
     const name = document.createElement('strong');
-    name.textContent = server.name;
+    name.textContent = server.selector_label;
     const discord = document.createElement('small');
-    discord.textContent = `Discord · ${serverInitials(server)}`;
+    discord.textContent = `World War Z · Nasdara ${server.selector_label}`;
     headingCopy.append(name, discord);
     heading.append(icon, headingCopy);
 
@@ -297,12 +302,13 @@
       ? payload.servers.map(normalizeServer).filter(Boolean)
       : [];
     const deepLink = readMapDeepLink();
-    const requested = deepLink
-      ? availableServers.find((server) => (
-          (!deepLink.server_key || server.key === deepLink.server_key) &&
-          server.map_key === deepLink.map_key
-        ))
-      : null;
+    // Two servers share the same map; never guess which account, KILLZONE or
+    // economy a map-only deep link intended to open.
+    const matchingDeepLinks = deepLink
+      ? availableServers.filter((server) => server.map_key === deepLink.map_key &&
+          (!deepLink.server_key || server.key === deepLink.server_key))
+      : [];
+    const requested = matchingDeepLinks.length === 1 ? matchingDeepLinks[0] : null;
     if (!requireSelection && requested) {
       selectServer(requested, { restored: true });
       return;
@@ -311,7 +317,8 @@
     const eventParams = new URLSearchParams(location.search);
     const eventMap = eventParams.get('event_map');
     const eventServer = eventParams.get('event_server');
-    const eventTarget = availableServers.find(server => server.map_key===eventMap && (!eventServer || server.key===eventServer));
+    const eventCandidates = availableServers.filter(server => server.map_key===eventMap && (!eventServer || server.key===eventServer));
+    const eventTarget = eventCandidates.length === 1 ? eventCandidates[0] : null;
     if (eventTarget) { selectServer(eventTarget, {restored:true}); return; }
     const restored = stored
       ? availableServers.find((server) => server.key === stored.key && server.map_key === stored.map_key)

@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   const ENDPOINT = 'https://world-war-z.up.railway.app/api/world/branding';
-  const KEYS = new Set(['chernarus', 'badlands', 'livonia']);
+  const KEYS = new Set(['badlands']);
   let snapshot = null;
   const sanitize = (item) => item && KEYS.has(String(item.map_key || '').toLowerCase())
     && typeof item.world_name === 'string' && item.world_name.length <= 32
@@ -10,10 +10,10 @@
   const update = (data) => {
     const primary = sanitize(data?.primary);
     if (!primary || primary.primary !== true || primary.status !== 'active') return false;
-    const secondary = (Array.isArray(data.servers) ? data.servers : []).find(item => item.map_key === 'livonia');
+    const secondary = (Array.isArray(data.servers) ? data.servers : []).find(item => item.server_key !== primary.server_key && item.map_key === 'badlands');
     const other = sanitize(secondary);
     if (!other) return false;
-    snapshot = Object.freeze({primary: primary.world_name, secondary: other.world_name, mapKey: primary.map_key});
+    snapshot = Object.freeze({primary: 'Nasdara PvE', secondary: 'Nasdara PvP', mapKey: 'badlands'});
     document.querySelectorAll('[data-wwz-primary-world]').forEach(el => { el.textContent = snapshot.primary; });
     document.querySelectorAll('[data-wwz-network-worlds]').forEach(el => { el.textContent = `${snapshot.primary} + ${snapshot.secondary}`; });
     document.querySelectorAll('[data-wwz-rules-worlds]').forEach(el => { el.textContent = `${snapshot.primary} and ${snapshot.secondary} keep separate published rulesets.`; });

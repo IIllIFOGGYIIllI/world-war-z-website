@@ -8,8 +8,8 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-10-20-zones-save-fix-1';
-const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-zones-save-fix-1`;
+const WWZ_PWA_UPDATE_REVISION = '2026-10-21-dual-nasdara-1';
+const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-dual-nasdara-1`;
 const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${APP_CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${APP_CACHE_RELEASE}`;
@@ -34,6 +34,9 @@ const APP_SHELL = [
   './assets/icons/pwa/apple-touch-icon-180.png',
   './assets/world-war-z-icon.png',
   './assets/world-war-z-logo.webp',
+  './assets/branding/nasdara-community.webp',
+  './assets/branding/nasdara-pve.webp',
+  './assets/branding/nasdara-pvp.webp',
   './assets/css/pages/home.css?v=1.22.93',
   './assets/css/pages/companion.css?v=1.53.0&rev=companion-download-repair-1',
   './assets/css/site-polish.css?v=1.22.93',
