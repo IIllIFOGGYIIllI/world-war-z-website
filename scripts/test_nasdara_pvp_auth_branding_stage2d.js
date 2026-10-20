@@ -43,5 +43,5 @@ assert.match(source,/\['Your Access', server\.access_level/);
 assert.match(html,/data-wwz-selected-server-logo/);
 assert.match(html,/class="service-context-icon"><img/);
 assert.match(fs.readFileSync('assets/js/dashboard/account.js', 'utf8'), /response.status === 403/);
-assert.match(fs.readFileSync('sw.js','utf8'), /nasdara-5-auth-isolation/);
+assert.match(fs.readFileSync('sw.js','utf8'), /nasdara-6-shared-bearer/);
 console.log('PASS: PvP OAuth restore, PvE regression, cross-guild safety, server branding and labels');

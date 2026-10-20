@@ -715,7 +715,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append(f"action-centre.css: missing layout guard: {token}")
     for token in (
         "ensureActionCentre",
-        "assets/js/dashboard/action-centre.js?v=1.38.0&rev=action-centre-1",
+        "assets/js/dashboard/action-centre.js?v=1.38.0&rev=action-centre-2",
         "assets/css/dashboard/action-centre.css?v=1.38.0&rev=action-centre-1",
         "['actioncentre', ensureActionCentre]",
     ):
@@ -1340,7 +1340,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         if token not in bank_layout_css:
             errors.append(f"bank-layout.css: missing responsive bank layout guard: {token}")
 
-    account_script = 'assets/js/dashboard/account.js?v=1.58.1&amp;rev=nasdara-stage2d-1'
+    account_script = 'assets/js/dashboard/account.js?v=1.58.1&amp;rev=nasdara-stage2f-1'
     bootstrap_script = 'assets/js/dashboard/bootstrap.js?v=1.40.0&amp;rev=member-home-overhaul-1'
     account_index = dashboard.find(account_script)
     bootstrap_index = dashboard.find(bootstrap_script)

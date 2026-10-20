@@ -289,7 +289,7 @@
     loadStylesheetOnce('action-centre-css', 'assets/css/dashboard/action-centre.css?v=1.38.0&rev=action-centre-1'),
     loadAfterDashboardRuntime(() => loadScriptOnce(
       'action-centre',
-      'assets/js/dashboard/action-centre.js?v=1.38.0&rev=action-centre-1',
+      'assets/js/dashboard/action-centre.js?v=1.38.0&rev=action-centre-2',
       () => window.__wwzActionCentreReady === true
     ))
   ]).then(() => undefined);

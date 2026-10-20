@@ -99,7 +99,10 @@
       });
       const payload = await response.json().catch(() => ({}));
       if (response.status === 401 || response.status === 403) {
-        storageRemove(AUTH_SESSION_KEY); applySignedOutState?.(); syncAuth(); return false;
+        // A scoped API denial is not evidence that the global OAuth token
+        // expired. Preserve the session and selected PvE/PvP server.
+        setMessage('Action Centre access is unavailable for this server. Your Discord session is still active.', 'error');
+        return false;
       }
       if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Action Centre update failed.');
       setMessage(payload.message || 'Action Centre updated.', 'success');
@@ -195,7 +198,12 @@
       });
       const payload = await response.json().catch(() => ({}));
       if (response.status === 401 || response.status === 403) {
-        storageRemove(AUTH_SESSION_KEY); applySignedOutState?.(); state.payload = null; syncAuth(); return;
+        // Account/action-centre is scoped to a server; only /api/auth/me
+        // can invalidate the global browser session.
+        state.payload = null;
+        setMessage('Action Centre access is unavailable for this server. Your Discord session is still active.', 'error');
+        render();
+        return;
       }
       if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'The Action Centre is unavailable.');
       state.payload = payload; render(); if (!quiet) setMessage('');

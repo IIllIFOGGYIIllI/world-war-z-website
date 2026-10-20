@@ -219,9 +219,12 @@ const loadAccountSummary = async (sessionToken) => {
       }
     });
 
+    // Account data is server-scoped. Its 401/403 must never revoke a valid
+    // GLOBAL Discord session. Only /api/auth/me determines session validity.
     if (response.status === 401 || response.status === 403) {
-      storageRemove(AUTH_SESSION_KEY);
-      applySignedOutState();
+      showAuthMessage('Discord sign-in is valid, but this server’s account data could not be accessed. Please retry shortly.', 'error');
+      setText('[data-profile-badge-label]', 'Server access unavailable');
+      setText('[data-economy-badge-label]', 'Server access unavailable');
       return false;
     }
 

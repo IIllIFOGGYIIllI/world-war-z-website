@@ -30,7 +30,7 @@ async function main() {
   assert.equal(fetched.at(-1).headers.get('X-WWZ-Server'),'world-war-z','PvE data remains scoped');
   memory.delete('wwz_dashboard_server');
   await assert.rejects(api(base+'/api/account/summary',auth),/Select a World War Z server/);
-  assert.match(fs.readFileSync('sw.js','utf8'),/dual-nasdara-5-auth-isolation/);
+  assert.match(fs.readFileSync('sw.js','utf8'),/dual-nasdara-6-shared-bearer/);
   console.log('PASS: global OAuth headers not server-scoped; operational PvE/PvP routing preserved');
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});
