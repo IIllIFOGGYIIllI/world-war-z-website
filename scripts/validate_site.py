@@ -2188,10 +2188,15 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
         if token not in http_source:
             errors.append(f"assets/js/core/http.js: missing security/reliability guard: {token}")
 
+    # Shared authentication must never be routed into a server-owned SQLite DB.
+    for token in ("if (key && operationalApi)", "headers.delete('X-WWZ-Server')"):
+        if token not in http_source:
+            errors.append(f"assets/js/core/http.js: missing global-auth server-routing isolation: {token}")
+
     security_http_refs = {
-        "dashboard.html": "assets/js/core/http.js?v=1.41.0&amp;rev=security-hardening-1",
-        "shop.html": "assets/js/core/http.js?v=1.41.0&rev=security-hardening-1",
-        "donations.html": "assets/js/core/http.js?v=1.41.0&rev=security-hardening-1",
+        "dashboard.html": "assets/js/core/http.js?v=1.41.1&amp;rev=dual-nasdara-auth-1",
+        "shop.html": "assets/js/core/http.js?v=1.41.1&rev=dual-nasdara-auth-1",
+        "donations.html": "assets/js/core/http.js?v=1.41.1&rev=dual-nasdara-auth-1",
     }
     for html_name, token in security_http_refs.items():
         if token not in (ROOT / html_name).read_text(encoding="utf-8"):

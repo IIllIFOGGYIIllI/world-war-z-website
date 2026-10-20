@@ -60,8 +60,13 @@
     if (operationalApi && !key) {
       throw new Error('Select a World War Z server before using this feature.');
     }
-    if (key && isTrustedApiTarget(target)) {
+    // Global OAuth endpoints must never receive a server-scoping header.
+    // Login/session tokens are shared across PvE and PvP; only operational
+    // requests route to their own guild/database.
+    if (key && operationalApi) {
       headers.set('X-WWZ-Server', key);
+    } else {
+      headers.delete('X-WWZ-Server');
     }
     return { headers, target, protectedRequest };
   };
