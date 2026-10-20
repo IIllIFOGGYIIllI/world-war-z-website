@@ -173,6 +173,17 @@
   };
 
   const updateDashboardLabels = (server) => {
+    // Brand the authenticated dashboard with the selected *server*, never with
+    // the shared Nasdara map key (PvE and PvP use the same map).
+    const selectedLogo = server.gameplay_mode === 'pvp'
+      ? 'assets/branding/nasdara-pvp.webp?v=3.0.0'
+      : 'assets/branding/nasdara-pve.webp?v=3.0.0';
+    document.querySelectorAll('[data-wwz-selected-server-logo]').forEach((image) => {
+      image.src = selectedLogo;
+      image.alt = `World War Z Nasdara ${server.selector_label} logo`;
+    });
+    if (document.body?.dataset) document.body.dataset.wwzSelectedServer = server.gameplay_mode;
+
     document.querySelectorAll('[data-selected-server-name]').forEach((element) => {
       element.textContent = `Nasdara ${server.selector_label}`;
     });
@@ -278,10 +289,10 @@
     const body = document.createElement('div');
     body.className = 'wwz-server-card-body';
     [
-      ['DayZ world', server.map_name],
+      ['DayZ World', server.map_name],
       ['Platform', server.platform],
       ['Capacity', `${server.player_capacity} slots`],
-      ['Your access', server.access_level.replace(/^./, (letter) => letter.toUpperCase())]
+      ['Your Access', server.access_level.replace(/^./, (letter) => letter.toUpperCase())]
     ].forEach(([label, value]) => {
       const row = document.createElement('div');
       row.className = 'wwz-server-meta';
@@ -332,7 +343,7 @@
           (!deepLink.server_key || server.key === deepLink.server_key))
       : [];
     const requested = matchingDeepLinks.length === 1 ? matchingDeepLinks[0] : null;
-    if (!requireSelection && requested) {
+    if (requested) {
       selectServer(requested, { restored: true });
       return;
     }
@@ -346,7 +357,12 @@
     const restored = stored
       ? availableServers.find((server) => server.key === stored.key && server.map_key === stored.map_key)
       : null;
-    if (!requireSelection && restored) {
+    // A successful Discord OAuth callback used to force a fresh selector even
+    // when the player explicitly chose PvP immediately before signing in.
+    // Only restore a key that the live /api/auth/me or /complete response
+    // proves belongs to the authenticated member; stale/unauthorised keys
+    // still fall through to the server picker.
+    if (restored) {
       selectServer(restored, { restored: true });
       return;
     }

@@ -250,9 +250,13 @@ const loadCurrentAccount = async (sessionToken) => {
         }
       });
 
-      if (response.status === 401 || response.status === 403) {
+      if (response.status === 401) {
         storageRemove(AUTH_SESSION_KEY);
-        applySignedOutState();
+        applySignedOutState({ preserveSelection: true });
+        return;
+      }
+      if (response.status === 403) {
+        showAuthMessage('Your Discord sign-in is valid, but this server denied account access. Check membership and server permissions.', 'error');
         return;
       }
 

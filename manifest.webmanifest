@@ -2,6 +2,7 @@
   "id": "./dashboard.html",
   "name": "World War Z Server Companion",
   "short_name": "WWZ Companion",
+  "version": "2026.10.21.2d",
   "description": "Installable World War Z DayZ companion for live server status, survivor profiles, economy, shop, tickets, events, factions, maps and protected administration.",
   "start_url": "./dashboard.html",
   "scope": "./",

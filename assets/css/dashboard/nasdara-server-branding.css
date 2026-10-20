@@ -1,0 +1,15 @@
+/* Selected-server branding and safe circular logo presentation. */
+.dashboard-brand-mark img[data-wwz-selected-server-logo],
+.service-context-icon img[data-wwz-selected-server-logo] {
+  display: block;
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+  border-radius: 50%;
+}
+.service-context-icon:has(img[data-wwz-selected-server-logo]) {
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 2px;
+  background: rgba(12, 12, 14, .9) !important;
+}
