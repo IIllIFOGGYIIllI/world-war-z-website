@@ -668,6 +668,30 @@ const applyAuthenticatedState = (payload) => {
   window.dispatchEvent(new CustomEvent('wwz:authchange', { detail: { authenticated: true, accessLevel } }));
 };
 
+// The OAuth payload verifies membership independently in each Nasdara guild.
+// Its top-level membership is only a default; never use it to grant or hide
+// controls after the player selects a specific PvE/PvP server.
+const applySelectedServerAccess = (server) => {
+  if (!authenticatedUser || !server?.key) return;
+  const verified = (Array.isArray(authenticatedUser.servers) ? authenticatedUser.servers : [])
+    .find((entry) => entry.key === server.key && entry.map_key === server.map_key);
+  if (!verified) return;
+  const level = String(verified.access_level || 'member').toLowerCase();
+  if (!['member', 'staff', 'owner'].includes(level)) return;
+
+  applyAccessVisibility(level);
+  const label = accessLabel(level);
+  const serverLabel = String(verified.name || server.name || 'selected server');
+  setText('[data-access-card-copy]', `${label} access verified for ${serverLabel}`);
+  setText('[data-account-level]', label);
+  setText('[data-auth-description]', `Your Discord identity and ${label.toLowerCase()} access are verified for ${serverLabel}. Your account data stays server-specific.`);
+  setText('[data-welcome-copy]', `Signed in with verified ${label.toLowerCase()} access for ${serverLabel}.`);
+  setAuthBadgeState('online', `Connected · ${label}`);
+};
+window.addEventListener('wwz:serverchange', (event) => {
+  applySelectedServerAccess(event.detail?.server);
+});
+
 const openLoginDialog = () => {
   if (typeof loginDialog?.showModal === 'function') loginDialog.showModal();
   else loginDialog?.setAttribute('open', '');

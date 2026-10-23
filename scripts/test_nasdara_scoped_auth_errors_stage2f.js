@@ -59,6 +59,12 @@ async function main() {
     assert.equal(handled, true);
   }
   assert.equal(notices.length, 2);
-  console.log('PASS: active server-scoped denied requests preserve global login');
+  // Server-specific access levels in /api/auth/me must override the
+  // top-level OAuth membership when selecting PvE versus PvP.
+  const core = fs.readFileSync('assets/js/dashboard/core.js', 'utf8');
+  assert.ok(core.includes('authenticatedUser.servers'), 'Use verified server memberships');
+  assert.ok(core.includes("entry.key === server.key && entry.map_key === server.map_key"), 'Match selected server exactly');
+  assert.ok(core.includes("window.addEventListener('wwz:serverchange'"), 'Update role UI when server changes');
+  console.log('PASS: protected login and selected-server access stay isolated');
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});
