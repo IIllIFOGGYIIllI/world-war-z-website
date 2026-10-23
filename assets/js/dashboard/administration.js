@@ -104,10 +104,9 @@ const loadServerActionHistory = async (sessionToken = storageGet(AUTH_SESSION_KE
     });
     const payload = await response.json().catch(() => ({}));
 
+    // Audit permission belongs to the selected guild, not the global session.
     if (response.status === 401 || response.status === 403) {
-      storageRemove(AUTH_SESSION_KEY);
-      applySignedOutState();
-      return;
+      throw new Error(payload.message || 'Audit access is unavailable for this server.');
     }
     if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Audit unavailable');
     renderServerActionHistory(payload);
@@ -437,10 +436,9 @@ const loadModerationCases = async (sessionToken = storageGet(AUTH_SESSION_KEY)) 
       }
     });
     const payload = await response.json().catch(() => ({}));
+    // One server's moderation permission cannot sign the member out of both.
     if (response.status === 401 || response.status === 403) {
-      storageRemove(AUTH_SESSION_KEY);
-      applySignedOutState();
-      return;
+      throw new Error(payload.message || 'Moderation access is unavailable for this server.');
     }
     if (!response.ok || payload.status !== 'ok') throw new Error('Moderation cases unavailable');
     renderModerationCases(payload);
