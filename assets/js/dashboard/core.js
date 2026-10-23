@@ -809,15 +809,11 @@ serverActionForm?.addEventListener('submit', async (event) => {
     });
     const payload = await response.json().catch(() => ({}));
 
+    // Nitrado controls are checked against the selected Discord guild.
+    // A 401/403 here cannot revoke a global PvE/PvP OAuth session.
     if (response.status === 401 || response.status === 403) {
-      storageRemove(AUTH_SESSION_KEY);
-      serverActionDialog?.close?.();
-      applySignedOutState();
-      showAuthMessage(
-        response.status === 403
-          ? 'Your current Discord account does not have Admin access for this operation.'
-          : 'Your dashboard session expired. Sign in again before using Admin controls.',
-        'error'
+      showServerActionDialogMessage(
+        payload.message || 'This server did not authorize the requested Admin operation.'
       );
       return;
     }
