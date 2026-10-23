@@ -9,7 +9,7 @@
     const summary = root.querySelector('[data-rental-cart-summary]');
     const countLabel = root.querySelector('[data-rental-cart-count]');
     const totalLabel = root.querySelector('[data-rental-cart-subtotal]');
-    const checkoutButton = root.querySelector('[data-rental-cart-checkout]');
+    const checkoutButtons = [...root.querySelectorAll('[data-rental-cart-checkout]')];
     const clearButton = root.querySelector('[data-rental-cart-clear]');
     let server = null, items = [], locations = [], rows = [];
 
@@ -57,7 +57,7 @@
       if (list) list.hidden = !active;
       if (summary) summary.hidden = !active;
       if (clearButton) clearButton.disabled = !active;
-      if (checkoutButton) checkoutButton.disabled = !active || server?.paused === true;
+      checkoutButtons.forEach(button => { button.disabled = !active || server?.paused === true; });
     };
     const load = () => {
       try {
@@ -96,7 +96,9 @@
         const [min, max] = bounds(item);
         const controls = element('div', 'wwz-rental-cart-controls');
         controls.append(field('Restarts', row.event_restarts, value => {
-          row.event_restarts = value; save(); refreshTotals();
+          row.event_restarts = value;
+          price.textContent = money(Number(item.price || 0) * Math.max(0, Number(value) || 0));
+          save(); refreshTotals();
         }, min, max));
         const destination = element('label', 'wwz-route-field');
         destination.append(element('span', '', 'Delivery destination'));
@@ -182,7 +184,7 @@
         return { item_id: Number(item.item_id), quantity: 1, event_restarts: restarts, delivery };
       });
     };
-    checkoutButton?.addEventListener('click', () => onCheckout?.());
+    checkoutButtons.forEach(button => button.addEventListener('click', () => onCheckout?.()));
     clearButton?.addEventListener('click', () => { rows = []; save(); render(); });
     render();
     return {

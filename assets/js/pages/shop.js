@@ -42,6 +42,7 @@ const state = {
   orderScope: 'all',
   cart: [],
   checkoutCart: false,
+  checkoutRentals: false,
   cashBalance: 0,
   bankBalance: 0
 };
@@ -198,6 +199,12 @@ const elements = {
   serverButtons: $('[data-shop-server-buttons]')
 };
 let checkoutMapInstance = null;
+const rentalCart = window.WWZRentalCart.create({
+  root: $('[data-member-rental-cart]'),
+  onCheckout: () => openRentalCartCheckout()
+});
+const rentalConfirmRow = $('[data-member-rental-confirm-row]');
+const rentalConfirm = $('[data-member-rental-confirm]');
 
 const money = (value) => `$${new Intl.NumberFormat('en-AU').format(Math.max(0, Number(value) || 0))}`;
 const dateText = (value) => {
@@ -242,6 +249,7 @@ const renderServerChoices = () => {
       state.locations = [];
       state.orders = [];
       loadCart();
+      rentalCart.setServer(server);
       acceptServerContext({ servers: state.servers });
       renderServerChoices();
       renderOrders();
@@ -265,6 +273,7 @@ const loadServerChoices = async () => {
   if (!selected) throw new Error('No World War Z shop server is currently available.');
   saveSelectedServer(selected);
   loadCart();
+  rentalCart.setServer(selected);
   acceptServerContext({ servers: state.servers });
   renderServerChoices();
 };
@@ -477,7 +486,7 @@ const purchaseButtonLabel = (item) => {
   if (!state.settings.enabled) return 'Purchases paused';
   if (item?.has_required_roles === false) return 'Required item role missing';
   if (!item?.available) return 'Unavailable';
-  return item.delivery_type === 'event' ? 'Order rental' : 'Add to cart';
+  return item.delivery_type === 'event' ? 'Add rental to cart' : 'Add to cart';
 };
 const resetCataloguePage = () => { state.cataloguePage = 1; };
 const filteredModeItems = ({ ignoreCategory = false } = {}) => {
@@ -701,7 +710,7 @@ const renderCatalogue = () => {
     const details = document.createElement('button'); details.type = 'button'; details.className = 'secondary-action'; details.textContent = 'View Details'; details.addEventListener('click', () => openItemDetails(item));
     const buy = document.createElement('button'); buy.type = 'button'; buy.className = 'primary-action'; buy.textContent = purchaseButtonLabel(item);
     buy.disabled = Boolean(state.user && !canPurchase(item));
-    buy.addEventListener('click', () => state.user ? (item.delivery_type === 'event' ? openPurchase(item) : addToCart(item)) : openLogin());
+    buy.addEventListener('click', () => state.user ? (item.delivery_type === 'event' ? rentalCart.add(item) : addToCart(item)) : openLogin());
     actions.append(details, buy);
     card.append(meta, actions); elements.catalogue.append(card);
   });
@@ -1014,6 +1023,7 @@ const applyPayload = (payload, member = false) => {
   });
   elements.modeLabel.textContent = state.mode === 'event' ? 'Event items' : 'Items';
   normalizeCart();
+  rentalCart.setCatalogue(state.items);
   populateCategories(); renderCatalogue(); renderCart(); renderOrders();
 };
 
@@ -1054,6 +1064,7 @@ const loadLocations = async () => {
   if (!state.token) return;
   const { response, payload } = await fetchJson(URLS.locations, { headers: authHeaders() });
   if (response.ok) state.locations = Array.isArray(payload.locations) ? payload.locations : [];
+  rentalCart.setLocations(state.locations);
 };
 const loadShop = async () => {
   if (state.loading) return;
@@ -1062,7 +1073,8 @@ const loadShop = async () => {
     const member = Boolean(state.token && state.user);
     const { response, payload } = await fetchJson(member ? URLS.account : URLS.catalogue, { headers: authHeaders() });
     if (response.status === 401 || response.status === 403) {
-      state.token = ''; sessionStorage.removeItem(SESSION_KEY); setSignedOut(); return loadShop();
+      // Shop routes are server-scoped: don't revoke the global PvE/PvP token.
+      throw new Error(payload.message || 'Shop access is unavailable on the selected server. Your Discord session is unchanged.');
     }
     if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'The shop is unavailable.');
     applyPayload(payload, member);
@@ -1151,6 +1163,7 @@ const updateMarker = () => {
 };
 
 const updateTotal = () => {
+  if (state.checkoutRentals) { elements.total.textContent = money(rentalCart.subtotal()); return; }
   if (state.checkoutCart) { elements.total.textContent = money(cartSubtotal()); return; }
   const quantity = Math.max(1, Number(elements.quantity.value || 1));
   elements.total.textContent = money(quantity * Number(state.selectedItem?.price || 0));
@@ -1162,6 +1175,8 @@ const openCartCheckout = () => {
   const entries = cartEntries();
   if (!state.user) { openLogin(); return; }
   if (!entries.length || state.purchasing) return;
+  state.checkoutRentals = false;
+  if (rentalConfirmRow) rentalConfirmRow.hidden = true;
   state.checkoutCart = true; state.selectedItem = null; elements.purchaseForm.reset(); elements.y.value = '0'; elements.rotation.value = '0';
   if (elements.quantityField) elements.quantityField.hidden = true;
   if (elements.paymentMethod) elements.paymentMethod.value = 'cash';
@@ -1188,11 +1203,35 @@ const openCartCheckout = () => {
     }
   }, 0);
 };
+const openRentalCartCheckout = () => {
+  if (state.server?.paused === true) { showMessage('This server is paused.'); return; }
+  if (!state.user) { openLogin(); return; }
+  if (state.purchasing || !rentalCart.count()) return;
+  state.checkoutCart = false; state.checkoutRentals = true; state.selectedItem = null;
+  elements.purchaseForm.reset();
+  if (elements.quantityField) elements.quantityField.hidden = true;
+  if (rentalConfirmRow) rentalConfirmRow.hidden = false;
+  if (rentalConfirm) rentalConfirm.checked = false;
+  elements.eventFields.hidden = true;
+  [elements.x, elements.y, elements.z, elements.rotation].forEach(input => {
+    if (input) { input.required = false; input.disabled = true; }
+  });
+  const routesHost = $('[data-member-cart-routes]'); if (routesHost) routesHost.hidden = true;
+  if (elements.paymentMethod) elements.paymentMethod.value = 'cash';
+  elements.purchaseTitle.textContent = 'Checkout Vehicle Rentals';
+  elements.purchaseItem.textContent = `${rentalCart.count()} independent vehicle rental${rentalCart.count() === 1 ? '' : 's'}`;
+  elements.purchasePrice.textContent = 'Each vehicle has its own restart term and delivery coordinates';
+  updatePaymentHelp(); updateTotal(); showMessage('');
+  elements.purchaseDialog.showModal();
+};
+
 const openPurchase = (item) => {
   
   if (!canPurchase(item)) return;
   if (elements.detailDialog?.open) elements.detailDialog.close();
   state.checkoutCart = false;
+  state.checkoutRentals = false;
+  if (rentalConfirmRow) rentalConfirmRow.hidden = true;
   cartDeliveryPlan = null;
   const routesHost = $('[data-member-cart-routes]'); if (routesHost) routesHost.hidden = true;
   state.selectedItem = item; elements.purchaseForm.reset(); elements.y.value = '0'; elements.rotation.value = '0';
@@ -1226,12 +1265,14 @@ const openPurchase = (item) => {
 const submitPurchase = async (event) => {
   event.preventDefault();
   if (state.server?.paused === true) { showMessage('This DayZ server is currently paused.'); return; }
-  if (!state.token || (!state.selectedItem && !state.checkoutCart) || state.purchasing) return;
+  if (!state.token || (!state.selectedItem && !state.checkoutCart && !state.checkoutRentals) || state.purchasing) return;
   state.purchasing = true; elements.purchaseConfirm.disabled = true; showMessage('Railway is validating your wallet, stock and access.', 'info');
   try {
     const eventItem = !state.checkoutCart && state.selectedItem?.delivery_type === 'event';
     let delivery = null;
-    {
+    if (state.checkoutRentals) {
+      if (!rentalConfirm?.checked) throw new Error('Confirm each rental\'s restarts and delivery coordinates.');
+    } else {
       if (!elements.coordinateConfirm.checked) throw new Error('Confirm that you checked the delivery coordinates.');
       delivery = elements.location.value ? { location_id: Number(elements.location.value) } : (
         state.checkoutCart && !elements.x.value && !elements.z.value ? null : {
@@ -1243,7 +1284,11 @@ const submitPurchase = async (event) => {
     const quantity = Math.max(1, Number(elements.quantity.value || 1));
     const purchaseKey = `${Date.now().toString(36)}-${crypto.randomUUID?.() || Math.random().toString(36).slice(2)}-shop`;
     const paymentMethod = elements.paymentMethod?.value === 'bank' ? 'bank' : 'cash';
-    const body = state.checkoutCart ? {
+    const body = state.checkoutRentals ? {
+      items: rentalCart.lines(),
+      buyer_note: elements.note.value.trim(), payment_method: paymentMethod,
+      checkout_key: purchaseKey, purchase_key: purchaseKey
+    } : state.checkoutCart ? {
       items: cartDeliveryPlan.lines(delivery),
       buyer_note: elements.note.value.trim(), payment_method: paymentMethod, checkout_key: purchaseKey, purchase_key: purchaseKey, delivery
     } : {
@@ -1257,7 +1302,8 @@ const submitPurchase = async (event) => {
     if (!response.ok) throw new Error(payload.message || 'The purchase could not be completed.');
     showMessage(payload.message || 'Order placed successfully.', 'success');
     if (state.checkoutCart) clearCart();
-    await loadShop(); window.setTimeout(() => { elements.purchaseDialog.close(); state.checkoutCart = false; }, 900);
+    if (state.checkoutRentals) rentalCart.clear();
+    await loadShop(); window.setTimeout(() => { elements.purchaseDialog.close(); state.checkoutCart = false; state.checkoutRentals = false; }, 900);
   } catch (error) { showMessage(error.message || 'The purchase could not be completed.'); }
   finally { state.purchasing = false; elements.purchaseConfirm.disabled = false; }
 };
@@ -1284,7 +1330,7 @@ $$('[data-member-item-detail-close]').forEach((button) => button.addEventListene
 elements.detailBuy?.addEventListener('click', () => {
   const item = state.detailItem; if (!item) return;
   if (!state.user) { elements.detailDialog?.close(); openLogin(); return; }
-  if (canPurchase(item)) item.delivery_type === 'event' ? openPurchase(item) : addToCart(item);
+  if (canPurchase(item)) item.delivery_type === 'event' ? rentalCart.add(item) : addToCart(item);
 });
 elements.refresh.addEventListener('click', loadShop);
 elements.ordersRefresh.addEventListener('click', loadShop);
@@ -1303,7 +1349,7 @@ elements.cartCheckout?.addEventListener('click', openCartCheckout);
 elements.cartCheckoutSecondary?.addEventListener('click', openCartCheckout);
 elements.location.addEventListener('change', syncLocationMode);
 [elements.x,elements.z].forEach((input) => input.addEventListener('input', updateMarker));
-$$('[data-member-purchase-cancel]').forEach((button) => button.addEventListener('click', () => { if (!state.purchasing) { elements.purchaseDialog.close(); state.checkoutCart = false; state.selectedItem = null; } }));
+$$('[data-member-purchase-cancel]').forEach((button) => button.addEventListener('click', () => { if (!state.purchasing) { elements.purchaseDialog.close(); state.checkoutCart = false; state.checkoutRentals = false; state.selectedItem = null; } }));
 elements.purchaseForm.addEventListener('submit', submitPurchase);
 
 const initialise = async () => {
