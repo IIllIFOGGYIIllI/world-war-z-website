@@ -8,8 +8,8 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-10-24-ios-oauth-recovery-1';
-const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-ios-oauth-recovery-1`;
+const WWZ_PWA_UPDATE_REVISION = '2026-10-24-dual-server-session-isolation-1';
+const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-dual-server-session-isolation-1`;
 const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${APP_CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${APP_CACHE_RELEASE}`;
@@ -212,9 +212,14 @@ self.addEventListener('fetch', (event) => {
   }
   if (url.pathname.endsWith('/manifest.webmanifest')
       || url.pathname.endsWith('/assets/data/companion-release.json')
-      // The installed iPhone app must not run outdated OAuth callback code
-      // for one more launch after a website release.
-      || url.pathname.endsWith('/assets/js/dashboard/account.js')) {
+      // Keep sign-in and guild-scoped access handling current in installed PWAs.
+      // A stale script could incorrectly clear the shared Discord session.
+      || url.pathname.endsWith('/assets/js/dashboard/account.js')
+      || url.pathname.endsWith('/assets/js/dashboard/core.js')
+      || url.pathname.endsWith('/assets/js/dashboard/administration.js')
+      || url.pathname.endsWith('/assets/js/dashboard/operations-centre.js')
+      || url.pathname.endsWith('/assets/js/dashboard/shop.js')
+      || url.pathname.endsWith('/assets/js/dashboard/delivery.js')) {
     event.respondWith(networkFirstStatic(request));
     return;
   }
