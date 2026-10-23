@@ -104,10 +104,10 @@ const performBankAction = async (action) => {
       body: JSON.stringify({ action, amount })
     });
     const payload = await response.json().catch(() => ({}));
+    // Banking is server-scoped. A denial here must not invalidate the shared
+    // PvE/PvP Discord session; /api/auth/me owns global session validity.
     if (response.status === 401 || response.status === 403) {
-      storageRemove(AUTH_SESSION_KEY);
-      applySignedOutState();
-      setBankActionState(false, 'Your dashboard session expired. Sign in again to continue.', 'error');
+      setBankActionState(false, payload.message || 'Bank access is unavailable for this selected server. Your Discord sign-in is unchanged.', 'error');
       return;
     }
     if (!response.ok) {
