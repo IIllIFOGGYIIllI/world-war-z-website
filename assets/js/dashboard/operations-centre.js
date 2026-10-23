@@ -320,10 +320,10 @@
         headers: { Accept: 'application/json', Authorization: `Bearer ${token}` }
       });
       const payload = await response.json().catch(() => ({}));
+      // The Operations Centre is guild-scoped; keep the shared OAuth session
+      // when this guild denies a request.
       if (response.status === 401 || response.status === 403) {
-        storageRemove(AUTH_SESSION_KEY);
-        applySignedOutState();
-        return;
+        throw new Error(payload.message || 'Operations access is unavailable for this server.');
       }
       if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Operations Centre unavailable');
       render(payload);
