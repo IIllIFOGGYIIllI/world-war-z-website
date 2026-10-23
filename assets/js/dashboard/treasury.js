@@ -158,6 +158,21 @@
     }
   };
 
+  // Clear previous-world financial data on selection changes or denial.
+  const clearServerSnapshot = () => {
+    payload = null;
+    [
+      '[data-treasury-available]', '[data-treasury-reserved]',
+      '[data-treasury-managed]', '[data-treasury-contributed]',
+      '[data-treasury-granted]', '[data-treasury-escrow-count]',
+      '[data-treasury-bank-balance]'
+    ].forEach((selector) => setText(selector, '—'));
+    setText('[data-treasury-server-name]', 'Selected server');
+    q('[data-treasury-activity]')?.replaceChildren();
+    q('[data-treasury-escrows]')?.replaceChildren();
+    qa('[data-treasury-admin]').forEach((node) => { node.hidden = true; });
+  };
+
   const load = async ({ quiet = false } = {}) => {
     if (loading) return;
     const session = token();
@@ -167,7 +182,11 @@
     try {
       const response = await authFetch(STATE_URL, { headers: { Accept: 'application/json', Authorization: `Bearer ${session}` } });
       const data = await response.json().catch(() => ({}));
-      if (response.status === 401 || response.status === 403) { storageRemove(AUTH_SESSION_KEY); applySignedOutState(); return; }
+      if (response.status === 401 || response.status === 403) {
+        clearServerSnapshot();
+        setMessage(data.message || 'Treasury access is unavailable for this server. Your Discord login remains active.', 'error');
+        return;
+      }
       if (!response.ok || data.status !== 'ok') throw new Error(data.message || 'Community treasury is unavailable.');
       render(data); setMessage('');
     } catch (error) { setMessage(error.message || 'Community treasury is unavailable.', 'error'); }
@@ -217,7 +236,7 @@
   window.addEventListener('wwz:viewchange', (event) => {
     if (event.detail?.view === 'economy' && event.detail?.section === 'treasury') load({ quiet: true });
   });
-  window.addEventListener('wwz:serverchange', () => { payload = null; if (location.hash.includes('economy/treasury')) load({ quiet: true }); });
-  window.addEventListener('wwz:authchange', () => { payload = null; if (token()) load({ quiet: true }); });
+  window.addEventListener('wwz:serverchange', () => { clearServerSnapshot(); if (location.hash.includes('economy/treasury')) load({ quiet: true }); });
+  window.addEventListener('wwz:authchange', () => { clearServerSnapshot(); if (token()) load({ quiet: true }); });
   window.addEventListener('wwz:accesschange', () => { if (payload) render(payload); });
 })();

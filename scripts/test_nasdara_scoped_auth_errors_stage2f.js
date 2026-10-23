@@ -37,6 +37,28 @@ async function main() {
   assert.ok(section.includes('only /api/auth/me determines session validity') || section.includes('Only /api/auth/me determines session validity'));
   assert.ok(!section.includes('storageRemove(AUTH_SESSION_KEY)'), 'account scoped 401 must not delete session');
   assert.ok(!section.includes('applySignedOutState('), 'account scoped 401 must not hide dashboard');
-  console.log('PASS: scoped 401/403 cannot invalidate global Discord login');
+
+  const checkedModules = [
+    'admin-access.js', 'treasury.js', 'data-management.js',
+    'moderation-centre.js', 'appeals.js'
+  ];
+  for (const name of checkedModules) {
+    const script = fs.readFileSync('assets/js/dashboard/' + name, 'utf8');
+    assert.ok(!script.includes('storageRemove(AUTH_SESSION_KEY)'), name + ': must keep OAuth token');
+    assert.ok(!script.includes('applySignedOutState('), name + ': must keep dashboard signed in');
+  }
+  const notices = [];
+  const context = { showAuthMessage: (msg) => notices.push(msg) };
+  vm.createContext(context);
+  vm.runInContext(fs.readFileSync('assets/js/dashboard/admin-access.js', 'utf8'), context);
+  for (const status of [401, 403]) {
+    const handled = vm.runInContext(
+      'handleAdminPlayerAuthorizationResponse({status:' + status + '}, {error_code:"admin_access_required"}, {actionRequest:true})',
+      context
+    );
+    assert.equal(handled, true);
+  }
+  assert.equal(notices.length, 2);
+  console.log('PASS: active server-scoped denied requests preserve global login');
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});

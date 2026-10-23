@@ -65,9 +65,9 @@
     }, timeout);
     const body = await response.json().catch(() => ({}));
     if (response.status === 401 || response.status === 403) {
-      storageRemove(AUTH_SESSION_KEY);
-      applySignedOutState?.();
-      throw new Error(body.message || 'Owner access is required.');
+      // Owner access is guild-scoped; retain the common Discord session.
+      payload = null;
+      throw new Error(body.message || 'Owner data access is unavailable for this server.');
     }
     if (!response.ok) throw new Error(body.message || 'The data-management request failed.');
     return body;

@@ -272,7 +272,7 @@
 
   const ensureAppeals = () => ensureModerationStyles().then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
     'appeals',
-    'assets/js/dashboard/appeals.js?v=1.22.93',
+    'assets/js/dashboard/appeals.js?v=1.22.93&authfix=nasdara-2',
     () => window.__wwzAppealsReady === true
   )));
 
@@ -307,7 +307,7 @@
     loadStylesheetOnce('moderation-centre-css', 'assets/css/dashboard/moderation-centre.css?v=1.52.0&rev=moderation-centre-1'),
     loadAfterDashboardRuntime(() => loadScriptOnce(
       'moderation-centre',
-      'assets/js/dashboard/moderation-centre.js?v=1.52.0&rev=moderation-centre-1',
+      'assets/js/dashboard/moderation-centre.js?v=1.52.0&rev=moderation-centre-1&authfix=nasdara-2',
       () => window.__wwzModerationCentreReady === true
     ))
   ])).then(() => undefined);
@@ -316,7 +316,7 @@
     loadStylesheetOnce('data-management-css', 'assets/css/dashboard/data-management.css?v=1.39.0&rev=data-management-1'),
     loadAfterDashboardRuntime(() => loadScriptOnce(
       'data-management',
-      'assets/js/dashboard/data-management.js?v=1.39.0&rev=data-management-1',
+      'assets/js/dashboard/data-management.js?v=1.39.0&rev=data-management-1&authfix=nasdara-2',
       () => window.__wwzDataManagementReady === true
     ))
   ]).then(() => undefined);

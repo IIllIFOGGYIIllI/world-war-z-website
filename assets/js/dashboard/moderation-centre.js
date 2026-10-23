@@ -199,8 +199,9 @@
       });
       const payload = await response.json().catch(() => ({}));
       if (response.status === 401 || response.status === 403) {
-        storageRemove(AUTH_SESSION_KEY);
-        applySignedOutState();
+        root.querySelectorAll('.moderation-centre-row').forEach((node) => node.remove());
+        if (errorNote) errorNote.hidden = false;
+        set('[data-moderation-centre-updated]', 'Access unavailable for selected server');
         return;
       }
       if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Moderation Centre unavailable');
@@ -264,8 +265,8 @@
       });
       const payload = await response.json().catch(() => ({}));
       if (response.status === 401 || response.status === 403) {
-        storageRemove(AUTH_SESSION_KEY);
-        applySignedOutState();
+        searchResults?.replaceChildren();
+        if (searchState) searchState.textContent = payload.message || 'Player search is unavailable for this server.';
         return;
       }
       if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Player search unavailable');

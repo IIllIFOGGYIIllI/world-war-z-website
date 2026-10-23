@@ -249,9 +249,11 @@ const loadMemberAppeals = async (sessionToken = storageGet(AUTH_SESSION_KEY)) =>
     });
     const payload = await response.json().catch(() => ({}));
     if (response.status === 401 || response.status === 403) {
-      storageRemove(AUTH_SESSION_KEY);
-      applySignedOutState();
-      showAuthMessage(payload.message || 'Sign in again to view appeals.', 'error');
+      memberAppealPayload = null;
+      memberAppealList?.replaceChildren();
+      appealEligibleList?.replaceChildren();
+      if (memberAppealError) memberAppealError.hidden = false;
+      showAuthMessage(payload.message || 'Appeals are unavailable for this server.', 'error');
       return false;
     }
     if (!response.ok) throw new Error(payload.message || 'Appeals are temporarily unavailable.');
@@ -286,11 +288,9 @@ const submitMemberAppealAction = async (payload, messageElement, button) => {
     });
     const result = await response.json().catch(() => ({}));
     if (response.status === 401 || response.status === 403) {
-      storageRemove(AUTH_SESSION_KEY);
-      applySignedOutState();
       closeDashboardDialog(memberAppealDialog);
       closeDashboardDialog(withdrawAppealDialog);
-      showAuthMessage(result.message || 'Your session expired. Sign in again.', 'error');
+      showAuthMessage(result.message || 'Appeal actions are unavailable for this server.', 'error');
       return null;
     }
     if (!response.ok) throw new Error(result.message || 'The appeal action could not be completed.');
@@ -369,20 +369,10 @@ const applyOwnerAppealSettings = (payload) => {
 };
 
 const handleOwnerAppealAuthFailure = (response, payload = {}) => {
-  if (response.status === 401) {
-    storageRemove(AUTH_SESSION_KEY);
-    applySignedOutState();
-    showAuthMessage(payload.message || 'Your session expired. Sign in again.', 'error');
-    return true;
-  }
-  if (response.status === 403) {
-    if (authenticatedUser?.membership) authenticatedUser.membership.access_level = 'member';
-    applyAccessVisibility('member');
-    showView('overview', false);
-    showAuthMessage(payload.message || 'Owner access is required.', 'error');
-    return true;
-  }
-  return false;
+  if (response.status !== 401 && response.status !== 403) return false;
+  // A server-level denial is not a global change of role.
+  showInlineMessage(ownerAppealMessage, payload.message || 'Owner appeal settings are unavailable for this server.');
+  return true;
 };
 
 const loadOwnerAppealSettings = async (sessionToken = storageGet(AUTH_SESSION_KEY)) => {
