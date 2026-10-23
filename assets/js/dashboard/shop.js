@@ -707,10 +707,10 @@ const loadMemberShop = async (sessionToken = storageGet(AUTH_SESSION_KEY)) => {
     await ensureShopPreviewRuntime();
     const response = await authFetch(ACCOUNT_SHOP_URL, { headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` } });
     const payload = await response.json().catch(() => ({}));
-    if (response.status === 401) {
-      storageRemove(AUTH_SESSION_KEY);
-      applySignedOutState();
-      return false;
+    // Checkout permissions are evaluated by the selected server. Do not
+    // discard a globally valid session on an individual guild rejection.
+    if (response.status === 401 || response.status === 403) {
+      throw new Error(payload.message || 'Shop access is unavailable for this server.');
     }
     if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Shop unavailable');
     applyShopPayload(payload, { member: true });
@@ -772,11 +772,10 @@ shopPurchaseForm?.addEventListener('submit', async (event) => {
       })())
     });
     const payload = await response.json().catch(() => ({}));
-    if (response.status === 401) {
-      storageRemove(AUTH_SESSION_KEY);
-      applySignedOutState();
-      shopPurchaseDialog?.close?.();
-      return;
+    // A rejected checkout never revokes the shared OAuth session or clears
+    // the cart; the backend still enforces stock, roles and payment safety.
+    if (response.status === 401 || response.status === 403) {
+      throw new Error(payload.message || 'Checkout is not permitted for this server.');
     }
     if (!response.ok) throw new Error(payload.message || 'The purchase could not be completed.');
     showShopInlineMessage(shopPurchaseMessage, payload.message || 'Order placed.', 'success');
