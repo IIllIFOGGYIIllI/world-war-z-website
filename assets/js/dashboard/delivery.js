@@ -163,10 +163,10 @@ const loadDeliveryLocations = async (sessionToken = storageGet(AUTH_SESSION_KEY)
       headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` }
     });
     const payload = await response.json().catch(() => ({}));
-    if (response.status === 401) {
-      storageRemove(AUTH_SESSION_KEY);
-      applySignedOutState();
-      return false;
+    // Saved locations are world-specific. A denial here does not expire
+    // the member's shared Discord login for their other Nasdara world.
+    if (response.status === 401 || response.status === 403) {
+      throw new Error(payload.message || 'Saved locations are unavailable for this server.');
     }
     if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Saved locations are unavailable.');
     savedDeliveryLocations = Array.isArray(payload.locations) ? payload.locations : [];
@@ -195,10 +195,8 @@ const saveDeliveryLocationAction = async (body) => {
       body: JSON.stringify(body)
     });
     const payload = await response.json().catch(() => ({}));
-    if (response.status === 401) {
-      storageRemove(AUTH_SESSION_KEY);
-      applySignedOutState();
-      return false;
+    if (response.status === 401 || response.status === 403) {
+      throw new Error(payload.message || 'Saved-location access is unavailable for this server.');
     }
     if (!response.ok) throw new Error(payload.message || 'The saved location could not be updated.');
     showDeliveryInlineMessage(deliveryLocationMessage, payload.message || 'Saved location updated.', 'success');
