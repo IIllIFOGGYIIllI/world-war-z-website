@@ -259,6 +259,7 @@ const loadCurrentAccount = async (sessionToken) => {
         return;
       }
       if (response.status === 403) {
+        window.WWZServerContext?.showLogin();
         showAuthMessage('Your Discord sign-in is valid, but this server denied account access. Check membership and server permissions.', 'error');
         return;
       }
@@ -297,6 +298,7 @@ const loadCurrentAccount = async (sessionToken) => {
 const completeDiscordLogin = async (loginTicket) => {
   if (authRequestInProgress) return;
   authRequestInProgress = true;
+  let sessionSaved = false;
   showAuthMessage('Finishing your secure Discord sign-in…', 'info');
 
   try {
@@ -317,19 +319,33 @@ const completeDiscordLogin = async (loginTicket) => {
     if (!storageSet(AUTH_SESSION_KEY, payload.session_token)) {
       throw new Error('Browser session storage is unavailable');
     }
-
+    sessionSaved = true;
+    // The ticket is single-use. Clear it before rendering to avoid accidentally
+    // redeeming it again if iOS suspends the app midway through sign-in.
+    const returnView = clearCallbackFragment();
     applyAuthenticatedState(payload);
     window.WWZServerContext?.handleAuthenticated(payload, { requireSelection: true });
-    const returnView = clearCallbackFragment();
     showView(returnView, false);
     await loadAccountSummary(payload.session_token);
     showAuthMessage(`Signed in as ${payload.user.display_name || payload.user.username}.`, 'success');
   } catch (error) {
-    storageRemove(AUTH_SESSION_KEY);
-    const returnView = clearCallbackFragment();
-    showView(returnView, false);
-    applySignedOutState();
-    showAuthMessage(error.message || 'Discord sign-in could not be completed.', 'error');
+    // Do not throw away a valid, already-issued session because a lazily loaded
+    // dashboard panel failed to render after the OAuth exchange committed.
+    if (sessionSaved) {
+      console.error('WWZ post-login dashboard restore failed.', error);
+      try { clearCallbackFragment(); } catch (_) {}
+      window.WWZServerContext?.showLogin();
+      showAuthMessage(
+        'Discord sign-in succeeded, but the dashboard did not finish opening. Refresh this page to restore your signed-in session.',
+        'error'
+      );
+    } else {
+      storageRemove(AUTH_SESSION_KEY);
+      const returnView = clearCallbackFragment();
+      showView(returnView, false);
+      applySignedOutState();
+      showAuthMessage(error.message || 'Discord sign-in could not be completed.', 'error');
+    }
   } finally {
     authRequestInProgress = false;
   }
@@ -388,12 +404,31 @@ const configureDiscordAuth = async () => {
   }
 };
 
+const isIOSInstalledWebApp = () =>
+  (/iphone|ipad|ipod/i.test(navigator.userAgent)
+    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))
+  && (window.navigator.standalone === true
+    || window.matchMedia?.('(display-mode: standalone)')?.matches === true);
+
+const startDiscordOAuth = () => {
+  if (isIOSInstalledWebApp()) {
+    // Apple recommends window.open for OAuth links that might otherwise break
+    // out of the installed web app into Safari's separate storage container.
+    // '_self' preserves the current browser context and its sessionStorage.
+    try {
+      if (window.open(AUTH_LOGIN_URL, '_self')) return;
+    } catch (_) {}
+  }
+  // Retain the established redirect path for Safari, Android and desktop.
+  window.location.assign(AUTH_LOGIN_URL);
+};
+
 startDiscordLoginButtons.forEach((button) => {
   button.addEventListener('click', () => {
     if (!discordAuthEnabled || authRequestInProgress) return;
     const activeView = document.querySelector('[data-view-panel].active')?.dataset.viewPanel || 'overview';
     storageSet(AUTH_RETURN_VIEW_KEY, navigationKey(activeView, activeDashboardSection || defaultSectionForView(activeView)));
-    window.location.assign(AUTH_LOGIN_URL);
+    startDiscordOAuth();
   });
 });
 
