@@ -8,8 +8,8 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-10-21-dual-nasdara-6-shared-bearer';
-const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-dual-nasdara-6-shared-bearer`;
+const WWZ_PWA_UPDATE_REVISION = '2026-10-24-ios-oauth-recovery-1';
+const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-ios-oauth-recovery-1`;
 const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${APP_CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${APP_CACHE_RELEASE}`;
@@ -210,7 +210,11 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(networkFirstMapData(request));
     return;
   }
-  if (url.pathname.endsWith('/manifest.webmanifest') || url.pathname.endsWith('/assets/data/companion-release.json')) {
+  if (url.pathname.endsWith('/manifest.webmanifest')
+      || url.pathname.endsWith('/assets/data/companion-release.json')
+      // The installed iPhone app must not run outdated OAuth callback code
+      // for one more launch after a website release.
+      || url.pathname.endsWith('/assets/js/dashboard/account.js')) {
     event.respondWith(networkFirstStatic(request));
     return;
   }
