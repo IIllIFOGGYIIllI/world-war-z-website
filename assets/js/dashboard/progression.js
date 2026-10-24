@@ -329,8 +329,8 @@
       resetProfileProgression('Progression data is temporarily unavailable');
       content?.setAttribute('hidden', '');
       guest?.removeAttribute('hidden');
-      setTextLocal('[data-progression-guest-copy]', error.status === 401
-        ? 'Your dashboard session expired. Sign in again to view progression.'
+      setTextLocal('[data-progression-guest-copy]', error.status === 401 || error.status === 403
+        ? 'Progression access could not be verified for this selected server. Your Discord login remains active.'
         : 'Progression data is temporarily unavailable.');
     }
   };
@@ -494,12 +494,18 @@
   const loadAdmin = async ({ force = false } = {}) => {
     if (!hasAdminAccess()) {
       adminLoaded = false;
+      adminData = null;
       adminPanel?.setAttribute('hidden', '');
       return;
     }
     if (adminLoaded && !force) return;
     const sessionToken = token();
-    if (!sessionToken) return;
+    if (!sessionToken) {
+      adminLoaded = false;
+      adminData = null;
+      adminPanel?.setAttribute('hidden', '');
+      return;
+    }
     try {
       const payload = await requestJson(ADMIN_PROGRESSION_CONFIG_URL, {
         headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` }
@@ -508,6 +514,10 @@
       adminLoaded = true;
     } catch (error) {
       adminLoaded = false;
+      adminData = null;
+      // Never leave an earlier server's editable role mappings visible after
+      // this server refuses (or cannot verify) the protected configuration.
+      adminPanel?.setAttribute('hidden', '');
       setAdminMessage(error.message || 'Progression configuration is temporarily unavailable.', 'error');
     }
   };
@@ -717,6 +727,8 @@
     memberLoaded = false;
     adminLoaded = false;
     memberPayload = null;
+    adminData = null;
+    adminPanel?.setAttribute('hidden', '');
     if (!event.detail?.authenticated) {
       resetProfileProgression('Sign in to load progression');
       return;
@@ -732,6 +744,8 @@
     memberLoaded = false;
     adminLoaded = false;
     memberPayload = null;
+    adminData = null;
+    adminPanel?.setAttribute('hidden', '');
     if (document.querySelector('[data-view-panel="progression"].active')) {
       loadMember({ force: true });
       loadAdmin({ force: true });

@@ -947,13 +947,35 @@
     }
     loading = true; refreshButton?.setAttribute('disabled', '');
     try {
+      // Member and Admin permissions are independent for the selected server.
+      // Never hide the member's factions because a protected Admin read fails.
       memberPayload = await apiJson(ACCOUNT_URL);
-      adminPayload = (isStaff() || forceAdmin) ? await apiJson(ADMIN_URL) : null;
-      if (guest) guest.hidden = true; if (content) content.hidden = false; if (errorBox) errorBox.hidden = true;
-      renderMyFaction(); renderFactionRegistration(); renderInbox(); renderGovernance(); renderDirectory(); renderAdmin();
+      adminPayload = null;
+      if (guest) guest.hidden = true;
+      if (content) content.hidden = false;
+      if (errorBox) errorBox.hidden = true;
+      renderMyFaction(); renderFactionRegistration(); renderInbox(); renderGovernance(); renderDirectory();
+      if (isStaff()) {
+        try {
+          adminPayload = await apiJson(ADMIN_URL);
+          showMessage(adminMessage, '');
+        } catch (adminError) {
+          // The API remains authoritative. An Admin denial only disables the
+          // privileged panel for this server; the public/member data stays up.
+          adminPayload = null;
+          showMessage(adminMessage, adminError.message || 'Faction administration is unavailable on this server.', 'error');
+        }
+      }
+      renderAdmin();
     } catch (error) {
-      if (error.status === 401) { if (guest) guest.hidden = false; if (content) content.hidden = true; }
-      else if (errorBox) { errorBox.textContent = error.message; errorBox.hidden = false; }
+      memberPayload = null;
+      adminPayload = null;
+      if (guest) guest.hidden = false;
+      if (content) content.hidden = true;
+      if (errorBox) {
+        errorBox.textContent = error.message || 'Faction information is unavailable on this selected server.';
+        errorBox.hidden = false;
+      }
     } finally { loading = false; refreshButton?.removeAttribute('disabled'); }
   };
 

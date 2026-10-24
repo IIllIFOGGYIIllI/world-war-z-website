@@ -329,7 +329,7 @@
 
   const ensureProgression = () => ensureProgressionStyles().then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
     'progression',
-    'assets/js/dashboard/progression.js?v=1.37.0&rev=quest-progression-1',
+    'assets/js/dashboard/progression.js?v=1.37.0&rev=progression-scoped-access-1',
     () => window.__wwzProgressionReady === true
   )));
 
@@ -341,7 +341,7 @@
 
   const ensureFactions = () => ensureFactionsStyles().then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
     'factions',
-    'assets/js/dashboard/factions.js?v=1.47.0&rev=faction-registration-1',
+    'assets/js/dashboard/factions.js?v=1.47.0&rev=faction-scoped-access-1',
     () => window.__wwzFactionsReady === true
   )));
 
