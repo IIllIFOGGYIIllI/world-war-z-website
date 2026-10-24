@@ -6,7 +6,7 @@ const text = fs.readFileSync('assets/js/dashboard/account.js','utf8');
 const html = fs.readFileSync('dashboard.html','utf8');
 const scoped = text.split('// Admin identity-sync controls. Settings are always scoped by the selected WWZ server.')[1];
 assert.ok(scoped);
-assert.ok(html.includes('account.js?v=1.58.1&amp;rev=identity-sync-scope-1'));
+assert.ok(html.includes('account.js?v=1.58.2&amp;rev=identity-stage4-safeguards'));
 for (const part of [
   'requestEpoch += 1',
   'selectedServerKey() === key && authorized()',
@@ -16,7 +16,10 @@ for (const part of [
   "window.addEventListener('wwz:authchange'",
   "window.addEventListener('wwz:accesschange'",
   'if (!loaded || busy || !authorized()) return',
-  'if (resultBody) resultBody.replaceChildren()'
+  'if (resultBody) resultBody.replaceChildren()',
+  'const needsAttention = Boolean(payload.needs_attention',
+  "needsAttention ? 'error' : 'success'",
+  "result.guild_available === false ? 'Not run'"
 ]) assert.ok(scoped.includes(part), 'Missing Identity Sync scope guard: '+part);
 const match = scoped.match(/const current = \(epoch, key\) => ([^\n]+);/);
 assert.ok(match);

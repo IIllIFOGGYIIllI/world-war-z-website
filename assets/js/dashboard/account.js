@@ -881,13 +881,13 @@ scheduleLiveStatusPolling();
     (Array.isArray(results) ? results : []).forEach((result) => {
       const row = document.createElement('tr');
       const values = [
-        result.server_name || result.map || 'Server',
-        `${Number(result.members_found) || 0} / ${Number(result.total_links) || 0}`,
-        `${Number(result.role_synced) || 0} synced${Number(result.role_failed) ? ` · ${Number(result.role_failed)} failed` : ''}`,
-        result.nickname_enabled
+        String(result.server_name || result.map || 'Server') + (result.guild_available === false ? ' · unavailable' : ''),
+        result.guild_available === false ? 'Unavailable' : `${Number(result.members_found) || 0} / ${Number(result.total_links) || 0}`,
+        result.guild_available === false ? 'Not run' : `${Number(result.role_synced) || 0} synced${Number(result.role_failed) ? ` · ${Number(result.role_failed)} failed` : ''}`,
+        result.guild_available === false ? 'Not run' : result.nickname_enabled
           ? `${Number(result.nickname_synced) || 0} synced${Number(result.nickname_failed) ? ` · ${Number(result.nickname_failed)} failed` : ''}`
           : `${Number(result.nickname_skipped) || 0} skipped · disabled`,
-        String(Number(result.members_missing) || 0)
+        result.guild_available === false ? 'Unavailable' : String(Number(result.members_missing) || 0)
       ];
       values.forEach((value) => {
         const cell = document.createElement('td');
@@ -914,8 +914,17 @@ scheduleLiveStatusPolling();
       });
       if (!current(epoch, serverKey)) return;
       renderResults(payload.results);
-      const found = (payload.results || []).reduce((total, result) => total + (Number(result.members_found) || 0), 0);
-      setMessage(String(payload.message || 'Identity resync completed.') + ' ' + found + ' Discord members processed.', 'success');
+      const summaries = Array.isArray(payload.results) ? payload.results : [];
+      const found = summaries.reduce((total, result) => total + (Number(result.members_found) || 0), 0);
+      const failures = summaries.reduce((total, result) =>
+        total + (Number(result.role_failed) || 0) + (Number(result.nickname_failed) || 0), 0);
+      const unavailable = summaries.filter(result => result.guild_available === false).length;
+      const needsAttention = Boolean(payload.needs_attention || unavailable || failures ||
+        summaries.some(result => result.needs_attention));
+      const suffix = needsAttention
+        ? ` ${found} members checked; ${failures} role/nickname failures${unavailable ? ` · ${unavailable} Discord server(s) unavailable` : ''}. Review the results below.`
+        : ` ${found} Discord members processed.`;
+      setMessage(String(payload.message || 'Identity resync completed.') + suffix, needsAttention ? 'error' : 'success');
     } catch (error) {
       if (!current(epoch, serverKey)) return;
       setMessage(error.message || 'Linked-member resync could not be completed.', 'error');
