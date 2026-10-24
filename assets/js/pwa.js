@@ -121,7 +121,7 @@
     });
 
     const heroActions = document.querySelector('.hero-actions');
-    if (heroActions && !heroActions.querySelector('[data-companion-hero-link]')) {
+    if (heroActions && !heroActions.querySelector('[data-companion-hero-link], [data-companion-home-download], [data-companion-ios-install]')) {
       const link = document.createElement('a');
       link.href = 'companion.html';
       link.className = 'button button-secondary';
