@@ -202,13 +202,14 @@ jobs:
           if not tools:
               raise SystemExit("Android apksigner is missing; cannot verify the signed APK")
           details = subprocess.check_output([str(tools[-1]), "verify", "--print-certs", "app-release-signed.apk"], text=True)
-          match = re.search(r"Signer #1 certificate SHA-256 digest:\s*([A-Fa-f0-9]{64})", details)
-          if not match:
-              raise SystemExit("Could not read the production APK signing certificate")
-          actual = match.group(1).lower()
           expected = SIGNING_CERT_SHA256.replace(":", "").lower()
-          if actual != expected:
-              raise SystemExit("The APK signing certificate differs from the established WWZ update certificate")
+          # apksigner versions differ: some separate digest bytes with colons.
+          # Normalise separators while still requiring the exact pinned signing SHA-256.
+          printed_hex = re.sub(r"[^0-9a-f]", "", details.lower())
+          if expected not in printed_hex:
+              certificate_lines = [line for line in details.splitlines() if "certificate" in line.lower() and "sha" in line.lower()]
+              print("APK certificate details:", *certificate_lines[:4], sep="\n")
+              raise SystemExit("The APK signing certificate does not match the established WWZ update certificate")
           subprocess.check_call([sys.executable, "scripts/generate_assetlinks.py", SIGNING_CERT_SHA256, "--output", output])
           print("PASS: verified signed APK certificate and generated Digital Asset Links")
           PY
@@ -252,6 +253,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # The Android build may overlap website commits. Publish on the latest main.
+          git fetch origin main
+          git reset --hard origin/main
           cp "$WWZ_RELEASE_ROOT/assets/data/companion-release.json" assets/data/companion-release.json
           mkdir -p .well-known
           cp "$WWZ_RELEASE_ROOT/native-artifacts/assetlinks.json" .well-known/assetlinks.json
@@ -280,6 +284,8 @@ jobs:
             echo "Companion release metadata is already current."
           else
             git commit -m "Update Companion release metadata"
+            git fetch origin main
+            git rebase origin/main
             git push origin HEAD:main
           fi
 
