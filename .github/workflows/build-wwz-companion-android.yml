@@ -3,11 +3,13 @@ name: Build WWZ Companion Android
 on:
   workflow_dispatch:
   push:
+    branches:
+      - main
+    tags:
+      - "companion-v*"
     paths:
       - "android-app/**"
       - ".github/workflows/build-wwz-companion-android.yml"
-    tags:
-      - "companion-v*"
 
 permissions:
   contents: write
@@ -97,6 +99,13 @@ jobs:
           echo "WWZ_BUBBLEWRAP_SDK=$WWZ_SDK" >> "$GITHUB_ENV"
           echo "WWZ_RUNNER_ANDROID_SDK=$RUNNER_ANDROID_SDK" >> "$GITHUB_ENV"
           bubblewrap doctor
+
+      - name: Validate Nasdara app icon source
+        shell: bash
+        run: |
+          python3 -m pip install Pillow==12.0.0
+          python3 scripts/build_community_icons.py
+          python3 scripts/test_community_icons.py
 
       - name: Generate Android project
         working-directory: android-app
@@ -223,9 +232,27 @@ jobs:
         run: |
           set -euo pipefail
           cp "$WWZ_RELEASE_ROOT/assets/data/companion-release.json" assets/data/companion-release.json
+          python3 - <<'PY'
+          import os
+          import re
+          from pathlib import Path
+          target = Path('sw.js')
+          source = target.read_text(encoding='utf-8')
+          version = os.environ['WWZ_COMPANION_VERSION'].replace('.', '-')
+          revision = 'companion-{}-run-{}-{}'.format(version, os.environ['GITHUB_RUN_ID'], os.environ['GITHUB_RUN_ATTEMPT'])
+          patterns = (
+              (r"^const WWZ_PWA_UPDATE_REVISION = '[^']+';$", "const WWZ_PWA_UPDATE_REVISION = '{}';".format(revision)),
+              (r"^const APP_CACHE_RELEASE = .+;$", "const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-%s`;" % revision),
+          )
+          for pattern, replacement in patterns:
+              source, count = re.subn(pattern, lambda match: replacement, source, count=1, flags=re.MULTILINE)
+              if count != 1:
+                  raise SystemExit('Could not safely refresh PWA cache revision for Android release')
+          target.write_text(source, encoding='utf-8')
+          PY
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add assets/data/companion-release.json
+          git add assets/data/companion-release.json sw.js
           if git diff --cached --quiet; then
             echo "Companion release metadata is already current."
           else

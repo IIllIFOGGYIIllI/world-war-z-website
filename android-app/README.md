@@ -1,4 +1,4 @@
-# World War Z Companion — Android v1.0.1
+# World War Z Companion — Android v1.0.2
 
 This Android package wraps the existing World War Z PWA as a **Trusted Web Activity (TWA)**. The website remains the canonical application, so normal website/API updates are immediately available to Android users without shipping a duplicate 294 MB map inside every APK.
 
@@ -47,9 +47,9 @@ When all four signing secrets exist, the same workflow also produces:
 
 ## App versioning
 
-Android v1.0.1 uses `appVersionCode` 10001. Future native releases should increment both fields in `twa-manifest.json`, for example:
+Android v1.0.2 uses `appVersionCode` 10001. Future native releases should increment both fields in `twa-manifest.json`, for example:
 
-- 1.0.1 -> 10001
+- 1.0.2 -> 10002
 - 1.1.0 -> 10100
 - 2.0.0 -> 20000
 
