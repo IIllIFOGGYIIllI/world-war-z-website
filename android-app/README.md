@@ -47,13 +47,15 @@ When all four signing secrets exist, the same workflow also produces:
 
 ## App versioning
 
-Android v1.0.2 uses `appVersionCode` 10001. Future native releases should increment both fields in `twa-manifest.json`, for example:
+Android v1.0.2 uses `appVersionCode` 10002. Future native releases should increment both fields in `twa-manifest.json`, for example:
 
 - 1.0.2 -> 10002
 - 1.1.0 -> 10100
 - 2.0.0 -> 20000
 
 Most server content, quests, events, analytics, dashboard changes and API-driven features remain live website updates and do **not** inherently require a new APK. Ship a new native version when Android metadata, permissions, native integration or store packaging changes.
+
+Minimum supported Android version for v1.0.2 is Android 7.0 (API 24), as required by the Android Browser Helper dependency.
 
 ## Current identity
 

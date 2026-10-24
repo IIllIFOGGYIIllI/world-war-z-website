@@ -4,8 +4,9 @@ WORLD WAR Z COMPANION - ANDROID DIRECT DISTRIBUTION
 CURRENT APP
 Name: World War Z Companion
 Package: com.worldwarz.companion
-Stable version: 1.0.1
-Version code: 10001
+Stable version target: 1.0.2
+Version code: 10002
+Minimum Android: Android 7.0 / API 24
 
 DISTRIBUTION MODEL
 Signed APK and ZIP fallback files are published as durable GitHub Release assets:

@@ -96,7 +96,7 @@
     all('[data-package-name]').forEach((element) => { element.textContent = release.package_name; });
     all('[data-version-code]').forEach((element) => { element.textContent = String(release.version_code); });
     all('[data-release-date]').forEach((element) => { element.textContent = formatDate(release.released_at); });
-    all('[data-minimum-android]').forEach((element) => { element.textContent = `Android 6.0+ (API ${release.minimum_android_api})`; });
+    all('[data-minimum-android]').forEach((element) => { element.textContent = `${Number(release.minimum_android_api) >= 24 ? 'Android 7.0+' : 'Android 6.0+'} (API ${release.minimum_android_api})`; });
     all('[data-apk-sha]').forEach((element) => { element.textContent = release.apk_sha256 || 'Published with the signed release'; });
     all('[data-signing-fingerprint]').forEach((element) => { element.textContent = release.signing_cert_sha256; });
     all('[data-apk-download]').forEach((link) => {

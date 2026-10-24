@@ -22,7 +22,7 @@
   "splashScreenFadeOutDuration": 300,
   "appVersion": "1.0.2",
   "appVersionCode": 10002,
-  "minSdkVersion": 23,
+  "minSdkVersion": 24,
   "signingKey": {
     "path": "./android-keystore",
     "alias": "wwzcompanion"
