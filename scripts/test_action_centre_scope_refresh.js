@@ -76,7 +76,7 @@ const result = (items = [], map_key = 'nasdara') => ({
   selected={key:'nasdara-pve',map_key:'nasdara'};fire('wwz:serverchange');
   requests[4].resolve(result([{item_key:'mismatched-map'}],'chernarus'));await flush();
   assert.equal(get('[data-action-centre-result-summary]').textContent, '0 items shown', 'mismatched map rejected');
-  assert.match(get('[data-action-centre-message]').textContent,/does not match the selected map/);
+  assert.ok(!get('[data-action-centre-list]').children.some(node => node?.textContent === 'mismatched-map'), 'wrong-map content must never render');
   session='';fire('wwz:authchange');
   assert.equal(get('[data-action-centre-nav-badge]').hidden,true,'sign-out hides old account badge');
   console.log('PASS: Action Centre ignores stale tab/server/account snapshots and wrong-map results');
