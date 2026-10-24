@@ -3,6 +3,7 @@
 
   const RELEASE_URL = 'assets/data/companion-release.json';
   const RELEASE_REPOSITORY = 'IIllIFOGGYIIllI/world-war-z-website';
+  const RELEASES_PAGE = `https://github.com/${RELEASE_REPOSITORY}/releases`;
   const $ = (selector) => document.querySelector(selector);
   const all = (selector) => [...document.querySelectorAll(selector)];
 
@@ -82,11 +83,10 @@
     }
   };
 
-  const disableDownloadLink = (link, label) => {
-    link.removeAttribute('href');
-    link.removeAttribute('download');
-    link.setAttribute('aria-disabled', 'true');
-    link.classList.add('is-disabled');
+  const linkToReleaseDirectory = (link, label) => {
+    // Keep the release directory accessible even when a signed APK does not exist.
+    // Never offer a fabricated APK or ZIP URL.
+    setDownloadLink(link, RELEASES_PAGE, 'World-War-Z-Companion.apk');
     link.textContent = label;
   };
 
@@ -137,17 +137,28 @@
 
   const applyUnavailableRelease = (release, reason) => {
     all('[data-release-version]').forEach((element) => { element.textContent = `v${release?.version || '—'}`; });
-    all('[data-release-size]').forEach((element) => { element.textContent = 'Signed package is being republished'; });
-    all('[data-apk-download]').forEach((link) => disableDownloadLink(link, 'APK temporarily unavailable'));
-    all('[data-zip-download]').forEach((link) => disableDownloadLink(link, 'ZIP temporarily unavailable'));
+    all('[data-release-size]').forEach((element) => { element.textContent = 'Signed APK not currently verified'; });
+    all('[data-apk-download]').forEach((link) => linkToReleaseDirectory(link, 'View Android releases'));
+    all('[data-zip-download]').forEach((link) => {
+      link.hidden = true;
+      link.removeAttribute('href');
+    });
+    const messages = {
+      'release-not-published': 'Signed Android release not published yet',
+      'apk-asset-missing': 'Release exists but its APK is missing',
+      'release-check-unavailable': 'GitHub download verification unavailable',
+      'missing-release-reference': 'Android release reference is missing',
+      'metadata-fetch-failed': 'Android release information is unavailable'
+    };
+    const message = messages[reason] || 'Signed Android release not yet available';
     const state = $('[data-release-state]');
     const label = $('[data-release-state-label]');
     if (state) state.dataset.releaseState = 'error';
-    if (label) label.textContent = 'Android release is being republished';
+    if (label) label.textContent = message;
     const note = $('[data-download-note]');
-    if (note) note.textContent = 'The signed Android package is temporarily unavailable. The browser/PWA dashboard remains available while the GitHub release is republished.';
+    if (note) note.textContent = 'The signed Android APK has not been verified. Open GitHub Releases to check publication; the WWZ browser and PWA dashboard remain available.';
     const status = $('[data-installed-status]');
-    if (status) status.textContent = reason === 'apk-asset-missing' ? 'Release found · APK asset missing' : 'Android release awaiting publication';
+    if (status) status.textContent = message;
   };
 
   const loadRelease = async () => {
@@ -173,8 +184,7 @@
     } catch (error) {
       const state = $('[data-release-state]');
       const label = $('[data-release-state-label]');
-      if (state) state.dataset.releaseState = 'error';
-      if (label) label.textContent = 'Companion release metadata is temporarily unavailable';
+      applyUnavailableRelease(null, 'metadata-fetch-failed');
       console.warn('WWZ Companion release metadata could not be loaded.', error);
       return null;
     }
