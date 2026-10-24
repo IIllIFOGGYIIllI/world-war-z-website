@@ -19,6 +19,12 @@
   const errorNote = select('[data-operations-centre-error]');
   let requestInProgress = false;
   let refreshTimer = 0;
+  let requestEpoch = 0;
+  const selectedServerKey = () => String(window.WWZServerContext?.getSelectedServer?.()?.key || '');
+  const isCurrent = (epoch, key, sessionToken) =>
+    epoch === requestEpoch && selectedServerKey() === key &&
+    sessionToken === (typeof storageGet === 'function' ? storageGet(AUTH_SESSION_KEY) : '') &&
+    (typeof hasServerActionAccess !== 'function' || hasServerActionAccess());
 
   const set = (query, value) => {
     const element = select(query);
@@ -261,7 +267,10 @@
     set('[data-operations-nitrado-state]', `Nitrado: ${stateLabel(runtime.nitrado_status)}`);
     set('[data-operations-next-restart]', restart.next_scheduled_restart ? timeLabel(restart.next_scheduled_restart) : 'Not scheduled');
     set('[data-operations-restart-countdown]', restart.countdown_seconds == null ? 'No synchronized countdown' : `${compactDuration(restart.countdown_seconds)} remaining`);
-    set('[data-operations-control-state]', runtime.server_actions_enabled ? 'Admin verified · controls connected' : 'Protected writes disabled');
+    const access = payload?.access || {};
+    const level = ['owner', 'staff'].includes(String(access.level)) ? friendly(access.level) : 'Unverified';
+    set('[data-operations-control-state]',
+      access.can_control_server ? `${level} verified · controls enabled` : `${level} · protected writes unavailable`);
 
     set('[data-operations-restart-next-detail]', restart.next_scheduled_restart ? timeLabel(restart.next_scheduled_restart) : 'Not scheduled');
     set('[data-operations-restart-countdown-detail]', restart.countdown_seconds == null ? 'Unavailable' : compactDuration(restart.countdown_seconds));
@@ -308,9 +317,37 @@
     if (errorNote) errorNote.hidden = true;
   };
 
+  const clearSnapshot = () => {
+    requestEpoch += 1;
+    requestInProgress = false;
+    if (healthRoot) delete healthRoot.dataset.operationsHealthState;
+    [servicesRoot, workersRoot, signalsRoot, errorsRoot, historyRoot,
+      select('[data-operations-next-actions]')].forEach((element) => element?.replaceChildren());
+    for (const key of [
+      'health-score', 'health-label', 'health-summary', 'failures', 'restarts-24h',
+      'audit-failures', 'context-world', 'context-server', 'population',
+      'population-note', 'live-state', 'nitrado-state', 'next-restart',
+      'restart-countdown', 'control-state', 'worker-summary', 'worker-attention',
+      'delivery-open', 'delivery-failed', 'delivery-approvals', 'delivery-cleanup',
+      'delivery-items', 'delivery-rentals', 'delivery-note', 'delivery-updated',
+      'restart-next-detail', 'restart-countdown-detail', 'restart-interval',
+      'restart-last', 'restarts-7d', 'restart-source', 'restart-sync',
+      'adm-state', 'adm-poll-interval', 'adm-last-poll', 'adm-last-success',
+      'adm-last-log', 'adm-reconcile', 'adm-last-error'
+    ]) set(`[data-operations-${key}]`, '—');
+    set('[data-operations-updated]', 'Selected server changed · refresh required');
+    if (errorNote) errorNote.hidden = true;
+    refreshButton?.removeAttribute('aria-busy');
+    refreshButton?.removeAttribute('disabled');
+  };
+
   const load = async () => {
     const token = typeof storageGet === 'function' ? storageGet(AUTH_SESSION_KEY) : '';
-    if (!token || (typeof hasServerActionAccess === 'function' && !hasServerActionAccess()) || requestInProgress) return;
+    const serverKey = selectedServerKey();
+    if (!serverKey || !token ||
+        (typeof hasServerActionAccess === 'function' && !hasServerActionAccess()) ||
+        requestInProgress) return;
+    const epoch = ++requestEpoch;
     requestInProgress = true;
     refreshButton?.setAttribute('aria-busy', 'true');
     refreshButton?.setAttribute('disabled', '');
@@ -320,20 +357,26 @@
         headers: { Accept: 'application/json', Authorization: `Bearer ${token}` }
       });
       const payload = await response.json().catch(() => ({}));
-      // The Operations Centre is guild-scoped; keep the shared OAuth session
-      // when this guild denies a request.
-      if (response.status === 401 || response.status === 403) {
-        throw new Error(payload.message || 'Operations access is unavailable for this server.');
+      if (!isCurrent(epoch, serverKey, token)) return;
+      // Reject responses delivered after a PvE/PvP switch even when the
+      // transport responds successfully to the old request.
+      if (!response.ok || payload.status !== 'ok') {
+        throw new Error(payload.message || 'Operations Centre unavailable');
       }
-      if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Operations Centre unavailable');
+      if (String(payload?.scope?.server_key || '') !== serverKey) {
+        throw new Error('Operations snapshot does not match the selected server.');
+      }
       render(payload);
     } catch (_) {
+      if (!isCurrent(epoch, serverKey, token)) return;
       if (errorNote) errorNote.hidden = false;
       set('[data-operations-updated]', 'Live snapshot unavailable');
     } finally {
-      requestInProgress = false;
-      refreshButton?.removeAttribute('aria-busy');
-      refreshButton?.removeAttribute('disabled');
+      if (epoch === requestEpoch) {
+        requestInProgress = false;
+        refreshButton?.removeAttribute('aria-busy');
+        refreshButton?.removeAttribute('disabled');
+      }
     }
   };
 
@@ -361,6 +404,16 @@
   };
 
   refreshButton?.addEventListener('click', load);
+  window.addEventListener('wwz:serverchange', () => {
+    clearSnapshot();
+    const current = String(location.hash || '').replace(/^#/, '').split('/');
+    if (current[0] === 'staff' && current[1] === 'server-audit' &&
+        document.visibilityState === 'visible') void load();
+  });
+  window.addEventListener('wwz:authchange', clearSnapshot);
+  window.addEventListener('wwz:accesschange', () => {
+    if (typeof hasServerActionAccess === 'function' && !hasServerActionAccess()) clearSnapshot();
+  });
   window.addEventListener('wwz:viewchange', (event) => schedule(event.detail || {}));
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState !== 'visible') return;

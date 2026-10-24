@@ -20,8 +20,10 @@ const document={
   querySelector:(s)=>s==='[data-dashboard-section="server-audit"]'?root:null,
   createElement:(tag)=>new Element(tag), addEventListener:()=>{}, visibilityState:'visible'
 };
+let selectedKey='world-war-z';
 const response={
-  status:'ok', checked_at:'2026-10-09T04:00:00Z', scope:{map_name:'Chernarus'},
+  status:'ok', checked_at:'2026-10-09T04:00:00Z', scope:{server_key:'world-war-z',map_name:'Chernarus'},
+  access:{level:'owner',can_control_server:true,can_retry_failures:true},
   health:{score:96,state:'healthy'}, workers:[{state:'critical',label:'Shop delivery',status:'Stopped'}],
   worker_summary:{total:1,running:0,attention:1},
   services:[],signals:[],recent_errors:[],history:[],runtime:{},restart_summary:{},adm:{},
@@ -31,7 +33,9 @@ const response={
     oldest_waiting_at:'2026-10-09T03:00:00Z',last_updated_at:'2026-10-09T04:00:00Z'}
 };
 const location={hash:'#staff/server-audit'};
-const window={addEventListener:()=>{},clearInterval:()=>{},setInterval:()=>0};
+const events={};
+const window={addEventListener:(kind,listener)=>{events[kind]=listener;},clearInterval:()=>{},setInterval:()=>0,
+  WWZServerContext:{getSelectedServer:()=>({key:selectedKey})}};
 const context={window,document,location,AUTH_SESSION_KEY:'WWZ',ADMIN_OPERATIONS_CENTRE_URL:'/api/admin/operations/centre',
   storageGet:()=> 'test',hasServerActionAccess:()=>true,
   authFetch:async()=>({ok:true,status:200,json:async()=>response}),
@@ -56,5 +60,23 @@ vm.runInNewContext(fs.readFileSync('assets/js/dashboard/operations-centre.js','u
  assert.equal(text('[data-operations-delivery-open]'),'—');
  assert.match(text('[data-operations-delivery-note]'),/Do not assume/);
  assert.match(elements.get('[data-operations-next-actions]').children[0].children[0].children[0].textContent,/diagnostics/i);
- console.log('Operations Centre 2.0 interaction checks passed: queue totals, action routing, unavailable-state guard.');
+ // An old server response must not replace the snapshot after a world switch.
+ location.hash='#staff/server-audit';
+ const requests=[];
+ context.authFetch=()=>new Promise(resolve=>requests.push(resolve));
+ const stale=window.WWZOperationsCentre.refresh();
+ selectedKey='nasdara-pvp';
+ events['wwz:serverchange']();
+ assert.equal(requests.length,2);
+ requests[0]({ok:true,status:200,json:async()=>response});
+ await stale;
+ assert.match(text('[data-operations-updated]'),/Selected server changed/);
+ const fresh={...response,scope:{server_key:'nasdara-pvp',map_name:'Nasdara PvP'},
+   delivery_queue:{available:true,open:2,failed:0,approvals:0,cleanup_due:0,items:{},rentals:{}}};
+ requests[1]({ok:true,status:200,json:async()=>fresh});
+ await Promise.resolve();
+ await new Promise(resolve=>setImmediate(resolve));
+ assert.equal(text('[data-operations-delivery-open]'),'2');
+ assert.match(text('[data-operations-control-state]'),/Owner verified/);
+ console.log('Operations Centre Stage 5B checks passed: delivery, scoped access and stale-request isolation.');
 })().catch(err=>{console.error(err);process.exitCode=1});

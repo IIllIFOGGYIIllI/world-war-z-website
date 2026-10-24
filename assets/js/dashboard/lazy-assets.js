@@ -298,7 +298,7 @@
     loadStylesheetOnce('operations-centre-css', 'assets/css/dashboard/operations-centre.css?v=2.2.0&rev=delivery-health-1'),
     loadAfterDashboardRuntime(() => loadScriptOnce(
       'operations-centre',
-      'assets/js/dashboard/operations-centre.js?v=2.2.0&rev=delivery-health-1',
+      'assets/js/dashboard/operations-centre.js?v=2.2.1&rev=stage5b-access-scope-1',
       () => window.__wwzOperationsCentreReady === true
     ))
   ]).then(() => undefined);

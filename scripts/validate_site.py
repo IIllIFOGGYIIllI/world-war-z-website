@@ -394,7 +394,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append(f"operations-centre.css: missing layout guard: {token}")
     for token in (
         "ensureOperationsCentre",
-        "assets/js/dashboard/operations-centre.js?v=2.2.0&rev=delivery-health-1",
+        "assets/js/dashboard/operations-centre.js?v=2.2.1&rev=stage5b-access-scope-1",
         "assets/css/dashboard/operations-centre.css?v=2.2.0&rev=delivery-health-1",
     ):
         if token not in operations_lazy:
