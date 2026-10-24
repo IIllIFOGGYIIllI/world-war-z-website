@@ -2216,7 +2216,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
     expected_manifest_ref = '<link href="manifest.webmanifest" rel="manifest"/>'
     expected_pwa_css = f'assets/css/pwa.css?v={EXPECTED_ASSET_VERSION}'
     expected_pwa_js = 'assets/js/pwa.js?v=1.61.0&rev=storefront-cart-1'
-    expected_apple = 'assets/icons/pwa/apple-touch-icon-180.png?v=1.22.94'
+    expected_apple = 'assets/icons/pwa/apple-touch-icon-180.png?v=nasdara-community-1'
     for html_path in sorted(ROOT.glob("*.html")):
         source = html_path.read_text(encoding="utf-8")
         for token, label in (

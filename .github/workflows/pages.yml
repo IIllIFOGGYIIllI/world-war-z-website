@@ -25,6 +25,12 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: Build Nasdara community app icons
+        run: |
+          python3 -m pip install Pillow==12.0.0
+          python3 scripts/build_community_icons.py
+          python3 scripts/test_community_icons.py
+
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v6
 
