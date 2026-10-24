@@ -15,3 +15,19 @@
 .wwz-rental-line-total { text-align:right; font-size:1.05rem; }
 .wwz-rental-unavailable { color:#f3aaaa; }
 @media (max-width:600px) { .wwz-rental-cart-head { flex-direction:column; } .wwz-rental-cart-line { padding:.75rem; } }
+
+/* One reusable map picker serves each rental, without duplicating canvases. */
+.wwz-rental-pick-map { justify-self:start; border-color:rgba(215,89,75,.65); }
+.wwz-rental-map-dialog { width:min(1140px,calc(100vw - 20px)); max-width:1140px; padding:0; border-radius:14px; }
+.wwz-rental-map-dialog-body { position:relative; display:grid; gap:.65rem; padding:1.1rem; min-width:0; }
+.wwz-rental-map-dialog-body h2,.wwz-rental-map-dialog-body p { margin:0; }
+.wwz-rental-map-dialog [data-rental-map-atlas] { display:block; width:100%; height:min(68vh,680px); border:1px solid #46505e; border-radius:10px; background:#10151c; }
+.wwz-rental-map-frame { width:100%; height:min(65vh,640px); min-height:360px; aspect-ratio:auto; }
+.wwz-rental-map-toolbar { display:flex; align-items:center; flex-wrap:wrap; gap:.65rem; justify-content:flex-end; }
+.wwz-rental-map-toolbar strong { margin-right:auto; font-variant-numeric:tabular-nums; }
+@media(max-width:640px) {
+  .wwz-rental-map-dialog-body { padding:.65rem; }
+  .wwz-rental-map-dialog [data-rental-map-atlas] { height:65vh; }
+  .wwz-rental-map-toolbar { flex-direction:column; align-items:stretch; }
+  .wwz-rental-map-frame { min-height:300px; }
+}

@@ -199,9 +199,114 @@ const elements = {
   serverButtons: $('[data-shop-server-buttons]')
 };
 let checkoutMapInstance = null;
+const rentalMapDialog = $('[data-rental-map-dialog]');
+const rentalMapAtlas = $('[data-rental-map-atlas]');
+const rentalMapFrame = $('[data-rental-map-frame]');
+const rentalMapMessage = $('[data-rental-map-message]');
+const rentalMapSelection = $('[data-rental-map-selection]');
+const rentalMapApply = $('[data-rental-map-apply]');
+const rentalMapName = $('[data-rental-map-name]');
+let rentalMapInstance = null;
+let rentalMapTarget = null;
+let rentalMapCoordinates = null;
+let rentalMapServerKey = '';
+const closeRentalMapPicker = () => {
+  rentalMapInstance?.destroy?.();
+  rentalMapInstance = null;
+  rentalMapTarget = null;
+  rentalMapCoordinates = null;
+  rentalMapServerKey = '';
+  if (rentalMapDialog?.open) rentalMapDialog.close();
+  if (rentalMapAtlas) {
+    rentalMapAtlas.hidden = true;
+    rentalMapAtlas.removeAttribute('src');
+  }
+  if (rentalMapFrame) rentalMapFrame.hidden = true;
+};
+const selectRentalMapCoordinates = (x, z) => {
+  const size = activeWorldSize();
+  if (!rentalMapDialog?.open || !rentalMapTarget || rentalMapServerKey !== String(state.server?.key || '')) return;
+  if (![x, z].every(Number.isFinite) || !Number.isFinite(size) || x < 0 || z < 0 || x > size || z > size) return;
+  rentalMapCoordinates = { x: Number(x.toFixed(1)), z: Number(z.toFixed(1)) };
+  if (rentalMapSelection) rentalMapSelection.textContent = `X ${rentalMapCoordinates.x} · Z ${rentalMapCoordinates.z}`;
+  if (rentalMapApply) rentalMapApply.disabled = false;
+};
+const openRentalMapPicker = async (target) => {
+  if (!rentalMapDialog || !state.server || !target) return;
+  closeRentalMapPicker();
+  rentalMapTarget = target;
+  rentalMapServerKey = String(state.server.key || '');
+  rentalMapCoordinates = null;
+  if (rentalMapName) rentalMapName.textContent = `${target.name} · Rental #${target.number}`;
+  if (rentalMapSelection) rentalMapSelection.textContent = 'Click or tap the map to choose X/Z';
+  if (rentalMapApply) rentalMapApply.disabled = true;
+  if (rentalMapMessage) rentalMapMessage.textContent = 'Select a position, then confirm. Existing Y and rotation values will be preserved.';
+  rentalMapDialog.showModal();
+  if (activeMapKey() === 'badlands') {
+    // Embed the already validated, dependency-free Nasdara Atlas. Its click
+    // coordinates are returned via a same-origin message, not guessed pixels.
+    if (rentalMapAtlas) {
+      const url = new URL('nasdara/index.html', location.href);
+      url.searchParams.set('rental_picker', '1');
+      const x = Number(target.x), z = Number(target.z);
+      if (String(target.x).trim() && String(target.z).trim()
+          && [x, z].every(Number.isFinite)) {
+        url.searchParams.set('x', String(x));
+        url.searchParams.set('z', String(z));
+      }
+      rentalMapAtlas.hidden = false;
+      rentalMapAtlas.src = url.href;
+    }
+    return;
+  }
+  try {
+    await ensureCheckoutMapRuntime();
+    if (!rentalMapDialog.open || rentalMapServerKey !== String(state.server?.key || '')) return;
+    rentalMapFrame.hidden = false;
+    rentalMapInstance = window.WWZMap.create(rentalMapFrame, {
+      mapKey: activeMapKey(), mode: 'picker', selectable: true,
+      copyOnSelect: false,
+      selectedElement: rentalMapSelection,
+      zoomInButton: $('[data-rental-map-zoom-in]'),
+      zoomOutButton: $('[data-rental-map-zoom-out]'),
+      resetButton: $('[data-rental-map-reset]'),
+      fullscreenButton: $('[data-rental-map-fullscreen]'),
+      fullscreenTarget: rentalMapFrame,
+      onSelect: ({ x, z }) => selectRentalMapCoordinates(x, z)
+    });
+    if (String(target.x).trim() && String(target.z).trim()
+        && [Number(target.x), Number(target.z)].every(Number.isFinite)) {
+      rentalMapInstance.setSelection(Number(target.x), Number(target.z), { notify: true, center: true });
+    }
+    window.setTimeout(() => rentalMapInstance?.invalidateSize(), 80);
+  } catch (error) {
+    if (rentalMapMessage) rentalMapMessage.textContent = 'Interactive map unavailable. You can still enter X/Z manually in the rental cart.';
+    console.warn('Rental map picker could not load:', error);
+  }
+};
+window.addEventListener('message', (event) => {
+  if (event.origin !== window.location.origin || event.source !== rentalMapAtlas?.contentWindow) return;
+  if (activeMapKey() !== 'badlands' || event.data?.type !== 'wwz:nasdara-rental-coordinate') return;
+  selectRentalMapCoordinates(Number(event.data.x), Number(event.data.z));
+});
+rentalMapApply?.addEventListener('click', () => {
+  if (!rentalMapCoordinates || !rentalMapTarget) return;
+  if (rentalMapTarget.apply(rentalMapCoordinates.x, rentalMapCoordinates.z)) closeRentalMapPicker();
+});
+$$('[data-rental-map-close]').forEach(button => button.addEventListener('click', closeRentalMapPicker));
+rentalMapDialog?.addEventListener('close', () => {
+  rentalMapInstance?.destroy?.();
+  rentalMapInstance = null;
+  rentalMapTarget = null;
+  rentalMapCoordinates = null;
+  rentalMapServerKey = '';
+  if (rentalMapAtlas) { rentalMapAtlas.hidden = true; rentalMapAtlas.removeAttribute('src'); }
+  if (rentalMapFrame) rentalMapFrame.hidden = true;
+});
 const rentalCart = window.WWZRentalCart.create({
   root: $('[data-member-rental-cart]'),
-  onCheckout: () => openRentalCartCheckout()
+  onCheckout: () => openRentalCartCheckout(),
+  onMapPick: (target) => openRentalMapPicker(target)
 });
 const rentalConfirmRow = $('[data-member-rental-confirm-row]');
 const rentalConfirm = $('[data-member-rental-confirm]');
@@ -214,6 +319,13 @@ const dateText = (value) => {
   }).format(date);
 };
 const titleCase = (value) => String(value || 'unknown').replace(/[_-]+/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
+const shopServerMode = (server) => {
+  const declared = String(server?.gameplay_mode || server?.selector_label || '').toLowerCase();
+  if (declared === 'pvp') return 'pvp';
+  if (declared === 'pve') return 'pve';
+  const label = [server?.name, server?.discord_name, server?.key].join(' ');
+  return /\bpvp\b|full[-_ ]?pvp/i.test(label) ? 'pvp' : 'pve';
+};
 const durationText = (seconds) => {
   const totalMinutes = Math.max(0, Math.trunc((Number(seconds) || 0) / 60));
   const hours = Math.trunc(totalMinutes / 60);
@@ -231,9 +343,12 @@ const renderServerChoices = () => {
     control.type = 'button';
     control.className = 'shop-server-button';
     const name = document.createElement('strong');
-    name.textContent = server.map_name || server.name || titleCase(server.map_key) || server.key;
+    const mode = shopServerMode(server);
+    name.textContent = server.map_key === 'badlands'
+      ? `Nasdara ${mode === 'pvp' ? 'PvP' : 'PvE'}`
+      : server.map_name || server.name || titleCase(server.map_key) || server.key;
     const detail = document.createElement('small');
-    detail.textContent = `${server.paused ? 'Paused' : 'Live'} · isolated shop`;
+    detail.textContent = `${server.paused ? 'Paused' : 'Live'} · ${mode === 'pvp' ? 'Full PvP' : 'PvE'} · isolated shop`;
     control.append(name, detail);
     const active = server.key === state.server?.key;
     control.classList.toggle('active', active);
@@ -245,6 +360,7 @@ const renderServerChoices = () => {
         checkoutMapInstance.destroy?.();
         checkoutMapInstance = null;
       }
+      closeRentalMapPicker();
       saveSelectedServer(server);
       state.locations = [];
       state.orders = [];

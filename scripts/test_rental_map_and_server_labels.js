@@ -1,0 +1,25 @@
+/* Regression contract: per-line map picker and accurate PvE/PvP labels. */
+'use strict';
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const cart = fs.readFileSync('assets/js/core/rental-cart.js','utf8');
+const shop = fs.readFileSync('assets/js/pages/shop.js','utf8');
+const html = fs.readFileSync('shop.html','utf8');
+const atlas = fs.readFileSync('nasdara/index.html','utf8');
+assert.match(cart, /onMapPick.*onMapPick/s);
+assert.match(cart, /rows\.includes\(row\)/);
+assert.match(cart, /row\.x = String\(x\)/);
+assert.match(cart, /row\.z = String\(z\)/);
+assert.match(shop, /Nasdara \$\{mode === 'pvp' \? 'PvP' : 'PvE'\}/);
+assert.match(shop, /mode === 'pvp' \? 'Full PvP' : 'PvE'/);
+assert.match(shop, /onMapPick: \(target\) => openRentalMapPicker\(target\)/);
+assert.match(shop, /event\.origin !== window\.location\.origin/);
+assert.match(shop, /event\.source !== rentalMapAtlas\?\.contentWindow/);
+assert.match(shop, /rentalMapServerKey !== String\(state\.server\?\.key \|\| ''\)/);
+assert.match(shop, /const url = new URL\('nasdara\/index\.html', location\.href\)/);
+assert.match(atlas, /wwz:nasdara-rental-coordinate/);
+assert.match(atlas, /rental_picker'\)==='1'/);
+assert.match(html, /data-rental-map-dialog/);
+assert.match(html, /data-rental-map-atlas/);
+assert.match(html, /data-rental-map-apply disabled/);
+console.log('PASS: rental map picker, safe Atlas messaging, isolated server labels');

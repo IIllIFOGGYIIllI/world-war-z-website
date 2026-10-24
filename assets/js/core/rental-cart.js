@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   const MAX_RENTALS = 25;
-  const create = ({ root, onCheckout }) => {
+  const create = ({ root, onCheckout, onMapPick }) => {
     if (!root) throw new Error('Rental cart mount is missing.');
     const list = root.querySelector('[data-rental-cart-list]');
     const empty = root.querySelector('[data-rental-cart-empty]');
@@ -140,6 +140,22 @@
           }
           card.append(coords);
         }
+        const mapButton = element('button', 'secondary-action compact-action wwz-rental-pick-map', '⌖ Pick on map');
+        mapButton.type = 'button';
+        mapButton.setAttribute('aria-label', `Choose map coordinates for ${item.name}, rental #${index + 1}`);
+        mapButton.addEventListener('click', () => onMapPick?.({
+          name: item.name, number: index + 1, x: row.x, z: row.z,
+          apply: (x, z) => {
+            if (!rows.includes(row)) return false;
+            row.mode = 'custom';
+            row.x = String(x);
+            row.z = String(z);
+            save();
+            render();
+            return true;
+          }
+        }));
+        card.append(mapButton);
         const price = element('strong', 'wwz-rental-line-total', money(Number(item.price || 0) * Math.max(0, Number(row.event_restarts) || 0)));
         card.append(price); list.append(card);
       });

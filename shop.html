@@ -21,7 +21,7 @@
 <link href="assets/css/dashboard/core.css?v=1.22.93" rel="stylesheet"/><link href="assets/css/dashboard/moderation.css?v=1.22.93" rel="stylesheet"/><link href="assets/css/dashboard/workspace.css?v=1.22.93" rel="stylesheet"/><link href="assets/css/dashboard/catalogue.css?v=1.61.0&amp;rev=storefront-cart-1" rel="stylesheet"/>
 <link href="assets/css/pages/shop.css?v=1.61.0&amp;rev=storefront-cart-1" rel="stylesheet"/>
 <link href="https://iillifoggyiilli.github.io/world-war-z-website/shop.html" rel="canonical"/><meta content="https://iillifoggyiilli.github.io/world-war-z-website/shop.html" property="og:url"/><link href="assets/css/site-polish.css?v=1.22.93" rel="stylesheet"/><link href="assets/icons/pwa/apple-touch-icon-180.png?v=1.22.94" rel="apple-touch-icon" sizes="180x180"/>
-<link rel="stylesheet" href="assets/css/components/cart-deliveries.css?v=2.1.0"/><link rel="stylesheet" href="assets/css/components/rental-cart.css?v=1.22.93&rev=rental-cart-1"/>
+<link rel="stylesheet" href="assets/css/components/cart-deliveries.css?v=2.1.0"/><link rel="stylesheet" href="assets/css/components/rental-cart.css?v=1.22.93&rev=rental-map-1"/>
 <link href="assets/css/pwa.css?v=1.22.93" rel="stylesheet"/>
 <link href="assets/css/ui-system.css?v=1.24.0&rev=ops-ui-1" rel="stylesheet"/>
 <link href="assets/css/modern-foundation.css?v=1.62.0&amp;rev=modern-ui-1" rel="stylesheet"/>
@@ -154,7 +154,7 @@
 <div><p class="breadcrumb">Member Shop / Vehicle Rentals</p><h2 id="rental-cart-title">Vehicle Rental Cart</h2><p>Order several vehicles at once. Each rental has its own restart duration and exact DayZ spawn coordinates. Each rental becomes a separate tracked order.</p></div>
 <div class="member-cart-heading-actions"><button class="secondary-action compact-action" type="button" data-rental-cart-clear>Clear Rentals</button><button class="primary-action compact-action" type="button" data-rental-cart-checkout>Checkout Rentals</button></div>
 </div>
-<div class="wwz-cart-tip"><span aria-hidden="true">↻</span><span>Set each vehicle's restarts and delivery destination. Use a saved location or enter X, Y, Z and rotation.</span><a href="#catalogue">Add more vehicles</a></div>
+<div class="wwz-cart-tip"><span aria-hidden="true">↻</span><span>Set each vehicle's restarts and destination. Use Pick on map for accurate X/Z, select a saved location, or enter coordinates manually.</span><a href="#catalogue">Add more vehicles</a></div>
 <div class="member-cart-empty" data-rental-cart-empty><span aria-hidden="true">🚙</span><div><strong>No vehicle rentals yet</strong><small>Open Event Items above and add a vehicle to your Rental Cart.</small></div></div>
 <div class="wwz-rental-cart-list" data-rental-cart-list hidden></div>
 <div class="member-cart-summary" data-rental-cart-summary hidden><div><span>Vehicles</span><strong data-rental-cart-count>0</strong></div><div><span>Estimated subtotal</span><strong data-rental-cart-subtotal>$0</strong></div><button class="primary-action" type="button" data-rental-cart-checkout>Pay for all rentals</button></div>
@@ -235,6 +235,27 @@
 <button class="dialog-cancel" data-member-rental-cancel-close="" type="button">Keep Rental</button>
 </form>
 </dialog>
+<dialog aria-labelledby="rental-map-title" class="login-dialog wwz-rental-map-dialog" data-rental-map-dialog>
+<div class="wwz-rental-map-dialog-body">
+<button aria-label="Close rental map" class="dialog-close" type="button" data-rental-map-close>×</button>
+<p class="panel-kicker">Independent rental destination</p>
+<h2 id="rental-map-title">Pick delivery coordinates</h2>
+<p data-rental-map-name>Vehicle rental</p>
+<p class="table-note" data-rental-map-message>Click or tap the map to set X/Z for this rental only.</p>
+<iframe data-rental-map-atlas title="World War Z Nasdara Atlas rental coordinate picker" loading="eager" hidden></iframe>
+<div data-rental-map-frame class="member-coordinate-map wwz-map-fullscreen-target wwz-rental-map-frame" tabindex="0" hidden>
+<div aria-label="Rental map controls" class="member-map-controls">
+<button type="button" data-rental-map-zoom-in aria-label="Zoom in">+</button>
+<button type="button" data-rental-map-zoom-out aria-label="Zoom out">−</button>
+<button type="button" data-rental-map-reset aria-label="Reset map">⌂</button>
+<button type="button" data-rental-map-fullscreen aria-label="Fullscreen map">⛶</button>
+</div>
+</div>
+<div class="wwz-rental-map-toolbar"><strong data-rental-map-selection>Click or tap the map to choose X/Z</strong>
+<button type="button" class="primary-action" data-rental-map-apply disabled>Use these coordinates</button>
+<button type="button" class="secondary-action" data-rental-map-close>Cancel</button></div>
+</div>
+</dialog>
 <dialog aria-labelledby="member-purchase-title" class="login-dialog shop-purchase-dialog member-purchase-dialog" data-member-purchase-dialog="">
 <form data-member-purchase-form="" method="dialog">
 <button aria-label="Close purchase" class="dialog-close" data-member-purchase-cancel="" type="button">×</button>
@@ -273,7 +294,7 @@
 <button class="dialog-cancel" data-member-purchase-cancel="" type="button">Cancel</button>
 </form>
 </dialog>
-<script defer="" src="assets/js/core/http.js?v=1.41.1&rev=dual-nasdara-auth-1"></script><script defer src="assets/js/core/cart-deliveries.js?v=2.1.0"></script><script defer src="assets/js/core/rental-cart.js?v=1.22.93&rev=rental-cart-2"></script><script defer src="assets/js/core/checkout-idempotency.js?v=1.22.93&rev=checkout-retries-1"></script><script defer="" src="assets/js/shop-wiki-previews.js?v=1.22.93"></script><script defer="" src="assets/js/pages/shop.js?v=2.1.0&amp;rev=checkout-retries-1"></script>
+<script defer="" src="assets/js/core/http.js?v=1.41.1&rev=dual-nasdara-auth-1"></script><script defer src="assets/js/core/cart-deliveries.js?v=2.1.0"></script><script defer src="assets/js/core/rental-cart.js?v=1.22.93&rev=rental-map-1"></script><script defer src="assets/js/core/checkout-idempotency.js?v=1.22.93&rev=checkout-retries-1"></script><script defer="" src="assets/js/shop-wiki-previews.js?v=1.22.93"></script><script defer="" src="assets/js/pages/shop.js?v=2.1.0&amp;rev=rental-map-1"></script>
 <script defer src="assets/js/pwa.js?v=1.61.0&rev=storefront-cart-1"></script>
 <script defer src="assets/js/ui-system.js?v=2.0.0&rev=final-polish-1"></script>
 <script defer src="assets/js/pages/shop-experience.js?v=1.63.0&amp;rev=survivor-ux-1"></script>
