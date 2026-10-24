@@ -295,6 +295,25 @@ const loadCurrentAccount = async (sessionToken) => {
   if (lastError) console.warn('WWZ dashboard session refresh delayed.', lastError);
 };
 
+const IOS_AUTH_PENDING_KEY = 'wwz_ios_oauth_pending';
+
+const prepareIOSAuthRecovery = () => {
+  const help = document.querySelector('[data-ios-auth-app-help]');
+  if (!help || window.WWZIOSAuth?.isInstalled() !== true) return;
+  help.hidden = false;
+  if (storageGet(IOS_AUTH_PENDING_KEY) === '1') help.open = true;
+};
+
+const displaySafariTransferChoice = () => {
+  const panel = document.querySelector('[data-ios-auth-safari-help]');
+  if (!panel) return false;
+  window.WWZServerContext?.showLogin();
+  panel.hidden = false;
+  const notice = document.querySelector('[data-gateway-notice]');
+  if (notice) notice.textContent = 'Discord authentication succeeded. Choose where to finish signing in.';
+  return true;
+};
+
 const completeDiscordLogin = async (loginTicket) => {
   if (authRequestInProgress) return;
   authRequestInProgress = true;
@@ -320,6 +339,7 @@ const completeDiscordLogin = async (loginTicket) => {
       throw new Error('Browser session storage is unavailable');
     }
     sessionSaved = true;
+    storageRemove(IOS_AUTH_PENDING_KEY);
     // The ticket is single-use. Clear it before rendering to avoid accidentally
     // redeeming it again if iOS suspends the app midway through sign-in.
     const returnView = clearCallbackFragment();
@@ -380,6 +400,7 @@ const configureDiscordAuth = async () => {
     }
   }
 
+  prepareIOSAuthRecovery();
   const fragment = callbackFragment();
 
   if (fragment.authError) {
@@ -391,6 +412,11 @@ const configureDiscordAuth = async () => {
   }
 
   if (fragment.loginTicket) {
+    const ios = window.WWZIOSAuth;
+    const locallyStartedInSafari = Boolean(storageGet(AUTH_RETURN_VIEW_KEY));
+    if (ios?.shouldOfferSafariHandoff(locallyStartedInSafari) && displaySafariTransferChoice()) {
+      return; // Do not consume the one-time ticket in Safari before the app can receive it.
+    }
     await completeDiscordLogin(fragment.loginTicket);
     return;
   }
@@ -404,17 +430,15 @@ const configureDiscordAuth = async () => {
   }
 };
 
-const isIOSInstalledWebApp = () =>
-  (/iphone|ipad|ipod/i.test(navigator.userAgent)
-    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))
-  && (window.navigator.standalone === true
-    || window.matchMedia?.('(display-mode: standalone)')?.matches === true);
+const isIOSInstalledWebApp = () => window.WWZIOSAuth?.isInstalled() === true;
 
 const startDiscordOAuth = () => {
   if (isIOSInstalledWebApp()) {
-    // Apple recommends window.open for OAuth links that might otherwise break
-    // out of the installed web app into Safari's separate storage container.
-    // '_self' preserves the current browser context and its sessionStorage.
+    // iOS may move this cross-origin OAuth journey into Safari, which has
+    // different storage from the installed web app. Keep an app-side recovery
+    // marker and try the normal same-window navigation first.
+    storageSet(IOS_AUTH_PENDING_KEY, '1');
+    prepareIOSAuthRecovery();
     try {
       if (window.open(AUTH_LOGIN_URL, '_self')) return;
     } catch (_) {}
@@ -422,6 +446,50 @@ const startDiscordOAuth = () => {
   // Retain the established redirect path for Safari, Android and desktop.
   window.location.assign(AUTH_LOGIN_URL);
 };
+
+
+document.querySelector('[data-ios-auth-copy-link]')?.addEventListener('click', async () => {
+  const status = document.querySelector('[data-ios-auth-copy-status]');
+  const ticket = callbackFragment().loginTicket;
+  if (!ticket || !/^[a-z0-9_-]{32,256}$/i.test(ticket)) {
+    if (status) status.textContent = 'This sign-in link is invalid. Please start Discord sign-in again.';
+    return;
+  }
+  const link = location.href;
+  try {
+    await navigator.clipboard.writeText(link);
+    if (status) status.textContent = 'Copied. Return to the WWZ Companion Home Screen app and paste the link there.';
+  } catch (_) {
+    const input = document.querySelector('[data-ios-auth-manual-copy]');
+    if (input) {
+      input.hidden = false;
+      input.value = link;
+      input.focus();
+      input.select();
+    }
+    if (status) status.textContent = 'Copy was blocked. Select the link above, copy it, then paste in the installed Companion.';
+  }
+});
+
+document.querySelector('[data-ios-auth-continue-safari]')?.addEventListener('click', () => {
+  document.querySelector('[data-ios-auth-safari-help]')?.setAttribute('hidden', '');
+  const ticket = callbackFragment().loginTicket;
+  if (ticket) void completeDiscordLogin(ticket);
+});
+
+document.querySelector('[data-ios-auth-transfer-submit]')?.addEventListener('click', async () => {
+  if (authRequestInProgress) return;
+  const input = document.querySelector('[data-ios-auth-transfer-input]');
+  const status = document.querySelector('[data-ios-auth-transfer-status]');
+  const ticket = window.WWZIOSAuth?.parseTransferLink(input?.value || '', location.href);
+  if (!ticket) {
+    if (status) status.textContent = 'Paste the complete, private WWZ dashboard login link from Safari. Other links cannot be accepted.';
+    return;
+  }
+  if (status) status.textContent = 'Completing Discord sign-in in this app…';
+  if (input) input.value = '';
+  await completeDiscordLogin(ticket);
+});
 
 startDiscordLoginButtons.forEach((button) => {
   button.addEventListener('click', () => {

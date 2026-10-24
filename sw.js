@@ -8,8 +8,8 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = 'companion-1-0-2-run-40123852878-1';
-const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-companion-1-0-2-run-40123852878-1`;
+const WWZ_PWA_UPDATE_REVISION = '2026-10-25-ios-auth-handoff-1';
+const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-ios-auth-handoff-1`;
 const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${APP_CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${APP_CACHE_RELEASE}`;

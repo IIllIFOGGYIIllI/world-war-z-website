@@ -1,0 +1,48 @@
+'use strict';
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const code = fs.readFileSync('assets/js/dashboard/ios-auth-handoff.js', 'utf8');
+const ua = { userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)', platform: 'iPhone', maxTouchPoints: 5, standalone: false };
+const ctx = {
+  URL, URLSearchParams, navigator: ua,
+  window: { navigator: ua, matchMedia: () => ({matches: false}) },
+  location: { href: 'https://iillifoggyiilli.github.io/world-war-z-website/dashboard.html' }
+};
+vm.runInNewContext(code, ctx);
+const auth = ctx.window.WWZIOSAuth;
+const validTicket = 'ABcd0123_-'.repeat(5);
+const base = ctx.location.href;
+assert.equal(auth.isIOS(), true);
+assert.equal(auth.isInstalled(), false);
+assert.equal(auth.shouldOfferSafariHandoff(false), true, 'handoff only when Safari did not start OAuth');
+assert.equal(auth.shouldOfferSafariHandoff(true), false, 'normal Safari login remains automatic');
+ua.standalone = true;
+assert.equal(auth.isInstalled(), true);
+assert.equal(auth.shouldOfferSafariHandoff(false), false);
+ua.standalone = false;
+assert.equal(auth.parseTransferLink(base + '#login_ticket=' + validTicket), validTicket);
+for (const url of [
+  base.replace('https:', 'http:') + '#login_ticket=' + validTicket,
+  base.replace('github.io', 'github.io.evil.example') + '#login_ticket=' + validTicket,
+  'https://example.org/dashboard.html#login_ticket=' + validTicket,
+  base + '?debug=1#login_ticket=' + validTicket,
+  base + '#auth_error=cancelled',
+  base + '#login_ticket=too-short',
+  base + '#login_ticket=' + validTicket + '&other=data',
+  validTicket
+]) assert.equal(auth.parseTransferLink(url), null, 'reject untrusted or malformed transfer link');
+ua.userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'; ua.platform = 'Win32';
+assert.equal(auth.isIOS(), false);
+assert.equal(auth.shouldOfferSafariHandoff(false), false);
+const page = fs.readFileSync('dashboard.html', 'utf8');
+const account = fs.readFileSync('assets/js/dashboard/account.js', 'utf8');
+for (const token of [
+  'data-ios-auth-app-help', 'data-ios-auth-safari-help',
+  'data-ios-auth-copy-link', 'data-ios-auth-transfer-submit',
+  'ios-auth-handoff.js?v=1.0.0', 'ios-auth.css?v=1.0.0'
+]) assert.ok(page.includes(token), 'missing iOS recovery UI ' + token);
+assert.ok(account.includes('shouldOfferSafariHandoff(locallyStartedInSafari)'));
+assert.ok(account.includes('Do not consume the one-time ticket in Safari'));
+assert.ok(account.includes('await completeDiscordLogin(ticket)'));
+console.log('PASS: iOS PWA OAuth handoff and safe one-time-ticket validation');

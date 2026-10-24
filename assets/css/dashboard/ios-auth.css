@@ -1,0 +1,61 @@
+/* iPhone installed-web-app Discord OAuth recovery.
+   Hidden on other platforms; no access tokens are persisted by this UI. */
+.wwz-ios-auth-panel {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid rgba(240, 103, 84, .4);
+  border-radius: 14px;
+  background: rgba(16, 19, 28, .9);
+  color: #f2f1ef;
+}
+.wwz-ios-auth-panel[hidden] { display: none !important; }
+.wwz-ios-auth-panel summary {
+  cursor: pointer;
+  font-weight: 700;
+  line-height: 1.5;
+}
+.wwz-ios-auth-panel p {
+  margin: 10px 0;
+  font-size: .91rem;
+  line-height: 1.5;
+}
+.wwz-ios-auth-panel label {
+  display: block;
+  margin: 12px 0 8px;
+  font-size: .87rem;
+  font-weight: 600;
+}
+.wwz-ios-auth-panel input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #626875;
+  border-radius: 8px;
+  color: #fff;
+  background: #121824;
+  font-size: 16px; /* Avoid automatic Safari zoom. */
+}
+.wwz-ios-auth-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+.wwz-ios-auth-actions button {
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #a75c52;
+  background: #951c1b;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 700;
+}
+.wwz-ios-auth-actions button.secondary {
+  background: transparent;
+  border-color: #767b86;
+}
+.wwz-ios-auth-panel [role="status"] {
+  overflow-wrap: anywhere;
+  color: #e7d6c1;
+}
+@media (max-width: 480px) {
+  .wwz-ios-auth-actions { flex-direction: column; }
+  .wwz-ios-auth-actions button { width: 100%; }
+}
