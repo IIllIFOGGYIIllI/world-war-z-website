@@ -6,7 +6,7 @@ const vm = require('node:vm');
 async function testActionCentre() {
   const source = fs.readFileSync('assets/js/dashboard/action-centre.js', 'utf8');
   const root = {
-    classList: {add(){},remove(){}},
+    classList: {add(){},remove(){},toggle(){}},
     querySelector(){return null;},
     querySelectorAll(){return [];}
   };
