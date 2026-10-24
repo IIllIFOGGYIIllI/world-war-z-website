@@ -11,6 +11,7 @@ const node = (name) => ({
   classList: { add() {}, remove() {}, toggle() {} },
   children: [], append(...args) { this.children.push(...args); },
   replaceChildren(...args) { this.children = args; },
+  addEventListener() {},
   setAttribute(name, value) { this[name] = value; }
 });
 const elements = new Map();
