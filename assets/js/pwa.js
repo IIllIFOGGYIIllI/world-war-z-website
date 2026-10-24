@@ -97,7 +97,7 @@
   const ensureCompanionNavigation = () => {
     document.querySelectorAll('.site-navigation').forEach((navigation) => {
       if ([...navigation.querySelectorAll('a[href]')].some(link => {
-        const href = (link.getAttribute('href') || '').split(/[?#]/, 1)[0].replace(/^\\.\\//, '');
+        const href = (link.getAttribute('href') || '').split(/[?#]/, 1)[0].replace('./', '');
         return href === 'companion.html';
       })) return;
       const link = document.createElement('a');
@@ -110,7 +110,7 @@
     });
 
     document.querySelectorAll('.footer-links').forEach((footer) => {
-      if ([...footer.querySelectorAll('a[href]')].some(link => (link.getAttribute('href') || '').split(/[?#]/, 1)[0].replace(/^\\.\\//, '') === 'companion.html')) return;
+      if ([...footer.querySelectorAll('a[href]')].some(link => (link.getAttribute('href') || '').split(/[?#]/, 1)[0].replace('./', '') === 'companion.html')) return;
       const link = document.createElement('a');
       link.href = 'companion.html';
       link.textContent = 'Companion';
