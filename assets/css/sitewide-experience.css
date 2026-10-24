@@ -239,3 +239,25 @@ body[data-wwz-page='changelog'] .page-content .version {
     border:1px solid ButtonText !important;
   }
 }
+
+/* Nasdara QOL: consistent touch targets, keyboard focus and mobile navigation. */
+:root { --wwz-ui-touch:44px; --wwz-ui-focus:rgba(255,125,108,.83); }
+:where(.site-navigation,.page-nav,.donation-topnav,.shop-topnav) > a {
+  display:inline-flex; align-items:center; justify-content:center;
+  min-height:var(--wwz-ui-touch);
+}
+:where(.site-navigation,.page-nav,.donation-topnav,.shop-topnav) > a:focus-visible {
+  outline:2px solid var(--wwz-ui-focus); outline-offset:3px;
+}
+:where(.wwz-network-rail,.wwz-page-tabs) { max-width:100%; min-width:0; overflow-wrap:anywhere; }
+:where(.shop-topnav,.donation-topnav,.page-nav,.wwz-page-tabs) {
+  scrollbar-width:thin; overscroll-behavior-x:contain;
+}
+:where(.panel,.content-card,.member-shop-section,.donation-section) :where(input,select,textarea) {
+  max-width:100%; min-width:0;
+}
+@media(max-width:720px) {
+  :where(.shop-topnav,.donation-topnav,.page-nav,.wwz-page-tabs) {-webkit-overflow-scrolling:touch;}
+  :where(.shop-topnav,.donation-topnav,.page-nav) > a {white-space:nowrap; flex-shrink:0;}
+  :where(.wwz-network-rail,.wwz-page-tabs) {padding-inline:clamp(12px,4vw,20px);}
+}

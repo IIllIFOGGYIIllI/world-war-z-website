@@ -29,7 +29,7 @@ const ensureCompanionDownloadEntryPoints = async () => {
     navigation?.classList.remove('open');
   };
 
-  if (navigation && !navigation.querySelector('[data-companion-home-nav]')) {
+  if (navigation && ![...navigation.querySelectorAll('a[href]')].some(link => (link.getAttribute('href') || '').split(/[?#]/, 1)[0].replace(/^\\.\\//, '') === 'companion.html')) {
     const companionNav = document.createElement('a');
     companionNav.href = 'companion.html';
     companionNav.dataset.companionHomeNav = '';

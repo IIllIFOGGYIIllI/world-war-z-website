@@ -30,8 +30,8 @@ RETIRED_MAP_PATHS = (
 EXPECTED_ASSET_VERSION = "1.22.93"
 EXPECTED_UI_VERSION = "1.24.0"
 EXPECTED_UI_REVISION = "ops-ui-1"
-EXPECTED_UI_JS_VERSION = "2.0.0"
-EXPECTED_UI_JS_REVISION = "final-polish-1"
+EXPECTED_UI_JS_VERSION = "2.0.1"
+EXPECTED_UI_JS_REVISION = "nav-dedupe-1"
 
 EXPECTED_ROAD_GROUPS = {
     "paved_primary",
@@ -409,7 +409,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         'Two Nasdara Servers. Two Ways to Survive.',
         'World War Z PvE', 'World War Z Full PvP',
         '6 November 2026', '24 hours a day, seven days a week',
-        'Secondary Nitrado/Discord routing is being verified',
+        'Separate Nitrado and Discord services',
     )):
         errors.append('index.html: dual-Nasdara public content is missing or stale.')
     if 'assets/css/modern-foundation.css?v=1.62.0&amp;rev=modern-ui-1' not in dashboard or 'assets/css/modern-foundation.css?v=1.62.0&amp;rev=modern-ui-1' not in index:
@@ -1619,7 +1619,7 @@ def validate_dual_server_public_parity(errors: list[str]) -> None:
 
     for token in (
         'data-rules-server-buttons',
-        'Chernarus and Livonia keep separate published rulesets',
+        'Nasdara PvE and Nasdara PvP keep separate published rulesets',
     ):
         if token not in rules_html:
             errors.append(f"rules.html: missing dual-server rules selector hook/copy: {token}")
@@ -2215,7 +2215,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     expected_manifest_ref = '<link href="manifest.webmanifest" rel="manifest"/>'
     expected_pwa_css = f'assets/css/pwa.css?v={EXPECTED_ASSET_VERSION}'
-    expected_pwa_js = 'assets/js/pwa.js?v=1.61.0&rev=storefront-cart-1'
+    expected_pwa_js = 'assets/js/pwa.js?v=1.61.1&rev=companion-nav-1'
     expected_apple = 'assets/icons/pwa/apple-touch-icon-180.png?v=nasdara-community-1'
     for html_path in sorted(ROOT.glob("*.html")):
         source = html_path.read_text(encoding="utf-8")
@@ -2315,7 +2315,7 @@ def main() -> int:
             if token not in styles:
                 errors.append(f'sitewide-experience.css: missing {token}')
     for page in ROOT.glob('*.html'):
-        if 'assets/css/sitewide-experience.css?v=2.0.0&amp;rev=final-polish-1' not in page.read_text(encoding='utf-8'):
+        if 'assets/css/sitewide-experience.css?v=2.0.1&amp;rev=site-qol-1' not in page.read_text(encoding='utf-8'):
             errors.append(f'{page.name}: whole-site stylesheet missing')
     home = (ROOT / 'index.html').read_text(encoding='utf-8')
     dashboard = (ROOT / 'dashboard.html').read_text(encoding='utf-8')
@@ -2333,7 +2333,7 @@ def main() -> int:
     if "event.key !== 'Escape'" not in ui_source or 'wwz-quick-empty' not in ui_source:
         errors.append('v2.0.0 mobile navigation and search empty-state behaviour missing')
     for page in ROOT.glob('*.html'):
-        if 'assets/js/ui-system.js?v=2.0.0&rev=final-polish-1' not in page.read_text(encoding='utf-8'):
+        if 'assets/js/ui-system.js?v=2.0.1&rev=nav-dedupe-1' not in page.read_text(encoding='utf-8'):
             errors.append(f'{page.name}: v2.0.0 controller reference missing')
     # Multi-destination: shared checkout allocator must be loaded before either
     # purchase controller, including the lazy dashboard Shop controller.

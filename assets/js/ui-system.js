@@ -34,7 +34,7 @@
     link.href = href;
     link.textContent = label;
     if (className) link.className = className;
-    if (href === 'companion.html') link.dataset.companionHomeNav = '';
+    if (href === 'companion.html') { link.dataset.companionHomeNav = ''; link.dataset.companionLink = ''; }
     if (isCurrent(href)) link.setAttribute('aria-current', 'page');
     return link;
   };
@@ -85,7 +85,7 @@
     const left = document.createElement('span');
     left.innerHTML = '<strong>WWZ OPS NETWORK</strong> <span class="rail-divider">//</span> PLAYSTATION DAYZ';
     const right = document.createElement('span');
-    right.innerHTML = '<span class="rail-live">● WWZ NETWORK</span> <span class="rail-divider">//</span> PRIMARY + LIVONIA';
+    right.innerHTML = '<span class="rail-live">● WWZ NETWORK</span> <span class="rail-divider">//</span> NASDARA PvE + PvP';
     const syncWorld = (event) => {
       const world = event?.detail;
       if (world?.primary && world?.secondary) right.textContent = `● WWZ NETWORK // ${world.primary} + ${world.secondary}`;
@@ -292,7 +292,7 @@
   };
 
   const markUiReady = () => {
-    document.documentElement.dataset.wwzUi = '2.0.0';
+    document.documentElement.dataset.wwzUi = '2.0.1';
     document.body.dataset.wwzPage = fileName().replace(/\.html$/i, '') || 'home';
     document.body.classList.add('wwz-ui-ready', 'wwz-ops-interface');
   };
