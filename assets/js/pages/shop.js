@@ -1023,6 +1023,7 @@ const applyPayload = (payload, member = false) => {
   });
   elements.modeLabel.textContent = state.mode === 'event' ? 'Event items' : 'Items';
   normalizeCart();
+  rentalCart.setSettings(state.settings);
   rentalCart.setCatalogue(state.items);
   populateCategories(); renderCatalogue(); renderCart(); renderOrders();
 };
@@ -1282,29 +1283,38 @@ const submitPurchase = async (event) => {
       if (!delivery && !state.checkoutCart) throw new Error('Choose in-game delivery coordinates.');
     }
     const quantity = Math.max(1, Number(elements.quantity.value || 1));
-    const purchaseKey = `${Date.now().toString(36)}-${crypto.randomUUID?.() || Math.random().toString(36).slice(2)}-shop`;
     const paymentMethod = elements.paymentMethod?.value === 'bank' ? 'bank' : 'cash';
     const body = state.checkoutRentals ? {
       items: rentalCart.lines(),
-      buyer_note: elements.note.value.trim(), payment_method: paymentMethod,
-      checkout_key: purchaseKey, purchase_key: purchaseKey
+      buyer_note: elements.note.value.trim(), payment_method: paymentMethod
     } : state.checkoutCart ? {
       items: cartDeliveryPlan.lines(delivery),
-      buyer_note: elements.note.value.trim(), payment_method: paymentMethod, checkout_key: purchaseKey, purchase_key: purchaseKey, delivery
+      buyer_note: elements.note.value.trim(), payment_method: paymentMethod, delivery
     } : {
       item_id: Number(state.selectedItem.item_id), quantity: eventItem ? 1 : quantity,
-      event_restarts: eventItem ? quantity : 1, buyer_note: elements.note.value.trim(), payment_method: paymentMethod,
-      purchase_key: purchaseKey, delivery
+      event_restarts: eventItem ? quantity : 1, buyer_note: elements.note.value.trim(),
+      payment_method: paymentMethod, delivery
     };
+    const purchaseKey = window.WWZCheckoutIdempotency.prepare({
+      server: state.server, identity: state.user?.user?.id || state.user?.user?.discord_id,
+      request: body
+    });
+    body.purchase_key = purchaseKey;
+    if (state.checkoutCart || state.checkoutRentals) body.checkout_key = purchaseKey;
     const { response, payload } = await fetchJson(URLS.purchase, {
       method: 'POST', headers: authHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify(body)
     }, 60000);
     if (!response.ok) throw new Error(payload.message || 'The purchase could not be completed.');
+    // Do not reuse an idempotency key after a confirmed successful purchase.
+    window.WWZCheckoutIdempotency.clear(purchaseKey);
     showMessage(payload.message || 'Order placed successfully.', 'success');
     if (state.checkoutCart) clearCart();
     if (state.checkoutRentals) rentalCart.clear();
     await loadShop(); window.setTimeout(() => { elements.purchaseDialog.close(); state.checkoutCart = false; state.checkoutRentals = false; }, 900);
-  } catch (error) { showMessage(error.message || 'The purchase could not be completed.'); }
+  } catch (error) {
+    showMessage((error.message || 'The purchase could not be completed.') +
+      ' If the request may have reached the server, check My Orders before editing your cart. Repeating the same checkout uses the original payment key.');
+  }
   finally { state.purchasing = false; elements.purchaseConfirm.disabled = false; }
 };
 
@@ -1330,7 +1340,12 @@ $$('[data-member-item-detail-close]').forEach((button) => button.addEventListene
 elements.detailBuy?.addEventListener('click', () => {
   const item = state.detailItem; if (!item) return;
   if (!state.user) { elements.detailDialog?.close(); openLogin(); return; }
-  if (canPurchase(item)) item.delivery_type === 'event' ? rentalCart.add(item) : addToCart(item);
+  if (canPurchase(item)) {
+    if (item.delivery_type === 'event') {
+      elements.detailDialog?.close();
+      rentalCart.add(item);
+    } else addToCart(item);
+  }
 });
 elements.refresh.addEventListener('click', loadShop);
 elements.ordersRefresh.addEventListener('click', loadShop);

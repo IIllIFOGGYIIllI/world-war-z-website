@@ -11,15 +11,17 @@
     const totalLabel = root.querySelector('[data-rental-cart-subtotal]');
     const checkoutButtons = [...root.querySelectorAll('[data-rental-cart-checkout]')];
     const clearButton = root.querySelector('[data-rental-cart-clear]');
-    let server = null, items = [], locations = [], rows = [];
+    let server = null, items = [], locations = [], rows = [], settings = {};
 
     const storageKey = () => server ? `wwz_shop_rentals_v1:${server.key}:${server.map_key}` : '';
     const worldSize = () => ({ badlands: 16384, chernarus: 15360, livonia: 12800 })[server?.map_key] || 0;
     const money = n => '$' + new Intl.NumberFormat('en-AU').format(Math.max(0, Number(n) || 0));
     const catalog = id => items.find(item => Number(item.item_id) === Number(id) && item.delivery_type === 'event');
     const bounds = item => {
-      const minimum = Math.max(1, Number(item.delivery?.minimum_restarts || 1));
-      const maximum = Math.min(30000, Number(item.delivery?.maximum_restarts || 30000));
+      const minimum = Math.max(1, Number(settings.event_restart_min || 1), Number(item.delivery?.minimum_restarts || 1));
+      const maximum = Math.min(30000,
+        Math.max(minimum, Number(settings.event_restart_max || 30000)),
+        Math.max(minimum, Number(item.delivery?.maximum_restarts || 30000)));
       return [minimum, maximum];
     };
     const element = (tag, cls = '', value = '') => {
@@ -192,6 +194,7 @@
       clear: () => { rows = []; save(); render(); },
       setServer: value => { server = value; items = []; locations = []; load(); },
       setCatalogue: value => { items = Array.isArray(value) ? value : []; render(); },
+      setSettings: value => { settings = value || {}; render(); },
       setLocations: value => { locations = Array.isArray(value) ? value : []; render(); },
       refresh: render
     };
