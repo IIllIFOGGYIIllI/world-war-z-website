@@ -190,7 +190,28 @@ jobs:
             --output-root "$RELEASE_ROOT"
           mkdir -p "$RELEASE_ROOT/native-artifacts"
           cp app-release-bundle.aab "$RELEASE_ROOT/native-artifacts/World-War-Z-Companion-v${WWZ_COMPANION_VERSION}.aab"
-          cp assetlinks.json "$RELEASE_ROOT/native-artifacts/assetlinks.json"
+          python3 - "$WWZ_RUNNER_ANDROID_SDK" "$RELEASE_ROOT/native-artifacts/assetlinks.json" <<'PY'
+          import re
+          import subprocess
+          import sys
+          from pathlib import Path
+          from scripts.package_release import SIGNING_CERT_SHA256
+          sdk = Path(sys.argv[1])
+          output = sys.argv[2]
+          tools = sorted(sdk.glob("build-tools/*/apksigner"))
+          if not tools:
+              raise SystemExit("Android apksigner is missing; cannot verify the signed APK")
+          details = subprocess.check_output([str(tools[-1]), "verify", "--print-certs", "app-release-signed.apk"], text=True)
+          match = re.search(r"Signer #1 certificate SHA-256 digest:\s*([A-Fa-f0-9]{64})", details)
+          if not match:
+              raise SystemExit("Could not read the production APK signing certificate")
+          actual = match.group(1).lower()
+          expected = SIGNING_CERT_SHA256.replace(":", "").lower()
+          if actual != expected:
+              raise SystemExit("The APK signing certificate differs from the established WWZ update certificate")
+          subprocess.check_call([sys.executable, "scripts/generate_assetlinks.py", SIGNING_CERT_SHA256, "--output", output])
+          print("PASS: verified signed APK certificate and generated Digital Asset Links")
+          PY
           echo "WWZ_RELEASE_ROOT=$RELEASE_ROOT" >> "$GITHUB_ENV"
 
       - name: Publish stable GitHub release
@@ -232,6 +253,8 @@ jobs:
         run: |
           set -euo pipefail
           cp "$WWZ_RELEASE_ROOT/assets/data/companion-release.json" assets/data/companion-release.json
+          mkdir -p .well-known
+          cp "$WWZ_RELEASE_ROOT/native-artifacts/assetlinks.json" .well-known/assetlinks.json
           python3 - <<'PY'
           import os
           import re
@@ -252,7 +275,7 @@ jobs:
           PY
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add assets/data/companion-release.json sw.js
+          git add assets/data/companion-release.json sw.js .well-known/assetlinks.json
           if git diff --cached --quiet; then
             echo "Companion release metadata is already current."
           else
