@@ -1,0 +1,12 @@
+'use strict';
+const fs = require('node:fs');
+const assert = require('node:assert/strict');
+const source = fs.readFileSync('assets/js/dashboard/objectives.js','utf8');
+const loader = fs.readFileSync('assets/js/dashboard/lazy-assets.js','utf8');
+assert.match(source, /wwz:serverchange/, 'Switches must reset server-specific objectives');
+assert.match(source, /const resetScopedData = \(\) => \{[\s\S]*?memberData = null;[\s\S]*?adminData = null;/);
+assert.match(source, /if \(!hasAdmin\(\)\) \{[\s\S]*?adminPanel\.hidden = true/);
+assert.match(source, /catch \(error\) \{\s*adminLoaded = false;\s*adminData = null;[\s\S]*?adminPanel\.hidden = true/);
+assert.ok(!source.includes('Your dashboard session expired. Sign in again to view Objectives.'), 'Scoped denials must not incorrectly claim global session expiry');
+assert.ok(loader.includes('nasdara-scoped-objectives-1'), 'Use refreshed script');
+console.log('PASS: Objectives access denial and data reset are scoped by server');

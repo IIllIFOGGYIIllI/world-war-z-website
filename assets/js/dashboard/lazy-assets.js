@@ -335,7 +335,7 @@
 
   const ensureObjectives = () => ensureObjectivesStyles().then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
     'objectives',
-    'assets/js/dashboard/objectives.js?v=1.37.2&rev=nasdara-eventdesk-1',
+    'assets/js/dashboard/objectives.js?v=1.37.2&rev=nasdara-scoped-objectives-1',
     () => window.__wwzObjectivesReady === true
   )));
 

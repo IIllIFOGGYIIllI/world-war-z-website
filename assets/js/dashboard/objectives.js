@@ -14,6 +14,7 @@
   const contractsList = panel.querySelector('[data-objectives-contracts]');
   const myContractsList = panel.querySelector('[data-objectives-my-contracts]');
   const adminList = panel.querySelector('[data-objectives-admin-list]');
+  const adminPanel = panel.querySelector('[data-objectives-admin]');
   const refreshButton = panel.querySelector('[data-refresh-objectives]');
   const bountyForm = panel.querySelector('[data-bounty-create-form]');
   const contractForm = panel.querySelector('[data-contract-create-form]');
@@ -336,6 +337,7 @@
   const renderAdmin = (payload) => {
     adminData = payload;
     if (!payload || payload.status !== 'ok') return;
+    if (adminPanel && hasAdmin()) adminPanel.hidden = false;
     const settings = payload.quest_settings || {};
     const enabled = panel.querySelector('[data-quest-enabled]'); if (enabled) enabled.checked = Boolean(settings.enabled);
     const daily = panel.querySelector('[data-quest-daily-count]'); if (daily) daily.value = String(settings.daily_count || 3);
@@ -455,20 +457,35 @@
       setMessage('');
     } catch (error) {
       loaded = false;
+      memberData = null;
       if (error?.status === 401 || error?.status === 403) {
-        renderMember({ status: 'guest' });
-        setMessage('Your dashboard session expired. Sign in again to view Objectives.', 'error');
+        if (content) content.hidden = true;
+        if (unlinked) unlinked.hidden = true;
+        if (guest) guest.hidden = false;
+        setMessage(error.message || 'Objectives access is unavailable on the selected server. Your Discord login remains active.', 'error');
       } else {
         if (guest) guest.hidden = true;
+        if (content) content.hidden = true;
         setMessage(error.message || 'Objectives could not be loaded.', 'error');
       }
     }
   };
 
   const loadAdmin = async ({ force = false } = {}) => {
-    if (!hasAdmin() || (adminLoaded && !force)) return;
+    if (!hasAdmin()) {
+      adminLoaded = false; adminData = null;
+      if (adminList) adminList.replaceChildren();
+      if (adminPanel) adminPanel.hidden = true;
+      return;
+    }
+    if (adminLoaded && !force) return;
     const sessionToken = token();
-    if (!sessionToken) return;
+    if (!sessionToken) {
+      adminLoaded = false; adminData = null;
+      if (adminList) adminList.replaceChildren();
+      if (adminPanel) adminPanel.hidden = true;
+      return;
+    }
     try {
       const payload = await requestJson(ADMIN_OBJECTIVES_URL, {
         method: 'GET',
@@ -478,7 +495,10 @@
       adminLoaded = true;
     } catch (error) {
       adminLoaded = false;
-      setMessage(error.message || 'Objective administration could not be loaded.', 'error');
+      adminData = null;
+      if (adminList) adminList.replaceChildren();
+      if (adminPanel) adminPanel.hidden = true;
+      setMessage(error.message || 'Objective administration could not be loaded on this server.', 'error');
     }
   };
 
@@ -544,7 +564,23 @@
 
   const activate = () => { loadMember(); loadAdmin(); };
   window.addEventListener('wwz:viewchange', (event) => { if (event.detail?.view === 'objectives') activate(); });
-  window.addEventListener('wwz:authchange', () => { loaded = false; adminLoaded = false; if (panel.classList.contains('active')) activate(); });
+  const resetScopedData = () => {
+    loaded = false;
+    adminLoaded = false;
+    memberData = null;
+    adminData = null;
+    if (adminList) adminList.replaceChildren();
+    if (adminPanel) adminPanel.hidden = true;
+  };
+  window.addEventListener('wwz:authchange', () => {
+    resetScopedData();
+    if (panel.classList.contains('active')) activate();
+  });
+  window.addEventListener('wwz:serverchange', () => {
+    resetScopedData();
+    if (content) content.hidden = true;
+    if (panel.classList.contains('active')) activate();
+  });
   setInterval(() => {
     if (!memberData?.quests) return;
     const dailyReset = panel.querySelector('[data-objectives-daily-reset]'); if (dailyReset) dailyReset.textContent = `Resets in ${relative(memberData.quests.daily_resets_at)}`;

@@ -1086,7 +1086,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         errors.append(
             "dashboard.html: command library must be lazy-loaded instead of downloaded on every dashboard visit."
         )
-    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=2.8.0&amp;rev=nasdara-stage2b-1'
+    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=2.8.0&amp;rev=nasdara-admin-scopes-1'
     lazy_index = dashboard.find(lazy_script)
     shell_index = dashboard.find("assets/js/dashboard/shell.js")
     if lazy_index < 0:
@@ -1230,9 +1230,9 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         ("Administration controller", "assets/js/dashboard/administration.js?v=1.52.0&rev=moderation-centre-1", "ensureAdministration", "__wwzAdministrationReady", "assets/js/dashboard/administration.js"),
         ("Appeals controller", f"assets/js/dashboard/appeals.js?v={EXPECTED_ASSET_VERSION}", "ensureAppeals", "__wwzAppealsReady", "assets/js/dashboard/appeals.js"),
         ("Tickets controller", f"assets/js/dashboard/tickets.js?v={EXPECTED_ASSET_VERSION}", "ensureTickets", "__wwzTicketsReady", "assets/js/dashboard/tickets.js"),
-        ("Progression controller", "assets/js/dashboard/progression.js?v=1.37.0&rev=quest-progression-1", "ensureProgression", "__wwzProgressionReady", "assets/js/dashboard/progression.js"),
-        ("Objectives controller", "assets/js/dashboard/objectives.js?v=1.37.2&rev=nasdara-eventdesk-1", "ensureObjectives", "__wwzObjectivesReady", "assets/js/dashboard/objectives.js"),
-        ("Factions controller", "assets/js/dashboard/factions.js?v=1.47.0&rev=faction-registration-1", "ensureFactions", "__wwzFactionsReady", "assets/js/dashboard/factions.js"),
+        ("Progression controller", "assets/js/dashboard/progression.js?v=1.37.0&rev=progression-scoped-access-1", "ensureProgression", "__wwzProgressionReady", "assets/js/dashboard/progression.js"),
+        ("Objectives controller", "assets/js/dashboard/objectives.js?v=1.37.2&rev=nasdara-scoped-objectives-1", "ensureObjectives", "__wwzObjectivesReady", "assets/js/dashboard/objectives.js"),
+        ("Factions controller", "assets/js/dashboard/factions.js?v=1.47.0&rev=faction-scoped-access-1", "ensureFactions", "__wwzFactionsReady", "assets/js/dashboard/factions.js"),
         ("Command Centre controller", "assets/js/dashboard/command-centre.js?v=1.46.0&rev=command-centre-security-1", "ensureCommandCentre", "__wwzCommandCentreReady", "assets/js/dashboard/command-centre.js"),
     )
     for label, asset_url, loader_name, ready_flag, relative in lazy_dashboard_controllers:
@@ -1996,7 +1996,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     launch_requirements = {
         "index.html": ("PvE + PvP", "91 random spawn loadouts", "Fortnightly", "Full PvP"),
-        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/lazy-assets.js?v=2.8.0&amp;rev=nasdara-stage2b-1"),
+        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/lazy-assets.js?v=2.8.0&amp;rev=nasdara-admin-scopes-1"),
         "assets/js/dashboard/server-context.js": ("player_capacity", "Capacity', `${server.player_capacity} slots`"),
         "assets/js/dashboard/account.js": ("payload.server?.player_capacity",),
         "assets/js/dashboard/livonia-pvp.js": ("rotation.player_capacity", "players online"),

@@ -35,6 +35,7 @@ jobs:
           node scripts/test_nasdara_scoped_auth_errors_stage2f.js
           node scripts/test_shop_checkout_retries.js
           node scripts/test_nasdara_scoped_panels.js
+          node scripts/test_nasdara_scoped_objectives.js
           find assets/js -type f -name '*.js' -print0 | xargs -0 -n1 node --check
 
       - name: Upload website artifact
