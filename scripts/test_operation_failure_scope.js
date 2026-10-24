@@ -11,7 +11,8 @@ for (const guard of [
   'if (operationFailureServerKey() !== requestedServerKey) return;',
   "window.addEventListener('wwz:serverchange'",
   'Boolean(failure?.retry_pending)',
-  'Manual retry queued'
+  'Manual retry queued',
+  'server_key: serverKey'
 ]) assert.ok(admin.includes(guard), 'Missing retry scope safeguard: ' + guard);
 assert.ok(lazy.includes('administration.js?v=1.52.1&rev=stage5-failure-scope-1'));
 console.log('PASS: Server-isolated operation failures and retries');

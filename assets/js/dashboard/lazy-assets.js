@@ -281,7 +281,7 @@
     loadStylesheetOnce('player-intelligence-css', 'assets/css/dashboard/player-intelligence.css?v=1.31.0&rev=player-intelligence-1')
   ]).then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
     'administration',
-    'assets/js/dashboard/administration.js?v=1.52.1&rev=stage5-failure-scope-1',
+    'assets/js/dashboard/administration.js?v=1.52.2&rev=stage5b-retry-world-1',
     () => window.__wwzAdministrationReady === true
   )));
 

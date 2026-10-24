@@ -706,7 +706,7 @@ const renderOperationFailures = (payload, serverKey) => {
         const response = await authFetch(ADMIN_OPERATION_RETRY_URL, {
           method: 'POST',
           headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken}` },
-          body: JSON.stringify({ failure_id: failure.failure_id })
+          body: JSON.stringify({ failure_id: failure.failure_id, server_key: serverKey })
         });
         const result = await response.json().catch(() => ({}));
         if (handleAdminPlayerAuthorizationResponse(response, result, { actionRequest: true })) return;

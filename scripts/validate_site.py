@@ -826,7 +826,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         'renderPlayerIntelligence',
         'renderPlayerIntelligenceTimeline',
         'assets/css/dashboard/player-intelligence.css?v=1.31.0',
-        'assets/js/dashboard/administration.js?v=1.52.1&rev=stage5-failure-scope-1',
+        'assets/js/dashboard/administration.js?v=1.52.2&rev=stage5b-retry-world-1',
     ):
         source = player_intelligence_lazy if token.startswith('assets/') else player_intelligence
         if token not in source:
@@ -1227,7 +1227,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append(f"dashboard-map-intelligence.js: collaborative Group/Faction data must not be persisted in browser storage: {forbidden}")
 
     lazy_dashboard_controllers = (
-        ("Administration controller", "assets/js/dashboard/administration.js?v=1.52.1&rev=stage5-failure-scope-1", "ensureAdministration", "__wwzAdministrationReady", "assets/js/dashboard/administration.js"),
+        ("Administration controller", "assets/js/dashboard/administration.js?v=1.52.2&rev=stage5b-retry-world-1", "ensureAdministration", "__wwzAdministrationReady", "assets/js/dashboard/administration.js"),
         ("Appeals controller", f"assets/js/dashboard/appeals.js?v={EXPECTED_ASSET_VERSION}", "ensureAppeals", "__wwzAppealsReady", "assets/js/dashboard/appeals.js"),
         ("Tickets controller", f"assets/js/dashboard/tickets.js?v={EXPECTED_ASSET_VERSION}", "ensureTickets", "__wwzTicketsReady", "assets/js/dashboard/tickets.js"),
         ("Progression controller", "assets/js/dashboard/progression.js?v=1.37.0&rev=progression-scoped-access-1", "ensureProgression", "__wwzProgressionReady", "assets/js/dashboard/progression.js"),
