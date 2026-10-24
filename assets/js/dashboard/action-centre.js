@@ -9,9 +9,30 @@
   const qs = (selector) => root.querySelector(selector);
   const qsa = (selector) => [...root.querySelectorAll(selector)];
   const navBadge = document.querySelector('[data-action-centre-nav-badge]');
-  const state = { payload: null, view: 'active', loading: false, timer: 0, active: false };
+  const state = {
+    payload: null, view: 'active', loading: false, operationInProgress: false,
+    timer: 0, active: false, epoch: 0
+  };
 
   const token = () => { try { return storageGet(AUTH_SESSION_KEY) || ''; } catch (_) { return ''; } };
+  const selectedServerKey = () => String(window.WWZServerContext?.getSelectedServer?.()?.key || '');
+  const selectedMapKey = () => String(window.WWZServerContext?.getSelectedServer?.()?.map_key || '');
+  const captureRequestScope = () => ({
+    epoch: state.epoch, token: token(), serverKey: selectedServerKey(),
+    mapKey: selectedMapKey(), view: state.view
+  });
+  const requestScopeCurrent = (scope, { checkView = true } = {}) =>
+    scope.epoch === state.epoch && scope.token === token()
+    && scope.serverKey === selectedServerKey()
+    && (!checkView || scope.view === state.view);
+  // A server, identity or tab switch must invalidate any pending GET response.
+  const clearStaleSnapshot = () => {
+    state.epoch += 1;
+    state.payload = null;
+    state.loading = false;
+    root.classList.toggle('action-centre-loading', state.operationInProgress);
+    render();
+  };
   const access = () => String(state.payload?.access_level || 'member').toLowerCase();
   const isAdmin = () => ['staff', 'owner'].includes(access());
   const clean = (value) => String(value ?? '').replace(/\s+/g, ' ').trim();
@@ -88,19 +109,20 @@
   };
 
   const performAction = async (action, itemKeys = []) => {
-    if (!token() || state.loading) return false;
-    state.loading = true;
+    const scope = captureRequestScope();
+    if (!scope.token || !scope.serverKey || state.loading || state.operationInProgress) return false;
+    state.operationInProgress = true;
     root.classList.add('action-centre-loading');
     try {
       const response = await authFetch(ACTION_ENDPOINT, {
         method: 'POST',
-        headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${scope.token}` },
         body: JSON.stringify({ action, item_keys: itemKeys })
       });
       const payload = await response.json().catch(() => ({}));
+      if (!requestScopeCurrent(scope, { checkView: false })) return false;
       if (response.status === 401 || response.status === 403) {
-        // A scoped API denial is not evidence that the global OAuth token
-        // expired. Preserve the session and selected PvE/PvP server.
+        // This guild-specific denial must not delete the global Discord session.
         setMessage('Action Centre access is unavailable for this server. Your Discord session is still active.', 'error');
         return false;
       }
@@ -108,11 +130,13 @@
       setMessage(payload.message || 'Action Centre updated.', 'success');
       return true;
     } catch (error) {
-      setMessage(error?.message || 'Action Centre update failed.', 'error');
+      if (requestScopeCurrent(scope, { checkView: false })) {
+        setMessage(error?.message || 'Action Centre update failed.', 'error');
+      }
       return false;
     } finally {
-      state.loading = false;
-      root.classList.remove('action-centre-loading');
+      state.operationInProgress = false;
+      root.classList.toggle('action-centre-loading', state.loading);
     }
   };
 
@@ -190,27 +214,37 @@
 
   const load = async ({ quiet = false } = {}) => {
     if (!syncAuth() || state.loading) return;
+    const scope = captureRequestScope();
+    if (!scope.token || !scope.serverKey) return;
     state.loading = true; root.classList.add('action-centre-loading');
     if (!quiet) setMessage('Refreshing your Action Centre…');
     try {
-      const response = await authFetch(`${ENDPOINT}?view=${encodeURIComponent(state.view)}&limit=500`, {
-        method: 'GET', headers: { Accept: 'application/json', Authorization: `Bearer ${token()}` }
+      const response = await authFetch(`${ENDPOINT}?view=${encodeURIComponent(scope.view)}&limit=500`, {
+        method: 'GET', headers: { Accept: 'application/json', Authorization: `Bearer ${scope.token}` }
       });
       const payload = await response.json().catch(() => ({}));
+      if (!requestScopeCurrent(scope)) return;
       if (response.status === 401 || response.status === 403) {
-        // Account/action-centre is scoped to a server; only /api/auth/me
-        // can invalidate the global browser session.
+        // This scoped rejection does not invalidate global Discord authentication.
         state.payload = null;
         setMessage('Action Centre access is unavailable for this server. Your Discord session is still active.', 'error');
         render();
         return;
       }
       if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'The Action Centre is unavailable.');
-      state.payload = payload; render(); if (!quiet) setMessage('');
+      if (payload.map_key && String(payload.map_key) !== scope.mapKey) {
+        throw new Error('Action Centre snapshot does not match the selected map.');
+      }
+      state.payload = payload;
+      render();
+      if (!quiet) setMessage('');
     } catch (error) {
-      setMessage(error?.message || 'The Action Centre is unavailable.', 'error');
+      if (requestScopeCurrent(scope)) setMessage(error?.message || 'The Action Centre is unavailable.', 'error');
     } finally {
-      state.loading = false; root.classList.remove('action-centre-loading');
+      if (requestScopeCurrent(scope)) {
+        state.loading = false;
+        root.classList.toggle('action-centre-loading', state.operationInProgress);
+      }
     }
   };
 
@@ -224,7 +258,11 @@
     }, 60_000);
   };
 
-  qsa('[data-action-centre-view]').forEach((button) => button.addEventListener('click', () => { state.view = button.dataset.actionCentreView || 'active'; load(); }));
+  qsa('[data-action-centre-view]').forEach((button) => button.addEventListener('click', () => {
+    const next = button.dataset.actionCentreView || 'active';
+    if (next !== state.view) { state.view = next; clearStaleSnapshot(); }
+    load();
+  }));
   ['[data-action-centre-search]','[data-action-centre-source]','[data-action-centre-priority]','[data-action-centre-kind]'].forEach((selector) => {
     qs(selector)?.addEventListener(selector.includes('search') ? 'input' : 'change', render);
   });
@@ -234,8 +272,15 @@
   qs('[data-action-centre-signin]')?.addEventListener('click', () => document.querySelector('[data-open-login]')?.click());
   qs('[data-action-centre-notification-settings]')?.addEventListener('click', () => { if (typeof showView === 'function') showView('community', true, 'notifications'); });
   window.addEventListener('wwz:viewchange', (event) => schedule(event.detail || {}));
-  window.addEventListener('wwz:serverchange', () => { state.payload = null; if (state.active) load(); else if (token()) load({ quiet: true }); });
-  window.addEventListener('wwz:authchange', () => { state.payload = null; syncAuth(); if (token()) load({ quiet: !state.active }); });
+  window.addEventListener('wwz:serverchange', () => {
+    clearStaleSnapshot();
+    if (token()) load({ quiet: !state.active });
+  });
+  window.addEventListener('wwz:authchange', () => {
+    clearStaleSnapshot();
+    syncAuth();
+    if (token()) load({ quiet: !state.active });
+  });
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && state.active) load({ quiet: true }); });
 
   syncAuth();

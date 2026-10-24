@@ -56,6 +56,7 @@ jobs:
           node scripts/test_ui_polish_consistency.js
           node scripts/test_ios_auth_handoff.js
           node scripts/test_mobile_dashboard_reliability.js
+          node scripts/test_action_centre_scope_refresh.js
           find assets/js -type f -name '*.js' -print0 | xargs -0 -n1 node --check
 
       - name: Upload website artifact
