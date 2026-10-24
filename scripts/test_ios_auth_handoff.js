@@ -40,7 +40,7 @@ const account = fs.readFileSync('assets/js/dashboard/account.js', 'utf8');
 for (const token of [
   'data-ios-auth-app-help', 'data-ios-auth-safari-help',
   'data-ios-auth-copy-link', 'data-ios-auth-transfer-submit',
-  'ios-auth-handoff.js?v=1.0.0', 'ios-auth.css?v=1.0.0'
+  'ios-auth-handoff.js?v=1.22.93', 'ios-auth.css?v=1.22.93'
 ]) assert.ok(page.includes(token), 'missing iOS recovery UI ' + token);
 assert.ok(account.includes('shouldOfferSafariHandoff(locallyStartedInSafari)'));
 assert.ok(account.includes('Do not consume the one-time ticket in Safari'));
