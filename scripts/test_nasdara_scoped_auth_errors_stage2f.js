@@ -13,7 +13,7 @@ async function testActionCentre() {
   const calls = {logout:0, remove:0, requests:0};
   const fake = {
     document: {querySelector(s){return s === '[data-action-centre]' ? root : null;},querySelectorAll(){return [];},addEventListener(){}},
-    window: {addEventListener(){},setInterval(){return 1;},clearInterval(){}},
+    window: {WWZServerContext:{getSelectedServer:()=>({key:'nasdara-pve',map_key:'nasdara'})},addEventListener(){},setInterval(){return 1;},clearInterval(){}},
     DASHBOARD_API_BASE: 'https://world-war-z.up.railway.app',
     AUTH_SESSION_KEY: 'wwz_dashboard_session',
     storageGet(){return 'a'.repeat(48);},
