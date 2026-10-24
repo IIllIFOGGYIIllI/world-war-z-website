@@ -8,8 +8,8 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-10-25-wwz-ui-consistency-1';
-const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-wwz-ui-consistency-1`;
+const WWZ_PWA_UPDATE_REVISION = '2026-10-25-wwz-ui-consistency-2';
+const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-wwz-ui-consistency-2`;
 const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${APP_CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${APP_CACHE_RELEASE}`;
@@ -41,17 +41,17 @@ const APP_SHELL = [
   './assets/css/site-polish.css?v=1.22.93',
   './assets/css/pwa.css?v=1.22.93',
   './assets/css/ui-system.css?v=1.24.0&rev=ops-ui-1',
-  './assets/js/pages/home.js?v=1.53.0&rev=companion-download-repair-1',
+  './assets/js/pages/home.js?v=1.53.1&rev=companion-nav-1',
   './assets/js/pages/companion.js?v=1.53.0&rev=companion-download-repair-1',
   './assets/data/companion-release.json',
-  './assets/js/pwa.js?v=1.61.0&rev=storefront-cart-1',
+  './assets/js/pwa.js?v=1.61.1&rev=companion-nav-1',
   './assets/css/modern-foundation.css?v=1.62.0&rev=modern-ui-1',
   './assets/css/survivor-experience.css?v=1.63.0&rev=survivor-ux-1',
   './assets/css/community-experience.css?v=1.64.0&rev=community-ux-1',
-  './assets/css/sitewide-experience.css?v=2.0.0&rev=final-polish-1',
+  './assets/css/sitewide-experience.css?v=2.0.1&rev=site-qol-1',
   './assets/js/dashboard/community-experience.js?v=1.64.0&rev=community-ux-1',
   './assets/js/pages/shop-experience.js?v=1.63.0&rev=survivor-ux-1',
-  './assets/js/ui-system.js?v=2.0.0&rev=final-polish-1',
+  './assets/js/ui-system.js?v=2.0.1&rev=nav-dedupe-1',
   './assets/js/core/cart-deliveries.js?v=2.1.0',
   './assets/css/components/cart-deliveries.css?v=2.1.0',
   './assets/js/dashboard/modern-navigation.js?v=1.62.0&rev=modern-ui-1'
