@@ -668,7 +668,11 @@ const loadModerationQueue = async (sessionToken = storageGet(AUTH_SESSION_KEY)) 
 
 refreshModerationQueueButton?.addEventListener('click', () => loadModerationQueue());
 
-const renderOperationFailures = (payload) => {
+const operationFailureServerKey = () => String(window.WWZServerContext?.getSelectedServer?.()?.key || '');
+
+const renderOperationFailures = (payload, serverKey) => {
+  // Failure IDs can overlap between independently stored worlds.
+  if (!serverKey || operationFailureServerKey() !== serverKey) return;
   const failures = Array.isArray(payload?.failures) ? payload.failures : [];
   operationFailureList?.replaceChildren();
   if (operationFailureEmpty) operationFailureEmpty.hidden = failures.length !== 0;
@@ -685,14 +689,15 @@ const renderOperationFailures = (payload) => {
     const message = document.createElement('p');
     message.textContent = String(failure?.message || 'No failure detail was recorded.');
     const detail = document.createElement('small');
-    detail.textContent = `${String(failure?.subject || 'Operation')} · ${Number(failure?.attempts || 1)} attempt(s)${failure?.retry_at ? ` · Next retry ${formatAccountDate(failure.retry_at)}` : ''}`;
+    detail.textContent = `${String(failure?.subject || 'Operation')} · ${Number(failure?.attempts || 1)} attempt(s)${failure?.retry_pending ? ' · Manual retry queued' : (failure?.retry_at ? ` · Next retry ${formatAccountDate(failure.retry_at)}` : '')}`;
     copy.append(title, message, detail);
     const retry = document.createElement('button');
     retry.type = 'button';
     retry.className = 'secondary-action compact-action';
     retry.textContent = 'Retry now';
-    retry.disabled = !failure?.can_retry;
+    retry.disabled = !failure?.can_retry || Boolean(failure?.retry_pending);
     retry.addEventListener('click', async () => {
+      if (operationFailureServerKey() !== serverKey) return;
       const sessionToken = storageGet(AUTH_SESSION_KEY);
       if (!sessionToken) return;
       retry.disabled = true;
@@ -706,10 +711,17 @@ const renderOperationFailures = (payload) => {
         const result = await response.json().catch(() => ({}));
         if (handleAdminPlayerAuthorizationResponse(response, result, { actionRequest: true })) return;
         if (!response.ok || result.status !== 'ok') throw new Error(result.message || 'Retry failed');
+        if (operationFailureServerKey() !== serverKey) return;
         await Promise.all([loadOperationFailures(), loadModerationQueue()]);
       } catch (error) {
+        if (operationFailureServerKey() !== serverKey) return;
         retry.textContent = error instanceof Error ? error.message : 'Retry failed';
-        window.setTimeout(() => { retry.textContent = 'Retry now'; retry.disabled = false; }, 2500);
+        window.setTimeout(() => {
+          if (operationFailureServerKey() === serverKey) {
+            retry.textContent = 'Retry now';
+            retry.disabled = !failure?.can_retry || Boolean(failure?.retry_pending);
+          }
+        }, 2500);
       }
     });
     card.append(copy, retry);
@@ -719,6 +731,8 @@ const renderOperationFailures = (payload) => {
 
 const loadOperationFailures = async (sessionToken = storageGet(AUTH_SESSION_KEY)) => {
   if (!hasServerActionAccess() || !sessionToken || operationFailureRequestInProgress) return;
+  const requestedServerKey = operationFailureServerKey();
+  if (!requestedServerKey) return;
   operationFailureRequestInProgress = true;
   refreshOperationFailuresButton?.setAttribute('disabled', '');
   try {
@@ -726,10 +740,12 @@ const loadOperationFailures = async (sessionToken = storageGet(AUTH_SESSION_KEY)
       headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` }
     });
     const payload = await response.json().catch(() => ({}));
+    if (operationFailureServerKey() !== requestedServerKey) return;
     if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: false })) return;
     if (!response.ok || payload.status !== 'ok') throw new Error('Operational failures unavailable');
-    renderOperationFailures(payload);
+    renderOperationFailures(payload, requestedServerKey);
   } catch (error) {
+    if (operationFailureServerKey() !== requestedServerKey) return;
     operationFailureList?.replaceChildren();
     if (operationFailureEmpty) operationFailureEmpty.hidden = true;
     if (operationFailureError) operationFailureError.hidden = false;
@@ -741,6 +757,13 @@ const loadOperationFailures = async (sessionToken = storageGet(AUTH_SESSION_KEY)
 };
 
 refreshOperationFailuresButton?.addEventListener('click', () => loadOperationFailures());
+window.addEventListener('wwz:serverchange', () => {
+  operationFailureList?.replaceChildren();
+  if (operationFailureEmpty) operationFailureEmpty.hidden = true;
+  if (operationFailureError) operationFailureError.hidden = true;
+  if (operationFailureCount) operationFailureCount.textContent = '—';
+  setSidebarBadge(failureNavBadge, 0);
+});
 
 const showWebhookMessage = (message = '', tone = 'error') => {
   if (!webhookMessage) return;
