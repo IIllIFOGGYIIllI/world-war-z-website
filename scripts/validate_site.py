@@ -635,7 +635,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     ):
         if token not in command_centre_css:
             errors.append(f"command-centre-m10.css: missing Command Centre / Security layout guard: {token}")
-    if "assets/js/dashboard/command-centre.js?v=1.46.0&rev=command-centre-security-1" not in lazy_assets_js:
+    if "assets/js/dashboard/command-centre.js?v=1.46.1&rev=stage6-world-scope-1" not in lazy_assets_js:
         errors.append("lazy-assets.js: missing v1.46.0 Command Centre controller revision.")
     server_feeds_js = (ROOT / "assets/js/dashboard/server-feeds.js").read_text(encoding="utf-8")
     server_feeds_css = (ROOT / "assets/css/dashboard/server-feeds.css").read_text(encoding="utf-8")
@@ -1233,7 +1233,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         ("Progression controller", "assets/js/dashboard/progression.js?v=1.37.0&rev=progression-scoped-access-1", "ensureProgression", "__wwzProgressionReady", "assets/js/dashboard/progression.js"),
         ("Objectives controller", "assets/js/dashboard/objectives.js?v=1.37.2&rev=nasdara-scoped-objectives-1", "ensureObjectives", "__wwzObjectivesReady", "assets/js/dashboard/objectives.js"),
         ("Factions controller", "assets/js/dashboard/factions.js?v=1.47.0&rev=faction-scoped-access-1", "ensureFactions", "__wwzFactionsReady", "assets/js/dashboard/factions.js"),
-        ("Command Centre controller", "assets/js/dashboard/command-centre.js?v=1.46.0&rev=command-centre-security-1", "ensureCommandCentre", "__wwzCommandCentreReady", "assets/js/dashboard/command-centre.js"),
+        ("Command Centre controller", "assets/js/dashboard/command-centre.js?v=1.46.1&rev=stage6-world-scope-1", "ensureCommandCentre", "__wwzCommandCentreReady", "assets/js/dashboard/command-centre.js"),
     )
     for label, asset_url, loader_name, ready_flag, relative in lazy_dashboard_controllers:
         if asset_url in dashboard:

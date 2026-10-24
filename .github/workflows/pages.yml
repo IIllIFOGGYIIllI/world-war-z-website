@@ -40,6 +40,7 @@ jobs:
           node scripts/test_identity_sync_scope.js
           node scripts/test_operation_failure_scope.js
           node scripts/test_operations_centre_2.js
+          node scripts/test_command_centre_scope.js
           find assets/js -type f -name '*.js' -print0 | xargs -0 -n1 node --check
 
       - name: Upload website artifact

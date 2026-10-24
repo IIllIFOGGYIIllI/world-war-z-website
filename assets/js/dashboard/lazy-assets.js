@@ -393,7 +393,7 @@
 
   const ensureCommandCentre = () => loadAfterDashboardRuntime(() => loadScriptOnce(
     'command-centre',
-    'assets/js/dashboard/command-centre.js?v=1.46.0&rev=command-centre-security-1',
+    'assets/js/dashboard/command-centre.js?v=1.46.1&rev=stage6-world-scope-1',
     () => window.__wwzCommandCentreReady === true
   ));
 

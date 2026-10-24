@@ -7,6 +7,11 @@ const commandCentreActivityEmpty = document.querySelector('[data-command-centre-
 const commandCentreNavBadge = document.querySelector('[data-command-centre-nav-badge]');
 const commandCentrePanel = document.querySelector('#dashboard-admin-command-centre');
 let commandCentreRequestInProgress = false;
+let commandCentreRequestEpoch = 0;
+const commandCentreSelectedKey = () => String(window.WWZServerContext?.getSelectedServer?.()?.key || '');
+const commandCentreRequestCurrent = (epoch, key, token) =>
+  commandCentreRequestEpoch === epoch && commandCentreSelectedKey() === key &&
+  token === storageGet(AUTH_SESSION_KEY);
 let commandCentreTimer = 0;
 let commandCentreStaleTimer = 0;
 let commandCentreBackgroundTimer = 0;
@@ -1360,7 +1365,9 @@ const stopCommandCentreFreshnessWatch = () => {
 };
 
 const loadCommandCentre = async (sessionToken = storageGet(AUTH_SESSION_KEY)) => {
-  if (!sessionToken || commandCentreRequestInProgress) return false;
+  const serverKey = commandCentreSelectedKey();
+  if (!sessionToken || !serverKey || commandCentreRequestInProgress) return false;
+  const epoch = ++commandCentreRequestEpoch;
   commandCentreRequestInProgress = true;
   const originalLabel = commandCentreRefresh?.textContent || 'Refresh Overview';
   if (commandCentreRefresh) {
@@ -1375,12 +1382,16 @@ const loadCommandCentre = async (sessionToken = storageGet(AUTH_SESSION_KEY)) =>
       cache: 'no-store'
     });
     const payload = await response.json().catch(() => ({}));
+    if (!commandCentreRequestCurrent(epoch, serverKey, sessionToken)) return false;
     if (typeof handleAdminPlayerAuthorizationResponse === 'function' && handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: false })) {
       m10SetMonitorArmed(false);
       scheduleM10BackgroundMonitor();
       return false;
     }
     if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Command Centre unavailable.');
+    if (String(payload?.scope?.server_key || '') !== serverKey) {
+      throw new Error('Command Centre snapshot does not match the selected server.');
+    }
     renderCommandCentre(payload);
     m10SetMonitorArmed(true);
     updateCommandCentreFreshness();
@@ -1388,6 +1399,7 @@ const loadCommandCentre = async (sessionToken = storageGet(AUTH_SESSION_KEY)) =>
     void refreshM10AdminPushStatus();
     return true;
   } catch (error) {
+    if (!commandCentreRequestCurrent(epoch, serverKey, sessionToken)) return false;
     updateCommandCentreFreshness();
     if (commandCentreError) {
       commandCentreError.hidden = false;
@@ -1400,10 +1412,12 @@ const loadCommandCentre = async (sessionToken = storageGet(AUTH_SESSION_KEY)) =>
     commandCentreSet('[data-m10-snapshot]', commandCentreLastPayload ? 'Refresh failed' : 'Unavailable');
     return false;
   } finally {
-    commandCentreRequestInProgress = false;
-    if (commandCentreRefresh) {
-      commandCentreRefresh.removeAttribute('disabled');
-      commandCentreRefresh.textContent = originalLabel;
+    if (epoch === commandCentreRequestEpoch) {
+      commandCentreRequestInProgress = false;
+      if (commandCentreRefresh) {
+        commandCentreRefresh.removeAttribute('disabled');
+        commandCentreRefresh.textContent = originalLabel;
+      }
     }
   }
 };
@@ -1473,13 +1487,29 @@ window.addEventListener('offline', () => {
   stopM10BackgroundMonitor();
 });
 window.addEventListener('wwz:serverchange', () => {
+  commandCentreRequestEpoch += 1;
+  commandCentreRequestInProgress = false;
+  commandCentreRefresh?.removeAttribute('disabled');
+  if (commandCentreRefresh) commandCentreRefresh.textContent = 'Refresh Overview';
   commandCentreLastPayload = null;
   commandCentreLastSuccessAt = 0;
   commandCentreSecurityLoaded = false;
   m10PushStatusCheckedAt = 0;
+  for (const key of [
+    'server', 'nitrado', 'api', 'api-uptime', 'discord', 'players', 'tracked',
+    'restart', 'countdown', 'deliveries', 'delivery-failures', 'rentals',
+    'expiring', 'tickets', 'unclaimed', 'moderation', 'overdue', 'failures',
+    'routes', 'notification-failures', 'bounties', 'contracts', 'refunds', 'shop-open'
+  ]) commandCentreSet(`[data-command-centre-${key}]`, '—');
+  commandCentreSet('[data-command-centre-updated]', 'Switching servers · awaiting fresh snapshot');
+  commandCentreSet('[data-m10-snapshot]', 'Waiting');
+  commandCentreSet('[data-m10-health-score]', '—');
+  commandCentreAttention?.replaceChildren();
+  commandCentreActivity?.replaceChildren();
+  if (commandCentreError) commandCentreError.hidden = true;
   renderM10ChangeHistory();
   void refreshM10AdminPushStatus({ force: true });
-  if (commandCentreMonitorArmed && !document.hidden) loadCommandCentre();
+  if ((commandCentreMonitorArmed || commandCentreViewActive) && !document.hidden) loadCommandCentre();
   if (commandCentreViewActive && !document.hidden) loadSecurityCentre(storageGet(AUTH_SESSION_KEY), { quiet: true });
 });
 
