@@ -733,6 +733,11 @@ scheduleLiveStatusPolling();
   const resultWrap = panel.querySelector('[data-identity-results-wrap]');
   const resultBody = panel.querySelector('[data-identity-results]');
   let loaded = false;
+  let busy = false;
+  let requestEpoch = 0;
+  const selectedServerKey = () => String(window.WWZServerContext?.getSelectedServer?.()?.key || '');
+  const authorized = () => Boolean(storageGet(AUTH_SESSION_KEY) && selectedServerKey() && hasAdminAccess());
+  const current = (epoch, key) => requestEpoch === epoch && selectedServerKey() === key && authorized();
 
   const token = () => storageGet(AUTH_SESSION_KEY);
   const setMessage = (text = '', tone = 'info') => {
@@ -742,10 +747,32 @@ scheduleLiveStatusPolling();
     message.hidden = !text;
   };
 
-  const setBusy = (busy) => {
-    [refreshButton, saveButton, resyncCurrentButton, resyncAllButton].forEach((button) => {
-      if (button) button.disabled = Boolean(busy);
+  const setBusy = (value) => {
+    busy = Boolean(value);
+    const locked = busy || !loaded || !authorized();
+    [saveButton, resyncCurrentButton, resyncAllButton].forEach(button => {
+      if (button) button.disabled = locked;
     });
+    if (roleSelect) roleSelect.disabled = locked;
+    if (nicknameToggle) nicknameToggle.disabled = locked;
+    if (refreshButton) refreshButton.disabled = busy || !authorized();
+  };
+
+  const resetPanel = () => {
+    requestEpoch += 1;
+    loaded = false;
+    busy = false;
+    fillRoles([], { auto_detect_role: true });
+    if (nicknameToggle) nicknameToggle.checked = false;
+    if (serverName) serverName.textContent =
+      String(window.WWZServerContext?.getSelectedServer?.()?.name || 'Select a server');
+    if (verifiedCount) verifiedCount.textContent = '—';
+    if (memberCount) memberCount.textContent = '—';
+    if (activeRole) activeRole.textContent = 'Not verified';
+    if (roleNote) roleNote.textContent = 'Load the selected server settings before editing.';
+    if (resultBody) resultBody.replaceChildren();
+    if (resultWrap) resultWrap.hidden = true;
+    setBusy(false);
   };
 
   const fillRoles = (roles, settings) => {
@@ -765,6 +792,9 @@ scheduleLiveStatusPolling();
   };
 
   const apply = (payload) => {
+    if (payload?.status !== 'ok' || String(payload?.server?.key || '') !== selectedServerKey()) {
+      throw new Error('Identity settings did not match the selected server.');
+    }
     const settings = payload?.settings || {};
     fillRoles(payload?.roles, settings);
     if (nicknameToggle) nicknameToggle.checked = Boolean(settings.nickname_sync_enabled);
@@ -778,6 +808,7 @@ scheduleLiveStatusPolling();
         : `Explicit role${settings.verified_role_name ? ` · ${settings.verified_role_name}` : ' is unavailable'}`;
     }
     loaded = true;
+    setBusy(false);
   };
 
   const request = async (url, options = {}) => {
@@ -793,27 +824,35 @@ scheduleLiveStatusPolling();
       }
     });
     const payload = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(payload.message || 'Identity Sync request failed.');
+    if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Identity Sync access unavailable for this server.');
     return payload;
   };
 
   const load = async ({ quiet = false } = {}) => {
+    resetPanel();
+    if (!authorized()) return;
+    const epoch = requestEpoch, serverKey = selectedServerKey();
     setBusy(true);
-    if (!quiet) setMessage('Loading identity settings…', 'info');
+    if (!quiet) setMessage('Loading selected-server identity settings…', 'info');
     try {
       const payload = await request(ADMIN_IDENTITY_URL, { method: 'GET' });
+      if (!current(epoch, serverKey)) return;
       apply(payload);
-      if (!quiet) setMessage(`Identity settings loaded for ${payload?.server?.name || 'the selected server'}.`, 'success');
+      if (!quiet) setMessage('Identity settings loaded for ' + String(payload.server?.name || 'selected server') + '.', 'success');
     } catch (error) {
-      setMessage(error.message || 'Identity settings are temporarily unavailable.', 'error');
+      if (!current(epoch, serverKey)) return;
+      loaded = false;
+      setMessage(error.message || 'Selected-server identity settings are unavailable.', 'error');
     } finally {
-      setBusy(false);
+      if (current(epoch, serverKey)) setBusy(false);
     }
   };
 
   const save = async () => {
+    if (!loaded || busy || !authorized()) return;
+    const epoch = requestEpoch, serverKey = selectedServerKey();
     setBusy(true);
-    setMessage('Saving server-scoped identity settings…', 'info');
+    setMessage('Saving identity settings for this server…', 'info');
     try {
       const payload = await request(ADMIN_IDENTITY_ACTION_URL, {
         method: 'POST',
@@ -824,13 +863,15 @@ scheduleLiveStatusPolling();
           nickname_sync_enabled: Boolean(nicknameToggle?.checked)
         })
       });
-      apply({ ...payload, linked: { verified_records: Number(verifiedCount?.textContent?.replace(/\D/g, '')) || 0, members_in_discord: Number(memberCount?.textContent?.replace(/\D/g, '')) || 0 } });
+      if (!current(epoch, serverKey)) return;
+      if (String(payload.server?.key || '') !== serverKey) throw new Error('Server mismatch in identity save response.');
       setMessage(payload.message || 'Identity settings saved.', 'success');
       await load({ quiet: true });
     } catch (error) {
+      if (!current(epoch, serverKey)) return;
       setMessage(error.message || 'Identity settings could not be saved.', 'error');
     } finally {
-      setBusy(false);
+      if (current(epoch, serverKey)) setBusy(false);
     }
   };
 
@@ -859,23 +900,27 @@ scheduleLiveStatusPolling();
   };
 
   const resync = async (allServers) => {
-    const scopeLabel = allServers ? 'both configured World War Z servers' : 'the selected server';
-    if (!window.confirm(`Resync the Verified role and PSN nickname for every linked Discord member on ${scopeLabel}?`)) return;
+    if (!loaded || busy || !authorized()) return;
+    const epoch = requestEpoch, serverKey = selectedServerKey();
+    const scopeLabel = allServers ? 'both configured World War Z servers' :
+      String(window.WWZServerContext?.getSelectedServer?.()?.name || 'the selected server');
+    if (!window.confirm('Resync Verified roles and PSN nicknames for every linked Discord member on ' + scopeLabel + '?')) return;
     setBusy(true);
-    setMessage(`Resynchronising linked members on ${scopeLabel}…`, 'info');
+    setMessage('Resynchronising linked members on ' + scopeLabel + '…', 'info');
     try {
       const payload = await request(ADMIN_IDENTITY_ACTION_URL, {
         method: 'POST',
         body: JSON.stringify({ action: 'resync_all', all_servers: Boolean(allServers), confirmation: 'RESYNC' })
       });
+      if (!current(epoch, serverKey)) return;
       renderResults(payload.results);
       const found = (payload.results || []).reduce((total, result) => total + (Number(result.members_found) || 0), 0);
-      setMessage(`${payload.message || 'Identity resync completed.'} ${found} Discord member${found === 1 ? '' : 's'} processed.`, 'success');
-      await load({ quiet: true });
+      setMessage(String(payload.message || 'Identity resync completed.') + ' ' + found + ' Discord members processed.', 'success');
     } catch (error) {
+      if (!current(epoch, serverKey)) return;
       setMessage(error.message || 'Linked-member resync could not be completed.', 'error');
     } finally {
-      setBusy(false);
+      if (current(epoch, serverKey)) setBusy(false);
     }
   };
 
@@ -884,11 +929,22 @@ scheduleLiveStatusPolling();
   resyncCurrentButton?.addEventListener('click', () => resync(false));
   resyncAllButton?.addEventListener('click', () => resync(true));
   window.addEventListener('wwz:serverchange', () => {
-    loaded = false;
-    resultWrap?.setAttribute('hidden', '');
-    if (token()) load({ quiet: true });
+    resetPanel();
+    setMessage('');
+    if (authorized() && panel.classList.contains('active')) void load({ quiet: true });
+  });
+  window.addEventListener('wwz:authchange', () => {
+    resetPanel();
+    if (authorized() && panel.classList.contains('active')) void load({ quiet: true });
+  });
+  window.addEventListener('wwz:accesschange', () => {
+    if (!authorized()) {
+      resetPanel();
+      setMessage('Identity Sync requires Admin access on this server.', 'info');
+    }
   });
   window.addEventListener('wwz:viewchange', (event) => {
-    if (event.detail?.view === 'staff' && event.detail?.section === 'identity-sync' && !loaded) load();
+    if (event.detail?.view === 'staff' && event.detail?.section === 'identity-sync' && !loaded && !busy) load();
   });
+  resetPanel();
 })();
