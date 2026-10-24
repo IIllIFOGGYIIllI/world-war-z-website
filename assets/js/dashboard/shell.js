@@ -13,20 +13,51 @@ const commandPaletteClosers = [...document.querySelectorAll('[data-close-command
 let dashboardAccessLevel = 'guest';
 let activeDashboardSection = '';
 
-const closeSidebar = () => {
+// Use the same breakpoint as the dashboard's single-column/tablet layout.
+// Closed off-canvas navigation must not remain in the keyboard tab order.
+const mobileSidebarMedia = window.matchMedia('(max-width: 980px)');
+const syncMobileSidebar = () => {
+  const mobile = mobileSidebarMedia.matches;
+  const open = mobile && Boolean(sidebar?.classList.contains('open'));
+  if (sidebar) {
+    sidebar.inert = mobile && !open;
+    sidebar.setAttribute('aria-hidden', String(mobile && !open));
+  }
+  sidebarToggle?.setAttribute('aria-expanded', String(open));
+  document.body.classList.toggle('wwz-mobile-nav-open', open);
+};
+const closeSidebar = (restoreFocus = false) => {
+  const wasOpen = Boolean(sidebar?.classList.contains('open'));
+  const focusedInside = Boolean(sidebar?.contains(document.activeElement));
   sidebar?.classList.remove('open');
   sidebarScrim?.classList.remove('open');
-  sidebarToggle?.setAttribute('aria-expanded', 'false');
+  syncMobileSidebar();
+  if (wasOpen && mobileSidebarMedia.matches && (restoreFocus || focusedInside)) {
+    sidebarToggle?.focus({ preventScroll: true });
+  }
 };
 
 sidebarToggle?.addEventListener('click', () => {
+  if (!mobileSidebarMedia.matches) return;
   const willOpen = !sidebar?.classList.contains('open');
   sidebar?.classList.toggle('open', willOpen);
   sidebarScrim?.classList.toggle('open', willOpen);
-  sidebarToggle.setAttribute('aria-expanded', String(willOpen));
+  syncMobileSidebar();
+  if (willOpen) {
+    sidebar?.querySelector('.sidebar-navigation summary, .sidebar-navigation .side-link:not([hidden])')
+      ?.focus({ preventScroll: true });
+  } else {
+    sidebarToggle?.focus({ preventScroll: true });
+  }
 });
-
-sidebarScrim?.addEventListener('click', closeSidebar);
+sidebarScrim?.addEventListener('click', () => closeSidebar(true));
+const handleSidebarBreakpointChange = () => closeSidebar();
+if (mobileSidebarMedia.addEventListener) {
+  mobileSidebarMedia.addEventListener('change', handleSidebarBreakpointChange);
+} else {
+  mobileSidebarMedia.addListener?.(handleSidebarBreakpointChange);
+}
+syncMobileSidebar();
 
 const availableViews = new Set(viewPanels.map((panel) => panel.dataset.viewPanel));
 
@@ -251,7 +282,7 @@ document.addEventListener('keydown', (event) => {
     openCommandPalette();
     return;
   }
-  if (event.key === 'Escape') closeSidebar();
+  if (event.key === 'Escape') closeSidebar(true);
   if (!isTyping && event.key === '/' && !commandPalette?.open) {
     event.preventDefault();
     openCommandPalette();
