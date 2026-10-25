@@ -244,10 +244,38 @@
       raidToggle.textContent = raid.enabled ? 'Disable future raid starts' : 'Enable raid damage & restarts';
       raidToggle.dataset.enabled = String(Boolean(raid.enabled));
     }
+    const raidFormatPhase = (phase) => ({
+      done: 'Restart request recorded',
+      claimed: 'Change started — confirmation pending',
+      restart_requested: 'Restart submitted — confirmation pending',
+      attention_required: 'Needs manual verification'
+    }[phase] || 'Not attempted');
+    const raidNext = qs('[data-raid-next-window]');
+    if (raidNext) raidNext.textContent = raid.next_start && raid.next_end
+      ? fmtDate(raid.next_start) + ' — ' + fmtDate(raid.next_end) + ' (Sydney time)'
+      : 'Schedule temporarily unavailable';
+    const raidPhases = qs('[data-raid-phase-readout]');
+    if (raidPhases) raidPhases.textContent = 'Recorded actions for the current/latest weekend: opening '
+      + raidFormatPhase(raid.start_phase) + ' · restoration ' + raidFormatPhase(raid.end_phase) + '.';
+    const raidAlert = qs('[data-raid-damage-alert]');
+    if (raidAlert) {
+      raidAlert.hidden = !raid.attention_required;
+      raidAlert.textContent = raid.blocked_weekend
+        ? 'ACTION REQUIRED: A previous raid weekend (' + fmtDate(raid.blocked_weekend) + ') has no confirmed restoration. Later openings are blocked. Check Nitrado damage settings and restart history before assuming PvE protection is restored.'
+        : 'ACTION REQUIRED: An opening or restoration was not fully confirmed. Check Nitrado damage settings and restart history. The system will not blindly send duplicate restarts.';
+    }
     const raidStatus = qs('[data-raid-damage-status]');
-    if (raidStatus) raidStatus.textContent = raid.enabled
-      ? 'Armed · opening and closing restarts enabled. Current weekend start: ' + fmtDate(raid.next_start) + ' · start ' + (raid.start_phase || 'not attempted') + ' · finish ' + (raid.end_phase || 'not attempted')
-      : 'Not armed · upcoming raid weekends appear in the calendar, but game settings will not change automatically.';
+    if (raidStatus) {
+      raidStatus.textContent = raid.enabled
+        ? 'Future raid openings armed · base/container damage and restart requests are automated. Full-map PvP enforcement is NOT automated.'
+        : 'Future raid openings are disabled · any raid previously started must still restore PvE protections. Full-map PvP enforcement is managed separately.';
+      raidStatus.dataset.tone = raid.attention_required ? 'attention' : raid.enabled ? 'armed' : 'idle';
+    }
+    if (raidToggle) {
+      // Never arm another weekend while the backend reports an unresolved restore.
+      raidToggle.disabled = Boolean(raid.attention_required && !raid.enabled);
+      raidToggle.title = raidToggle.disabled ? 'Resolve the previous raid restoration before enabling new starts.' : '';
+    }
     const panelState=qs('[data-community-calendar-panel-state]');if(panelState)panelState.textContent=payload.calendar_panel?.message_id?`Published · channel ${payload.calendar_panel.channel_id}`:'No panel published yet.';
     const locationSelect=qs('[data-community-template-location]');if(locationSelect)locationSelect.innerHTML='<option value="">Choose reusable location…</option>'+optionList(payload.locations||[],'label');
     const loadoutSelect=qs('[data-community-template-loadout]');if(loadoutSelect)loadoutSelect.innerHTML='<option value="">No preset</option>'+optionList(payload.loadouts||[]);

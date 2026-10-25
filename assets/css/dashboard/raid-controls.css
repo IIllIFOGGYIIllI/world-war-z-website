@@ -20,3 +20,24 @@
   .community-raid-controls { flex-direction: column; padding: 16px; }
   .community-raid-controls button { width: 100%; }
 }
+
+/* Raid lifecycle information: visible without enabling any live server controls. */
+.community-raid-controls .raid-schedule-meta,
+.community-raid-controls .raid-operator-meta {
+  margin: 8px 0;
+  line-height: 1.55;
+}
+.community-raid-controls .raid-schedule-meta b { font-weight: 700; }
+.community-raid-controls [data-raid-damage-status][data-tone="armed"] { color: #a2e2b8; }
+.community-raid-controls [data-raid-damage-status][data-tone="idle"] { color: #dfc8a2; }
+.community-raid-controls [data-raid-damage-status][data-tone="attention"] { color: #ffae9d; }
+.community-raid-controls .raid-operator-alert {
+  border-left: 3px solid #f27f65;
+  background: rgba(126, 39, 30, .16);
+  color: #ffd3c8;
+  border-radius: 5px;
+  padding: 10px 12px;
+  margin: 12px 0 0;
+  font-weight: 600;
+}
+.community-raid-controls .raid-operator-alert[hidden] { display: none !important; }
