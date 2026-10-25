@@ -306,6 +306,9 @@
     });
   };
 
+  let activeServiceWorkerRegistration = null;
+  let lastForegroundCheckAt = 0;
+  const FOREGROUND_UPDATE_CHECK_MS = 15 * 60_000;
   const registerServiceWorker = async () => {
     if (!('serviceWorker' in navigator) || !window.isSecureContext) return;
     try {
@@ -315,11 +318,22 @@
         scope: scopeUrl.pathname,
         updateViaCache: 'none'
       });
+      activeServiceWorkerRegistration = registration;
       watchRegistration(registration);
+      lastForegroundCheckAt = Date.now();
       registration.update().catch(() => null);
     } catch (error) {
       console.warn('WWZ PWA service worker registration failed.', error);
     }
+  };
+
+  const checkForegroundUpdates = () => {
+    if (document.hidden || navigator.onLine === false || !activeServiceWorkerRegistration) return;
+    if (Date.now() - lastForegroundCheckAt < FOREGROUND_UPDATE_CHECK_MS) return;
+    lastForegroundCheckAt = Date.now();
+    void activeServiceWorkerRegistration.update().catch(() => null);
+    const installed = captureNativeRelease();
+    if (installed) void checkNativeRelease(installed);
   };
 
   window.addEventListener('beforeinstallprompt', (event) => {
@@ -335,6 +349,8 @@
 
   window.addEventListener('online', syncNetworkState);
   window.addEventListener('offline', syncNetworkState);
+  window.addEventListener('pageshow', checkForegroundUpdates);
+  document.addEventListener('visibilitychange', checkForegroundUpdates);
   window.matchMedia?.('(display-mode: standalone)')?.addEventListener?.('change', syncInstallButtons);
 
   navigator.serviceWorker?.addEventListener('controllerchange', () => {

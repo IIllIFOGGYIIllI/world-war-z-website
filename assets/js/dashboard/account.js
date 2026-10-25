@@ -740,45 +740,94 @@ const showStatusUnavailable = () => {
   syncServerActionControls();
 };
 
+// Stage 5: the website API check is distinct from DayZ ADM ingestion.
+let liveStatusRequestEpoch = 0;
+let liveStatusPollTimer = 0;
+let liveStatusCountdownTimer = 0;
+let liveStatusNextCheckAt = 0;
+const liveStatusServerKey = () => String(window.WWZServerContext?.getSelectedServer?.()?.key || '');
+const statusResponseIsCurrent = (epoch, key) =>
+  epoch === liveStatusRequestEpoch && key === liveStatusServerKey();
+const showNextLiveCheck = () => {
+  const message = document.hidden
+    ? 'Website status checks pause while this app is in the background.'
+    : navigator.onLine === false
+      ? 'Offline — website status checks resume when connected.'
+      : !liveStatusServerKey()
+        ? 'Select a server to start website status checks.'
+        : liveStatusNextCheckAt
+          ? `Next website status check in ${Math.max(0, Math.ceil((liveStatusNextCheckAt - Date.now()) / 1000))}s · DayZ data may update separately.`
+          : 'Connecting to your selected server…';
+  setText('[data-status-next-check]', message);
+};
 const refreshLiveStatus = async () => {
-  if (statusRequestInProgress) return;
+  if (statusRequestInProgress || navigator.onLine === false) return;
+  const epoch = ++liveStatusRequestEpoch;
+  const serverKey = liveStatusServerKey();
   statusRequestInProgress = true;
   refreshStatusButton?.classList.add('is-loading');
   refreshStatusButton?.setAttribute('aria-busy', 'true');
-
   try {
     const response = await window.WWZHttp.request(SERVER_STATUS_URL, {
-      method: 'GET',
-      headers: { Accept: 'application/json' }
+      method: 'GET', headers: { Accept: 'application/json' }
     }, 8_000);
     if (!response.ok) throw new Error(`Status request failed: ${response.status}`);
-    applyLiveStatus(await response.json());
+    const payload = await response.json();
+    if (!statusResponseIsCurrent(epoch, serverKey)) return;
+    applyLiveStatus(payload);
   } catch (error) {
-    showStatusUnavailable();
+    if (statusResponseIsCurrent(epoch, serverKey)) showStatusUnavailable();
   } finally {
-    statusRequestInProgress = false;
-    refreshStatusButton?.classList.remove('is-loading');
-    refreshStatusButton?.removeAttribute('aria-busy');
+    if (epoch === liveStatusRequestEpoch) {
+      statusRequestInProgress = false;
+      refreshStatusButton?.classList.remove('is-loading');
+      refreshStatusButton?.removeAttribute('aria-busy');
+    }
   }
 };
-
-let liveStatusPollTimer = 0;
 const scheduleLiveStatusPolling = () => {
   if (liveStatusPollTimer) window.clearInterval(liveStatusPollTimer);
+  if (liveStatusCountdownTimer) window.clearInterval(liveStatusCountdownTimer);
   liveStatusPollTimer = 0;
-  if (document.hidden) return;
+  liveStatusCountdownTimer = 0;
+  liveStatusNextCheckAt = 0;
+  if (document.hidden || navigator.onLine === false || !liveStatusServerKey()) {
+    showNextLiveCheck();
+    return;
+  }
+  liveStatusNextCheckAt = Date.now() + LIVE_STATUS_REFRESH_MS;
+  showNextLiveCheck();
   liveStatusPollTimer = window.setInterval(() => {
-    if (!document.hidden) refreshLiveStatus();
+    if (document.hidden || navigator.onLine === false) return;
+    liveStatusNextCheckAt = Date.now() + LIVE_STATUS_REFRESH_MS;
+    showNextLiveCheck();
+    void refreshLiveStatus();
   }, LIVE_STATUS_REFRESH_MS);
+  liveStatusCountdownTimer = window.setInterval(showNextLiveCheck, 5_000);
 };
-
-refreshStatusButton?.addEventListener('click', refreshLiveStatus);
+refreshStatusButton?.addEventListener('click', () => { void refreshLiveStatus(); });
 document.addEventListener('visibilitychange', () => {
   scheduleLiveStatusPolling();
-  if (!document.hidden) refreshLiveStatus();
+  if (!document.hidden) void refreshLiveStatus();
 });
-if (!document.hidden) refreshLiveStatus();
+window.addEventListener('wwz:serverchange', () => {
+  liveStatusRequestEpoch += 1;
+  statusRequestInProgress = false;
+  refreshStatusButton?.classList.remove('is-loading');
+  refreshStatusButton?.removeAttribute('aria-busy');
+  scheduleLiveStatusPolling();
+  if (!document.hidden) void refreshLiveStatus();
+});
+window.addEventListener('online', () => {
+  scheduleLiveStatusPolling();
+  if (!document.hidden) void refreshLiveStatus();
+});
+window.addEventListener('offline', () => {
+  scheduleLiveStatusPolling();
+  showStatusUnavailable();
+});
 scheduleLiveStatusPolling();
+if (!document.hidden) void refreshLiveStatus();
 
 
 // Admin identity-sync controls. Settings are always scoped by the selected WWZ server.

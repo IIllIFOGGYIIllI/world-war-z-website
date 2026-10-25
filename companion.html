@@ -10,7 +10,7 @@
 <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="WWZ Companion" name="apple-mobile-web-app-title"/>
 <meta content="Official World War Z Android companion for Nasdara PvE and PvP and the WWZ community dashboard." name="description"/>
-<title>WWZ Companion | Android Download</title>
+<title>WWZ Companion | Android &amp; iPhone</title>
 <link href="manifest.webmanifest" rel="manifest"/>
 <link href="assets/favicon.png?v=nasdara-community-1" rel="icon" type="image/png"/>
 <link href="assets/css/pages/home.css?v=1.22.93" rel="stylesheet"/>
@@ -65,7 +65,7 @@
 <div class="companion-hero-glow"></div>
 <div class="shell companion-hero-layout">
 <div class="companion-hero-copy">
-<p class="eyebrow"><span class="pulse"></span> Official Android release</p>
+<p class="eyebrow"><span class="pulse"></span> Signed Android app · iPhone Home Screen app</p>
 <h1>WORLD WAR Z<br/><span>COMPANION</span></h1>
 <p class="companion-lead">Take the WWZ Command Centre with you. The signed Android companion uses the same live website, Discord authentication, server context, maps, shop, community tools and Railway backend as the browser dashboard. Stable APK files are hosted as permanent GitHub Release assets.</p>
 <div class="companion-release-state" data-release-state="loading"><span></span><strong data-release-state-label="">Checking latest signed release…</strong></div>
@@ -75,7 +75,7 @@
 <button class="button button-secondary pwa-install-button" data-pwa-install="" hidden="" type="button">Install Web App</button>
 <a class="button button-secondary" href="dashboard.html">Open Dashboard</a>
 </div>
-<p class="companion-download-note" data-download-note="">Android 7.0+ · signed production APK · no Google Play account required.</p>
+<p class="companion-download-note" data-download-note="">Android 7.0+ · signed production APK · no Google Play account required. iPhone users can install the website from Safari using Add to Home Screen.</p>
 </div>
 <aside class="companion-device-card" aria-label="World War Z Companion release summary">
 <div class="companion-icon"><img alt="" src="assets/icons/pwa/icon-192.png?v=1.22.94"/></div>
@@ -100,6 +100,14 @@
 </ol>
 </article>
 
+<article class="companion-panel" data-iphone-install-guide>
+<p class="eyebrow">iPhone and iPad</p><h2>Install The WWZ Home Screen App</h2>
+<ol class="companion-steps">
+<li><span>01</span><div><strong>Open this site in Safari</strong><p>The Android APK is not compatible with iPhones.</p></div></li>
+<li><span>02</span><div><strong>Tap Share, then Add to Home Screen</strong><p>Confirm Add to install the WWZ Companion icon on your Home Screen.</p></div></li>
+<li><span>03</span><div><strong>Sign in inside the installed Companion</strong><p>If Discord sends you back to Safari, copy the private sign-in link and finish sign-in inside the Home Screen Companion.</p></div></li>
+</ol>
+</article>
 <article class="companion-panel">
 <p class="eyebrow">Two update layers</p>
 <h2>How Updates Work</h2>
@@ -115,7 +123,7 @@
 <dl>
 <div><dt>Package</dt><dd data-package-name="">com.worldwarz.companion</dd></div>
 <div><dt>Version code</dt><dd data-version-code="">Checking…</dd></div>
-<div><dt>Released</dt><dd data-release-date="">16 September 2026</dd></div>
+<div><dt>Released</dt><dd data-release-date="">Checking published release…</dd></div>
 <div><dt>Minimum Android</dt><dd data-minimum-android="">Checking…</dd></div>
 </dl>
 <label class="companion-hash"><span>APK SHA-256</span><code data-apk-sha="">Published with the signed release</code></label>
@@ -129,7 +137,7 @@
 <ul class="companion-checks">
 <li>Uses the live GitHub Pages WWZ website rather than bundling a stale copy.</li>
 <li>Uses the existing Railway API and Discord OAuth flow.</li>
-<li>Keeps Chernarus and Livonia server context isolated exactly like the website.</li>
+<li>Keeps Nasdara PvE and Nasdara PvP accounts, economy, orders and server selection separate.</li>
 <li>Does not put Discord, Nitrado or Android signing secrets in the public frontend.</li>
 <li>Retains the existing opt-in Web Push and bounded map caching behaviour.</li>
 </ul>

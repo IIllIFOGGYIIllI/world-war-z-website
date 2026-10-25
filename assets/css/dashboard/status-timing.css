@@ -1,0 +1,11 @@
+/* Stage 5: website read-only check timing, not an ADM update promise. */
+.status-next-refresh {
+  margin: 9px 0 0;
+  color: #aeb8c5;
+  font-size: clamp(12px, .86vw, 14px);
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 620px) {
+  .status-next-refresh { font-size: 13px; }
+}

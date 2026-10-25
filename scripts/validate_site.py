@@ -1340,7 +1340,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         if token not in bank_layout_css:
             errors.append(f"bank-layout.css: missing responsive bank layout guard: {token}")
 
-    account_script = 'assets/js/dashboard/account.js?v=1.58.3&amp;rev=ios-pwa-handoff-1'
+    account_script = 'assets/js/dashboard/account.js?v=1.58.3&amp;rev=stage5-status-1'
     bootstrap_script = 'assets/js/dashboard/bootstrap.js?v=1.40.0&amp;rev=member-home-overhaul-1'
     account_index = dashboard.find(account_script)
     bootstrap_index = dashboard.find(bootstrap_script)
