@@ -798,7 +798,8 @@ const scheduleLiveStatusPolling = () => {
   liveStatusNextCheckAt = Date.now() + LIVE_STATUS_REFRESH_MS;
   showNextLiveCheck();
   liveStatusPollTimer = window.setInterval(() => {
-    if (document.hidden || navigator.onLine === false) return;
+    if (document.hidden) return;
+    if (navigator.onLine === false) return;
     liveStatusNextCheckAt = Date.now() + LIVE_STATUS_REFRESH_MS;
     showNextLiveCheck();
     void refreshLiveStatus();
