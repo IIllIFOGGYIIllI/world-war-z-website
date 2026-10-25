@@ -40,6 +40,32 @@
   const selectedMapKey = () => String(window.WWZServerContext?.getMapKey?.() || state.mapKey || 'chernarus');
   const safeHex = (value, fallback = '#d52b1e') => /^#[0-9a-f]{6}$/i.test(String(value || '')) ? String(value) : fallback;
   const formatCoordinate = (value) => Number.isFinite(Number(value)) ? Number(value).toFixed(1) : '—';
+  const coordinateLimit = () => Number(state.worldSize) || Number(window.WWZMap?.getConfig?.(selectedMapKey())?.mapMetres) || 0;
+  const parseManualCoordinate = (raw, label) => {
+    const value = String(raw ?? '').trim();
+    const limit = coordinateLimit();
+    if (!value || !Number.isFinite(Number(value))) throw new Error(`${label} must be a valid number.`);
+    const number = Number(value);
+    if (number < 0 || (limit > 0 && number > limit)) {
+      throw new Error(`${label} must be between 0 and ${limit || 'the map boundary'}.`);
+    }
+    return Number(number.toFixed(4));
+  };
+  const zonePointArea = (points) => Math.abs(points.reduce((total, point, index) => {
+    const next = points[(index + 1) % points.length];
+    return total + point.x * next.z - next.x * point.z;
+  }, 0) / 2);
+  const syncCoordinateLimits = () => {
+    const limit = coordinateLimit();
+    const label = $('[data-zone-coordinate-limits]');
+    if (label) label.textContent = limit > 0
+      ? `Allowed map coordinates: 0–${limit.toLocaleString()} (including both boundaries).`
+      : 'Coordinates must stay within the selected map.';
+    $('[data-zone-center-x], [data-zone-center-z], [data-zone-manual-point-x], [data-zone-manual-point-z], [data-zone-point-coordinate]').forEach(input => {
+      if (limit > 0) input.max = String(limit);
+      else input.removeAttribute('max');
+    });
+  };
   const circleRadiusUnits = (radius, mapKey = selectedMapKey()) => {
     const config = window.WWZMap?.getConfig?.(mapKey);
     if (!config) return Number(radius) || 0;
@@ -549,6 +575,8 @@
     $('[data-zone-circle-fields] input').forEach((input) => {
       input.disabled = !circle || state.editorManaged;
     });
+    $('[data-zone-manual-point-entry] input, [data-zone-add-manual-point], [data-zone-preview-circle]').forEach(control => { control.disabled = state.editorManaged; });
+    syncCoordinateLimits();
     const title = $('[data-zone-editor-title]');
     const kicker = $('[data-zone-editor-kicker]');
     if (title) title.textContent = `${state.editorZoneId ? 'Edit' : 'Create'} ${circle ? 'Circular' : 'Polygon'} Zone`;
@@ -561,26 +589,72 @@
     if (count) count.textContent = `${state.editorPoints.length} / 256 points`;
     if (!list) return;
     list.replaceChildren();
+    const limit = coordinateLimit();
     state.editorPoints.forEach((point, index) => {
       const item = document.createElement('li');
-      const text = document.createElement('span');
-      text.textContent = `#${index + 1} · X ${formatCoordinate(point.x)} · Z ${formatCoordinate(point.z)}`;
-      const remove = document.createElement('button');
-      remove.type = 'button';
-      remove.textContent = '×';
-      remove.setAttribute('aria-label', `Remove polygon point ${index + 1}`);
-      remove.disabled = state.editorManaged;
-      remove.addEventListener('click', () => {
-        if (state.editorManaged) return;
-        state.editorPoints.splice(index, 1);
-        renderEditorGeometry();
-      });
-      item.append(text, remove);
+      item.className = 'zone-point-editor-row';
+      const number = document.createElement('strong');
+      number.className = 'zone-point-index';
+      number.textContent = `#${index + 1}`;
+      const coordinate = (axis) => {
+        const label = document.createElement('label');
+        label.className = 'zone-point-axis';
+        const name = document.createElement('span');
+        name.textContent = axis.toUpperCase();
+        const field = document.createElement('input');
+        field.type = 'number';
+        field.step = 'any';
+        field.min = '0';
+        field.inputMode = 'decimal';
+        field.dataset.zonePointCoordinate = axis;
+        field.setAttribute('aria-label', `Point ${index + 1} ${axis.toUpperCase()} coordinate`);
+        if (limit > 0) field.max = String(limit);
+        field.value = String(point[axis]);
+        field.disabled = state.editorManaged;
+        field.addEventListener('change', () => {
+          if (state.editorManaged) return;
+          try {
+            state.editorPoints[index][axis] = parseManualCoordinate(field.value, `Point ${index + 1} ${axis.toUpperCase()}`);
+            editorMessage('');
+            renderEditorGeometry();
+          } catch (error) {
+            field.value = String(state.editorPoints[index][axis]);
+            editorMessage(error.message, 'error');
+          }
+        });
+        label.append(name, field);
+        return label;
+      };
+      const buttons = document.createElement('div');
+      buttons.className = 'zone-point-row-actions';
+      const action = (symbol, title, fn, disabled = false) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'secondary-action compact-action';
+        button.textContent = symbol;
+        button.title = title;
+        button.setAttribute('aria-label', title);
+        button.disabled = state.editorManaged || disabled;
+        button.addEventListener('click', () => {
+          if (state.editorManaged) return;
+          fn();
+          renderEditorGeometry();
+        });
+        return button;
+      };
+      buttons.append(
+        action('↑', `Move point ${index + 1} up`, () => { [state.editorPoints[index - 1], state.editorPoints[index]] = [state.editorPoints[index], state.editorPoints[index - 1]]; }, index === 0),
+        action('↓', `Move point ${index + 1} down`, () => { [state.editorPoints[index], state.editorPoints[index + 1]] = [state.editorPoints[index + 1], state.editorPoints[index]]; }, index === state.editorPoints.length - 1),
+        action('×', `Remove polygon point ${index + 1}`, () => { state.editorPoints.splice(index, 1); }),
+      );
+      item.append(number, coordinate('x'), coordinate('z'), buttons);
       list.append(item);
     });
   };
 
   const renderEditorGeometry = () => {
+    // Coordinates remain editable even when a map image has not loaded.
+    renderPolygonPointList();
     const mapInstance = ensureEditorMap();
     if (!mapInstance || !state.editorLayers) return;
     state.editorLayers.clearLayers();
@@ -609,7 +683,6 @@
           .addTo(state.editorLayers);
       });
     }
-    renderPolygonPointList();
   };
 
   const resetEditor = () => {
@@ -628,6 +701,9 @@
     if ($('[data-zone-radar-interval]')) $('[data-zone-radar-interval]').value = '5';
     if ($('[data-zone-temporary-ban-minutes]')) $('[data-zone-temporary-ban-minutes]').value = '60';
     if ($('[data-zone-radius]')) $('[data-zone-radius]').value = '150';
+    if ($('[data-zone-manual-point-x]')) $('[data-zone-manual-point-x]').value = '';
+    if ($('[data-zone-manual-point-z]')) $('[data-zone-manual-point-z]').value = '';
+    syncCoordinateLimits();
     setRuleValues({});
     fillChannelOptions('');
     fillRoleChecklist('[data-zone-ping-roles]', []);
@@ -776,7 +852,20 @@
       const payload = zonePayloadFromEditor();
       if (!payload.name) throw new Error('Enter a zone name.');
       if (payload.ping_on_detection && !payload.channel_key) throw new Error('Select a Discord alert channel for Ping on Detection.');
-      if (payload.shape === 'polygon' && payload.points.length < 3) throw new Error('Polygon zones need at least three map points.');
+      if (payload.shape === 'polygon') {
+        if (payload.points.length < 3) throw new Error('Polygon zones need at least three distinct points.');
+        if (payload.points.length > 256) throw new Error('Polygon zones can have at most 256 points.');
+        payload.points.forEach((point, i) => {
+          point.x = parseManualCoordinate(point.x, `Point ${i + 1} X`);
+          point.z = parseManualCoordinate(point.z, `Point ${i + 1} Z`);
+        });
+        if (new Set(payload.points.map(p => `${p.x}:${p.z}`)).size < 3) throw new Error('Polygon zones need at least three distinct coordinates.');
+        if (zonePointArea(payload.points) < 1) throw new Error('Polygon vertices must enclose an area; check their order and positions.');
+      } else {
+        payload.center_x = Number(parseManualCoordinate($('[data-zone-center-x]')?.value, 'Circle X').toFixed(1));
+        payload.center_z = Number(parseManualCoordinate($('[data-zone-center-z]')?.value, 'Circle Z').toFixed(1));
+        if (!Number.isFinite(payload.radius) || payload.radius < 1) throw new Error('Enter a circle radius of at least 1 metre.');
+      }
       const result = await authenticatedJson(ADMIN_ZONES_ACTION_URL, {
         method: 'POST',
         body: JSON.stringify(payload),
@@ -988,9 +1077,40 @@
       renderEditorGeometry();
     });
     $('[data-zone-clear-points]')?.addEventListener('click', () => {
+      if (state.editorManaged) return;
       state.editorPoints = [];
       state.editorMap?.clearSelection?.({ notify: false });
       renderEditorGeometry();
+    });
+    $('[data-zone-add-manual-point]')?.addEventListener('click', () => {
+      if (state.editorManaged || state.editorShape !== 'polygon') return;
+      try {
+        if (state.editorPoints.length >= 256) throw new Error('Polygon zones support a maximum of 256 points.');
+        const x = parseManualCoordinate($('[data-zone-manual-point-x]')?.value, 'New point X');
+        const z = parseManualCoordinate($('[data-zone-manual-point-z]')?.value, 'New point Z');
+        state.editorPoints.push({ x, z });
+        $('[data-zone-manual-point-x]').value = '';
+        $('[data-zone-manual-point-z]').value = '';
+        editorMessage('');
+        renderEditorGeometry();
+      } catch (error) {
+        editorMessage(error.message, 'error');
+      }
+    });
+    $('[data-zone-preview-circle]')?.addEventListener('click', () => {
+      if (state.editorManaged || state.editorShape !== 'circle') return;
+      try {
+        const x = parseManualCoordinate($('[data-zone-center-x]')?.value, 'Circle X');
+        const z = parseManualCoordinate($('[data-zone-center-z]')?.value, 'Circle Z');
+        const radius = Number($('[data-zone-radius]')?.value);
+        if (!Number.isFinite(radius) || radius < 1) throw new Error('Enter a radius of at least 1 metre.');
+        renderEditorGeometry();
+        state.editorMap?.setSelection?.(x, z, { notify: false, marker: true });
+        state.editorMap?.focus?.(x, z, 6);
+        editorMessage('Preview updated from manual coordinates.', 'info');
+      } catch (error) {
+        editorMessage(error.message, 'error');
+      }
     });
     window.addEventListener('wwz:viewchange', (event) => {
       if (String(event.detail?.view || '') !== 'zones') {

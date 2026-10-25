@@ -328,3 +328,41 @@
   .zone-dynamic-row { grid-template-columns: 1fr; }
   .zone-dynamic-entries { grid-column: auto; }
 }
+
+/* Manual DayZ X/Z geometry editing: keyboard, pointer and mobile. */
+.zone-coordinate-entry {
+  display: grid;
+  grid-template-columns: minmax(190px, 1fr) minmax(105px, 130px) minmax(105px, 130px) auto;
+  gap: .65rem;
+  align-items: end;
+  margin: .8rem 0;
+  padding: .85rem;
+  background: rgba(6,11,20,.25);
+  border: 1px solid rgba(255,255,255,.11);
+  border-radius: 11px;
+}
+.zone-manual-label { align-self: center; min-width: 0; }
+.zone-manual-label strong { display: block; font-size: .86rem; }
+.zone-manual-label small { display: block; margin-top: .25rem; color: #aeb8c8; line-height: 1.45; }
+.zone-coordinate-entry input, .zone-point-axis input { width: 100%; min-width: 0; }
+.zone-coordinate-entry > button, .zone-coordinate-commands button { min-height: 44px; }
+.zone-coordinate-commands { display: flex; flex-wrap: wrap; align-items: center; gap: .7rem; margin-top: .7rem; }
+.zone-coordinate-commands small { font-size: .75rem; color: #bdc8d9; }
+.zone-point-editor-row { display: grid; grid-template-columns: 42px minmax(90px, 1fr) minmax(90px, 1fr) auto; align-items: center; gap: .55rem; padding: .46rem .5rem; }
+.zone-point-index { font-size: .79rem; white-space: nowrap; }
+.zone-point-axis { display: flex; align-items: center; gap: .4rem; color: #c6d0df; font-size: .78rem; }
+.zone-point-axis span { flex-shrink: 0; }
+.zone-point-axis input { background: rgba(4,9,16,.4); color: #eef1f7; border: 1px solid rgba(255,255,255,.17); border-radius: 7px; min-height: 40px; padding: .4rem .45rem; font: inherit; }
+.zone-point-row-actions { display: flex; gap: .3rem; }
+.zone-point-row-actions button { min-width: 33px; min-height: 38px; padding: .25rem .35rem; }
+.zone-point-editor-row input:focus-visible { outline: 2px solid #d52b1e; outline-offset: 1px; }
+@media (max-width: 1080px) {
+  .zone-coordinate-entry { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .zone-manual-label { grid-column: 1 / -1; }
+  .zone-coordinate-entry > button { grid-column: 1 / -1; }
+}
+@media (max-width: 590px) {
+  .zone-point-editor-row { grid-template-columns: 38px minmax(0, 1fr) minmax(0, 1fr); }
+  .zone-point-row-actions { grid-column: 2 / -1; justify-content: flex-end; }
+  .zone-coordinate-entry { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
