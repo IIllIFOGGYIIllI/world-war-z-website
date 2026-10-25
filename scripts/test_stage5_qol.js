@@ -28,5 +28,5 @@ for(const token of [
 'lastForegroundCheckAt = Date.now();',
 'void activeServiceWorkerRegistration.update().catch(() => null);'
 ])assert.ok(p.includes(token),'missing PWA foreground safeguard '+token);
-assert.ok(read('sw.js').includes('2026-10-26-stage5-qol-1'));
+assert.match(read('sw.js'), /WWZ_PWA_UPDATE_REVISION = '2026-10-26-stage5-qol-\d+';/);
 console.log('PASS: Stage 5 status timing, Nasdara Companion and foreground updates');
