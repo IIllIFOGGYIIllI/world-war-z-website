@@ -1048,7 +1048,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append(f"shop.js: extracted helper {helper} must live in shop-helpers.js.")
 
     shop_helper_script = 'assets/js/dashboard/shop-helpers.js?v=1.54.2&rev=shop-classname-admin-1'
-    shop_script = 'assets/js/dashboard/shop.js?v=2.1.0&rev=multi-destination-1'
+    shop_script = 'assets/js/dashboard/shop.js?v=2.1.1&rev=phase2-reliability-1'
     delivery_script = 'assets/js/dashboard/delivery.js?v=1.54.3&rev=item-retry-1'
     for label, asset_url in (
         ("shared Shop helpers", shop_helper_script),
@@ -1104,7 +1104,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     for changed_asset in (
         'assets/js/dashboard/zones.js?v=1.59.4&rev=zone-save-fix-1',
         'assets/js/dashboard/shop-helpers.js?v=1.54.2&rev=shop-classname-admin-1',
-        'assets/js/dashboard/shop.js?v=2.1.0&rev=multi-destination-1',
+        'assets/js/dashboard/shop.js?v=2.1.1&rev=phase2-reliability-1',
     ):
         if changed_asset not in lazy_assets:
             errors.append(f'lazy-assets.js: stale changed-controller cache key: {changed_asset}')

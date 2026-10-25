@@ -179,8 +179,11 @@ let editingShopItemDiscounts = [];
 let editingShopItemId = null;
 let shopPurchasesEnabled = false;
 let shopRequestInProgress = false;
+let shopRequestEpoch = 0;
+let shopRefreshPending = false;
 let shopPurchaseInProgress = false;
 let adminShopRequestInProgress = false;
+let adminShopRequestEpoch = 0;
 let shopOrderActionInProgress = false;
 let ownerShopRequestInProgress = false;
 let savedDeliveryLocations = [];
@@ -605,9 +608,41 @@ const appendDashboardRestartBanner = (card, order) => {
   copy.append(small,strong,em); banner.append(icon,copy); card.append(banner);
 };
 const appendDashboardRentalProgress = (card, order) => {
-  if(order?.delivery_type!=='event') return;
-  const purchased=Math.max(1,Number(order?.delivery?.purchased_restarts??order.event_restarts??1)); const remaining=Math.max(0,Number(order?.delivery?.remaining_restarts??(String(order?.status).toLowerCase()==='fulfilled'?0:purchased))); const used=Math.min(purchased,Math.max(0,purchased-remaining));
-  const block=document.createElement('div'); block.className='shop-rental-progress'; const head=document.createElement('div'); const strong=document.createElement('strong'); strong.textContent=`${remaining.toLocaleString()} restart${remaining===1?'':'s'} remaining`; const span=document.createElement('span'); span.textContent=`${used.toLocaleString()} used · ${purchased.toLocaleString()} purchased`; head.append(strong,span); const meter=document.createElement('div'); const fill=document.createElement('i'); fill.style.width=`${purchased?Math.min(100,(used/purchased)*100):0}%`; meter.append(fill); block.append(head,meter); card.append(block);
+  if (order?.delivery_type !== 'event') return;
+  const purchased = Math.max(1, Number(order?.delivery?.purchased_restarts ?? order.event_restarts ?? 1));
+  const remaining = Math.max(0, Number(order?.delivery?.remaining_restarts ??
+    (String(order?.status).toLowerCase() === 'fulfilled' ? 0 : purchased)));
+  const used = Math.min(purchased, Math.max(0, purchased - remaining));
+  const status = dashboardOrderDeliveryState(order);
+  const block = document.createElement('div'); block.className = 'shop-rental-progress';
+  const head = document.createElement('div');
+  const strong = document.createElement('strong');
+  strong.textContent = `${remaining.toLocaleString()} restart${remaining === 1 ? '' : 's'} remaining`;
+  const span = document.createElement('span');
+  span.textContent = `${used.toLocaleString()} used · ${purchased.toLocaleString()} purchased`;
+  head.append(strong, span);
+  const meter = document.createElement('div');
+  const fill = document.createElement('i');
+  fill.style.width = `${purchased ? Math.min(100, (used / purchased) * 100) : 0}%`;
+  meter.append(fill);
+  const note = document.createElement('small');
+  note.className = 'rental-progress-note';
+  note.textContent = status === 'active'
+    ? 'Rental active · remaining restarts are tracked separately for this vehicle.'
+    : status === 'restart_pending'
+      ? 'Waiting for first spawn · rental restart tracking begins after activation.'
+      : status === 'cleanup_due'
+        ? 'Rental term complete · automatic file cleanup is queued.'
+        : status === 'fulfilled'
+          ? 'Rental complete · automatic file cleanup finished.'
+          : 'Each vehicle has its own order, delivery location and restart term.';
+  const link = document.createElement('a');
+  link.className = 'secondary-action compact-action rental-manage-link';
+  link.href = 'shop.html?section=rentals';
+  link.textContent = 'Manage rentals';
+  link.setAttribute('aria-label', `Manage rental order #${order.order_id} in the member shop`);
+  block.append(head, meter, note, link);
+  card.append(block);
 };
 const renderMemberShopOrders = (orders) => {
   if (!shopOrderList) return;
@@ -675,55 +710,82 @@ const ensureShopPreviewRuntime = async () => {
   }
 };
 
+// Protect the shop against old requests arriving after PvE/PvP or Discord account changes.
+// Coalesce simultaneous tab/refetch requests into one follow-up instead of
+// queuing an unbounded chain of 250ms retry timers.
+const shopSelectedServerKey = () => String(window.WWZServerContext?.getSelectedServer?.()?.key || '');
+const shopReadScope = (token) => ({ epoch: shopRequestEpoch, serverKey: shopSelectedServerKey(), token });
+const shopScopeCurrent = (scope) => scope.epoch === shopRequestEpoch
+  && scope.serverKey === shopSelectedServerKey()
+  && scope.token === storageGet(AUTH_SESSION_KEY);
+
 const loadPublicShop = async () => {
-  if (shopRequestInProgress) return;
+  if (shopRequestInProgress) { shopRefreshPending = true; return false; }
+  const scope = shopReadScope(storageGet(AUTH_SESSION_KEY));
+  if (!scope.serverKey) return false;
   shopRequestInProgress = true;
   refreshShopButton?.setAttribute('disabled', '');
   try {
     await ensureShopPreviewRuntime();
     const response = await authFetch(SHOP_CATALOGUE_URL, { headers: { Accept: 'application/json' } });
     const payload = await response.json().catch(() => ({}));
+    if (!shopScopeCurrent(scope)) return false;
     if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Shop unavailable');
     applyShopPayload(payload);
     if (shopError) shopError.hidden = true;
+    return true;
   } catch (error) {
-    if (shopError) shopError.hidden = false;
+    if (shopScopeCurrent(scope) && shopError) shopError.hidden = false;
+    return false;
   } finally {
-    shopRequestInProgress = false;
-    refreshShopButton?.removeAttribute('disabled');
+    if (shopScopeCurrent(scope)) {
+      shopRequestInProgress = false;
+      refreshShopButton?.removeAttribute('disabled');
+      if (shopRefreshPending) {
+        shopRefreshPending = false;
+        void (storageGet(AUTH_SESSION_KEY) ? loadMemberShop() : loadPublicShop());
+      }
+    }
   }
 };
 
 const loadMemberShop = async (sessionToken = storageGet(AUTH_SESSION_KEY)) => {
   if (!sessionToken) return false;
-  if (shopRequestInProgress) {
-    window.setTimeout(() => loadMemberShop(sessionToken), 250);
-    return false;
-  }
+  if (shopRequestInProgress) { shopRefreshPending = true; return false; }
+  const scope = shopReadScope(sessionToken);
+  if (!scope.serverKey || !shopScopeCurrent(scope)) return false;
   shopRequestInProgress = true;
   refreshShopButton?.setAttribute('disabled', '');
   refreshShopOrdersButton?.setAttribute('disabled', '');
   try {
     await ensureShopPreviewRuntime();
-    const response = await authFetch(ACCOUNT_SHOP_URL, { headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` } });
+    const response = await authFetch(ACCOUNT_SHOP_URL, {
+      headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` }
+    });
     const payload = await response.json().catch(() => ({}));
-    // Checkout permissions are evaluated by the selected server. Do not
-    // discard a globally valid session on an individual guild rejection.
+    if (!shopScopeCurrent(scope)) return false;
+    // Server-specific denials never invalidate global Discord authentication.
     if (response.status === 401 || response.status === 403) {
       throw new Error(payload.message || 'Shop access is unavailable for this server.');
     }
     if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Shop unavailable');
     applyShopPayload(payload, { member: true });
-    loadDeliveryLocations(sessionToken, { quiet: true });
+    void loadDeliveryLocations(sessionToken, { quiet: true });
     if (shopError) shopError.hidden = true;
     return true;
   } catch (error) {
-    if (shopError) shopError.hidden = false;
+    if (shopScopeCurrent(scope) && shopError) shopError.hidden = false;
     return false;
   } finally {
-    shopRequestInProgress = false;
-    refreshShopButton?.removeAttribute('disabled');
-    refreshShopOrdersButton?.removeAttribute('disabled');
+    if (shopScopeCurrent(scope)) {
+      shopRequestInProgress = false;
+      refreshShopButton?.removeAttribute('disabled');
+      refreshShopOrdersButton?.removeAttribute('disabled');
+      if (shopRefreshPending) {
+        shopRefreshPending = false;
+        void loadMemberShop(storageGet(AUTH_SESSION_KEY));
+      }
+    }
   }
 };
 
@@ -747,29 +809,52 @@ shopPurchaseForm?.addEventListener('submit', async (event) => {
   const sessionToken = storageGet(AUTH_SESSION_KEY);
   if (!sessionToken || (!selectedShopItem && !shopCartCheckout) || shopPurchaseInProgress) return;
   shopPurchaseInProgress = true;
+  let checkoutRequestSent = false;
   confirmShopPurchaseButton?.setAttribute('disabled', '');
   showShopInlineMessage(shopPurchaseMessage, 'Railway is validating stock, purchase limits and your selected payment source.', 'info');
   try {
+    const purchaseRequest = (() => {
+      const paymentMethod = shopPaymentMethod?.value === 'bank' ? 'bank' : 'cash';
+      const needsDelivery = shopCartCheckout || selectedShopItem?.delivery_type === 'event' || selectedShopItem?.requires_coordinates;
+      const delivery = needsDelivery ? (() => {
+        if (!shopCoordinateConfirm?.checked) throw new Error('Confirm that you checked the in-game coordinates.');
+        if (shopDeliveryLocation?.value) return { location_id: Number(shopDeliveryLocation.value) };
+        if (shopCartCheckout && !shopDeliveryX?.value && !shopDeliveryZ?.value) return null;
+        const value = { x: shopDeliveryX?.value, y: shopDeliveryY?.value, z: shopDeliveryZ?.value, rotation: shopDeliveryRotation?.value || 0,
+          save_location: shopCartCheckout ? false : Boolean(shopSaveLocation?.checked), location_name: shopCartCheckout ? '' : (shopSaveLocationName?.value.trim() || '') };
+        if (!value.x || value.y === '' || !value.z) throw new Error('Enter complete X, Y and Z coordinates.');
+        if (value.save_location && !value.location_name) throw new Error('Name the saved location before continuing.');
+        return value;
+      })() : null;
+      if (shopCartCheckout) return {
+        items: dashboardCartDeliveryPlan.lines(delivery),
+        buyer_note: shopPurchaseNote?.value.trim() || '',
+        payment_method: paymentMethod, delivery
+      };
+      return {
+        item_id: Number(selectedShopItem.item_id),
+        quantity: selectedShopItem.delivery_type === 'event' ? 1 : Number(shopPurchaseQuantity?.value || 1),
+        event_restarts: selectedShopItem.delivery_type === 'event' ? Number(shopPurchaseQuantity?.value || 1) : 1,
+        buyer_note: shopPurchaseNote?.value.trim() || '', payment_method: paymentMethod,
+        delivery: (selectedShopItem.delivery_type === 'event' || selectedShopItem.requires_coordinates) ? delivery : null
+      };
+    })();
+    // Reuse the same checkout key for the same account, server and request.
+    // Only a confirmed success should release the key for a new purchase.
+    const purchaseKey = window.WWZCheckoutIdempotency.prepare({
+      server: window.WWZServerContext?.getSelectedServer?.(),
+      identity: authenticatedUser?.user?.id || authenticatedUser?.user?.discord_id,
+      request: purchaseRequest
+    });
+    const checkoutBody = {
+      ...purchaseRequest, purchase_key: purchaseKey,
+      ...(shopCartCheckout ? { checkout_key: purchaseKey } : {})
+    };
+    checkoutRequestSent = true;
     const response = await protectedActionFetch(ACCOUNT_SHOP_PURCHASE_URL, {
       method: 'POST',
       headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken}` },
-      body: JSON.stringify((() => {
-        const purchaseKey = `${Date.now().toString(36)}-${crypto.randomUUID?.() || Math.random().toString(36).slice(2)}-shop`;
-        const paymentMethod = shopPaymentMethod?.value === 'bank' ? 'bank' : 'cash';
-        const needsDelivery = shopCartCheckout || selectedShopItem?.delivery_type === 'event' || selectedShopItem?.requires_coordinates;
-        const delivery = needsDelivery ? (() => {
-          if (!shopCoordinateConfirm?.checked) throw new Error('Confirm that you checked the in-game coordinates.');
-          if (shopDeliveryLocation?.value) return { location_id: Number(shopDeliveryLocation.value) };
-          if (shopCartCheckout && !shopDeliveryX?.value && !shopDeliveryZ?.value) return null;
-          const value = { x: shopDeliveryX?.value, y: shopDeliveryY?.value, z: shopDeliveryZ?.value, rotation: shopDeliveryRotation?.value || 0,
-            save_location: shopCartCheckout ? false : Boolean(shopSaveLocation?.checked), location_name: shopCartCheckout ? '' : (shopSaveLocationName?.value.trim() || '') };
-          if (!value.x || value.y === '' || !value.z) throw new Error('Enter complete X, Y and Z coordinates.');
-          if (value.save_location && !value.location_name) throw new Error('Name the saved location before continuing.');
-          return value;
-        })() : null;
-        if (shopCartCheckout) return { items: dashboardCartDeliveryPlan.lines(delivery), buyer_note: shopPurchaseNote?.value.trim() || '', payment_method: paymentMethod, checkout_key: purchaseKey, purchase_key: purchaseKey, delivery };
-        return { item_id: Number(selectedShopItem.item_id), quantity: selectedShopItem.delivery_type === 'event' ? 1 : Number(shopPurchaseQuantity?.value || 1), event_restarts: selectedShopItem.delivery_type === 'event' ? Number(shopPurchaseQuantity?.value || 1) : 1, buyer_note: shopPurchaseNote?.value.trim() || '', payment_method: paymentMethod, purchase_key: purchaseKey, delivery: (selectedShopItem.delivery_type === 'event' || selectedShopItem.requires_coordinates) ? delivery : null };
-      })())
+      body: JSON.stringify(checkoutBody)
     });
     const payload = await response.json().catch(() => ({}));
     // A rejected checkout never revokes the shared OAuth session or clears
@@ -778,12 +863,14 @@ shopPurchaseForm?.addEventListener('submit', async (event) => {
       throw new Error(payload.message || 'Checkout is not permitted for this server.');
     }
     if (!response.ok) throw new Error(payload.message || 'The purchase could not be completed.');
+    window.WWZCheckoutIdempotency.clear(purchaseKey);
     showShopInlineMessage(shopPurchaseMessage, payload.message || 'Order placed.', 'success');
     if (shopCartCheckout) clearDashboardShopCart();
     await loadMemberShop(sessionToken);
     window.setTimeout(() => { shopPurchaseDialog?.close?.(); shopCartCheckout = false; }, 900);
   } catch (error) {
-    showShopInlineMessage(shopPurchaseMessage, error.message || 'The purchase could not be completed.');
+    showShopInlineMessage(shopPurchaseMessage, (error.message || 'The purchase could not be completed.') +
+      (checkoutRequestSent ? ' Check My Orders before changing your cart. Retrying the same checkout keeps the original payment key.' : ''));
   } finally {
     shopPurchaseInProgress = false;
     confirmShopPurchaseButton?.removeAttribute('disabled');
@@ -910,25 +997,40 @@ const renderAdminShopOrders = (payload) => {
 
 const loadAdminShopOrders = async (sessionToken = storageGet(AUTH_SESSION_KEY)) => {
   if (!sessionToken || !hasServerActionAccess() || adminShopRequestInProgress) return false;
+  const epoch = ++adminShopRequestEpoch;
+  const serverKey = shopSelectedServerKey();
+  const view = String(adminShopOrderScope?.value || 'open');
+  const isCurrent = () => epoch === adminShopRequestEpoch &&
+    shopSelectedServerKey() === serverKey && storageGet(AUTH_SESSION_KEY) === sessionToken &&
+    view === String(adminShopOrderScope?.value || 'open');
   adminShopRequestInProgress = true;
   refreshAdminShopOrdersButton?.setAttribute('disabled', '');
   try {
-    const scope = encodeURIComponent(adminShopOrderScope?.value || 'open');
-    const response = await authFetch(`${ADMIN_SHOP_ORDERS_URL}?status=${scope}&limit=75`, { headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` } });
+    const scope = encodeURIComponent(view);
+    const response = await authFetch(`${ADMIN_SHOP_ORDERS_URL}?status=${scope}&limit=75`, {
+      headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` }
+    });
     const payload = await response.json().catch(() => ({}));
+    if (!isCurrent()) return false;
     if (handleAdminPlayerAuthorizationResponse(response, payload, { actionRequest: false })) return false;
     if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || 'Orders unavailable');
     renderAdminShopOrders(payload);
     return true;
   } catch (error) {
-    if (adminShopOrderError) adminShopOrderError.hidden = false;
+    if (isCurrent() && adminShopOrderError) adminShopOrderError.hidden = false;
     return false;
   } finally {
-    adminShopRequestInProgress = false;
-    refreshAdminShopOrdersButton?.removeAttribute('disabled');
+    if (epoch === adminShopRequestEpoch) {
+      adminShopRequestInProgress = false;
+      refreshAdminShopOrdersButton?.removeAttribute('disabled');
+    }
   }
 };
-adminShopOrderScope?.addEventListener('change', () => loadAdminShopOrders());
+adminShopOrderScope?.addEventListener('change', () => {
+  adminShopRequestEpoch += 1;
+  adminShopRequestInProgress = false;
+  void loadAdminShopOrders();
+});
 refreshAdminShopOrdersButton?.addEventListener('click', () => loadAdminShopOrders());
 shopOrderActionCancelButtons.forEach((button) => button.addEventListener('click', () => { if (!shopOrderActionInProgress) shopOrderActionDialog?.close?.(); }));
 shopOrderActionForm?.addEventListener('submit', async (event) => {
@@ -2029,16 +2131,38 @@ window.WWZShopController = Object.freeze({
 });
 window.__wwzShopControllerReady = true;
 window.addEventListener('wwz:serverchange', () => {
+  shopRequestEpoch += 1;
+  adminShopRequestEpoch += 1;
+  shopRequestInProgress = false;
+  adminShopRequestInProgress = false;
+  shopRefreshPending = false;
+  shopItems = [];
+  resetShopPanels();
+  refreshShopButton?.removeAttribute('disabled');
+  refreshShopOrdersButton?.removeAttribute('disabled');
+  refreshAdminShopOrdersButton?.removeAttribute('disabled');
+  if (shopError) shopError.hidden = true;
+  if (adminShopOrderList) adminShopOrderList.replaceChildren();
   loadDashboardShopCart(); renderDashboardShopCart();
-  if (!shopCoordinateMapInstance) return;
-  shopCoordinateMapInstance.destroy();
-  shopCoordinateMapInstance = null;
-  ensureShopCoordinateMap()?.invalidateSize();
-  updateCoordinateMarker();
+  if (shopCoordinateMapInstance) {
+    shopCoordinateMapInstance.destroy();
+    shopCoordinateMapInstance = null;
+    ensureShopCoordinateMap()?.invalidateSize();
+    updateCoordinateMarker();
+  }
 });
 window.addEventListener('wwz:restartstatus', (event) => {
   shopRestartOperations = event.detail && typeof event.detail === 'object' ? event.detail : null;
   if (memberShopOrders.length) renderMemberShopOrders(memberShopOrders);
 });
 shopRestartOperations = window.WWZShopRestartOperations || null;
+window.addEventListener('wwz:authchange', () => {
+  shopRequestEpoch += 1;
+  adminShopRequestEpoch += 1;
+  shopRequestInProgress = false;
+  adminShopRequestInProgress = false;
+  shopRefreshPending = false;
+  memberShopOrders = [];
+  resetShopPanels();
+});
 loadDashboardShopCart(); renderDashboardShopCart();

@@ -235,9 +235,15 @@
     () => window.__wwzShopHelpersReady === true
   ));
 
-  const ensureShopController = () => ensureShopHelpers().then(() => loadScriptOnce(
+  const ensureCheckoutIdempotency = () => loadScriptOnce(
+    'checkout-idempotency',
+    'assets/js/core/checkout-idempotency.js?v=1.0.0&rev=stage5-phase2',
+    () => Boolean(window.WWZCheckoutIdempotency?.prepare)
+  );
+
+  const ensureShopController = () => Promise.all([ensureShopHelpers(), ensureCheckoutIdempotency()]).then(() => loadScriptOnce(
     'shop-controller',
-    'assets/js/dashboard/shop.js?v=2.1.0&rev=multi-destination-1',
+    'assets/js/dashboard/shop.js?v=2.1.1&rev=phase2-reliability-1',
     () => window.__wwzShopControllerReady === true
   ));
 

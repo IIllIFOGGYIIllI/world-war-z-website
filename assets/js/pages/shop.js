@@ -1522,6 +1522,6 @@ const initialise = async () => {
   } else if (requestedSection === 'orders') {
     document.getElementById('orders')?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
   }
-  window.setInterval(loadRestartStatus, 30_000);
+  window.setInterval(() => { if (!document.hidden) void loadRestartStatus(); }, 30_000);
 };
 initialise();
