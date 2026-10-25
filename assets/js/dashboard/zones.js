@@ -961,7 +961,8 @@
     zoneForm?.addEventListener('submit', saveZone);
     zoneForm?.addEventListener('invalid', (event) => {
       const control = event.target;
-      const field = control?.closest?.('label')?.querySelector?.('span')?.textContent || control?.getAttribute?.('data-zone-name') !== null && control?.hasAttribute?.('data-zone-name') ? 'Name' : 'required field';
+      const field = control?.closest?.('label')?.querySelector?.('span')?.textContent
+        || (control?.hasAttribute?.('data-zone-name') ? 'Name' : 'a required field');
       editorMessage('Cannot save: please complete ' + String(field || 'the required field') + '.', 'error');
     }, true);
     $('[data-zone-add-dynamic-list]')?.addEventListener('click', () => {
