@@ -33,7 +33,7 @@ const mergeEvents=(events,server,now=Date.now())=>{
   const existing=Array.isArray(events)?events:[];
   const planned=forServer(server,now);
   if(!planned.length)return existing;
-  const existingDays=new Set(existing.filter(e=>e.event_type==='raid_weekend'&&!e.virtual_raid_weekend).map(e=>String(e.starts_at||'').slice(0,10)));
+  const existingDays=new Set(existing.filter(e=>e.event_type==='raid_weekend').map(e=>String(e.starts_at||'').slice(0,10)));
   return [...existing,...planned.filter(e=>!existingDays.has(e.starts_at.slice(0,10)))]
     .sort((a,b)=>new Date(a.starts_at)-new Date(b.starts_at));
 };

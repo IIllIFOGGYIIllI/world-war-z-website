@@ -18,6 +18,7 @@ assert.equal(Number(hour),19,'7pm Sydney survives DST');
 const real={...rows[0],id:42,virtual_raid_weekend:false};
 assert.equal(mergeEvents([real],pve,Date.parse('2026-10-26T00:00:00Z')).filter(x=>x.starts_at===rows[0].starts_at).length,1);
 assert.ok(rows.every(x=>x.signup_enabled===false&&x.virtual_raid_weekend));
+assert.equal(mergeEvents([rows[0]],pve,Date.parse('2026-10-26T00:00:00Z')).filter(x=>x.starts_at===rows[0].starts_at).length,1,'bot-fed planned raiding entries must not duplicate');
 const community=fs.readFileSync('assets/js/dashboard/community.js','utf8');
 const lazy=fs.readFileSync('assets/js/dashboard/lazy-assets.js','utf8');
 assert.ok(community.includes('WWZRaidWeekends?.mergeEvents?.'));
