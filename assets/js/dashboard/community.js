@@ -241,11 +241,13 @@
     const raidServer = window.WWZServerContext?.getSelectedServer?.();
     const raidEligible = raidServer?.map_key === 'badlands' && raidServer?.gameplay_mode === 'pve';
     if (raidControls) raidControls.hidden = !(owner && raidEligible);
-    const preflightOutput = qs('[data-raid-preflight-result]');
-    if (preflightOutput && preflightOutput.dataset.serverScope !== selectedScope()) {
-      preflightOutput.hidden = true;
-      preflightOutput.textContent = '';
-      preflightOutput.dataset.serverScope = selectedScope();
+    for (const selector of ['[data-raid-preflight-result]', '[data-raid-recovery-result]']) {
+      const output = qs(selector);
+      if (output && output.dataset.serverScope !== selectedScope()) {
+        output.hidden = true;
+        output.textContent = '';
+        output.dataset.serverScope = selectedScope();
+      }
     }
     const raidToggle = qs('[data-raid-damage-toggle]');
     if (raidToggle) {
@@ -253,7 +255,7 @@
       raidToggle.dataset.enabled = String(Boolean(raid.enabled));
     }
     const raidFormatPhase = (phase) => ({
-      done: 'Restart request recorded',
+      done: 'Nitrado restart accepted (reboot not independently verified)',
       claimed: 'Change started — confirmation pending',
       restart_requested: 'Restart submitted — confirmation pending',
       attention_required: 'Needs manual verification'
@@ -275,10 +277,10 @@
     const raidStatus = qs('[data-raid-damage-status]');
     if (raidStatus) {
       raidStatus.textContent = !live
-        ? 'Live automation status unavailable. The read-only readiness check works independently; activation is locked until status loads.'
+        ? 'Live automation status unavailable. Read-only checks remain available; activation requires verified server status.'
         : raid.enabled
-        ? 'Future raid openings armed · base/container damage and restart requests are automated. Full-map PvP enforcement is NOT automated.'
-        : 'Future raid openings are disabled · any raid previously started must still restore PvE protections. Full-map PvP enforcement is managed separately.';
+        ? 'Raid automation armed · game damage, Nitrado restart requests and WWZ internal KILLZONE suspension/restoration are coordinated. Full-map PvP enforcement is NOT automated by external DayZ++.'
+        : 'Future raid openings disabled · WWZ internal KILLZONE controls will be coordinated when armed. External DayZ++ illegal-kill enforcement remains separate.';
       raidStatus.dataset.tone = raid.attention_required ? 'attention' : raid.enabled ? 'armed' : 'idle';
     }
     if (raidToggle) {
@@ -431,6 +433,53 @@
       if (button) button.disabled = false;
     }
   });
+  qs('[data-raid-recovery-check]')?.addEventListener('click', async () => {
+    if (dashboardAccessLevel !== 'owner') return;
+    const server = window.WWZServerContext?.getSelectedServer?.();
+    if (server?.map_key !== 'badlands' || server?.gameplay_mode !== 'pve') return;
+    const scope = selectedScope();
+    const button = qs('[data-raid-recovery-check]');
+    const output = qs('[data-raid-recovery-result]');
+    if (button) button.disabled = true;
+    if (output) {
+      output.hidden = false;
+      output.dataset.kind = 'checking';
+      output.dataset.serverScope = scope;
+      output.textContent = 'Reading current gameplay damage and WWZ KILLZONE status…';
+    }
+    try {
+      const response = await request(API.adminAction, {
+        method: 'POST', body: JSON.stringify({action: 'raid_recovery_check'})
+      }, true);
+      if (scope !== selectedScope()) return;
+      const report = response.result || {};
+      const blockers = Array.isArray(report.blockers) ? report.blockers : [];
+      const checks = Array.isArray(report.manual_checks) ? report.manual_checks : [];
+      if (output) {
+        output.dataset.kind = report.inspection_ok === true ? 'ready' : 'blocked';
+        output.textContent = (report.inspection_ok === true
+          ? 'FILE AND WWZ POLICY CHECKS PASSED — actual restart remains unverified.'
+          : 'ATTENTION REQUIRED — current policy or raid history is inconsistent.')
+          + '\nChecked: ' + fmtSydney(report.checked_at)
+          + '\nRaid active in bot: ' + (report.raid_active_in_ledger ? 'Yes' : 'No')
+          + ' · Expected damage: ' + (report.expected_damage_enabled ? 'Enabled' : 'Protected')
+          + '\nBase damage: ' + (report.base_damage_enabled == null ? 'Unavailable' : report.base_damage_enabled ? 'Enabled' : 'Protected')
+          + ' · Containers: ' + (report.container_damage_enabled == null ? 'Unavailable' : report.container_damage_enabled ? 'Enabled' : 'Protected')
+          + '\nInternal KILLZONES: ' + (report.internal_killzones_enabled == null ? 'Unavailable' : report.internal_killzones_enabled ? 'Enabled' : 'Suspended')
+          + (blockers.length ? '\nIssues: ' + blockers.join(' | ') : '')
+          + '\nManual checks: ' + checks.join(' | ')
+          + '\nThis inspection makes no Nitrado or DayZ++ changes.';
+      }
+    } catch (error) {
+      if (scope !== selectedScope()) return;
+      if (output) {
+        output.dataset.kind = 'blocked';
+        output.textContent = 'Raid recovery inspection unavailable: ' + (error.message || 'Unknown error') + '. No changes were made.';
+      }
+    } finally {
+      if (button) button.disabled = false;
+    }
+  });
   qs('[data-raid-damage-toggle]')?.addEventListener('click', async () => {
     if (dashboardAccessLevel !== 'owner') return;
     const server = window.WWZServerContext?.getSelectedServer?.();
@@ -438,7 +487,7 @@
     const toggle = qs('[data-raid-damage-toggle]');
     const turnOn = toggle?.dataset.enabled !== 'true';
     const message = turnOn
-      ? 'Enable automatic NASDARA PVE raid damage changes and DayZ restarts every second Friday/Sunday at 7 PM Sydney time? Confirm enableCfgGameplayFile is ON and full-map PvP protections are managed separately. The bot will affect real players.'
+      ? 'Enable automatic Nasdara PvE damage changes, Nitrado restart requests and WWZ internal KILLZONE suspension/restoration? External DayZ++ bans are NOT changed and require separate administration. This affects live players.'
       : 'Disable NEW automated raid starts? Any previously started raid will still restore normal PvE damage protection at its scheduled end.';
     if (!confirm(message)) return;
     if (toggle) toggle.disabled = true;
