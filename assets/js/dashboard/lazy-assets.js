@@ -379,13 +379,19 @@
   ]).then(() => undefined);
 
 
+  const ensureRaidWeekendCalendar = () => loadAfterDashboardRuntime(() => loadScriptOnce(
+    'raid-weekend-calendar',
+    'assets/js/dashboard/raid-weekends.js?v=1.0.0&rev=stage6-fortnightly-1',
+    () => Boolean(window.WWZRaidWeekends?.mergeEvents)
+  ));
+
   const ensureCommunity = () => Promise.all([
     loadStylesheetOnce('community-css', 'assets/css/dashboard/community.css?v=2.4.2&rev=badlands-release-1'),
-    loadAfterDashboardRuntime(() => loadScriptOnce(
+    ensureRaidWeekendCalendar().then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
       'community',
-      'assets/js/dashboard/community.js?v=2.4.3&rev=nasdara-eventdesk-1',
+      'assets/js/dashboard/community.js?v=2.4.3&rev=nasdara-eventdesk-1&stage6=raid-weekends',
       () => window.__wwzCommunityReady === true
-    ))
+    )))
   ]).then(() => undefined);
 
   const ensureFlagClaims = () => Promise.all([

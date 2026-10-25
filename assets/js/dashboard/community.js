@@ -57,9 +57,16 @@
   const eventMapUrl=(e)=>{if(e.x==null||e.z==null)return '';const key=e.map_key||overview?.map_key;if(!key)return '';const map=encodeURIComponent(key);return `map-link.html?map=${map}&x=${encodeURIComponent(e.x)}&z=${encodeURIComponent(e.z)}&marker=${encodeURIComponent(e.location_label||e.title||'WWZ Event')}&source=event-calendar${e.zone_id?`&zone=${encodeURIComponent(e.zone_id)}`:""}`;};
   const sameDay=(a,b)=>a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();
   const startOfWeek=(value)=>{const d=new Date(value);d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d;};
-  const calendarRows=()=>['staff','owner'].includes(dashboardAccessLevel)&&adminPayload?adminPayload.runs||[]:overview?.events||[];
+  const calendarRows=()=>window.WWZRaidWeekends?.mergeEvents?.(['staff','owner'].includes(dashboardAccessLevel)&&adminPayload?adminPayload.runs||[]:overview?.events||[],window.WWZServerContext?.getSelectedServer?.()) || [];
   const localInput=(value)=>{const d=new Date(value);return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);};
-  const calendarEventsForDay=(events,day)=>events.filter(e=>sameDay(new Date(e.starts_at),day));
+  const calendarEventsForDay=(events,day)=>events.filter(e=>{
+    if(sameDay(new Date(e.starts_at),day))return true;
+    if(!e.virtual_raid_weekend)return false;
+    const start=new Date(e.starts_at),end=new Date(e.ends_at);
+    const noon=new Date(day);noon.setHours(12,0,0,0);
+    return noon>=new Date(start.getFullYear(),start.getMonth(),start.getDate())
+      && noon<=new Date(end.getFullYear(),end.getMonth(),end.getDate(),23,59);
+  });
   const renderCalendar=(events=[])=>{
     const el=qs('[data-community-calendar]'), list=qs('[data-community-events]'), title=qs('[data-calendar-title]'); if(!el)return;
     root.querySelectorAll('[data-calendar-view]').forEach(b=>b.classList.toggle('is-active',b.dataset.calendarView===calendarView));
@@ -114,6 +121,7 @@
   const accountSignupMap = () => new Map((accountPayload?.signups||[]).map(s => [Number(s.run_id), s]));
   const renderEvents = (events=[]) => {
     if(['staff','owner'].includes(dashboardAccessLevel)&&adminPayload)events=adminPayload.runs||events;
+    events=window.WWZRaidWeekends?.mergeEvents?.(events,window.WWZServerContext?.getSelectedServer?.())||events;
     const el=qs('[data-community-events]'); if(!el)return;
     const signupMap=accountSignupMap();
     el.innerHTML=events.map(e=>{
@@ -190,7 +198,7 @@
     capture_the_flag:{name:'Capture The Flag',title:'🚩 WORLD WAR Z CAPTURE THE FLAG',category:'Capture The Flag',event_type:'capture_the_flag',duration_minutes:180,restart_minutes_before:5,location_source:'killzone',signup_enabled:true,ping_everyone:true,setup_text:'Teams compete to capture the opposing flag and return it to their base.',rules_text:'Stay inside the event area.\nUse only the event-approved loadout.\nFollow Admin calls for rounds and resets.',reward_categories:[{label:'Winning Team Member',money:500000,xp:0},{label:'Participation',money:50000,xp:0}]},
     scavenger_hunt:{name:'Scavenger Hunt',title:'🔎 WORLD WAR Z SCAVENGER HUNT',category:'Scavenger Hunt',event_type:'scavenger_hunt',duration_minutes:180,location_source:'custom',signup_enabled:true,ping_everyone:true,setup_text:'Follow the clues, find the required locations/items, and report back as instructed.',rules_text:'No exploiting or sharing answers publicly.\nFollow Admin instructions for proof and completion.',reward_categories:[{label:'Winner',money:750000,xp:0},{label:'Participation',money:50000,xp:0}]},
     hunt_admins:{name:'Hunt The Admins',title:'🧟 HUNT THE ADMIN CANNIBALS',category:'Hunt The Admins',event_type:'hunt_admins',duration_minutes:180,location_source:'custom',signup_enabled:true,ping_everyone:true,setup_text:'Track down the Admin targets and complete the hunt under the announced event conditions.',rules_text:'Follow the event boundary and weapon rules.\nAdmin targets may fight back.\nFollow all event instructions.',reward_categories:[{label:'Successful Hunter',money:750000,xp:0},{label:'Participation',money:50000,xp:0}]},
-    raid_weekend:{name:'Random Raid Weekend',title:'💥 WORLD WAR Z RAID WEEKEND',category:'Raid Weekend',event_type:'raid_weekend',duration_minutes:4320,visibility:'hidden',publish_lead_minutes:2880,location_source:'serverwide',signup_enabled:false,ping_everyone:true,setup_text:'Raid Weekend is active for the announced period. Standard Raid Weekend rules apply.',rules_text:'Follow the current World War Z Raid Weekend rules and all Admin instructions.',reward_categories:[]}
+    raid_weekend:{name:'Fortnightly Nasdara PvE Raid Weekend',title:'💥 WORLD WAR Z RAID WEEKEND',category:'Raid Weekend',event_type:'raid_weekend',duration_minutes:2880,visibility:'public',publish_lead_minutes:0,location_source:'serverwide',signup_enabled:false,announce_on_schedule:false,ping_everyone:false,reminder_minutes:0,second_reminder_minutes:0,description:'Every second Friday 7 PM to Sunday 7 PM Sydney time, starting 6 November 2026. Full-map PvP and base raiding apply on Nasdara PvE only.',setup_text:'Admins separately enable and restore PvP, base and container damage. Calendar entry does not change Nitrado settings.',rules_text:'Follow published raid rules and Admin instructions. Normal PvE rules return after each raid weekend.',reward_categories:[]}
   };
   const setFriendlyValue=(field,value)=>{if(!field)return;const next=String(value??'');if(field.tagName==='SELECT'&&next&&!Array.from(field.options).some(option=>option.value===next)){const timingFields=new Set(['duration_minutes','publish_lead_minutes','restart_minutes_before','reminder_minutes','second_reminder_minutes']);const option=document.createElement('option');option.value=next;option.textContent=timingFields.has(field.name)?`Custom (${next} minutes)`:`Current value (${next})`;option.dataset.dynamicOption='';field.append(option);}field.value=next;};
   const setPresetSelection=(key='')=>root.querySelectorAll('[data-event-preset]').forEach(btn=>btn.classList.toggle('is-selected',btn.dataset.eventPreset===key));
