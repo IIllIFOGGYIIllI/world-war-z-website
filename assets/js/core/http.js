@@ -96,7 +96,11 @@
       else upstreamSignal.addEventListener('abort', abortFromUpstream, { once: true });
     }
 
-    const timeout = window.setTimeout(() => controller.abort(), safeTimeout);
+    let timedOut = false;
+    const timeout = window.setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, safeTimeout);
     try {
       return await fetch(target.href, {
         ...options,
@@ -109,6 +113,13 @@
         headers,
         signal: controller.signal
       });
+    } catch (error) {
+      if (timedOut) {
+        const timeoutError = new Error('The World War Z service did not respond in time. Retry the affected section.');
+        timeoutError.name = 'WWZTimeoutError';
+        throw timeoutError;
+      }
+      throw error;
     } finally {
       window.clearTimeout(timeout);
       upstreamSignal?.removeEventListener?.('abort', abortFromUpstream);

@@ -47,7 +47,7 @@
     if (requireAuth && !session) throw new Error('Sign in with Discord to continue.');
     if (session) headers.Authorization = `Bearer ${session}`;
     const scope = selectedScope();
-    const response = await authFetch(url, {cache:'no-store', ...options, headers});
+    const response = await window.WWZHttp.request(url, {cache:'no-store', ...options, headers}, 30_000);
     const payload = await response.json().catch(() => ({}));
     if(scope !== selectedScope() || session !== token())throw new Error('Server or account changed. Reloading event data.');
     if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || `Request failed (${response.status}).`);
@@ -232,22 +232,14 @@
     E.restart_enabled.checked=Number(preset.restart_minutes_before||0)>0;
     E.rewards_enabled.checked=eventHasRewards(preset);
     syncEventOptionFields();if(E.name)E.name.value='';if(!E.starts_at.value)E.starts_at.value=nextRoundedHour();syncEndFromDuration(true);syncLocationFields();setPresetSelection(key);plannerForm.scrollIntoView({behavior:'smooth',block:'start'});setStatus(`${preset.name} loaded. Set the start and location, then preview, save a draft or schedule it.`,'success');};
-  const renderPlanner = (payload={}) => {
-    const owner=dashboardAccessLevel==='owner'; const canPlan=['staff','owner'].includes(dashboardAccessLevel);
-    const ownerEditor=qs('[data-community-owner-editor]');if(ownerEditor)ownerEditor.hidden=!canPlan;
-    const ownerPresets=qs('[data-community-owner-presets]');if(ownerPresets)ownerPresets.hidden=!owner;
-    const label=qs('[data-event-server-label]');if(label)label.textContent=`${String(payload.map_key||overview?.map_key||'Current server').replace(/^./,c=>c.toUpperCase())}`;
-    root.querySelectorAll('[data-nasdara-event-preset]').forEach(button=>{button.hidden=String(payload.map_key||'').toLowerCase()!=='badlands';});
-    const poi=qs('[data-event-poi]');if(poi)poi.innerHTML='<option value="">Choose public POI…</option>'+(payload.public_pois||[]).map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');
-    const templateSelect=qs('[data-community-template-select]');if(templateSelect)templateSelect.innerHTML='<option value="">Choose an event plan…</option>'+optionList(payload.templates||[]);
-    const channelOptions=(payload.channels||[]).map(c=>`<option value="${esc(c.id||'')}">${esc(c.category?`${c.category} / ${c.name}`:c.name||'Discord channel')}</option>`).join('');
-    const channel=qs('[data-community-channel]');if(channel)channel.innerHTML='<option value="">Use template channel</option>'+channelOptions;
-    const templateChannel=qs('[data-community-template-channel]');if(templateChannel)templateChannel.innerHTML='<option value="">No Discord announcement</option>'+channelOptions;
-    const calendarChannel=qs('[data-community-calendar-channel]');if(calendarChannel){const selected=String(payload.calendar_panel?.channel_id||'');calendarChannel.innerHTML='<option value="">Choose Discord channel…</option>'+channelOptions;if(selected)calendarChannel.value=selected;}
-    const raid = payload.raid_damage_automation || {};
+  const renderRaidPanel = (state = null) => {
+    const raid = state || {};
+    const owner = dashboardAccessLevel === 'owner';
+    const live = Boolean(state && state.eligible === true);
+    const fallbackWindow = window.WWZRaidWeekends?.forServer?.(window.WWZServerContext?.getSelectedServer?.(), Date.now(), 1)?.[0];
     const raidControls = qs('[data-raid-damage-controls]');
     const raidServer = window.WWZServerContext?.getSelectedServer?.();
-    const raidEligible = raidServer?.map_key === 'badlands' && raidServer?.gameplay_mode === 'pve' && raid.eligible === true;
+    const raidEligible = raidServer?.map_key === 'badlands' && raidServer?.gameplay_mode === 'pve';
     if (raidControls) raidControls.hidden = !(owner && raidEligible);
     const preflightOutput = qs('[data-raid-preflight-result]');
     if (preflightOutput && preflightOutput.dataset.serverScope !== selectedScope()) {
@@ -257,7 +249,7 @@
     }
     const raidToggle = qs('[data-raid-damage-toggle]');
     if (raidToggle) {
-      raidToggle.textContent = raid.enabled ? 'Disable future raid starts' : 'Enable raid damage & restarts';
+      raidToggle.textContent = !live ? 'Waiting for live status' : raid.enabled ? 'Disable future raid starts' : 'Enable raid damage & restarts';
       raidToggle.dataset.enabled = String(Boolean(raid.enabled));
     }
     const raidFormatPhase = (phase) => ({
@@ -269,7 +261,7 @@
     const raidNext = qs('[data-raid-next-window]');
     if (raidNext) raidNext.textContent = raid.next_start && raid.next_end
       ? fmtSydney(raid.next_start) + ' — ' + fmtSydney(raid.next_end) + ' (Sydney time)'
-      : 'Schedule temporarily unavailable';
+      : fallbackWindow ? fmtSydney(fallbackWindow.starts_at) + ' — ' + fmtSydney(fallbackWindow.ends_at) + ' (local schedule; live status unavailable)' : 'Schedule temporarily unavailable';
     const raidPhases = qs('[data-raid-phase-readout]');
     if (raidPhases) raidPhases.textContent = 'Recorded actions for the current/latest weekend: opening '
       + raidFormatPhase(raid.start_phase) + ' · restoration ' + raidFormatPhase(raid.end_phase) + '.';
@@ -282,16 +274,33 @@
     }
     const raidStatus = qs('[data-raid-damage-status]');
     if (raidStatus) {
-      raidStatus.textContent = raid.enabled
+      raidStatus.textContent = !live
+        ? 'Live automation status unavailable. The read-only readiness check works independently; activation is locked until status loads.'
+        : raid.enabled
         ? 'Future raid openings armed · base/container damage and restart requests are automated. Full-map PvP enforcement is NOT automated.'
         : 'Future raid openings are disabled · any raid previously started must still restore PvE protections. Full-map PvP enforcement is managed separately.';
       raidStatus.dataset.tone = raid.attention_required ? 'attention' : raid.enabled ? 'armed' : 'idle';
     }
     if (raidToggle) {
       // Never arm another weekend while the backend reports an unresolved restore.
-      raidToggle.disabled = Boolean(raid.attention_required && !raid.enabled);
-      raidToggle.title = raidToggle.disabled ? 'Resolve the previous raid restoration before enabling new starts.' : '';
+      raidToggle.disabled = !live || Boolean(raid.attention_required && !raid.enabled);
+      raidToggle.title = !live ? 'Waiting for verified automation status.' : raidToggle.disabled ? 'Resolve the previous raid restoration before enabling new starts.' : '';
     }
+  };
+
+  const renderPlanner = (payload={}) => {
+    const owner=dashboardAccessLevel==='owner'; const canPlan=['staff','owner'].includes(dashboardAccessLevel);
+    const ownerEditor=qs('[data-community-owner-editor]');if(ownerEditor)ownerEditor.hidden=!canPlan;
+    const ownerPresets=qs('[data-community-owner-presets]');if(ownerPresets)ownerPresets.hidden=!owner;
+    const label=qs('[data-event-server-label]');if(label)label.textContent=`${String(payload.map_key||overview?.map_key||'Current server').replace(/^./,c=>c.toUpperCase())}`;
+    root.querySelectorAll('[data-nasdara-event-preset]').forEach(button=>{button.hidden=String(payload.map_key||'').toLowerCase()!=='badlands';});
+    const poi=qs('[data-event-poi]');if(poi)poi.innerHTML='<option value="">Choose public POI…</option>'+(payload.public_pois||[]).map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');
+    const templateSelect=qs('[data-community-template-select]');if(templateSelect)templateSelect.innerHTML='<option value="">Choose an event plan…</option>'+optionList(payload.templates||[]);
+    const channelOptions=(payload.channels||[]).map(c=>`<option value="${esc(c.id||'')}">${esc(c.category?`${c.category} / ${c.name}`:c.name||'Discord channel')}</option>`).join('');
+    const channel=qs('[data-community-channel]');if(channel)channel.innerHTML='<option value="">Use template channel</option>'+channelOptions;
+    const templateChannel=qs('[data-community-template-channel]');if(templateChannel)templateChannel.innerHTML='<option value="">No Discord announcement</option>'+channelOptions;
+    const calendarChannel=qs('[data-community-calendar-channel]');if(calendarChannel){const selected=String(payload.calendar_panel?.channel_id||'');calendarChannel.innerHTML='<option value="">Choose Discord channel…</option>'+channelOptions;if(selected)calendarChannel.value=selected;}
+    renderRaidPanel(payload.raid_damage_automation || null);
     const panelState=qs('[data-community-calendar-panel-state]');if(panelState)panelState.textContent=payload.calendar_panel?.message_id?`Published · channel ${payload.calendar_panel.channel_id}`:'No panel published yet.';
     const locationSelect=qs('[data-community-template-location]');if(locationSelect)locationSelect.innerHTML='<option value="">Choose reusable location…</option>'+optionList(payload.locations||[],'label');
     const loadoutSelect=qs('[data-community-template-loadout]');if(loadoutSelect)loadoutSelect.innerHTML='<option value="">No preset</option>'+optionList(payload.loadouts||[]);
@@ -473,9 +482,23 @@
   qs('[data-community-disable-push]')?.addEventListener('click',async()=>{try{await disablePush();setStatus('Browser notifications disabled.','success');await loadPreferences();}catch(e){setStatus(e.message,'error');}});
   qs('[data-community-refresh]')?.addEventListener('click',()=>refresh(true));
 
-  const refresh=async(loud=false)=>{try{await loadOverview();await Promise.all([loadAccountEvents(),loadPreferences(),loadAdmin()]);if(loud)setStatus('Community data refreshed.','success');}catch(e){setStatus(e.message,'error');}};
-  const activate=({section=''}={})=>{active=true;refresh();clearInterval(refreshTimer);refreshTimer=setInterval(()=>{if(active)loadOverview().catch(()=>{});},60000);if(section==='planner'&&!['staff','owner'].includes(dashboardAccessLevel))setStatus('Staff access is required for Event Planner.','error');};
+  const refresh=async(loud=false)=>{
+    const entries = [
+      ['analytics and events', loadOverview()],
+      ['registrations', loadAccountEvents()],
+      ['notifications', loadPreferences()],
+      ['staff event workspace', loadAdmin()]
+    ];
+    const results = await Promise.allSettled(entries.map(([,task]) => task));
+    const errors = results.flatMap((result, i) =>
+      result.status === 'rejected' ? [entries[i][0] + ': ' + String(result.reason?.message || 'request failed')] : []);
+    if (errors.length) setStatus('Some Events data could not load: ' + errors.join(' · ') + '. Other sections remain usable. Try Refresh Community Data.', 'error');
+    else if (loud) setStatus('Community data refreshed.', 'success');
+    else setStatus();
+  };
+  const activate=({section=''}={})=>{active=true;renderRaidPanel(adminPayload?.raid_damage_automation || null);refresh();clearInterval(refreshTimer);refreshTimer=setInterval(()=>{if(active)loadOverview().catch(()=>{});},60000);if(section==='planner'&&!['staff','owner'].includes(dashboardAccessLevel))setStatus('Staff access is required for Event Planner.','error');};
   window.addEventListener('wwz:viewchange',(event)=>{if(event.detail?.view==='community')activate(event.detail);else active=false;});
+  window.addEventListener('wwz:accesschange',()=>renderRaidPanel(adminPayload?.raid_damage_automation || null));
   window.addEventListener('wwz:serverchange',()=>{selectedRunId=null;adminPayload=null;accountPayload=null;overview=null;clearTemplate();renderPlanner({});document.querySelector('[data-event-dialog]')?.remove();renderEvents([]);if(active)refresh();});
   window.addEventListener('wwz:authchange',()=>{accountPayload=null;adminPayload=null;clearTemplate();renderPlanner({});document.querySelector('[data-event-dialog]')?.remove();renderEvents(overview?.events||[]);if(active)refresh();});
   window.__wwzCommunityReady=true;
