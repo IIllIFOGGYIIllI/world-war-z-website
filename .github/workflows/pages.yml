@@ -62,6 +62,7 @@ jobs:
           node scripts/test_stage6_raid_calendar.js
           node scripts/test_stage6_raid_automation_ui.js
           node scripts/test_raid_lifecycle_status_ui.js
+          node scripts/test_raid_preflight_ui.js
           node scripts/test_zone_save_fix.js
           node scripts/test_zone_submit_validation.js
           node scripts/test_zone_manual_coordinates.js

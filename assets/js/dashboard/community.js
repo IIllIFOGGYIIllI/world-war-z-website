@@ -31,15 +31,19 @@
   const qs = (sel) => root.querySelector(sel);
   const status = qs('[data-community-status]');
   const setStatus = (message='', tone='') => { if (!status) return; status.hidden = !message; status.textContent = message; status.dataset.tone = tone; };
+  const selectedScope = () => {
+    const server = window.WWZServerContext?.getSelectedServer?.();
+    return server ? String(server.key || '') + ':' + String(server.map_key || '') : String(window.WWZServerContext?.getMapKey?.() || '');
+  };
   const request = async (url, options={}, requireAuth=false) => {
     const headers = {Accept:'application/json', ...(options.body ? {'Content-Type':'application/json'} : {}), ...(options.headers || {})};
     const session = token();
     if (requireAuth && !session) throw new Error('Sign in with Discord to continue.');
     if (session) headers.Authorization = `Bearer ${session}`;
-    const scope = window.WWZServerContext?.getMapKey();
+    const scope = selectedScope();
     const response = await authFetch(url, {cache:'no-store', ...options, headers});
     const payload = await response.json().catch(() => ({}));
-    if(scope !== window.WWZServerContext?.getMapKey() || session !== token())throw new Error('Server changed. Reloading event data.');
+    if(scope !== selectedScope() || session !== token())throw new Error('Server or account changed. Reloading event data.');
     if (!response.ok || payload.status !== 'ok') throw new Error(payload.message || `Request failed (${response.status}).`);
     return payload;
   };
@@ -239,6 +243,12 @@
     const raidServer = window.WWZServerContext?.getSelectedServer?.();
     const raidEligible = raidServer?.map_key === 'badlands' && raidServer?.gameplay_mode === 'pve' && raid.eligible === true;
     if (raidControls) raidControls.hidden = !(owner && raidEligible);
+    const preflightOutput = qs('[data-raid-preflight-result]');
+    if (preflightOutput && preflightOutput.dataset.serverScope !== selectedScope()) {
+      preflightOutput.hidden = true;
+      preflightOutput.textContent = '';
+      preflightOutput.dataset.serverScope = selectedScope();
+    }
     const raidToggle = qs('[data-raid-damage-toggle]');
     if (raidToggle) {
       raidToggle.textContent = raid.enabled ? 'Disable future raid starts' : 'Enable raid damage & restarts';
@@ -365,6 +375,53 @@
   qs('[data-community-schedule]')?.addEventListener('click',async()=>{const id=Number(qs('[data-community-template-select]')?.value||0);const local=qs('[data-community-starts]')?.value;if(!id||!local){setStatus('Choose an event plan and start time.','error');return;}const repeating=Boolean(qs('[data-community-repeat-toggle]')?.checked);const occurrences=repeating?Math.max(2,Number(qs('[data-community-occurrences]')?.value||2)):1;const repeatDays=Math.max(1,Number(qs('[data-community-repeat-days]')?.value||7));try{await adminAction({action:repeating?'schedule_series':'schedule',template_id:id,starts_at:new Date(local).toISOString(),occurrences,repeat_days:repeatDays,overrides:{discord_channel_id:qs('[data-community-channel]')?.value||''}});}catch(e){setStatus(e.message,'error');}});
   qs('[data-community-start-now]')?.addEventListener('click',async()=>{const id=Number(qs('[data-community-template-select]')?.value||0);if(!id){setStatus('Choose an event plan first.','error');return;}try{await adminAction({action:'start_now',template_id:id,overrides:{discord_channel_id:qs('[data-community-channel]')?.value||''}});}catch(e){setStatus(e.message,'error');}});
   root.querySelectorAll('[data-event-preset]').forEach(btn=>btn.addEventListener('click',()=>applyPreset(btn.dataset.eventPreset)));
+  qs('[data-raid-preflight]')?.addEventListener('click', async () => {
+    if (dashboardAccessLevel !== 'owner') return;
+    const server = window.WWZServerContext?.getSelectedServer?.();
+    if (server?.map_key !== 'badlands' || server?.gameplay_mode !== 'pve') return;
+    const button = qs('[data-raid-preflight]');
+    const output = qs('[data-raid-preflight-result]');
+    if (button) button.disabled = true;
+    if (output) {
+      output.hidden = false;
+      output.dataset.kind = 'checking';
+      output.textContent = 'Checking the active cfggameplay.json and raid history…';
+      output.dataset.serverScope = selectedScope();
+    }
+    try {
+      // Deliberately do not use adminAction: a preflight is read-only and does
+      // not need to reload every event panel or imply that something was saved.
+      const response = await request(API.adminAction, {
+        method: 'POST', body: JSON.stringify({action: 'raid_preflight'})
+      }, true);
+      const report = response.result || {};
+      const checks = [
+        report.mission_file_verified ? 'Active mission file verified' : 'Mission file NOT verified',
+        report.base_damage_enabled === false ? 'Base damage protected' : 'Base damage not verified as protected',
+        report.container_damage_enabled === false ? 'Container damage protected' : 'Container damage not verified as protected'
+      ];
+      const blockers = Array.isArray(report.blockers) ? report.blockers : [];
+      const manual = Array.isArray(report.manual_checks) ? report.manual_checks : [];
+      if (output) {
+        output.dataset.kind = report.ready === true ? 'ready' : 'blocked';
+        output.textContent = (report.ready === true
+          ? 'FILE CHECKS PASSED — manual settings still require confirmation.'
+          : 'NOT READY — do not arm automation until these checks pass.')
+          + '\nChecked: ' + fmtSydney(report.checked_at)
+          + '\n' + checks.join(' · ')
+          + (blockers.length ? '\nIssues: ' + blockers.join(' | ') : '')
+          + (manual.length ? '\nManual checks still required: ' + manual.join(' | ') : '')
+          + '\nNo Nitrado upload or restart was requested by this check.';
+      }
+    } catch (error) {
+      if (output) {
+        output.dataset.kind = 'blocked';
+        output.textContent = 'Preflight could not complete: ' + (error.message || 'Unknown error') + '. No game settings were changed by this check.';
+      }
+    } finally {
+      if (button) button.disabled = false;
+    }
+  });
   qs('[data-raid-damage-toggle]')?.addEventListener('click', async () => {
     if (dashboardAccessLevel !== 'owner') return;
     const server = window.WWZServerContext?.getSelectedServer?.();

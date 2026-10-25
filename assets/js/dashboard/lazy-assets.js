@@ -389,7 +389,7 @@
     loadStylesheetOnce('community-css', 'assets/css/dashboard/community.css?v=2.4.2&rev=badlands-release-1'),
     ensureRaidWeekendCalendar().then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
       'community',
-      'assets/js/dashboard/community.js?v=2.4.3&rev=nasdara-eventdesk-1&stage6=raid-damage-1&lifecycle=2',
+      'assets/js/dashboard/community.js?v=2.4.3&rev=nasdara-eventdesk-1&stage6=raid-damage-1&lifecycle=2&preflight=1',
       () => window.__wwzCommunityReady === true
     )))
   ]).then(() => undefined);

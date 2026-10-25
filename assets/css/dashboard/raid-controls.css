@@ -41,3 +41,33 @@
   font-weight: 600;
 }
 .community-raid-controls .raid-operator-alert[hidden] { display: none !important; }
+
+/* Safe, opt-in preflight diagnostics. Results are scoped to the selected server. */
+.community-raid-controls .raid-preflight-control {
+  margin-top: 16px;
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+}
+.community-raid-controls .raid-preflight-control button { min-height: 44px; max-width: 100%; }
+.community-raid-controls .raid-preflight-control small { color: #b9c7d4; }
+.community-raid-controls .raid-preflight-result {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border: 1px solid rgba(195,205,220,.22);
+  border-radius: 8px;
+  background: rgba(0,0,0,.23);
+  color: #d3e4f5;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  font-size: .91rem;
+  line-height: 1.6;
+}
+.community-raid-controls .raid-preflight-result[data-kind="ready"] {
+  border-color: rgba(89,190,132,.5); color: #c1ead1;
+}
+.community-raid-controls .raid-preflight-result[data-kind="blocked"] {
+  border-color: rgba(230,134,94,.6); color: #ffd2bb;
+}
+.community-raid-controls .raid-preflight-result[hidden] { display: none !important; }
