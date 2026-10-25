@@ -30,6 +30,9 @@ for(const marker of [
 ]) assert.ok(js.includes(marker), 'Missing geometry behavior '+marker);
 assert.ok(css.includes('.zone-coordinate-entry'));
 assert.ok(css.includes('.zone-point-editor-row'));
+assert.ok(js.includes('control.disabled = state.editorManaged || (polygonInput ? circle : !circle);'));
+assert.ok(js.includes('control.disabled = circle || state.editorManaged;'));
+assert.ok(js.includes("if (state.editorManaged || state.editorShape !== 'polygon') return;"));
 assert.ok(js.includes("document.querySelectorAll('[data-zone-circle-fields] input').forEach"));
 assert.ok(js.includes("document.querySelectorAll('[data-zone-manual-point-entry] input, [data-zone-add-manual-point], [data-zone-preview-circle]').forEach"));
 assert.ok(js.includes("document.querySelectorAll('[data-zone-center-x], [data-zone-center-z], [data-zone-manual-point-x], [data-zone-manual-point-z], [data-zone-point-coordinate]').forEach"));

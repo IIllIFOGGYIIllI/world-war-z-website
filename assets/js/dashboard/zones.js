@@ -575,7 +575,14 @@
     document.querySelectorAll('[data-zone-circle-fields] input').forEach((input) => {
       input.disabled = !circle || state.editorManaged;
     });
-    document.querySelectorAll('[data-zone-manual-point-entry] input, [data-zone-add-manual-point], [data-zone-preview-circle]').forEach(control => { control.disabled = state.editorManaged; });
+    document.querySelectorAll('[data-zone-manual-point-entry] input, [data-zone-add-manual-point], [data-zone-preview-circle]').forEach(control => {
+      const polygonInput = control.matches('[data-zone-manual-point-entry] input, [data-zone-add-manual-point]');
+      // Hidden number fields must not block HTML form validation.
+      control.disabled = state.editorManaged || (polygonInput ? circle : !circle);
+    });
+    document.querySelectorAll('[data-zone-undo-point], [data-zone-clear-points]').forEach(control => {
+      control.disabled = circle || state.editorManaged;
+    });
     syncCoordinateLimits();
     const title = $('[data-zone-editor-title]');
     const kicker = $('[data-zone-editor-kicker]');
@@ -1073,6 +1080,7 @@
     ['[data-zone-center-x]', '[data-zone-center-z]', '[data-zone-radius]', '[data-zone-colour]', '[data-zone-active]']
       .forEach((selector) => $(selector)?.addEventListener('input', renderEditorGeometry));
     $('[data-zone-undo-point]')?.addEventListener('click', () => {
+      if (state.editorManaged || state.editorShape !== 'polygon') return;
       state.editorPoints.pop();
       renderEditorGeometry();
     });
