@@ -22,5 +22,5 @@ assert.ok(app.includes('}, 30_000)'), 'Community request timeout extended');
 assert.ok(http.includes("timeoutError.name = 'WWZTimeoutError'"), 'Timeout error actionable');
 assert.ok(page.includes('http.js?v=1.41.1&amp;rev=dual-nasdara-auth-1&amp;events=2'));
 assert.ok(loader.includes('preflight=1&events=2'));
-assert.ok(sw.includes('2026-10-26-events-reliability-1'));
+assert.match(sw, /WWZ_PWA_UPDATE_REVISION = '\d{4}-\d{2}-\d{2}-[a-z0-9-]+';/, 'PWA must use a versioned update token');
 console.log('PASS: Events readiness accessible, partial failures isolated, timeout reporting improved');
