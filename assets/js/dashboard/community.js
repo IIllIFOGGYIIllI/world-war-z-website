@@ -250,9 +250,15 @@
       restart_requested: 'Restart submitted — confirmation pending',
       attention_required: 'Needs manual verification'
     }[phase] || 'Not attempted');
+    const fmtSydney = (value) => {
+      const when = new Date(value);
+      return Number.isNaN(when.getTime()) ? '—' : new Intl.DateTimeFormat('en-AU', {
+        timeZone: 'Australia/Sydney', dateStyle: 'medium', timeStyle: 'short'
+      }).format(when);
+    };
     const raidNext = qs('[data-raid-next-window]');
     if (raidNext) raidNext.textContent = raid.next_start && raid.next_end
-      ? fmtDate(raid.next_start) + ' — ' + fmtDate(raid.next_end) + ' (Sydney time)'
+      ? fmtSydney(raid.next_start) + ' — ' + fmtSydney(raid.next_end) + ' (Sydney time)'
       : 'Schedule temporarily unavailable';
     const raidPhases = qs('[data-raid-phase-readout]');
     if (raidPhases) raidPhases.textContent = 'Recorded actions for the current/latest weekend: opening '
@@ -261,7 +267,7 @@
     if (raidAlert) {
       raidAlert.hidden = !raid.attention_required;
       raidAlert.textContent = raid.blocked_weekend
-        ? 'ACTION REQUIRED: A previous raid weekend (' + fmtDate(raid.blocked_weekend) + ') has no confirmed restoration. Later openings are blocked. Check Nitrado damage settings and restart history before assuming PvE protection is restored.'
+        ? 'ACTION REQUIRED: A previous raid weekend (' + fmtSydney(raid.blocked_weekend) + ') has no confirmed restoration. Later openings are blocked. Check Nitrado damage settings and restart history before assuming PvE protection is restored.'
         : 'ACTION REQUIRED: An opening or restoration was not fully confirmed. Check Nitrado damage settings and restart history. The system will not blindly send duplicate restarts.';
     }
     const raidStatus = qs('[data-raid-damage-status]');
