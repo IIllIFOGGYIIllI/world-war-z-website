@@ -13,6 +13,7 @@ assert.ok(html.includes('data-raid-preflight-result role="status" hidden'));
 assert.ok(js.includes("action: 'raid_preflight'"), 'Read-only action must reach bot API');
 assert.ok(js.includes("dashboardAccessLevel !== 'owner'"), 'Check requires Owner');
 assert.ok(js.includes("server?.gameplay_mode !== 'pve'"), 'PvP mode must not call preflight');
+assert.ok(js.indexOf('const fmtSydney =') < js.indexOf('const request = async'), 'Formatter must be in handler scope');
 assert.ok(js.includes('report.manual_checks'), 'Manual items must be visible');
 assert.ok(js.includes('report.blockers'), 'Blocking conditions must be visible');
 assert.ok(js.includes("output.dataset.serverScope = selectedScope()"), 'Scope each result');
@@ -21,5 +22,5 @@ assert.ok(!js.includes('adminAction({action: \'raid_preflight\''), 'Read-only ch
 assert.ok(css.includes('.raid-preflight-result[hidden]'));
 assert.ok(lazy.includes('stage6=raid-damage-1&lifecycle=2&preflight=1'));
 assert.ok(html.includes('rev=manual-coords-1&amp;lifecycle=2&amp;preflight=1'));
-assert.ok(sw.includes('2026-10-26-raid-preflight-1'));
+assert.ok(sw.includes('2026-10-26-raid-preflight-2'));
 console.log('PASS: Owner preflight, distinct Nasdara scope, no game write, release cache refresh');

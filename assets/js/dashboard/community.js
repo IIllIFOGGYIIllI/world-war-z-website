@@ -17,6 +17,12 @@
   const token = () => { try { return storageGet(AUTH_SESSION_KEY) || ''; } catch { return ''; } };
   const esc = (value) => String(value ?? '').replace(/[&<>'"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
   const fmtDate = (value) => { const d = new Date(value); return Number.isNaN(d.getTime()) ? '—' : d.toLocaleString([], {dateStyle:'medium',timeStyle:'short'}); };
+  const fmtSydney = (value) => {
+    const when = new Date(value);
+    return Number.isNaN(when.getTime()) ? '—' : new Intl.DateTimeFormat('en-AU', {
+      timeZone: 'Australia/Sydney', dateStyle: 'medium', timeStyle: 'short'
+    }).format(when);
+  };
   const money = (value) => Number(value || 0).toLocaleString();
   const topicLabels = {
     events:['Event reminders','Scheduled events, reminders, starts, finishes and published results.'],
@@ -260,12 +266,6 @@
       restart_requested: 'Restart submitted — confirmation pending',
       attention_required: 'Needs manual verification'
     }[phase] || 'Not attempted');
-    const fmtSydney = (value) => {
-      const when = new Date(value);
-      return Number.isNaN(when.getTime()) ? '—' : new Intl.DateTimeFormat('en-AU', {
-        timeZone: 'Australia/Sydney', dateStyle: 'medium', timeStyle: 'short'
-      }).format(when);
-    };
     const raidNext = qs('[data-raid-next-window]');
     if (raidNext) raidNext.textContent = raid.next_start && raid.next_end
       ? fmtSydney(raid.next_start) + ' — ' + fmtSydney(raid.next_end) + ' (Sydney time)'
