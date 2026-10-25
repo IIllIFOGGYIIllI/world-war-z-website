@@ -61,7 +61,7 @@
     if (label) label.textContent = limit > 0
       ? `Allowed map coordinates: 0–${limit.toLocaleString()} (including both boundaries).`
       : 'Coordinates must stay within the selected map.';
-    $('[data-zone-center-x], [data-zone-center-z], [data-zone-manual-point-x], [data-zone-manual-point-z], [data-zone-point-coordinate]').forEach(input => {
+    document.querySelectorAll('[data-zone-center-x], [data-zone-center-z], [data-zone-manual-point-x], [data-zone-manual-point-z], [data-zone-point-coordinate]').forEach(input => {
       if (limit > 0) input.max = String(limit);
       else input.removeAttribute('max');
     });
@@ -572,10 +572,10 @@
     $('[data-zone-polygon-fields]')?.toggleAttribute('hidden', circle);
     // Polygon fields must never be blocked by hidden required circle inputs.
     // Keep managed-zone geometry locked regardless of which shape is selected.
-    $('[data-zone-circle-fields] input').forEach((input) => {
+    document.querySelectorAll('[data-zone-circle-fields] input').forEach((input) => {
       input.disabled = !circle || state.editorManaged;
     });
-    $('[data-zone-manual-point-entry] input, [data-zone-add-manual-point], [data-zone-preview-circle]').forEach(control => { control.disabled = state.editorManaged; });
+    document.querySelectorAll('[data-zone-manual-point-entry] input, [data-zone-add-manual-point], [data-zone-preview-circle]').forEach(control => { control.disabled = state.editorManaged; });
     syncCoordinateLimits();
     const title = $('[data-zone-editor-title]');
     const kicker = $('[data-zone-editor-kicker]');
