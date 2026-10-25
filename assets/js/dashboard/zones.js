@@ -544,7 +544,11 @@
     const circle = state.editorShape === 'circle';
     $('[data-zone-circle-fields]')?.toggleAttribute('hidden', !circle);
     $('[data-zone-polygon-fields]')?.toggleAttribute('hidden', circle);
-    $$('[data-zone-circle-fields] input').forEach((input) => { input.disabled = !circle; });
+    // Polygon fields must never be blocked by hidden required circle inputs.
+    // Keep managed-zone geometry locked regardless of which shape is selected.
+    $('[data-zone-circle-fields] input').forEach((input) => {
+      input.disabled = !circle || state.editorManaged;
+    });
     const title = $('[data-zone-editor-title]');
     const kicker = $('[data-zone-editor-kicker]');
     if (title) title.textContent = `${state.editorZoneId ? 'Edit' : 'Create'} ${circle ? 'Circular' : 'Polygon'} Zone`;
@@ -708,6 +712,10 @@
       }
     }
     applyManagedEditorPolicy(zone);
+    // applyManagedEditorPolicy restores editable fields on ordinary zones.
+    // Re-apply shape-specific disabled state AFTER policy, or HTML5 validation
+    // blocks polygon Submit on hidden required X/Z/radius fields.
+    setShapeFields();
 
     const dialog = $('[data-zone-dialog]');
     if (typeof dialog?.showModal === 'function') dialog.showModal();
@@ -949,7 +957,13 @@
     $('[data-zone-search]')?.addEventListener('input', renderZoneList);
     $('[data-zone-filter]')?.addEventListener('change', renderZoneList);
     $('[data-zone-online-refresh]')?.addEventListener('click', () => loadOnlinePlayers({ force: true }));
-    $('[data-zone-editor-form]')?.addEventListener('submit', saveZone);
+    const zoneForm = $('[data-zone-editor-form]');
+    zoneForm?.addEventListener('submit', saveZone);
+    zoneForm?.addEventListener('invalid', (event) => {
+      const control = event.target;
+      const field = control?.closest?.('label')?.querySelector?.('span')?.textContent || control?.getAttribute?.('data-zone-name') !== null && control?.hasAttribute?.('data-zone-name') ? 'Name' : 'required field';
+      editorMessage('Cannot save: please complete ' + String(field || 'the required field') + '.', 'error');
+    }, true);
     $('[data-zone-add-dynamic-list]')?.addEventListener('click', () => {
       if (state.dynamicLists.length >= 20) {
         editorMessage('A maximum of 20 dynamic lists can be configured per zone.', 'warning');

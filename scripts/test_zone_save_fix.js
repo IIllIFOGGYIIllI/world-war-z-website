@@ -18,8 +18,8 @@ assert.ok(page.includes('data-zone-save-status=""'), 'Footer status target missi
 assert.ok(!page.includes('checked="" data-zone-ping-on-detection=""'), 'Unsafe radar default in HTML');
 assert.ok(!page.includes('checked="" data-zone-alert-enter=""'), 'Unsafe entry alert default in HTML');
 assert.ok(css.includes('.zone-save-status[data-kind="error"]'), 'Footer error style missing');
-assert.ok(lazy.includes('zones.js?v=1.59.4&rev=zone-save-fix-1'), 'Updated module not cache-busted');
-assert.ok(lazy.includes('zones.css?v=1.59.4&rev=zone-save-fix-1'), 'Updated stylesheet not cache-busted');
-assert.ok(page.includes('lazy-assets.js?v=2.8.1&amp;rev=zone-save-fix-1'), 'Updated loader not cache-busted');
-assert.ok(sw.includes("WWZ_PWA_UPDATE_REVISION = '2026-10-20-zones-save-fix-1'"), 'PWA refresh token missing');
-console.log('Nasdara zone-save frontend regression checks passed (13 checks).');
+assert.ok(lazy.includes('zones.js?v=1.59.5&rev=polygon-submit-1'), 'Updated module not cache-busted');
+assert.ok(lazy.includes('zones.css?v=1.59.5&rev=polygon-submit-1'), 'Updated stylesheet not cache-busted');
+assert.ok(page.includes('lazy-assets.js?v=2.8.1&amp;rev=polygon-submit-1'), 'Updated loader not cache-busted');
+assert.ok(sw.includes("WWZ_PWA_UPDATE_REVISION = '2026-10-26-polygon-submit-1'"), 'PWA refresh token missing');
+console.log('Nasdara zone-save frontend checks passed.');
