@@ -1,0 +1,22 @@
+/* Explicit owner-only Nasdara PvE raid-control opt-in. */
+.community-raid-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+  padding: 20px;
+  margin: 16px 0 24px;
+  border: 1px solid var(--border, rgba(255,255,255,.16));
+  border-radius: 14px;
+  background: rgba(27, 34, 43, .55);
+}
+.community-raid-controls[hidden] { display: none !important; }
+.community-raid-controls > div { min-width: 0; flex: 1; }
+.community-raid-controls strong { display: block; font-size: 1.04rem; margin-bottom: 9px; }
+.community-raid-controls p { margin: 0 0 9px; line-height: 1.55; color: #c5ccd5; }
+.community-raid-controls small { display: block; color: #e5bb74; }
+.community-raid-controls button { min-height: 44px; flex-shrink: 0; }
+@media (max-width: 800px) {
+  .community-raid-controls { flex-direction: column; padding: 16px; }
+  .community-raid-controls button { width: 100%; }
+}

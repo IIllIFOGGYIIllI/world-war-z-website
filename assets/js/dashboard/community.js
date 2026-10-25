@@ -234,6 +234,20 @@
     const channel=qs('[data-community-channel]');if(channel)channel.innerHTML='<option value="">Use template channel</option>'+channelOptions;
     const templateChannel=qs('[data-community-template-channel]');if(templateChannel)templateChannel.innerHTML='<option value="">No Discord announcement</option>'+channelOptions;
     const calendarChannel=qs('[data-community-calendar-channel]');if(calendarChannel){const selected=String(payload.calendar_panel?.channel_id||'');calendarChannel.innerHTML='<option value="">Choose Discord channel…</option>'+channelOptions;if(selected)calendarChannel.value=selected;}
+    const raid = payload.raid_damage_automation || {};
+    const raidControls = qs('[data-raid-damage-controls]');
+    const raidServer = window.WWZServerContext?.getSelectedServer?.();
+    const raidEligible = raidServer?.map_key === 'badlands' && raidServer?.gameplay_mode === 'pve' && raid.eligible === true;
+    if (raidControls) raidControls.hidden = !(owner && raidEligible);
+    const raidToggle = qs('[data-raid-damage-toggle]');
+    if (raidToggle) {
+      raidToggle.textContent = raid.enabled ? 'Disable future raid starts' : 'Enable raid damage & restarts';
+      raidToggle.dataset.enabled = String(Boolean(raid.enabled));
+    }
+    const raidStatus = qs('[data-raid-damage-status]');
+    if (raidStatus) raidStatus.textContent = raid.enabled
+      ? 'Armed · opening and closing restarts enabled. Current weekend start: ' + fmtDate(raid.next_start) + ' · start ' + (raid.start_phase || 'not attempted') + ' · finish ' + (raid.end_phase || 'not attempted')
+      : 'Not armed · upcoming raid weekends appear in the calendar, but game settings will not change automatically.';
     const panelState=qs('[data-community-calendar-panel-state]');if(panelState)panelState.textContent=payload.calendar_panel?.message_id?`Published · channel ${payload.calendar_panel.channel_id}`:'No panel published yet.';
     const locationSelect=qs('[data-community-template-location]');if(locationSelect)locationSelect.innerHTML='<option value="">Choose reusable location…</option>'+optionList(payload.locations||[],'label');
     const loadoutSelect=qs('[data-community-template-loadout]');if(loadoutSelect)loadoutSelect.innerHTML='<option value="">No preset</option>'+optionList(payload.loadouts||[]);
@@ -317,6 +331,25 @@
   qs('[data-community-schedule]')?.addEventListener('click',async()=>{const id=Number(qs('[data-community-template-select]')?.value||0);const local=qs('[data-community-starts]')?.value;if(!id||!local){setStatus('Choose an event plan and start time.','error');return;}const repeating=Boolean(qs('[data-community-repeat-toggle]')?.checked);const occurrences=repeating?Math.max(2,Number(qs('[data-community-occurrences]')?.value||2)):1;const repeatDays=Math.max(1,Number(qs('[data-community-repeat-days]')?.value||7));try{await adminAction({action:repeating?'schedule_series':'schedule',template_id:id,starts_at:new Date(local).toISOString(),occurrences,repeat_days:repeatDays,overrides:{discord_channel_id:qs('[data-community-channel]')?.value||''}});}catch(e){setStatus(e.message,'error');}});
   qs('[data-community-start-now]')?.addEventListener('click',async()=>{const id=Number(qs('[data-community-template-select]')?.value||0);if(!id){setStatus('Choose an event plan first.','error');return;}try{await adminAction({action:'start_now',template_id:id,overrides:{discord_channel_id:qs('[data-community-channel]')?.value||''}});}catch(e){setStatus(e.message,'error');}});
   root.querySelectorAll('[data-event-preset]').forEach(btn=>btn.addEventListener('click',()=>applyPreset(btn.dataset.eventPreset)));
+  qs('[data-raid-damage-toggle]')?.addEventListener('click', async () => {
+    if (dashboardAccessLevel !== 'owner') return;
+    const server = window.WWZServerContext?.getSelectedServer?.();
+    if (server?.map_key !== 'badlands' || server?.gameplay_mode !== 'pve') return;
+    const toggle = qs('[data-raid-damage-toggle]');
+    const turnOn = toggle?.dataset.enabled !== 'true';
+    const message = turnOn
+      ? 'Enable automatic NASDARA PVE raid damage changes and DayZ restarts every second Friday/Sunday at 7 PM Sydney time? Confirm enableCfgGameplayFile is ON and full-map PvP protections are managed separately. The bot will affect real players.'
+      : 'Disable NEW automated raid starts? Any previously started raid will still restore normal PvE damage protection at its scheduled end.';
+    if (!confirm(message)) return;
+    if (toggle) toggle.disabled = true;
+    try {
+      await adminAction({action: 'raid_damage_automation', enabled: turnOn});
+    } catch (error) {
+      setStatus(error.message, 'error');
+    } finally {
+      if (toggle) toggle.disabled = false;
+    }
+  });
   qs('[data-community-calendar-publish]')?.addEventListener('click',async()=>{const channelId=qs('[data-community-calendar-channel]')?.value||'';if(!channelId){setStatus('Choose a Discord channel for the Event Calendar panel.','error');return;}try{await adminAction({action:'calendar_panel_publish',channel_id:channelId});}catch(e){setStatus(e.message,'error');}});
   root.querySelectorAll('[data-calendar-view]').forEach(btn=>btn.addEventListener('click',()=>{calendarView=btn.dataset.calendarView;renderCalendar(calendarRows());}));
   qs('[data-calendar-today]')?.addEventListener('click',()=>{calendarCursor=new Date();renderCalendar(calendarRows());});

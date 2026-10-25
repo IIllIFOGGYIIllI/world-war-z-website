@@ -32,6 +32,7 @@
 <link href="assets/css/dashboard/ios-auth.css?v=1.22.93" rel="stylesheet"/>
 <link href="assets/css/dashboard/mobile-reliability.css?v=1.22.93&rev=tablet-1" rel="stylesheet"/>
 <link href="assets/css/dashboard/status-timing.css?v=1.22.93&rev=stage5-1" rel="stylesheet"/>
+<link href="assets/css/dashboard/raid-controls.css?v=1.0&rev=stage6-damage-1" rel="stylesheet"/>
 <link href="assets/css/dashboard/shop-phase2.css?v=1.22.93&rev=phase2-1" rel="stylesheet"/>
 <meta name="twitter:image:alt" content="World War Z Badlands — original Nasdara paper map with roads and town names">
 </head>
@@ -476,6 +477,14 @@
         </details>
       </div>
 
+      <section class="community-raid-controls" data-raid-damage-controls hidden>
+        <div><strong>Fortnightly Raid Weekend Automation — Nasdara PvE</strong>
+          <p>Friday 7 PM to Sunday 7 PM (Sydney time), every 14 days from 6 November 2026. With Owner approval, the bot changes both base and container damage settings in the verified mission file <em>before</em> requesting a restart at each boundary. Disabling future starts does not cancel restoration of an already-started raid.</p>
+          <p>Before enabling: confirm Nitrado is using <code>cfggameplay.json</code> (<code>enableCfgGameplayFile</code> enabled) and that full-map PvP enforcement is configured separately. A calendar entry alone does not change gameplay rules.</p>
+          <small data-raid-damage-status>Checking PvE automation…</small>
+        </div>
+        <button class="secondary-action" data-raid-damage-toggle type="button">Enable raid automation</button>
+      </section>
       <section class="community-event-builder">
         <div class="community-builder-heading"><div><span class="community-builder-step">1</span><div><h4>Choose an event</h4><p>Templates fill the rules, rewards, announcement defaults and event behaviour for you.</p></div></div><span class="community-template-hint">You can change anything afterwards.</span></div>
         <div class="community-quick-template-grid" data-community-quick-templates>

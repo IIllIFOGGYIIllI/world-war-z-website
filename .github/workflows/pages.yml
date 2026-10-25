@@ -60,6 +60,7 @@ jobs:
           node scripts/test_stage5_qol.js
           node scripts/test_phase2_shop_reliability.js
           node scripts/test_stage6_raid_calendar.js
+          node scripts/test_stage6_raid_automation_ui.js
           find assets/js -type f -name '*.js' -print0 | xargs -0 -n1 node --check
 
       - name: Upload website artifact
