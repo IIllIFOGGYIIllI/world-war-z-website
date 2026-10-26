@@ -12,7 +12,7 @@ assert.ok(js.includes('raid.start_restart_observation'));
 assert.ok(js.includes('raid.end_restart_observation'));
 assert.ok(js.includes('report.start_restart_observation'));
 assert.ok(js.includes('report.end_restart_observation'));
-assert.ok(js.includes('unverified within 20 minutes'));
+assert.ok(js.includes('Not verified within 20 minutes'));
 assert.ok(html.includes('external DayZ++ illegal-kill bans'));
 assert.ok(js.includes("action: 'raid_recovery_check'"));
 assert.ok(js.includes("server?.gameplay_mode !== 'pve'"));
