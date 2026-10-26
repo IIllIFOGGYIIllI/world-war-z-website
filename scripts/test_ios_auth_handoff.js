@@ -61,6 +61,6 @@ assert.ok(!account.includes("window.open(AUTH_LOGIN_URL, '_self')"));
 assert.ok(page.includes('data-auth-session-retry'));
 assert.ok(page.includes('iosreturn=2'));
 const sw = fs.readFileSync('sw.js', 'utf8');
-assert.ok(sw.includes('2026-10-26-ios-auth-return-1'));
+assert.ok(sw.includes('2026-10-26-ios-auth-return-2'));
 assert.ok(sw.includes("url.pathname.endsWith('/assets/js/dashboard/ios-auth-handoff.js')"));
 console.log('PASS: iOS PWA OAuth handoff and safe one-time-ticket validation');

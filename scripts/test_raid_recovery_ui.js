@@ -32,5 +32,5 @@ assert.ok(!js.includes('WWZ internal KILLZONE suspension/restoration'));
 assert.ok(js.includes('Nitrado restart accepted (reboot not independently verified)'));
 assert.ok(js.includes('The separate map-wide kill-ban zone is NOT modified.'));
 assert.ok(lazy.includes('recovery=3&ownerreview=1&pvemode=1'));
-assert.ok(sw.includes('2026-10-26-ios-auth-return-1'));
+assert.ok(sw.includes('2026-10-26-ios-auth-return-2'));
 console.log('PASS: PvE raid damage only, restart safety, separate kill-ban zone unchanged');
