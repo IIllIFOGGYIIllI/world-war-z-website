@@ -8,8 +8,8 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-10-27-nasdara-draw-order-1';
-const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-nasdara-draw-order-1`;
+const WWZ_PWA_UPDATE_REVISION = '2026-10-27-nasdara-draw-order-2';
+const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-nasdara-draw-order-2`;
 const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${APP_CACHE_RELEASE}`;
 const STATIC_CACHE = `${CACHE_PREFIX}static-${APP_CACHE_RELEASE}`;
