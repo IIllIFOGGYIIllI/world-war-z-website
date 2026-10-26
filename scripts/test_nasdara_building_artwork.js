@@ -21,6 +21,7 @@ let fallbackPaints=0,picturesDrawn=0;
 const ctx={setTransform(){},clearRect(){},transform(){},beginPath(){},moveTo(){},lineTo(){},
   closePath(){},fill(){fallbackPaints++;},stroke(){},drawImage(){picturesDrawn++;},save(){},restore(){}};
 const canvas={style:{},width:0,height:0,getContext:()=>ctx};
+const zoomTransforms=[];
 const events=new Map(),statuses=[];
 class FakeImage{
   set src(value){
@@ -31,7 +32,9 @@ class FakeImage{
 }
 const window={
   devicePixelRatio:1,
-  L:{DomUtil:{create:()=>canvas,setPosition(){}}},
+  L:{DomUtil:{create:()=>canvas,setPosition(){},
+    addClass(element,name){element.animationClass=name},
+    setTransform(element,position,scale){zoomTransforms.push({position,scale})}}},
   requestAnimationFrame:callback=>setImmediate(callback),
   cancelAnimationFrame:handle=>clearImmediate(handle)
 };
@@ -49,8 +52,17 @@ assert.equal(source.models[0].sprite[3],195);
 assert(source.models[0].top[1]<0,'Top-down artwork requires original model orientation');
 const unit=240/16384*Math.pow(2,6);
 const map={
+  options:{zoomAnimation:true},
+  _animatingZoom:false,
   createPane(){return {style:{},remove(){}}},
   getZoom(){return 6;},
+  getZoomScale(to,from){return Math.pow(2,to-from)},
+  _latLngToNewLayerPoint(anchor,zoom,center){
+    assert.equal(typeof anchor.lat,'number');
+    assert.equal(typeof anchor.lng,'number');
+    return {x:55+zoom,y:66+zoom};
+  },
+  containerPointToLatLng(){return {lat:-100,lng:100}},
   getSize(){return {x:800,y:650};},
   containerPointToLayerPoint(){return {x:0,y:0};},
   latLngToContainerPoint(point){
@@ -87,6 +99,16 @@ const check=()=>{
   assert(status.drawn>250,'Native buildings missing at actual Nasdara town coordinates: '+JSON.stringify(status));
   assert(status.detailed>100,'Top-down roof artwork not rendered at actual coordinates: '+JSON.stringify(status));
   assert(picturesDrawn>100,'Atlas pictures were not drawn');
+  assert.equal(canvas.animationClass,'leaflet-zoom-animated');
+  assert(events.has('zoomanim'),'A zoom-animation listener is required');
+  const countBeforeZoom=controller.getStatus().drawn;
+  map._animatingZoom=true;
+  events.get('zoomanim')({zoom:7,center:[-100,100]});
+  assert.equal(zoomTransforms.at(-1).scale,2,'Buildings must scale with the map');
+  assert.deepEqual(zoomTransforms.at(-1).position,{x:62,y:73});
+  assert.equal(controller.getStatus().drawn,countBeforeZoom,'Do not clear the zooming frame');
+  map._animatingZoom=false;
+  events.get('zoomend')();
   controller.setVisible(false);
   assert.equal(controller.getVisible(),false);
   controller.destroy();

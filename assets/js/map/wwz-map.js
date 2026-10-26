@@ -928,7 +928,7 @@
       if(window.WWZNasdaraStructures){start();return;}
       structureLoading=new Promise((resolve,reject)=>{
         const script=document.createElement('script');
-        script.src='assets/js/map/nasdara-structures.js?v=wwz-origin-fix-1';
+        script.src='assets/js/map/nasdara-structures.js?v=wwz-zoom-smooth-1';
         script.async=true;
         script.onload=resolve;script.onerror=()=>reject(Error('Nasdara building renderer unavailable'));
         document.head.appendChild(script);

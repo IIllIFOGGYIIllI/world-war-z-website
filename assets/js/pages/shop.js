@@ -89,8 +89,8 @@ const isBadlandsWorld = () => activeMapKey() === 'badlands';
 const MAP_ASSETS = {
   leafletCss: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
   leafletJs: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
-  mapCss: 'assets/css/components/wwz-map.css?v=1.29.1&rev=nasdara-origin-fix-1',
-  mapJs: 'assets/js/map/wwz-map.js?v=1.29.1&rev=nasdara-origin-fix-1'
+  mapCss: 'assets/css/components/wwz-map.css?v=1.29.2&rev=nasdara-zoom-smooth-1',
+  mapJs: 'assets/js/map/wwz-map.js?v=1.29.2&rev=nasdara-zoom-smooth-1'
 };
 let checkoutMapRuntimePromise = null;
 const loadStylesheetOnce = (key, href, integrity = '') => {

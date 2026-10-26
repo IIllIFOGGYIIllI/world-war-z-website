@@ -60,8 +60,17 @@ function attach(map,config){
   pane.style.zIndex='325';pane.style.pointerEvents='none';
   const canvas=window.L.DomUtil.create('canvas','wwz-nasdara-structures',pane);
   canvas.style.position='absolute';canvas.style.pointerEvents='none';
+  // Animate the existing raster with Leaflet rather than letting it jump at
+  // zoomend. Leaflet's zoom CSS interpolates the transform on this canvas.
+  const zoomAnimated=Boolean(map.options?.zoomAnimation &&
+    map._latLngToNewLayerPoint && map.getZoomScale &&
+    window.L.DomUtil.setTransform && window.L.DomUtil.addClass);
+  if(zoomAnimated){
+    window.L.DomUtil.addClass(canvas,'leaflet-zoom-animated');
+    canvas.style.transformOrigin='0 0';
+  }
   const state={visible:true,destroyed:false,loaded:null,loading:null,images:new Map(),failures:new Set(),
-    frame:null,drawn:0,detail:0,loadError:null};
+    frame:null,drawn:0,detail:0,loadError:null,paintAnchor:null,paintZoom:null,zoomAnimating:false};
   const base=config.structureAtlasUrl.split('?')[0].replace(/[^/]+$/,'');
   const report=status=>config.onStructureStatus?.(status);
   function getImage(sprite){
@@ -78,10 +87,15 @@ function attach(map,config){
     return null;
   }
   function paint(){
-    if(state.destroyed)return;
+    if(state.destroyed||(state.zoomAnimating&&map._animatingZoom))return;
+    state.zoomAnimating=false;
     const size=map.getSize(),zoom=map.getZoom(),w=Math.ceil(size.x),h=Math.ceil(size.y),
       dpr=Math.min(window.devicePixelRatio||1,2);
+    // Snapshot the map location beneath the current canvas origin. Its
+    // geographic anchor lets the bitmap track satellite imagery on zoom.
     window.L.DomUtil.setPosition(canvas,map.containerPointToLayerPoint([0,0]));
+    state.paintAnchor=zoomAnimated?map.containerPointToLatLng([0,0]):null;
+    state.paintZoom=zoom;
     canvas.style.width=w+'px';canvas.style.height=h+'px';
     if(canvas.width!==Math.round(w*dpr)||canvas.height!==Math.round(h*dpr)){
       canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);
@@ -164,14 +178,32 @@ function attach(map,config){
     return state.loading;
   }
   function onMove(){if(state.visible&&map.getZoom()>=MIN_ZOOM)load();schedule()}
-  map.on('moveend zoomend resize',onMove);
+  function onZoomAnim(event){
+    if(!zoomAnimated||!state.visible||!state.paintAnchor||state.paintZoom===null)return;
+    // Keep buildings in lock-step with the underlying Leaflet satellite.
+    // Redrawing while the CSS zoom is in flight used to cause blank/jumpy frames.
+    const offset=map._latLngToNewLayerPoint(state.paintAnchor,event.zoom,event.center);
+    const scale=map.getZoomScale(event.zoom,state.paintZoom);
+    state.zoomAnimating=true;
+    window.L.DomUtil.setTransform(canvas,offset,scale);
+  }
+  function onZoomEnd(){
+    state.zoomAnimating=false;
+    onMove();
+  }
+  map.on('moveend resize',onMove);
+  map.on('zoomend',onZoomEnd);
+  if(zoomAnimated)map.on('zoomanim',onZoomAnim);
   const controller={
     setVisible(value){state.visible=Boolean(value);onMove()},
     getVisible(){return state.visible},
     getStatus(){return {visible:state.visible,loaded:Boolean(state.loaded),error:state.loadError,
       placements:state.loaded?.valid||0,drawn:state.drawn,detailed:state.detail}},
     destroy(){
-      state.destroyed=true;map.off('moveend zoomend resize',onMove);
+      state.destroyed=true;
+      map.off('moveend resize',onMove);
+      map.off('zoomend',onZoomEnd);
+      if(zoomAnimated)map.off('zoomanim',onZoomAnim);
       if(state.frame!==null)window.cancelAnimationFrame(state.frame);
       pane.remove();instances.delete(map);
     }
