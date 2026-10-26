@@ -17,6 +17,13 @@
   const token = () => { try { return storageGet(AUTH_SESSION_KEY) || ''; } catch { return ''; } };
   const esc = (value) => String(value ?? '').replace(/[&<>'"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
   const fmtDate = (value) => { const d = new Date(value); return Number.isNaN(d.getTime()) ? '—' : d.toLocaleString([], {dateStyle:'medium',timeStyle:'short'}); };
+  const raidFailureLabel = (stage) => ({
+    read_settings: 'Read mission file',
+    suspend_killzones: 'Suspend internal KILLZONES',
+    upload_gameplay: 'Upload gameplay settings — remote outcome may be uncertain',
+    request_restart: 'Request Nitrado restart — completion unverified',
+    restore_killzones: 'Restore internal KILLZONES'
+  }[String(stage || '')] || 'Unclassified operation');
   const fmtSydney = (value) => {
     const when = new Date(value);
     return Number.isNaN(when.getTime()) ? '—' : new Intl.DateTimeFormat('en-AU', {
@@ -267,12 +274,16 @@
     const raidPhases = qs('[data-raid-phase-readout]');
     if (raidPhases) raidPhases.textContent = 'Recorded actions for the current/latest weekend: opening '
       + raidFormatPhase(raid.start_phase) + ' · restoration ' + raidFormatPhase(raid.end_phase) + '.';
+    const raidFailureStage = raid.blocked_failure_stage || raid.end_failure_stage || raid.start_failure_stage;
     const raidAlert = qs('[data-raid-damage-alert]');
     if (raidAlert) {
       raidAlert.hidden = !raid.attention_required;
       raidAlert.textContent = raid.blocked_weekend
         ? 'ACTION REQUIRED: A previous raid weekend (' + fmtSydney(raid.blocked_weekend) + ') has no confirmed restoration. Later openings are blocked. Check Nitrado damage settings and restart history before assuming PvE protection is restored.'
         : 'ACTION REQUIRED: An opening or restoration was not fully confirmed. Check Nitrado damage settings and restart history. The system will not blindly send duplicate restarts.';
+      if (raid.attention_required && raidFailureStage) {
+        raidAlert.textContent += ' Failed step: ' + raidFailureLabel(raidFailureStage) + '.';
+      }
     }
     const raidStatus = qs('[data-raid-damage-status]');
     if (raidStatus) {
@@ -455,6 +466,7 @@
       const report = response.result || {};
       const blockers = Array.isArray(report.blockers) ? report.blockers : [];
       const checks = Array.isArray(report.manual_checks) ? report.manual_checks : [];
+      const failedStep = report.blocked_failure_stage || report.end_failure_stage || report.start_failure_stage;
       if (output) {
         output.dataset.kind = report.inspection_ok === true ? 'ready' : 'blocked';
         output.textContent = (report.inspection_ok === true
@@ -466,6 +478,8 @@
           + '\nBase damage: ' + (report.base_damage_enabled == null ? 'Unavailable' : report.base_damage_enabled ? 'Enabled' : 'Protected')
           + ' · Containers: ' + (report.container_damage_enabled == null ? 'Unavailable' : report.container_damage_enabled ? 'Enabled' : 'Protected')
           + '\nInternal KILLZONES: ' + (report.internal_killzones_enabled == null ? 'Unavailable' : report.internal_killzones_enabled ? 'Enabled' : 'Suspended')
+          + (failedStep ? '\nInterrupted step: ' + raidFailureLabel(failedStep) : '')
+          + (report.blocked_weekend ? '\nPrevious raid requiring review: ' + fmtSydney(report.blocked_weekend) : '')
           + (blockers.length ? '\nIssues: ' + blockers.join(' | ') : '')
           + '\nManual checks: ' + checks.join(' | ')
           + '\nThis inspection makes no Nitrado or DayZ++ changes.';
