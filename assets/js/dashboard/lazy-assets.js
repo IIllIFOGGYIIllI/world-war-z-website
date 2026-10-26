@@ -84,7 +84,7 @@
     ),
     loadStylesheetOnce(
       'wwz-map-css',
-      'assets/css/components/wwz-map.css?v=1.28.2&rev=wwz-marker-icons-1'
+      'assets/css/components/wwz-map.css?v=1.29.1&rev=nasdara-origin-fix-1'
     ),
     loadScriptOnce(
       'leaflet-runtime',
@@ -97,7 +97,7 @@
     )
   ]).then(() => loadScriptOnce(
     'wwz-map-runtime',
-    'assets/js/map/wwz-map.js?v=1.29.0&rev=nasdara-roof-art-2',
+    'assets/js/map/wwz-map.js?v=1.29.1&rev=nasdara-origin-fix-1',
     () => Boolean(window.WWZMap?.create)
   ));
 

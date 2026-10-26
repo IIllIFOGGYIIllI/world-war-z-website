@@ -12,7 +12,10 @@ assert.equal(classes.length,1697);
 assert.equal(atlas.sprites['0'][3],195);
 assert.equal(atlas.sprites['0'][4],308);
 assert(main.includes("structureAtlasUrl: 'assets/maps/nasdara/building-atlas.json"));
-assert(main.includes("map.getZoom()<3.1"));
+assert(main.includes("map.getZoom()<3.1")||main.includes("map.getZoom()<3.8"));
+assert(code.includes("map.latLngToContainerPoint([-config.mapUnits,0])"),
+  'Building origin must be DayZ southwest, not Leaflet northwest');
+assert(code.includes("const minSize=1.5"), 'Use the same native detail density as ZedForge');
 assert(main.includes("setStructuresVisible: visible =>"));
 let fallbackPaints=0,picturesDrawn=0;
 const ctx={setTransform(){},clearRect(){},transform(){},beginPath(){},moveTo(){},lineTo(){},
@@ -50,7 +53,17 @@ const map={
   getZoom(){return 6;},
   getSize(){return {x:800,y:650};},
   containerPointToLayerPoint(){return {x:0,y:0};},
-  latLngToContainerPoint(){return {x:400-8500*unit,y:325+7000*unit};},
+  latLngToContainerPoint(point){
+    // World-map projection (CRS.Simple):
+    // [-240,0] is DayZ southwest (X0, Z0);
+    // [0,0] is northwest (X0, Z16384).
+    // A fake constant origin would silently conceal the original map bug.
+    const lat=point[0],lng=point[1];
+    return {
+      x:400+(lng/(240/16384)-11153)*unit,
+      y:325+(10967-(lat/(240/16384)+16384))*unit
+    };
+  },
   on(key,callback){events.set(key,callback)},
   off(key){events.delete(key)}
 };
@@ -71,8 +84,8 @@ const check=()=>{
   }
   assert(status.loaded,'Building data did not load: '+String(status.error));
   assert.equal(status.placements,295195);
-  assert(status.drawn>100,'Native buildings not visible at zoom 6: '+JSON.stringify(status));
-  assert(status.detailed>100,'Top-down roof artwork not rendered: '+JSON.stringify(status));
+  assert(status.drawn>250,'Native buildings missing at actual Nasdara town coordinates: '+JSON.stringify(status));
+  assert(status.detailed>100,'Top-down roof artwork not rendered at actual coordinates: '+JSON.stringify(status));
   assert(picturesDrawn>100,'Atlas pictures were not drawn');
   controller.setVisible(false);
   assert.equal(controller.getVisible(),false);

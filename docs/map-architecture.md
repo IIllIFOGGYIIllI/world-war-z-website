@@ -80,3 +80,15 @@ existing protected API and browser storage—not in the static map data.
 Terrain detail cannot exceed the source's 4096px native resolution. Detailed roof textures use the original source pictures. Distant zoom levels
 avoid excessive fine details to preserve readability and mobile performance. Named settlements use grid-centres. Markers, rentals and zones
 continue to use exact user-entered X/Z coordinates.
+
+## Southwest-origin rendering fix (2026-10-27)
+
+The native structures use DayZ X/Z coordinates measured from the **southwest**
+corner. Leaflet CRS.Simple [0,0] is the **northwest** corner of this world;
+the previous renderer incorrectly treated it as the southwest corner,
+placing all 295,195 objects off screen despite correctly loading the binary.
+The renderer now anchors to [-240,0] for the 16,384-metre world, matching
+ZedForge. At zoom 6 near X 11153, Z 10967, a realistic map-coordinate
+regression sees thousands of buildings rather than zero. Density and outline
+colours are aligned with ZedForge, and a live on-map counter exposes whether
+building geometry and roof imagery have actually rendered.

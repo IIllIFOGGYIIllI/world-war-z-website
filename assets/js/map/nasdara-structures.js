@@ -3,7 +3,7 @@
  */
 (() => {
 'use strict';
-const WORLD=16384,CELL=256,GRID=64,MIN_ZOOM=3.1,PICTURE_ZOOM=4.8;
+const WORLD=16384,CELL=256,GRID=64,MIN_ZOOM=3.8,PICTURE_ZOOM=5.5;
 const clamp=(x,a,b)=>Math.min(b,Math.max(a,x)),instances=new WeakMap();
 const getJson=async url=>{const r=await fetch(url,{cache:'force-cache'});if(!r.ok)throw Error('HTTP '+r.status+': '+url);return r.json()};
 const getBinary=async url=>{const r=await fetch(url,{cache:'force-cache'});if(!r.ok)throw Error('HTTP '+r.status+': '+url);return r.arrayBuffer()};
@@ -89,23 +89,27 @@ function attach(map,config){
     const ctx=canvas.getContext('2d');if(!ctx)return;
     ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
     state.drawn=0;state.detail=0;
-    if(!state.visible||!state.loaded||zoom<MIN_ZOOM)return;
-    const source=state.loaded,unit=config.mapUnits/WORLD*Math.pow(2,zoom),
-      origin=map.latLngToContainerPoint([0,0]);
+    if(!state.visible||!state.loaded||zoom<MIN_ZOOM){report('drawn',{drawn:0,detailed:0,zoom});return;}
+    const source=state.loaded,unit=config.mapUnits/WORLD*Math.pow(2,zoom);
+    // The Leaflet CRS.Simple point [0,0] is NORTHWEST (Z=16384).
+    // Buildings are measured northward from SOUTHWEST (Z=0).
+    // Using [0,0] incorrectly put every building far outside the viewport.
+    const origin=map.latLngToContainerPoint([-config.mapUnits,0]);
     const x0=clamp(Math.floor((-origin.x-100)/unit/CELL),0,GRID-1),
       x1=clamp(Math.floor((w-origin.x+100)/unit/CELL),0,GRID-1),
       z0=clamp(Math.floor((origin.y-h-100)/unit/CELL),0,GRID-1),
       z1=clamp(Math.floor((origin.y+100)/unit/CELL),0,GRID-1);
     if(x1<x0||z1<z0)return;
-    const usePictures=zoom>=PICTURE_ZOOM,
-      minArea=zoom<4.25?32:zoom<5.4?10:zoom<6.5?3:0,
-      minSize=zoom<4.25?3.5:zoom<5.4?2:1;
+    const usePictures=zoom>=PICTURE_ZOOM;
+    // Match ZedForge's native-structure density and close-zoom thresholds.
+    const minSize=1.5;
     let drawn=0;ctx.lineJoin='round';ctx.lineCap='round';
     for(let zz=z0;zz<=z1;zz++)for(let xx=x0;xx<=x1;xx++){
       for(const index of source.cells[zz*GRID+xx]){
         const off=source.placementsStart+index*20,view=source.view,
           model=source.models[view.getUint32(off,true)];
-        if(model.area<minArea||(zoom<5&&!model.prominent))continue;
+        if((model.flags&2)&&zoom<6)continue;
+        if(!model.rings.length)continue;
         const x=view.getFloat32(off+4,true),z=view.getFloat32(off+8,true),
           scale=view.getFloat32(off+16,true),angle=view.getFloat32(off+12,true)*Math.PI/180;
         const maxSize=Math.max(model.bounds[2]-model.bounds[0],model.bounds[3]-model.bounds[1]);
@@ -118,27 +122,28 @@ function attach(map,config){
         if(usePictures&&model.sprite){
           const sprite=model.sprite,image=getImage(sprite);
           if(image){
-            ctx.transform(...model.top);
+            ctx.save();ctx.transform(...model.top);
             ctx.drawImage(image,sprite[1],sprite[2],sprite[3],sprite[4],0,0,sprite[3],sprite[4]);
-            painted=true;state.detail++;
+            ctx.restore();painted=true;state.detail++;
           }
         }
-        if(!painted){
-          ctx.beginPath();
-          for(const ring of model.rings){
-            for(let k=0;k<ring.length;k+=2){
-              if(k===0)ctx.moveTo(ring[0],ring[1]);else ctx.lineTo(ring[k],ring[k+1]);
-            }
-            ctx.closePath();
+        ctx.beginPath();
+        for(const ring of model.rings){
+          for(let k=0;k<ring.length;k+=2){
+            if(k===0)ctx.moveTo(ring[0],ring[1]);else ctx.lineTo(ring[k],ring[k+1]);
           }
-          ctx.fillStyle=zoom<4.5?'rgba(242,221,181,.34)':'rgba(237,211,169,.55)';
-          ctx.strokeStyle=zoom<4.5?'rgba(40,32,21,.86)':'rgba(19,22,21,.95)';
-          ctx.lineWidth=Math.max(.35,1.2/unit/scale);ctx.fill();ctx.stroke();
+          ctx.closePath();
         }
+        ctx.fillStyle=(model.flags&1)?'#8d614d':'#525e5c';
+        ctx.strokeStyle='#1b2728';
+        ctx.lineWidth=Math.max(.5,1/(unit*scale));
+        if(!painted)ctx.fill();
+        ctx.stroke();
         ctx.restore();state.drawn++;
         if(++drawn>=14000){report('limited');return}
       }
     }
+    report('drawn',{drawn:state.drawn,detailed:state.detail,zoom});
   }
   function schedule(){
     if(state.frame!==null||state.destroyed)return;

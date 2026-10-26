@@ -414,7 +414,7 @@
         buildings.textContent='Buildings';buildings.dataset.wwzBuildings='true';
         buildings.setAttribute('aria-pressed','true');
         buildings.setAttribute('aria-label','Toggle native building pictures and outlines');
-        buildings.title='Zoom in: building outlines from zoom 3.1; detailed roof images from zoom 4.8';
+        buildings.title='Zoom in for true Nasdara footprints (3.8+) and roof artwork (5.5+)';
         buildings.addEventListener('click',()=>{
           const enabled=buildings.getAttribute('aria-pressed')!=='true';
           buildings.setAttribute('aria-pressed',String(enabled));
@@ -422,6 +422,12 @@
           container._wwzMapInstance?.setStructuresVisible(enabled);
         });
         section.appendChild(buildings);
+        const detailState=document.createElement('span');
+        detailState.className='wwz-nasdara-building-status';
+        detailState.dataset.wwzBuildingStats='true';
+        detailState.textContent='Buildings load from zoom 3.8 · roofs from 5.5';
+        detailState.setAttribute('role','status');
+        section.appendChild(detailState);
         layerPanel.appendChild(section);
         layerPanel.classList.add('wwz-nasdara-layers-panel');
       }
@@ -895,17 +901,26 @@
     // Load structure rendering on demand; no heavy Nasdara parser on other worlds.
     let structureController=null,structureLoading=null;
     const loadStructures=()=>{
-      if(!config.structureUrl||state.destroyed||map.getZoom()<3.1||structureController||structureLoading)return;
+      if(!config.structureUrl||state.destroyed||map.getZoom()<3.8||structureController||structureLoading)return;
       const start=()=>{if(!state.destroyed&&window.WWZNasdaraStructures){
         structureController=window.WWZNasdaraStructures.attach(map,{
           ...config,
-          onStructureStatus:status=>{
+          onStructureStatus:(status,details)=>{
             const button=container.querySelector('[data-wwz-buildings]');
-            if(!button)return;
-            button.dataset.loadState=status;
-            if(status==='error')button.title='Building artwork unavailable — check deployment assets';
-            else if(status==='loading')button.title='Loading detailed building data…';
-            else if(status==='ready')button.title='Detailed buildings ready — zoom in for individual roofs';
+            const readout=container.querySelector('[data-wwz-building-stats]');
+            if(button)button.dataset.loadState=status;
+            if(status==='error'){
+              if(button)button.title='Building artwork unavailable — check deployment assets';
+              if(readout)readout.textContent='Buildings could not load. Reload the map.';
+            }else if(status==='loading'){
+              if(readout)readout.textContent='Loading native Nasdara buildings…';
+            }else if(status==='ready'){
+              if(readout)readout.textContent='Buildings ready · zoom in for detailed roofs';
+            }else if(status==='drawn'&&readout){
+              const count=details?.drawn||0,roofs=details?.detailed||0,zoom=details?.zoom||0;
+              readout.textContent=zoom<3.8?'Zoom in to see buildings':
+                count.toLocaleString('en-AU')+' buildings · '+roofs.toLocaleString('en-AU')+' detailed roofs';
+            }
           }
         });
         structureController.setVisible(state.structuresVisible);
@@ -913,7 +928,7 @@
       if(window.WWZNasdaraStructures){start();return;}
       structureLoading=new Promise((resolve,reject)=>{
         const script=document.createElement('script');
-        script.src='assets/js/map/nasdara-structures.js?v=wwz-roof-art-2';
+        script.src='assets/js/map/nasdara-structures.js?v=wwz-origin-fix-1';
         script.async=true;
         script.onload=resolve;script.onerror=()=>reject(Error('Nasdara building renderer unavailable'));
         document.head.appendChild(script);
@@ -955,7 +970,7 @@
         structureController?.setVisible(state.structuresVisible);
       },
       getStructureStatus:()=>structureController?.getStatus()||{
-        visible:state.structuresVisible,loaded:false,minimumZoom:3.1,pictureZoom:4.8
+        visible:state.structuresVisible,loaded:false,minimumZoom:3.8,pictureZoom:5.5
       },
       setSatelliteOpacity: (opacity) => { state.satelliteOpacity = clamp(Number(opacity), 0, 1); satellite.setOpacity(state.satelliteOpacity); },
       destroy: () => {

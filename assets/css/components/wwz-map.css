@@ -1073,3 +1073,19 @@
  .wwz-marker-icon-preview{min-height:45px}
  .wwz-marker-icon-preview img{height:42px;width:34px}
 }
+
+/* Native Nasdara building layer: explicit readiness and on-screen detail count. */
+.wwz-badlands-map .wwz-nasdara-building-status{
+  grid-column:1/-1;
+  color:#e9d7b2;
+  background:rgba(6,13,17,.65);
+  border:1px solid rgba(236,209,163,.20);
+  border-radius:6px;
+  padding:7px 9px;
+  font:700 11px/1.5 system-ui,sans-serif;
+  letter-spacing:0;
+}
+.wwz-badlands-map [data-wwz-buildings][data-load-state="error"]{
+  border-color:#f28a7b!important;
+  color:#ffc4b8!important;
+}
