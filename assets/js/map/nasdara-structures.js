@@ -1,139 +1,177 @@
-/* WWZ Nasdara static structures — native DVMOBJ1 footprint renderer.
- * Deliberately loads only for Nasdara close-up views and draws on a
- * noninteractive Leaflet canvas beneath roads, markers and labels.
- * World metres stay in DayZ X/Z: +Z is north, no paper-grid inversion.
+/* WWZ Nasdara native 3D-model roof pictures and exact game X/Z placements.
+ * Model art and transforms are from the pinned user-supplied DayZ map archive.
  */
 (() => {
-  'use strict';
-  const SIZE=16384, CELL=256, GRID=64;
-  const clamp=(n,a,b)=>Math.max(a,Math.min(n,b));
-  const stateByMap=new WeakMap();
-
-  const readBinary=async url=>{
-    const response=await fetch(url,{cache:'force-cache'});
-    if(!response.ok)throw Error('Nasdara structures returned HTTP '+response.status);
-    return response.arrayBuffer();
-  };
-  const readClasses=async url=>{
-    const response=await fetch(url,{cache:'force-cache'});
-    if(!response.ok)throw Error('Nasdara structure classes returned HTTP '+response.status);
-    return response.json();
-  };
-  function parse(buffer, names){
-    const view=new DataView(buffer);
-    const signature='DVMOBJ1';
-    if(view.byteLength<28||[...signature].some((char,i)=>view.getUint8(i)!==char.charCodeAt(0))||view.getUint8(7)!==0)
-      throw Error('Invalid Nasdara structure binary');
-    const world=view.getFloat32(8,true),n=view.getUint32(12,true),count=view.getUint32(16,true),
-      nRings=view.getUint32(20,true),nPoints=view.getUint32(24,true);
-    if(world!==SIZE||n!==1697||count!==295195||!Array.isArray(names)||names.length!==n)
-      throw Error('Incompatible Nasdara structure dataset');
-    const ringsStart=28+n*60,pointsStart=ringsStart+nRings*8,instancesStart=pointsStart+nPoints*8;
-    if(instancesStart+count*20!==view.byteLength)throw Error('Incomplete Nasdara structures');
-    const models=Array.from({length:n},(_,i)=>{
-      const off=28+i*60,first=view.getUint32(off,true),length=view.getUint32(off+4,true);
-      const allowed=/^Land_(?!.*(?:wall|fence|pole))/i.test(names[i]);
-      if(!allowed||!length||first>=nRings)return null;
-      const rings=[];
-      for(let j=first;j<first+Math.min(length,3);j++){
-        const r=ringsStart+j*8,start=view.getUint32(r,true),vertices=view.getUint32(r+4,true);
-        if(vertices<3||vertices>150||start+vertices>nPoints)continue;
-        const pts=[];
-        for(let k=0;k<vertices;k++){
-          const x=view.getFloat32(pointsStart+(start+k)*8,true);
-          const z=view.getFloat32(pointsStart+(start+k)*8+4,true);
-          if(!Number.isFinite(x)||!Number.isFinite(z))continue;
-          pts.push([x,z]);
-        }
-        if(pts.length>=3)rings.push(pts);
+'use strict';
+const WORLD=16384,CELL=256,GRID=64,MIN_ZOOM=3.1,PICTURE_ZOOM=4.8;
+const clamp=(x,a,b)=>Math.min(b,Math.max(a,x)),instances=new WeakMap();
+const getJson=async url=>{const r=await fetch(url,{cache:'force-cache'});if(!r.ok)throw Error('HTTP '+r.status+': '+url);return r.json()};
+const getBinary=async url=>{const r=await fetch(url,{cache:'force-cache'});if(!r.ok)throw Error('HTTP '+r.status+': '+url);return r.arrayBuffer()};
+function parse(buffer,names,atlas){
+  const view=new DataView(buffer),signature='DVMOBJ1';
+  if(view.byteLength<28||[...signature].some((c,i)=>view.getUint8(i)!==c.charCodeAt(0))||view.getUint8(7)!==0)
+    throw Error('Invalid Nasdara objects signature');
+  const world=view.getFloat32(8,true),modelCount=view.getUint32(12,true),count=view.getUint32(16,true),
+    ringCount=view.getUint32(20,true),pointCount=view.getUint32(24,true);
+  if(world!==WORLD||modelCount!==1697||count!==295195||!Array.isArray(names)||names.length!==modelCount)
+    throw Error('Nasdara building source does not match the published map');
+  const ringsStart=28+modelCount*60,pointsStart=ringsStart+ringCount*8,placementsStart=pointsStart+pointCount*8;
+  if(placementsStart+count*20!==view.byteLength)throw Error('Truncated building coordinate data');
+  if(!atlas||atlas.version!==1||atlas.count!==1694||!Array.isArray(atlas.pages)||
+     !atlas.pages.length||!atlas.sprites)throw Error('Detailed building picture atlas is missing');
+  const models=Array.from({length:modelCount},(_,i)=>{
+    const off=28+i*60,first=view.getUint32(off,true),length=view.getUint32(off+4,true),
+      flags=view.getUint32(off+8,true),width=view.getUint32(off+12,true),height=view.getUint32(off+16,true),
+      top=Array.from({length:6},(_,j)=>view.getFloat32(off+20+j*4,true)),
+      bounds=Array.from({length:4},(_,j)=>view.getFloat32(off+44+j*4,true)),rings=[];
+    if(first+length>ringCount)throw Error('Invalid building ring reference');
+    for(let j=first;j<first+length;j++){
+      const r=ringsStart+j*8,start=view.getUint32(r,true),vertices=view.getUint32(r+4,true);
+      if(vertices<3||start+vertices>pointCount)throw Error('Invalid building outline');
+      const ring=new Float32Array(vertices*2);
+      for(let k=0;k<vertices;k++){
+        ring[2*k]=view.getFloat32(pointsStart+(start+k)*8,true);
+        ring[2*k+1]=view.getFloat32(pointsStart+(start+k)*8+4,true);
       }
-      return rings.length?rings:null;
-    });
-    const cells=Array.from({length:GRID*GRID},()=>[]);
-    let included=0;
-    for(let i=0;i<count;i++){
-      const p=instancesStart+i*20,model=view.getUint32(p,true);
-      if(!models[model])continue;
-      const x=view.getFloat32(p+4,true),z=view.getFloat32(p+8,true),
-        angle=view.getFloat32(p+12,true)*Math.PI/180,scale=view.getFloat32(p+16,true);
-      if(!Number.isFinite(x)||!Number.isFinite(z)||!Number.isFinite(angle)||!Number.isFinite(scale)||scale<=0||
-        x<0||z<0||x>SIZE||z>SIZE)continue;
-      const cx=Math.min(GRID-1,Math.floor(x/CELL)),cz=Math.min(GRID-1,Math.floor(z/CELL));
-      cells[cz*GRID+cx].push({x,z,c:Math.cos(angle)*scale,s:Math.sin(angle)*scale,model});
-      included++;
+      rings.push(ring);
     }
-    return {models,cells,included};
+    const sprite=atlas.sprites[String(i)]||null;
+    if((flags&4)&&(!sprite||sprite[3]!==width||sprite[4]!==height))
+      throw Error('Building picture dimensions do not match model '+i);
+    const name=String(names[i]),prominent=/^Land_/i.test(name)&&!/(?:wall|fence|pole|wreck)/i.test(name);
+    const area=Math.abs((bounds[2]-bounds[0])*(bounds[3]-bounds[1]));
+    return {name,flags,top,bounds,rings,sprite,prominent,area};
+  });
+  const cells=Array.from({length:GRID*GRID},()=>[]);
+  let valid=0;
+  for(let i=0;i<count;i++){
+    const off=placementsStart+i*20,id=view.getUint32(off,true),x=view.getFloat32(off+4,true),
+      z=view.getFloat32(off+8,true),scale=view.getFloat32(off+16,true);
+    if(id>=models.length||!Number.isFinite(x)||!Number.isFinite(z)||!Number.isFinite(scale)||
+       scale<=0||x<0||x>WORLD||z<0||z>WORLD)continue;
+    cells[clamp(Math.floor(z/CELL),0,GRID-1)*GRID+clamp(Math.floor(x/CELL),0,GRID-1)].push(i);
+    valid++;
   }
-  function attach(map,config){
-    if(stateByMap.has(map))return stateByMap.get(map).controller;
-    const pane=map.createPane('wwzNasdaraBuildings');
-    pane.style.zIndex='325';
-    pane.style.pointerEvents='none';
-    const canvas=window.L.DomUtil.create('canvas','wwz-nasdara-structures',pane);
-    canvas.style.pointerEvents='none';
-    canvas.style.position='absolute';
-    const state={visible:true,destroyed:false,layer:null,lastZoom:-1,canvas};
-    let loaded=null,loading=null;
-    function draw(){
-      if(state.destroyed)return;
-      const zoom=map.getZoom(),size=map.getSize(),dpr=Math.min(window.devicePixelRatio||1,2);
-      const w=Math.max(1,Math.ceil(size.x)),h=Math.max(1,Math.ceil(size.y));
-      window.L.DomUtil.setPosition(canvas,map.containerPointToLayerPoint([0,0]));
-      canvas.style.width=w+'px';canvas.style.height=h+'px';
-      if(canvas.width!==Math.ceil(w*dpr)||canvas.height!==Math.ceil(h*dpr)){
-        canvas.width=Math.ceil(w*dpr);canvas.height=Math.ceil(h*dpr);
-      }
-      const ctx=canvas.getContext('2d');
-      if(!ctx)return;
-      ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
-      if(!state.visible||zoom<4.75||!loaded)return;
-      const unit=config.mapUnits/SIZE*Math.pow(2,zoom);
-      const origin=map.latLngToContainerPoint([0,0]);
-      const xStart=clamp(Math.floor((-origin.x-320*unit)/unit/CELL),0,GRID-1);
-      const xEnd=clamp(Math.floor((w-origin.x+320*unit)/unit/CELL),0,GRID-1);
-      const zStart=clamp(Math.floor((origin.y-h-320*unit)/unit/CELL),0,GRID-1);
-      const zEnd=clamp(Math.floor((origin.y+320*unit)/unit/CELL),0,GRID-1);
-      ctx.lineJoin='round';
-      ctx.lineWidth=zoom>6.2?1.3:.85;
-      ctx.strokeStyle='rgba(37,29,25,.82)';
-      ctx.fillStyle='rgba(241,215,177,.29)';
-      let drawn=0;
-      for(let gz=zStart;gz<=zEnd;gz++)for(let gx=xStart;gx<=xEnd;gx++){
-        for(const item of loaded.cells[gz*GRID+gx]){
-          const screenX=origin.x+item.x*unit,screenY=origin.y-item.z*unit;
-          if(screenX < -350||screenY < -350||screenX > w+350||screenY>h+350)continue;
-          const rings=loaded.models[item.model];
-          for(const ring of rings){
-            ctx.beginPath();
-            for(let i=0;i<ring.length;i++){
-              const [u,v]=ring[i];
-              const x=screenX+(item.c*u-item.s*v)*unit,y=screenY-(item.s*u+item.c*v)*unit;
-              if(i)ctx.lineTo(x,y);else ctx.moveTo(x,y);
-            }
-            ctx.closePath();ctx.fill();ctx.stroke();
+  return Object.freeze({view,models,cells,placementsStart,count,atlas,valid});
+}
+function attach(map,config){
+  const existing=instances.get(map);if(existing)return existing;
+  const pane=map.createPane('wwzNasdaraBuildings');
+  pane.style.zIndex='325';pane.style.pointerEvents='none';
+  const canvas=window.L.DomUtil.create('canvas','wwz-nasdara-structures',pane);
+  canvas.style.position='absolute';canvas.style.pointerEvents='none';
+  const state={visible:true,destroyed:false,loaded:null,loading:null,images:new Map(),failures:new Set(),
+    frame:null,drawn:0,detail:0,loadError:null};
+  const base=config.structureAtlasUrl.split('?')[0].replace(/[^/]+$/,'');
+  const report=status=>config.onStructureStatus?.(status);
+  function getImage(sprite){
+    const page=sprite[0],cached=state.images.get(page);
+    if(cached)return cached;
+    if(state.failures.has(page))return null;
+    state.failures.add(page);
+    const filename=state.loaded.atlas.pages[page];
+    if(!/^buildings-\d\d\.webp$/.test(filename))return null;
+    const image=new Image();
+    image.onload=()=>{if(state.destroyed)return;state.images.set(page,image);schedule()};
+    image.onerror=()=>{console.warn('Nasdara building atlas unavailable:',filename);report('error')};
+    image.src=base+filename;
+    return null;
+  }
+  function paint(){
+    if(state.destroyed)return;
+    const size=map.getSize(),zoom=map.getZoom(),w=Math.ceil(size.x),h=Math.ceil(size.y),
+      dpr=Math.min(window.devicePixelRatio||1,2);
+    window.L.DomUtil.setPosition(canvas,map.containerPointToLayerPoint([0,0]));
+    canvas.style.width=w+'px';canvas.style.height=h+'px';
+    if(canvas.width!==Math.round(w*dpr)||canvas.height!==Math.round(h*dpr)){
+      canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);
+    }
+    const ctx=canvas.getContext('2d');if(!ctx)return;
+    ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+    state.drawn=0;state.detail=0;
+    if(!state.visible||!state.loaded||zoom<MIN_ZOOM)return;
+    const source=state.loaded,unit=config.mapUnits/WORLD*Math.pow(2,zoom),
+      origin=map.latLngToContainerPoint([0,0]);
+    const x0=clamp(Math.floor((-origin.x-100)/unit/CELL),0,GRID-1),
+      x1=clamp(Math.floor((w-origin.x+100)/unit/CELL),0,GRID-1),
+      z0=clamp(Math.floor((origin.y-h-100)/unit/CELL),0,GRID-1),
+      z1=clamp(Math.floor((origin.y+100)/unit/CELL),0,GRID-1);
+    if(x1<x0||z1<z0)return;
+    const usePictures=zoom>=PICTURE_ZOOM,
+      minArea=zoom<4.25?32:zoom<5.4?10:zoom<6.5?3:0,
+      minSize=zoom<4.25?3.5:zoom<5.4?2:1;
+    let drawn=0;ctx.lineJoin='round';ctx.lineCap='round';
+    for(let zz=z0;zz<=z1;zz++)for(let xx=x0;xx<=x1;xx++){
+      for(const index of source.cells[zz*GRID+xx]){
+        const off=source.placementsStart+index*20,view=source.view,
+          model=source.models[view.getUint32(off,true)];
+        if(model.area<minArea||(zoom<5&&!model.prominent))continue;
+        const x=view.getFloat32(off+4,true),z=view.getFloat32(off+8,true),
+          scale=view.getFloat32(off+16,true),angle=view.getFloat32(off+12,true)*Math.PI/180;
+        const maxSize=Math.max(model.bounds[2]-model.bounds[0],model.bounds[3]-model.bounds[1]);
+        if(maxSize*scale*unit<minSize)continue;
+        const px=origin.x+x*unit,py=origin.y-z*unit;
+        if(px< -200||px>w+200||py< -200||py>h+200)continue;
+        const c=Math.cos(angle)*scale,s=Math.sin(angle)*scale;
+        ctx.save();ctx.transform(c*unit,-s*unit,-s*unit,-c*unit,px,py);
+        let painted=false;
+        if(usePictures&&model.sprite){
+          const sprite=model.sprite,image=getImage(sprite);
+          if(image){
+            ctx.transform(...model.top);
+            ctx.drawImage(image,sprite[1],sprite[2],sprite[3],sprite[4],0,0,sprite[3],sprite[4]);
+            painted=true;state.detail++;
           }
-          if(++drawn>=14000)return;
         }
+        if(!painted){
+          ctx.beginPath();
+          for(const ring of model.rings){
+            for(let k=0;k<ring.length;k+=2){
+              if(k===0)ctx.moveTo(ring[0],ring[1]);else ctx.lineTo(ring[k],ring[k+1]);
+            }
+            ctx.closePath();
+          }
+          ctx.fillStyle=zoom<4.5?'rgba(242,221,181,.34)':'rgba(237,211,169,.55)';
+          ctx.strokeStyle=zoom<4.5?'rgba(40,32,21,.86)':'rgba(19,22,21,.95)';
+          ctx.lineWidth=Math.max(.35,1.2/unit/scale);ctx.fill();ctx.stroke();
+        }
+        ctx.restore();state.drawn++;
+        if(++drawn>=14000){report('limited');return}
       }
     }
-    const onMove=()=>{draw();if(state.visible&&map.getZoom()>=4.75)load();};
-    function load(){
-      if(loaded||loading||state.destroyed)return loading;
-      loading=Promise.all([readBinary(config.structureUrl),readClasses(config.structureClassUrl)])
-        .then(([data,names])=>{if(!state.destroyed){loaded=parse(data,names);draw();}})
-        .catch(error=>{console.warn('Nasdara structure outlines unavailable:',error);})
-        .finally(()=>{loading=null;});
-      return loading;
-    }
-    map.on('moveend zoomend resize',onMove);
-    const controller={
-      setVisible(value){state.visible=Boolean(value);onMove();},
-      getVisible(){return state.visible;},
-      destroy(){state.destroyed=true;map.off('moveend zoomend resize',onMove);canvas.remove();stateByMap.delete(map);}
-    };
-    state.controller=controller;stateByMap.set(map,state);
-    onMove();
-    return controller;
   }
-  window.WWZNasdaraStructures=Object.freeze({attach,parse});
+  function schedule(){
+    if(state.frame!==null||state.destroyed)return;
+    state.frame=window.requestAnimationFrame(()=>{state.frame=null;paint()});
+  }
+  function load(){
+    if(state.loaded||state.loading||state.destroyed||!state.visible)return state.loading;
+    report('loading');
+    state.loading=Promise.all([
+      getBinary(config.structureUrl),getJson(config.structureClassUrl),getJson(config.structureAtlasUrl)
+    ]).then(([data,names,atlas])=>{
+      if(state.destroyed)return;
+      state.loaded=parse(data,names,atlas);report('ready');schedule();
+    }).catch(error=>{
+      state.loadError=String(error?.message||error);
+      console.warn('WWZ detailed Nasdara buildings unavailable:',error);report('error');
+    }).finally(()=>{state.loading=null});
+    return state.loading;
+  }
+  function onMove(){if(state.visible&&map.getZoom()>=MIN_ZOOM)load();schedule()}
+  map.on('moveend zoomend resize',onMove);
+  const controller={
+    setVisible(value){state.visible=Boolean(value);onMove()},
+    getVisible(){return state.visible},
+    getStatus(){return {visible:state.visible,loaded:Boolean(state.loaded),error:state.loadError,
+      placements:state.loaded?.valid||0,drawn:state.drawn,detailed:state.detail}},
+    destroy(){
+      state.destroyed=true;map.off('moveend zoomend resize',onMove);
+      if(state.frame!==null)window.cancelAnimationFrame(state.frame);
+      pane.remove();instances.delete(map);
+    }
+  };
+  instances.set(map,controller);onMove();return controller;
+}
+window.WWZNasdaraStructures=Object.freeze({attach,parse,MIN_ZOOM,PICTURE_ZOOM});
 })();

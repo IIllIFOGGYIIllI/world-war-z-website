@@ -97,7 +97,7 @@
     )
   ]).then(() => loadScriptOnce(
     'wwz-map-runtime',
-    'assets/js/map/wwz-map.js?v=1.28.2&rev=wwz-marker-icons-1',
+    'assets/js/map/wwz-map.js?v=1.29.0&rev=nasdara-roof-art-2',
     () => Boolean(window.WWZMap?.create)
   ));
 

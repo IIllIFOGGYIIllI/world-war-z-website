@@ -46,6 +46,7 @@
       roadBinaryUrl: 'assets/maps/nasdara/roads.bin?v=wwz-nasdara-1',
       structureUrl: 'assets/maps/nasdara/objects.bin?v=wwz-nasdara-1',
       structureClassUrl: 'assets/maps/nasdara/object-classes.json?v=wwz-nasdara-1',
+      structureAtlasUrl: 'assets/maps/nasdara/building-atlas.json?v=wwz-roof-art-2',
       labelUrl: 'assets/maps/nasdara/labels.json?v=wwz-nasdara-1',
       roadOrder: ['nasdara_paved','nasdara_dirt'],
       roadGroups: Object.freeze({paved:['nasdara_paved'],mud:['nasdara_dirt']}),
@@ -412,7 +413,8 @@
         buildings.type='button';buildings.className='map-layer-button active';
         buildings.textContent='Buildings';buildings.dataset.wwzBuildings='true';
         buildings.setAttribute('aria-pressed','true');
-        buildings.setAttribute('aria-label','Toggle native building footprints');
+        buildings.setAttribute('aria-label','Toggle native building pictures and outlines');
+        buildings.title='Zoom in: building outlines from zoom 3.1; detailed roof images from zoom 4.8';
         buildings.addEventListener('click',()=>{
           const enabled=buildings.getAttribute('aria-pressed')!=='true';
           buildings.setAttribute('aria-pressed',String(enabled));
@@ -893,15 +895,25 @@
     // Load structure rendering on demand; no heavy Nasdara parser on other worlds.
     let structureController=null,structureLoading=null;
     const loadStructures=()=>{
-      if(!config.structureUrl||state.destroyed||map.getZoom()<4.75||structureController||structureLoading)return;
+      if(!config.structureUrl||state.destroyed||map.getZoom()<3.1||structureController||structureLoading)return;
       const start=()=>{if(!state.destroyed&&window.WWZNasdaraStructures){
-        structureController=window.WWZNasdaraStructures.attach(map,config);
+        structureController=window.WWZNasdaraStructures.attach(map,{
+          ...config,
+          onStructureStatus:status=>{
+            const button=container.querySelector('[data-wwz-buildings]');
+            if(!button)return;
+            button.dataset.loadState=status;
+            if(status==='error')button.title='Building artwork unavailable — check deployment assets';
+            else if(status==='loading')button.title='Loading detailed building data…';
+            else if(status==='ready')button.title='Detailed buildings ready — zoom in for individual roofs';
+          }
+        });
         structureController.setVisible(state.structuresVisible);
       }};
       if(window.WWZNasdaraStructures){start();return;}
       structureLoading=new Promise((resolve,reject)=>{
         const script=document.createElement('script');
-        script.src='assets/js/map/nasdara-structures.js?v=wwz-nasdara-1';
+        script.src='assets/js/map/nasdara-structures.js?v=wwz-roof-art-2';
         script.async=true;
         script.onload=resolve;script.onerror=()=>reject(Error('Nasdara building renderer unavailable'));
         document.head.appendChild(script);
@@ -937,7 +949,14 @@
       },
       setGridVisible: (visible) => { state.gridVisible = Boolean(visible); updateGridLayer(); },
       setRoadOpacity: (opacity) => { state.roadOpacity = clamp(Number(opacity), 0, 1); updateRoadLayers(); },
-      setStructuresVisible: visible => {state.structuresVisible=Boolean(visible);loadStructures();structureController?.setVisible(state.structuresVisible);},
+      setStructuresVisible: visible => {
+        state.structuresVisible=Boolean(visible);
+        if(state.structuresVisible)loadStructures();
+        structureController?.setVisible(state.structuresVisible);
+      },
+      getStructureStatus:()=>structureController?.getStatus()||{
+        visible:state.structuresVisible,loaded:false,minimumZoom:3.1,pictureZoom:4.8
+      },
       setSatelliteOpacity: (opacity) => { state.satelliteOpacity = clamp(Number(opacity), 0, 1); satellite.setOpacity(state.satelliteOpacity); },
       destroy: () => {
         state.destroyed = true;

@@ -1,4 +1,36 @@
-# World War Z unified Nasdara map (2026-10-26)
+# World War Z unified Nasdara map (2026-10-27)
+
+## Detailed source building artwork (v1.29)
+
+The Nasdara website now includes all **1,694 original top-down model pictures**
+from the server owner's matching pinned DayZ-Vehicle-Map source archive.
+The Pages builder downloads one immutable pinned archive and creates three
+locally-hosted sprite sheets and a per-model index under
+`assets/maps/nasdara/`. The original 6.18 MB object placement binary is used
+unaltered.
+
+The map renderer reads **295,195 native placements**, their true world X/Z,
+model rotations, scales and original six-component picture transforms.
+Instead of default building placeholders:
+
+- From Leaflet zoom **3.1**, meaningful buildings show their real source
+  outline footprints; very small objects stay hidden at overview zoom.
+- From zoom **4.8**, buildings use the original top-down rendered roof artwork.
+- At closer zoom, increasingly small environmental details are shown, subject
+  to a 14,000-object draw cap for browser performance.
+- The existing **Buildings** layer toggle works on both dashboard and public
+  maps, and processing is deferred until a close enough zoom.
+- Native images are served from WWZ's own GitHub Pages assets, including
+  inside the PWA cache, not from a third-party image host.
+- Buildings, roads, labels, and public/private map markers all continue to
+  share the same DayZ world coordinate projection.
+
+`scripts/validate_nasdara_assets.py` verifies the atlas has all 1,694
+model pictures and matching source dimensions.
+`scripts/test_nasdara_building_artwork.js` additionally parses the authentic
+objects binary and exercises model alignment and actual canvas image drawing.
+
+
 
 ## Source and deployment
 
@@ -19,8 +51,8 @@ source artwork and all 1,694 PNG model pictures are not copied into Git.
 - `satellite.webp` — 4096px calibrated terrain (about 3.3 MB).
 - `roads.bin` — 47,236 measured native X/Z segment pairs.
 - `objects.bin`, `object-classes.json` — 295,195 native placements;
-  approximately 18,000 Land-prefixed structure placements can be rendered
-  on demand at zoom 4.75 and above. Small props, fences and poles are filtered.
+  all native building footprints and exact source roof artwork are rendered
+  on demand. Major structures appear from zoom 3.1 and pictures from 4.8.
 - `labels.json` — 78 published 100m grid-centre location names. These are
   approximate by +/-50m on each axis, not surveyed building entrances.
 - `preview.jpg` — a 1200px preview made from the satellite for link embeds.
@@ -45,7 +77,6 @@ existing protected API and browser storage—not in the static map data.
 
 ## Limitations and accuracy
 
-Terrain detail cannot exceed the source's 4096px native resolution. Building
-drawings are simplified model outlines, not the entire original model-top PNG
-picture set. Named settlements use grid-centres. Markers, rentals and zones
+Terrain detail cannot exceed the source's 4096px native resolution. Detailed roof textures use the original source pictures. Distant zoom levels
+avoid excessive fine details to preserve readability and mobile performance. Named settlements use grid-centres. Markers, rentals and zones
 continue to use exact user-entered X/Z coordinates.

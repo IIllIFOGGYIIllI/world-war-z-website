@@ -20,5 +20,17 @@ assert len(names)==1697 and sum(1 for n in names if n.startswith("Land_"))>400
 labels=json.loads((p/"labels.json").read_text())
 assert labels["worldSize"]==16384 and labels["labelCount"]==78
 assert len(labels["labels"])==78 and all(0<=p["x"]<=16384 and 0<=p["z"]<=16384 for p in labels["labels"])
+atlas=json.loads((p/"building-atlas.json").read_text())
+assert atlas["version"]==1 and atlas["count"]==1694, "Missing authentic Nasdara model pictures"
+assert len(atlas["sprites"])==1694 and len(atlas["pages"])>=2
+for sprite in atlas["sprites"].values():
+    page,x,y,w,h=sprite
+    assert 0<=page<len(atlas["pages"]) and 0<=x<2048 and 0<=y<2048
+    assert w>0 and h>0 and x+w<=2048 and y+h<=2048
+for filename in atlas["pages"]:
+    assert filename.startswith("buildings-") and filename.endswith(".webp")
+    with Image.open(p/filename) as picture:
+        assert picture.size==(2048,2048), "Invalid building sprite image size"
+assert atlas["sprites"]["0"][3:]==[195,308], "Hangar art metadata does not match source"
 assert not any(x.name.lower().endswith("paper_map.webp") for x in p.iterdir())
-print("PASS: 4096px satellite, source-aligned 47,236 roads, 295,195 placements, 78 names")
+print("PASS: satellite, 47,236 roads, 295,195 placements, 78 names, 1,694 roof pictures")

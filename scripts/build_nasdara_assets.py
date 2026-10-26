@@ -14,6 +14,7 @@ import struct
 import urllib.request
 import zipfile
 from PIL import Image
+from pack_nasdara_buildings import create_building_atlas
 
 PIN = "21d1b76847476a28c8a74cf2d8687e9c0e36c2e3"
 ROOT = "DayZ-Vehicle-Map-main/"
@@ -28,15 +29,35 @@ def main():
     ap.add_argument("--archive", type=Path, help="local DayZ-Vehicle-Map-main.zip")
     ap.add_argument("--out", type=Path, default=Path("assets/maps/nasdara"))
     args = ap.parse_args()
-    archive = zipfile.ZipFile(args.archive) if args.archive else None
+    if args.archive:
+        archive = zipfile.ZipFile(args.archive)
+    else:
+        # A single immutable upstream archive avoids 1,694 live picture requests,
+        # and allows the site to serve all map pictures locally and offline.
+        pinned_archive_url = (
+            f"https://codeload.github.com/FeliciaDayZ/DayZ-Vehicle-Map/zip/{PIN}"
+        )
+        request = urllib.request.Request(
+            pinned_archive_url, headers={"User-Agent": "WWZ-Nasdara-Asset-Build/2.0"}
+        )
+        with urllib.request.urlopen(request, timeout=180) as response:
+            compressed = response.read(160_000_001)
+        if len(compressed) > 160_000_000:
+            raise ValueError("Pinned map archive exceeds the allowed download size")
+        archive = zipfile.ZipFile(io.BytesIO(compressed))
+    # codeload and the supplied user ZIP name their top-level folder differently.
+    source_suffix = "data/objects/nasdara/source.json"
+    prefixes = [
+        name[:-len(source_suffix)]
+        for name in archive.namelist()
+        if name.endswith(source_suffix)
+    ]
+    if len(prefixes) != 1:
+        raise ValueError("Pinned archive does not contain exactly one Nasdara source")
+    prefix = prefixes[0]
     def read(path):
-        if archive:
-            # No zip extraction, path traversal or executable files involved.
-            value = archive.read(ROOT + path)
-        else:
-            req = urllib.request.Request(BASE + path, headers={"User-Agent":"WWZ-Nasdara-Asset-Build/1.0"})
-            with urllib.request.urlopen(req, timeout=120) as response:
-                value = response.read()
+        # Reading a known, literal ZIP member never extracts untrusted ZIP paths.
+        value = archive.read(prefix + path)
         if path in FILES:
             digest,length=FILES[path]
             if len(value)!=length or hashlib.sha256(value).hexdigest()!=digest:
@@ -63,16 +84,21 @@ def main():
     im.resize((1200,1200),Image.Resampling.LANCZOS).save(args.out/"preview.jpg","JPEG",quality=86,optimize=True)
     (args.out/"roads.bin").write_bytes(roads)
     (args.out/"objects.bin").write_bytes(objects)
+    atlas_report = create_building_atlas(archive, prefix, objects, args.out)
+    if atlas_report["pictures"] != 1694 or atlas_report["pages"] < 1:
+        raise ValueError("Nasdara object pictures are incomplete")
     # Class labels allow showing buildings while excluding hundreds of thousands
     # of fences, poles and loose debris from expensive mobile rendering.
     (args.out/"object-classes.json").write_text(json.dumps(source["classes"],separators=(",",":")),encoding="utf-8")
     (args.out/"source.json").write_text(json.dumps({
         "world":"Nasdara", "extent":16384, "imageSize":4096,
         "roadSegments":47236, "objectPlacements":295195,
+        "modelPictures":atlas_report["pictures"], "atlasPages":atlas_report["pages"],
         "upstream":"https://github.com/FeliciaDayZ/DayZ-Vehicle-Map",
         "upstreamCommit":PIN,
         "imageryOrigin":"DayZ Badlands terrain imagery as described in source calibration",
         "coordinateSystem":"DayZ X/Z metres; origin south-west; north-up",
     },indent=2)+chr(10),encoding="utf-8")
+    print("Nasdara detailed building atlas:", atlas_report)
     print("Nasdara built:",[(p.name,p.stat().st_size) for p in sorted(args.out.iterdir())])
 if __name__=="__main__":main()
