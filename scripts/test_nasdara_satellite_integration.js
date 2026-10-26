@@ -11,6 +11,22 @@ assert.match(c.roadBinaryUrl,/assets\/maps\/nasdara\/roads\.bin/);
 assert.match(c.structureUrl,/assets\/maps\/nasdara\/objects\.bin/);
 assert.match(c.labelUrl,/assets\/maps\/nasdara\/labels\.json/);
 assert(!source.includes('paperUrl')&&!source.includes('paperGrid'));
+const style=fs.readFileSync('assets/css/components/wwz-map.css','utf8');
+const lazy=fs.readFileSync('assets/js/dashboard/lazy-assets.js','utf8');
+// The previous imageOverlay used Leaflet overlayPane (400) and hid native
+// roads (350/360) and buildings (325). The satellite must sit at tilePane (200).
+assert(source.includes("pane:'tilePane'"),'Satellite must be under geometry overlays');
+assert(source.includes("casingPane.style.zIndex = '350'"));
+assert(source.includes("surfacePane.style.zIndex = '360'"));
+assert(source.includes("pane.style.zIndex='325'")||fs.readFileSync('assets/js/map/nasdara-structures.js','utf8').includes("pane.style.zIndex='325'"));
+assert(source.includes('metersPerPixel=MAP_METRES/(MAP_UNITS*Math.pow(2,map.getZoom()))'),'Scale must use game metres');
+assert(source.includes("layerPanel.classList.add('wwz-nasdara-layers-panel')"));
+assert(source.includes("buildings.dataset.wwzBuildings='true'"));
+assert(source.includes("button.matches('[data-map-road-group=\"gravel\"], [data-map-trail-toggle]')"));
+assert(style.includes('.wwz-badlands-map .wwz-map-place-name-native{')&&style.includes('color:#fff5d9!important'));
+assert(style.includes('.wwz-map-ground-scale{'));
+assert(lazy.includes('nasdara-draw-order-1'),'Map assets must be cache-busted');
+
 const p=m.worldToLeaflet([10450,10634],'badlands');
 const back=m.leafletToWorld({lat:p[0],lng:p[1]},'badlands');
 assert(Math.abs(back.x-10450)<.001&&Math.abs(back.z-10634)<.001);

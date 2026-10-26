@@ -1086,7 +1086,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         errors.append(
             "dashboard.html: command library must be lazy-loaded instead of downloaded on every dashboard visit."
         )
-    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=2.8.1&amp;rev=manual-coords-1'
+    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=2.8.1&amp;rev=manual-coords-1&amp;mapfix=1'
     lazy_index = dashboard.find(lazy_script)
     shell_index = dashboard.find("assets/js/dashboard/shell.js")
     if lazy_index < 0:
@@ -1120,8 +1120,8 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     map_runtime_assets = (
         ("Leaflet stylesheet", re.escape("https://unpkg.com/leaflet@1.9.4/dist/leaflet.css")),
         ("Leaflet runtime", re.escape("https://unpkg.com/leaflet@1.9.4/dist/leaflet.js")),
-        ("dashboard map styles", re.escape(f"assets/css/components/wwz-map.css?v={EXPECTED_ASSET_VERSION}&rev=2")),
-        ("shared WWZ map runtime", rf"assets/js/map/wwz-map\.js\?v={re.escape(EXPECTED_ASSET_VERSION)}&rev=[A-Za-z0-9][A-Za-z0-9_-]*"),
+        ("dashboard map styles", re.escape("assets/css/components/wwz-map.css?v=1.28.1&rev=nasdara-draw-order-1")),
+        ("shared WWZ map runtime", re.escape("assets/js/map/wwz-map.js?v=1.28.1&rev=nasdara-draw-order-1")),
     )
     for label, asset_pattern in map_runtime_assets:
         if re.search(asset_pattern, dashboard.replace("&amp;", "&")):

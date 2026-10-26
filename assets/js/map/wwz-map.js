@@ -356,6 +356,48 @@
       `wwz-chernarus-map--${options.mode || 'picker'}`
     );
     container.dataset.mapKey = config.key;
+    // For Nasdara, the obsolete Gravel/Mud/Trails controls do not match the
+    // native road dataset (only paved/dirt exist). Move all layer switches
+    // into the same collapsible menu, leaving only navigation over the image.
+    const navControls=container.querySelector('.map-controls');
+    const layerPanel=container.querySelector('.map-visual-controls');
+    if(config.key==='badlands'&&navControls&&layerPanel){
+      const section=document.createElement('div');
+      section.className='wwz-nasdara-layer-options';
+      const caption=document.createElement('div');
+      caption.className='wwz-nasdara-layer-heading';
+      caption.textContent='Map layers';
+      section.appendChild(caption);
+      navControls.querySelectorAll('.map-road-toggle, .map-layer-button, [data-map-grid-toggle]').forEach(button=>{
+        if(button.matches('[data-map-road-group="gravel"], [data-map-trail-toggle]')){
+          button.hidden=true;
+          button.classList.add('wwz-nasdara-not-supported');
+          return;
+        }
+        if(button.matches('[data-map-road-group="mud"]')){
+          button.textContent='Dirt roads';
+          button.setAttribute('aria-label','Toggle dirt roads');
+        }
+        if(button.matches('[data-map-road-group="paved"]'))button.textContent='Paved roads';
+        section.appendChild(button);
+      });
+      if(section.querySelector('button')){
+        const buildings=document.createElement('button');
+        buildings.type='button';buildings.className='map-layer-button active';
+        buildings.textContent='Buildings';buildings.dataset.wwzBuildings='true';
+        buildings.setAttribute('aria-pressed','true');
+        buildings.setAttribute('aria-label','Toggle native building footprints');
+        buildings.addEventListener('click',()=>{
+          const enabled=buildings.getAttribute('aria-pressed')!=='true';
+          buildings.setAttribute('aria-pressed',String(enabled));
+          buildings.classList.toggle('active',enabled);
+          container._wwzMapInstance?.setStructuresVisible(enabled);
+        });
+        section.appendChild(buildings);
+        layerPanel.appendChild(section);
+        layerPanel.classList.add('wwz-nasdara-layers-panel');
+      }
+    }
     // Collapsible map controls keep terrain visible on both desktop and phone.
     const visualPanel=container.querySelector('.map-visual-controls');
     if(visualPanel&&!visualPanel.querySelector('.wwz-map-layer-disclosure')){
@@ -372,7 +414,33 @@
         title.setAttribute('aria-label',closed?'Show map appearance controls':'Hide map appearance controls');
       });
     }
-    if(L.control?.scale)L.control.scale({imperial:false,metric:true,maxWidth:128,position:'bottomleft'}).addTo(map);
+    // Leaflet treats CRS.Simple units as metres, but our map projects 16,384
+    // actual DayZ metres onto 240 Leaflet units. Its default scale is wrong.
+    if(config.key==='badlands'&&L.control){
+      const groundScale=L.control({position:'bottomleft'});
+      let ruler=null;
+      groundScale.onAdd=()=>{
+        ruler=L.DomUtil.create('div','wwz-map-ground-scale');
+        ruler.setAttribute('aria-label','DayZ world-distance scale');
+        return ruler;
+      };
+      groundScale.addTo(map);
+      const updateGroundScale=()=>{
+        if(!ruler)return;
+        const metersPerPixel=MAP_METRES/(MAP_UNITS*Math.pow(2,map.getZoom()));
+        const target=metersPerPixel*120;
+        const power=Math.pow(10,Math.floor(Math.log10(Math.max(1,target))));
+        const increments=[1,2,5,10].map(v=>v*power);
+        const meters=increments.filter(v=>v<=target).pop()||power;
+        const width=Math.round(meters/metersPerPixel);
+        ruler.style.width=width+'px';
+        ruler.textContent=meters>=1000?(meters/1000).toLocaleString('en-AU')+' km':meters+' m';
+      };
+      map.on('zoomend resize',updateGroundScale);
+      window.setTimeout(updateGroundScale,0);
+    }else if(L.control?.scale){
+      L.control.scale({imperial:false,metric:true,maxWidth:128,position:'bottomleft'}).addTo(map);
+    }
 
     const casingPane = map.createPane('wwzRoadCasingPane');
     const surfacePane = map.createPane('wwzRoadSurfacePane');
@@ -391,7 +459,8 @@
     // Nasdara's calibrated satellite covers the full world extent exactly.
     const satellite = config.satelliteImageUrl
       ? L.imageOverlay(config.satelliteImageUrl, bounds, {
-          opacity: 1, interactive: false, className: 'wwz-nasdara-satellite'
+          opacity: 1, interactive: false, pane:'tilePane',
+          className: 'wwz-nasdara-satellite'
         }).addTo(map)
       : L.tileLayer(config.satelliteUrl, {
           tileSize: 256,
@@ -516,7 +585,11 @@
 
     const roadEnabledForGroup = (group) => {
       const roadGroup = roadGroupForClass(group);
-      const masterVisible = trailGroups.has(group) ? state.trailsVisible : state.roadsVisible;
+      // Native dirt tracks belong to the Roads master on Nasdara even though
+      // older map configurations group trails separately.
+      const masterVisible = config.key==='badlands'
+        ? state.roadsVisible
+        : (trailGroups.has(group)?state.trailsVisible:state.roadsVisible);
       return masterVisible && state.roadGroupVisibility.get(roadGroup) !== false;
     };
 

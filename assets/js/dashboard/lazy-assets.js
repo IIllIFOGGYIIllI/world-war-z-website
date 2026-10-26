@@ -84,7 +84,7 @@
     ),
     loadStylesheetOnce(
       'wwz-map-css',
-      'assets/css/components/wwz-map.css?v=1.22.93&rev=2'
+      'assets/css/components/wwz-map.css?v=1.28.1&rev=nasdara-draw-order-1'
     ),
     loadScriptOnce(
       'leaflet-runtime',
@@ -97,7 +97,7 @@
     )
   ]).then(() => loadScriptOnce(
     'wwz-map-runtime',
-    'assets/js/map/wwz-map.js?v=1.22.93&rev=nasdara-paper-4',
+    'assets/js/map/wwz-map.js?v=1.28.1&rev=nasdara-draw-order-1',
     () => Boolean(window.WWZMap?.create)
   ));
 
