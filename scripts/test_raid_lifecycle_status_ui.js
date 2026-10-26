@@ -13,7 +13,7 @@ for (const mark of ['data-raid-next-window','data-raid-phase-readout','data-raid
 assert.ok(js.includes('raid.attention_required'), 'Unresolved restorations must be visible');
 assert.ok(js.includes('raid.blocked_weekend'), 'Previous stuck raids must be visible');
 assert.ok(js.includes('raidToggle.disabled = !live || Boolean(raid.attention_required && !raid.enabled)'));
-assert.ok(js.includes('Full-map PvP enforcement is NOT automated'));
+assert.ok(js.includes('The separate map-wide kill-ban zone is NOT modified.'));
 assert.ok(js.includes('Never arm another weekend while the backend reports an unresolved restore'));
 assert.ok(css.includes('.raid-operator-alert[hidden]'));
 assert.ok(lazy.includes('stage6=raid-damage-1&lifecycle=2'));
