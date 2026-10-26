@@ -59,3 +59,19 @@
   .wwz-ios-auth-actions { flex-direction: column; }
   .wwz-ios-auth-actions button { width: 100%; }
 }
+
+.wwz-session-retry {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #939dad;
+  background: rgba(64, 76, 94, .28);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+.wwz-session-retry[hidden] { display: none !important; }
+.wwz-session-retry:disabled { opacity: .65; }

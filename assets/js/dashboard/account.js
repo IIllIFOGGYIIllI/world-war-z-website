@@ -241,19 +241,25 @@ const loadAccountSummary = async (sessionToken) => {
   }
 };
 
+const sessionRetryButton = document.querySelector('[data-auth-session-retry]');
+const showSavedSessionRetry = (visible) => {
+  if (sessionRetryButton) sessionRetryButton.hidden = !visible;
+};
+
 const loadCurrentAccount = async (sessionToken) => {
   let lastError = null;
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
-      const response = await authFetch(AUTH_ME_URL, {
+      const response = await window.WWZHttp.request(AUTH_ME_URL, {
         method: 'GET',
         headers: {
           Accept: 'application/json',
           Authorization: `Bearer ${sessionToken}`
         }
-      });
+      }, 25_000);
 
       if (response.status === 401) {
+        showSavedSessionRetry(false);
         storageRemove(AUTH_SESSION_KEY);
         applySignedOutState({ preserveSelection: true });
         return;
@@ -266,6 +272,7 @@ const loadCurrentAccount = async (sessionToken) => {
 
       if (response.ok) {
         const payload = await response.json();
+        showSavedSessionRetry(false);
         applyAuthenticatedState(payload);
         window.WWZServerContext?.handleAuthenticated(payload, { requireSelection: false });
         showView(location.hash.slice(1), false);
@@ -288,8 +295,9 @@ const loadCurrentAccount = async (sessionToken) => {
   // the gateway back to the normal sign-in view, and avoid the misleading red
   // "Discord verification unavailable" state.
   applySignedOutState({ preserveSelection: true });
+  showSavedSessionRetry(true);
   showAuthMessage(
-    'Your saved dashboard session could not be refreshed. Discord sign-in is still available; retry or sign in again.',
+    'Your Discord session is still saved. Tap Retry Saved Session—there is no need to authorise Discord again.',
     'info'
   );
   if (lastError) console.warn('WWZ dashboard session refresh delayed.', lastError);
@@ -321,14 +329,14 @@ const completeDiscordLogin = async (loginTicket) => {
   showAuthMessage('Finishing your secure Discord sign-in…', 'info');
 
   try {
-    const response = await authFetch(AUTH_COMPLETE_URL, {
+    const response = await window.WWZHttp.request(AUTH_COMPLETE_URL, {
       method: 'POST',
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ ticket: loginTicket })
-    });
+    }, 25_000);
     const payload = await response.json();
 
     if (!response.ok || !payload.session_token) {
@@ -339,6 +347,7 @@ const completeDiscordLogin = async (loginTicket) => {
       throw new Error('Browser session storage is unavailable');
     }
     sessionSaved = true;
+    showSavedSessionRetry(false);
     storageRemove(IOS_AUTH_PENDING_KEY);
     // The ticket is single-use. Clear it before rendering to avoid accidentally
     // redeeming it again if iOS suspends the app midway through sign-in.
@@ -354,10 +363,16 @@ const completeDiscordLogin = async (loginTicket) => {
     if (sessionSaved) {
       console.error('WWZ post-login dashboard restore failed.', error);
       try { clearCallbackFragment(); } catch (_) {}
-      window.WWZServerContext?.showLogin();
+      // A valid token is already in this browser. Never send an authenticated
+      // iPhone user back to the login gateway because a panel failed to load.
+      try {
+        await loadCurrentAccount(storageGet(AUTH_SESSION_KEY));
+      } catch (restoreError) {
+        console.warn('WWZ post-login session restore deferred.', restoreError);
+      }
       showAuthMessage(
-        'Discord sign-in succeeded, but the dashboard did not finish opening. Refresh this page to restore your signed-in session.',
-        'error'
+        'Discord sign-in succeeded. Your session was saved; use Refresh if the dashboard does not finish loading.',
+        'info'
       );
     } else {
       storageRemove(AUTH_SESSION_KEY);
@@ -414,7 +429,8 @@ const configureDiscordAuth = async () => {
   if (fragment.loginTicket) {
     const ios = window.WWZIOSAuth;
     const locallyStartedInSafari = Boolean(storageGet(AUTH_RETURN_VIEW_KEY));
-    if (ios?.shouldOfferSafariHandoff(locallyStartedInSafari) && displaySafariTransferChoice()) {
+    const appHandoffRequested = new URLSearchParams(location.search).get('wwz_handoff') === 'ios_app';
+    if (ios?.shouldOfferSafariHandoff(locallyStartedInSafari, appHandoffRequested) && displaySafariTransferChoice()) {
       return; // Do not consume the one-time ticket in Safari before the app can receive it.
     }
     await completeDiscordLogin(fragment.loginTicket);
@@ -423,28 +439,30 @@ const configureDiscordAuth = async () => {
 
   const sessionToken = storageGet(AUTH_SESSION_KEY);
 
-  if (sessionToken && discordAuthEnabled) {
+  if (sessionToken) {
+    // Transient /auth/config failures cannot invalidate a saved session.
     await loadCurrentAccount(sessionToken);
   } else {
     applySignedOutState();
+    showSavedSessionRetry(false);
   }
 };
 
 const isIOSInstalledWebApp = () => window.WWZIOSAuth?.isInstalled() === true;
 
 const startDiscordOAuth = () => {
+  showSavedSessionRetry(false);
+  const loginUrl = new URL(AUTH_LOGIN_URL);
   if (isIOSInstalledWebApp()) {
-    // iOS may move this cross-origin OAuth journey into Safari, which has
-    // different storage from the installed web app. Keep an app-side recovery
-    // marker and try the normal same-window navigation first.
+    // Bind the app handoff intent to the server-side OAuth state. Safari must
+    // not guess based on missing sessionStorage (new tabs have none).
     storageSet(IOS_AUTH_PENDING_KEY, '1');
     prepareIOSAuthRecovery();
-    try {
-      if (window.open(AUTH_LOGIN_URL, '_self')) return;
-    } catch (_) {}
+    loginUrl.searchParams.set('handoff', 'ios_app');
   }
-  // Retain the established redirect path for Safari, Android and desktop.
-  window.location.assign(AUTH_LOGIN_URL);
+  // Exactly one navigation: window.open('_self') can return null on iOS even
+  // after starting a navigation, which previously caused a second redirect.
+  window.location.assign(loginUrl.toString());
 };
 
 
@@ -500,7 +518,20 @@ startDiscordLoginButtons.forEach((button) => {
   });
 });
 
+sessionRetryButton?.addEventListener('click', async () => {
+  const sessionToken = storageGet(AUTH_SESSION_KEY);
+  if (!sessionToken || authRequestInProgress) return;
+  sessionRetryButton.disabled = true;
+  try {
+    showAuthMessage('Restoring your saved Discord session…', 'info');
+    await loadCurrentAccount(sessionToken);
+  } finally {
+    sessionRetryButton.disabled = false;
+  }
+});
+
 signOutButton?.addEventListener('click', async () => {
+  showSavedSessionRetry(false);
   const sessionToken = storageGet(AUTH_SESSION_KEY);
   storageRemove(AUTH_SESSION_KEY);
   applySignedOutState();

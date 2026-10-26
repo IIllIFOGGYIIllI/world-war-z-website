@@ -728,7 +728,15 @@ const clearCallbackFragment = () => {
   const view = availableViews.has(requested.view) ? requested.view : 'overview';
   const section = sectionTargetFor(view, requested.section) ? requested.section : defaultSectionForView(view);
   const key = navigationKey(view, section);
-  history.replaceState({ view, section }, '', `#${key}`);
+  // OAuth handoff intent is only for the one-time callback, not later visits.
+  const currentUrl = new URL(location.href);
+  if (currentUrl.searchParams.has('wwz_handoff')) {
+    currentUrl.searchParams.delete('wwz_handoff');
+    currentUrl.hash = key;
+    history.replaceState({ view, section }, '', currentUrl.pathname + currentUrl.search + currentUrl.hash);
+  } else {
+    history.replaceState({ view, section }, '', `#${key}`);
+  }
   return key;
 };
 

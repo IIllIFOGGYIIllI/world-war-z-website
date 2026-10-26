@@ -15,18 +15,22 @@ const validTicket = 'ABcd0123_-'.repeat(5);
 const base = ctx.location.href;
 assert.equal(auth.isIOS(), true);
 assert.equal(auth.isInstalled(), false);
-assert.equal(auth.shouldOfferSafariHandoff(false), true, 'handoff only when Safari did not start OAuth');
-assert.equal(auth.shouldOfferSafariHandoff(true), false, 'normal Safari login remains automatic');
+assert.equal(auth.shouldOfferSafariHandoff(false), false, 'normal Safari login must finish automatically');
+assert.equal(auth.shouldOfferSafariHandoff(false, true), true, 'explicit installed-app redirect offers transfer');
+assert.equal(auth.shouldOfferSafariHandoff(true, true), false, 'Safari-initiated login remains automatic');
 ua.standalone = true;
 assert.equal(auth.isInstalled(), true);
-assert.equal(auth.shouldOfferSafariHandoff(false), false);
+assert.equal(auth.shouldOfferSafariHandoff(false, true), false);
 ua.standalone = false;
 assert.equal(auth.parseTransferLink(base + '#login_ticket=' + validTicket), validTicket);
+assert.equal(auth.parseTransferLink(base + '?wwz_handoff=ios_app#login_ticket=' + validTicket), validTicket);
 for (const url of [
   base.replace('https:', 'http:') + '#login_ticket=' + validTicket,
   base.replace('github.io', 'github.io.evil.example') + '#login_ticket=' + validTicket,
   'https://example.org/dashboard.html#login_ticket=' + validTicket,
   base + '?debug=1#login_ticket=' + validTicket,
+  base + '?wwz_handoff=other#login_ticket=' + validTicket,
+  base + '?wwz_handoff=ios_app&extra=1#login_ticket=' + validTicket,
   base + '#auth_error=cancelled',
   base + '#login_ticket=too-short',
   base + '#login_ticket=' + validTicket + '&other=data',
@@ -42,7 +46,21 @@ for (const token of [
   'data-ios-auth-copy-link', 'data-ios-auth-transfer-submit',
   'ios-auth-handoff.js?v=1.22.93', 'ios-auth.css?v=1.22.93'
 ]) assert.ok(page.includes(token), 'missing iOS recovery UI ' + token);
-assert.ok(account.includes('shouldOfferSafariHandoff(locallyStartedInSafari)'));
+assert.ok(account.includes('shouldOfferSafariHandoff(locallyStartedInSafari, appHandoffRequested)'));
+assert.ok(account.includes("loginUrl.searchParams.set('handoff', 'ios_app')"));
+assert.ok(account.includes('window.location.assign(loginUrl.toString())'));
+assert.ok(!account.includes("window.open(AUTH_LOGIN_URL, '_self')"));
 assert.ok(account.includes('Do not consume the one-time ticket in Safari'));
 assert.ok(account.includes('await completeDiscordLogin(ticket)'));
+assert.ok(account.includes("new URLSearchParams(location.search).get('wwz_handoff') === 'ios_app'"));
+assert.ok(account.includes('showSavedSessionRetry(true)'));
+assert.ok(account.includes('data-auth-session-retry'));
+assert.ok(account.includes('window.WWZHttp.request(AUTH_COMPLETE_URL'));
+assert.ok(account.includes('window.WWZHttp.request(AUTH_ME_URL'));
+assert.ok(!account.includes("window.open(AUTH_LOGIN_URL, '_self')"));
+assert.ok(page.includes('data-auth-session-retry'));
+assert.ok(page.includes('iosreturn=2'));
+const sw = fs.readFileSync('sw.js', 'utf8');
+assert.ok(sw.includes('2026-10-26-ios-auth-return-1'));
+assert.ok(sw.includes("url.pathname.endsWith('/assets/js/dashboard/ios-auth-handoff.js')"));
 console.log('PASS: iOS PWA OAuth handoff and safe one-time-ticket validation');
