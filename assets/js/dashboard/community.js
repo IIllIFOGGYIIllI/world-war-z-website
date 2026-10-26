@@ -24,6 +24,12 @@
     request_restart: 'Request Nitrado restart — completion unverified',
     restore_killzones: 'Restore internal KILLZONES'
   }[String(stage || '')] || 'Unclassified operation');
+  const raidRestartObservationLabel = (state) => ({
+    pending: 'Request recorded; awaiting Nitrado status change',
+    saw_restarting: 'Restart/offline observed; awaiting online',
+    observed_online: 'Restart cycle observed: offline/restarting → online',
+    unverified: 'Not verified within 20 minutes — check the server'
+  }[String(state || '')] || 'No restart observation recorded');
   const fmtSydney = (value) => {
     const when = new Date(value);
     return Number.isNaN(when.getTime()) ? '—' : new Intl.DateTimeFormat('en-AU', {
@@ -274,6 +280,11 @@
     const raidPhases = qs('[data-raid-phase-readout]');
     if (raidPhases) raidPhases.textContent = 'Recorded actions for the current/latest weekend: opening '
       + raidFormatPhase(raid.start_phase) + ' · restoration ' + raidFormatPhase(raid.end_phase) + '.';
+    const observedRestart = qs('[data-raid-restart-observation]');
+    if (observedRestart) observedRestart.textContent =
+      'Nitrado restart observation — opening: ' + raidRestartObservationLabel(raid.start_restart_observation)
+      + ' · restoration: ' + raidRestartObservationLabel(raid.end_restart_observation)
+      + '. Online observation does not prove the game loaded configuration changes.';
     const raidFailureStage = raid.blocked_failure_stage || raid.end_failure_stage || raid.start_failure_stage;
     const raidAlert = qs('[data-raid-damage-alert]');
     if (raidAlert) {
@@ -283,6 +294,10 @@
         : 'ACTION REQUIRED: An opening or restoration was not fully confirmed. Check Nitrado damage settings and restart history. The system will not blindly send duplicate restarts.';
       if (raid.attention_required && raidFailureStage) {
         raidAlert.textContent += ' Failed step: ' + raidFailureLabel(raidFailureStage) + '.';
+      }
+      if (raid.attention_required &&
+          (raid.start_restart_observation === 'unverified' || raid.end_restart_observation === 'unverified')) {
+        raidAlert.textContent += ' Nitrado restart cycle was not verified within 20 minutes; do not assume the game loaded the changes.';
       }
     }
     const raidStatus = qs('[data-raid-damage-status]');
@@ -478,6 +493,8 @@
           + '\nBase damage: ' + (report.base_damage_enabled == null ? 'Unavailable' : report.base_damage_enabled ? 'Enabled' : 'Protected')
           + ' · Containers: ' + (report.container_damage_enabled == null ? 'Unavailable' : report.container_damage_enabled ? 'Enabled' : 'Protected')
           + '\nInternal KILLZONES: ' + (report.internal_killzones_enabled == null ? 'Unavailable' : report.internal_killzones_enabled ? 'Enabled' : 'Suspended')
+          + '\nNitrado opening: ' + raidRestartObservationLabel(report.start_restart_observation)
+          + ' · restoration: ' + raidRestartObservationLabel(report.end_restart_observation)
           + (failedStep ? '\nInterrupted step: ' + raidFailureLabel(failedStep) : '')
           + (report.blocked_weekend ? '\nPrevious raid requiring review: ' + fmtSydney(report.blocked_weekend) : '')
           + (blockers.length ? '\nIssues: ' + blockers.join(' | ') : '')
