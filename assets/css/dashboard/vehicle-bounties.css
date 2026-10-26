@@ -1,0 +1,32 @@
+/* Community bounty panel: scoped, touch-friendly forms and review cards. */
+.wwz-bounty-panel { max-width: 1120px; }
+.wwz-bounty-panel[hidden], .wwz-bounty-status[hidden], [data-bounty-staff][hidden] { display: none !important; }
+.wwz-bounty-form { display: grid; gap: 13px; margin-top: 18px; max-width: 820px; }
+.wwz-bounty-form label { display: grid; gap: 6px; font-weight: 600; font-size: .94rem; }
+.wwz-bounty-form input, .wwz-bounty-form textarea {
+  box-sizing: border-box; width: 100%; min-width: 0; min-height: 44px;
+  border: 1px solid var(--border-colour, #555b65);
+  background: #161a22; color: #fafafa; border-radius: 9px; padding: 10px 12px;
+}
+.wwz-bounty-form textarea { resize: vertical; }
+.wwz-bounty-coordinates { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.wwz-bounty-map-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.wwz-bounty-history { margin-top: 28px; }
+.wwz-bounty-status { padding: 12px 14px; border-radius: 8px; border: 1px solid #777; }
+.wwz-bounty-status[data-tone="error"] { border-color: #ec7878; color: #ffc5c5; }
+.wwz-bounty-status[data-tone="success"] { border-color: #6fcf9d; color: #b8ffd9; }
+.wwz-bounty-card {
+  border: 1px solid #525a65; border-radius: 12px; margin: 10px 0;
+  background: rgba(19,24,33,.82); padding: 14px;
+}
+.wwz-bounty-card header { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+.wwz-bounty-card h5 { margin: 0; font-size: 1rem; }
+.wwz-bounty-card p { margin: 6px 0; overflow-wrap: anywhere; }
+.wwz-bounty-evidence { display: flex; flex-wrap: wrap; gap: 12px; }
+.wwz-bounty-evidence a { text-decoration: underline; }
+.wwz-bounty-review { display: flex; gap: 9px; flex-wrap: wrap; margin-top: 10px; }
+.wwz-bounty-review button { min-height: 44px; }
+@media (max-width: 600px) {
+ .wwz-bounty-coordinates { grid-template-columns: 1fr; }
+ .wwz-bounty-map-actions { flex-direction: column; align-items: stretch; }
+}
