@@ -151,6 +151,7 @@
 <button class="side-link" data-livonia-only data-staff-only hidden data-nav-label="Deathmatch Rotation" data-section="administration" data-view="deathmatch" type="button"><span aria-hidden="true" class="side-link-icon" data-icon="refresh">↻</span><span class="side-link-copy"><strong>Deathmatch Rotation</strong><small>Arenas, JSON Profiles &amp; Messaging</small></span></button>
 
 <button class="side-link" data-nav-label="Community Analytics" data-section="analytics" data-view="community" type="button"><span aria-hidden="true" class="side-link-icon" data-icon="chart">▥</span><span class="side-link-copy"><strong>Community Analytics</strong><small>Activity, Locations And Trends</small></span></button>
+<button class="side-link" data-nav-label="Vehicle Bounties" data-section="bounties" data-view="community" type="button"><span aria-hidden="true" class="side-link-icon">🚗</span><span class="side-link-copy"><strong>Vehicle Bounties</strong><small>Cleanup Claims &amp; Rewards</small></span></button>
 <button class="side-link" data-nav-label="Event Calendar" data-section="events" data-view="community" type="button"><span aria-hidden="true" class="side-link-icon" data-icon="calendar">◫</span><span class="side-link-copy"><strong>Event Calendar</strong><small>Scheduled Community Events</small></span></button>
 <button class="side-link" data-nav-label="Browser Notifications" data-section="notifications" data-view="community" type="button"><span aria-hidden="true" class="side-link-icon" data-icon="bell">◉</span><span class="side-link-copy"><strong>Notifications</strong><small>Opt-in Browser Alerts</small></span></button>
 <button class="side-link" data-nav-label="App &amp; PWA" data-section="app" data-view="community" type="button"><span aria-hidden="true" class="side-link-icon" data-icon="phone">▣</span><span class="side-link-copy"><strong>App &amp; PWA</strong><small>Install And Native Foundation</small></span></button>
@@ -477,6 +478,30 @@
         <div><h4>My Event Registrations</h4><div class="community-list" data-community-my-signups><p class="community-empty">Sign in with Discord to register for community events.</p></div></div>
         <div><h4>Recent Results</h4><div class="community-list" data-community-results></div></div>
       </div>
+    </section>
+
+    <section class="community-panel wwz-bounty-panel" data-dashboard-section="bounties" data-vehicle-bounties>
+      <div class="community-panel-heading"><div><span class="community-kicker">Community Bounties / Nasdara</span><h3>Abandoned Vehicle Cleanup</h3></div><span class="community-inline-note" data-bounty-server>Choose a server</span></div>
+      <p>Earn <strong>$5,000 in-game</strong> for each eligible abandoned vehicle you destroy. Maximum <strong>two claims per rolling 24 hours</strong>, per server. Staff review all evidence before credits are issued. Deliberately damaging owned, shop-purchased or actively used vehicles is not eligible.</p>
+      <p class="community-inline-note">Your PvE and PvP claims and wallets are separate. Submit the vehicle's location and two distinct screenshot links. The system cannot verify vehicle destruction automatically.</p>
+      <p class="wwz-bounty-status" data-bounty-message role="status" hidden></p>
+      <form data-bounty-form class="wwz-bounty-form">
+        <label>Vehicle description<input name="vehicle_name" required maxlength="100" placeholder="e.g. abandoned Olga near the road"/></label>
+        <div class="wwz-bounty-coordinates">
+          <label>X coordinate<input name="x" required type="number" min="0" max="16384" step="0.1" placeholder="X"/></label>
+          <label>Z coordinate<input name="z" required type="number" min="0" max="16384" step="0.1" placeholder="Z"/></label>
+        </div>
+        <div class="wwz-bounty-map-actions">
+          <button type="button" class="secondary-action" data-bounty-open-map>Open Nasdara Map</button>
+          <button type="button" class="secondary-action" data-bounty-use-selection>Use Selected Map Point</button>
+        </div>
+        <label>Before screenshot (HTTPS link)<input name="before_url" required type="url" maxlength="1000" placeholder="https://..."/></label>
+        <label>After screenshot (HTTPS link)<input name="after_url" required type="url" maxlength="1000" placeholder="https://..."/></label>
+        <label>Additional details (optional)<textarea name="notes" maxlength="500" rows="3" placeholder="Describe why the vehicle was abandoned, and any helpful details."></textarea></label>
+        <div class="community-form-actions"><button class="primary-action" type="submit" data-bounty-submit>Submit Claim For Review</button><button class="secondary-action" type="button" data-bounty-refresh>Refresh Claims</button></div>
+      </form>
+      <section class="wwz-bounty-history"><h4>My Vehicle Claims</h4><div data-bounty-mine class="community-list"><p>Sign in with Discord to view your claims.</p></div></section>
+      <section class="wwz-bounty-history" data-bounty-staff hidden><h4>Staff Review Queue</h4><p class="community-inline-note">Check both screenshots and the map location before approving. Approval credits the selected server's in-game wallet only. A failed transfer can be retried safely without double payment.</p><div data-bounty-queue class="community-list"></div></section>
     </section>
 
     <section class="community-panel" data-dashboard-section="notifications">
