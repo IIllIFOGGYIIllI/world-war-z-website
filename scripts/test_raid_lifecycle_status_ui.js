@@ -18,5 +18,5 @@ assert.ok(js.includes('Never arm another weekend while the backend reports an un
 assert.ok(css.includes('.raid-operator-alert[hidden]'));
 assert.ok(lazy.includes('stage6=raid-damage-1&lifecycle=2'));
 assert.ok(html.includes('rev=manual-coords-1&amp;lifecycle=2'));
-assert.ok(sw.includes('2026-10-26-raid-owner-review-1'));
+assert.ok(sw.includes('2026-10-26-pve-damage-only-1'));
 console.log('PASS: Raid lifecycle states, next schedule, attention handling and PWA cache revision');

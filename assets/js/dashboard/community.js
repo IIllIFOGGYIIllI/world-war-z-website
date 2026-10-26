@@ -19,10 +19,8 @@
   const fmtDate = (value) => { const d = new Date(value); return Number.isNaN(d.getTime()) ? '—' : d.toLocaleString([], {dateStyle:'medium',timeStyle:'short'}); };
   const raidFailureLabel = (stage) => ({
     read_settings: 'Read mission file',
-    suspend_killzones: 'Suspend internal KILLZONES',
     upload_gameplay: 'Upload gameplay settings — remote outcome may be uncertain',
     request_restart: 'Request Nitrado restart — completion unverified',
-    restore_killzones: 'Restore internal KILLZONES'
   }[String(stage || '')] || 'Unclassified operation');
   const raidRestartObservationLabel = (state) => ({
     pending: 'Request recorded; awaiting Nitrado status change',
@@ -313,8 +311,8 @@
       raidStatus.textContent = !live
         ? 'Live automation status unavailable. Read-only checks remain available; activation requires verified server status.'
         : raid.enabled
-        ? 'Raid automation armed · game damage, Nitrado restart requests and WWZ internal KILLZONE suspension/restoration are coordinated. Full-map PvP enforcement is NOT automated by external DayZ++.'
-        : 'Future raid openings disabled · WWZ internal KILLZONE controls will be coordinated when armed. External DayZ++ illegal-kill enforcement remains separate.';
+        ? 'Raid automation armed · base/container damage and Nitrado restarts only. The separate map-wide kill-ban zone is NOT modified.'
+        : 'Future raid openings disabled · base/container damage and Nitrado restarts only. The map-wide kill-ban zone remains separate and unchanged.';
       raidStatus.dataset.tone = raid.attention_required ? 'attention' : raid.enabled ? 'armed' : 'idle';
     }
     if (raidToggle) {
@@ -479,7 +477,7 @@
       output.hidden = false;
       output.dataset.kind = 'checking';
       output.dataset.serverScope = scope;
-      output.textContent = 'Reading current gameplay damage and WWZ KILLZONE status…';
+      output.textContent = 'Reading current base/container damage and Nitrado restart history…';
     }
     try {
       const response = await request(API.adminAction, {
@@ -500,14 +498,13 @@
           + ' · Expected damage: ' + (report.expected_damage_enabled ? 'Enabled' : 'Protected')
           + '\nBase damage: ' + (report.base_damage_enabled == null ? 'Unavailable' : report.base_damage_enabled ? 'Enabled' : 'Protected')
           + ' · Containers: ' + (report.container_damage_enabled == null ? 'Unavailable' : report.container_damage_enabled ? 'Enabled' : 'Protected')
-          + '\nInternal KILLZONES: ' + (report.internal_killzones_enabled == null ? 'Unavailable' : report.internal_killzones_enabled ? 'Enabled' : 'Suspended')
           + '\nNitrado opening: ' + raidRestartObservationLabel(report.start_restart_observation)
           + ' · restoration: ' + raidRestartObservationLabel(report.end_restart_observation)
           + (failedStep ? '\nInterrupted step: ' + raidFailureLabel(failedStep) : '')
           + (report.blocked_weekend ? '\nPrevious raid requiring review: ' + fmtSydney(report.blocked_weekend) : '')
           + (blockers.length ? '\nIssues: ' + blockers.join(' | ') : '')
           + '\nManual checks: ' + checks.join(' | ')
-          + '\nThis inspection makes no Nitrado or DayZ++ changes.';
+          + '\nThis inspection makes no server changes. The separate map-wide kill-ban zone is untouched.';
       }
     } catch (error) {
       if (scope !== selectedScope()) return;
@@ -526,7 +523,7 @@
     const button = qs('[data-raid-restoration-confirm]');
     if (!button || button.hidden || button.disabled) return;
     const raidWindow = button.dataset.windowStart;
-    const confirmation = 'Confirm only after you have observed the Nasdara PvE server restart and verified PvE protection in-game. The bot will independently recheck damage protection, internal KILLZONES and Nitrado online status. This records your verification without changing or restarting the server. Continue?';
+    const confirmation = 'Confirm only after you have observed the Nasdara PvE server restart and verified PvE protection in-game. The bot will independently recheck base/container damage protection and Nitrado online status. This records your verification without changing or restarting the server. Continue?';
     if (!confirm(confirmation)) return;
     const scope = selectedScope();
     const result = qs('[data-raid-restoration-result]');
@@ -572,7 +569,7 @@
     const toggle = qs('[data-raid-damage-toggle]');
     const turnOn = toggle?.dataset.enabled !== 'true';
     const message = turnOn
-      ? 'Enable automatic Nasdara PvE damage changes, Nitrado restart requests and WWZ internal KILLZONE suspension/restoration? External DayZ++ bans are NOT changed and require separate administration. This affects live players.'
+      ? 'Enable automated Nasdara PvE base/container damage changes and Nitrado restart requests? The separate map-wide kill-ban zone will remain untouched. This affects live players.'
       : 'Disable NEW automated raid starts? Any previously started raid will still restore normal PvE damage protection at its scheduled end.';
     if (!confirm(message)) return;
     if (toggle) toggle.disabled = true;
