@@ -1086,7 +1086,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         errors.append(
             "dashboard.html: command library must be lazy-loaded instead of downloaded on every dashboard visit."
         )
-    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=2.8.1&amp;rev=manual-coords-1&amp;mapfix=1'
+    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=2.8.1&amp;rev=manual-coords-1'
     lazy_index = dashboard.find(lazy_script)
     shell_index = dashboard.find("assets/js/dashboard/shell.js")
     if lazy_index < 0:
