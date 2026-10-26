@@ -309,7 +309,9 @@ const prepareIOSAuthRecovery = () => {
   const help = document.querySelector('[data-ios-auth-app-help]');
   if (!help || window.WWZIOSAuth?.isInstalled() !== true) return;
   help.hidden = false;
-  if (storageGet(IOS_AUTH_PENDING_KEY) === '1') help.open = true;
+  let pending = storageGet(IOS_AUTH_PENDING_KEY) === '1';
+  try { pending = pending || window.localStorage.getItem('wwz_ios_oauth_pending_return') === '1'; } catch (_) {}
+  if (pending) help.open = true;
 };
 
 const displaySafariTransferChoice = () => {
@@ -349,6 +351,9 @@ const completeDiscordLogin = async (loginTicket) => {
     sessionSaved = true;
     showSavedSessionRetry(false);
     storageRemove(IOS_AUTH_PENDING_KEY);
+    if (window.WWZIOSAuth?.isIOS?.()) {
+      try { window.localStorage.removeItem('wwz_ios_oauth_pending_return'); } catch (_) {}
+    }
     // The ticket is single-use. Clear it before rendering to avoid accidentally
     // redeeming it again if iOS suspends the app midway through sign-in.
     const returnView = clearCallbackFragment();
@@ -453,6 +458,11 @@ const isIOSInstalledWebApp = () => window.WWZIOSAuth?.isInstalled() === true;
 const startDiscordOAuth = () => {
   showSavedSessionRetry(false);
   const loginUrl = new URL(AUTH_LOGIN_URL);
+  if (window.WWZIOSAuth?.isIOS?.()) {
+    try {
+      window.localStorage.setItem('wwz_ios_oauth_pending_return', '1');
+    } catch (_) {}
+  }
   if (isIOSInstalledWebApp()) {
     // Bind the app handoff intent to the server-side OAuth state. Safari must
     // not guess based on missing sessionStorage (new tabs have none).
@@ -513,7 +523,13 @@ startDiscordLoginButtons.forEach((button) => {
   button.addEventListener('click', () => {
     if (!discordAuthEnabled || authRequestInProgress) return;
     const activeView = document.querySelector('[data-view-panel].active')?.dataset.viewPanel || 'overview';
-    storageSet(AUTH_RETURN_VIEW_KEY, navigationKey(activeView, activeDashboardSection || defaultSectionForView(activeView)));
+    const returnKey = navigationKey(activeView, activeDashboardSection || defaultSectionForView(activeView));
+    storageSet(AUTH_RETURN_VIEW_KEY, returnKey);
+    // Store navigation intent only (never a bearer token). iOS can lose a
+    // tab-scoped session when switching out to Discord/Safari and back.
+    if (window.WWZIOSAuth?.isIOS?.()) {
+      try { window.localStorage.setItem('wwz_ios_oauth_return_view', returnKey); } catch (_) {}
+    }
     startDiscordOAuth();
   });
 });

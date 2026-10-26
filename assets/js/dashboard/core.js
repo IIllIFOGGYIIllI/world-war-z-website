@@ -722,7 +722,14 @@ const callbackFragment = () => {
 };
 
 const clearCallbackFragment = () => {
-  const storedKey = storageGet(AUTH_RETURN_VIEW_KEY) || 'overview/summary';
+  // iOS may discard sessionStorage when OAuth switches between Safari and a
+  // standalone Home Screen app. Only the non-secret return view is persisted.
+  let fallbackView = '';
+  if (window.WWZIOSAuth?.isIOS?.()) {
+    try { fallbackView = window.localStorage.getItem('wwz_ios_oauth_return_view') || ''; } catch (_) {}
+    try { window.localStorage.removeItem('wwz_ios_oauth_return_view'); } catch (_) {}
+  }
+  const storedKey = storageGet(AUTH_RETURN_VIEW_KEY) || fallbackView || 'overview/summary';
   storageRemove(AUTH_RETURN_VIEW_KEY);
   const requested = parseNavigationKey(storedKey);
   const view = availableViews.has(requested.view) ? requested.view : 'overview';
