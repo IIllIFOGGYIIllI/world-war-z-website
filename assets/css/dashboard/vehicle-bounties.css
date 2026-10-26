@@ -30,3 +30,12 @@
  .wwz-bounty-coordinates { grid-template-columns: 1fr; }
  .wwz-bounty-map-actions { flex-direction: column; align-items: stretch; }
 }
+
+.wwz-bounty-form input[type="file"] { cursor: pointer; padding: 8px; }
+.wwz-bounty-form input[type="file"]::file-selector-button {
+  border: 1px solid #858d9f; background: #273548; color: #fff;
+  padding: 8px 12px; border-radius: 7px; margin-right: 8px; cursor: pointer;
+}
+.wwz-bounty-form label small { font-size: .78rem; font-weight: 400; opacity: .85; }
+.wwz-bounty-preview { max-width: 100%; max-height: 200px; border-radius: 8px; object-fit: contain; }
+.wwz-bounty-preview[hidden] { display: none !important; }
