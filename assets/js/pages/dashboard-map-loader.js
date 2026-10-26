@@ -59,6 +59,21 @@
   const customName = document.querySelector('[data-map-custom-name]');
   const customCategory = document.querySelector('[data-map-custom-category]');
   const customColour = document.querySelector('[data-map-custom-colour]');
+  const customIcon = document.querySelector('[data-map-custom-icon]');
+  const customIconPreview = document.querySelector('[data-map-custom-icon-preview]');
+  const customIconLabel = document.querySelector('[data-map-custom-icon-label]');
+  const markerIcon = value => window.WWZMap?.normaliseMarkerIcon?.(value) || 'default';
+  const syncIconPreview = () => {
+    const id=markerIcon(customIcon?.value);
+    const src=window.WWZMap?.markerIconUrl?.(id);
+    if(customIconPreview){
+      customIconPreview.hidden=!src;
+      if(src)customIconPreview.src=src;
+      else customIconPreview.removeAttribute('src');
+    }
+    if(customIconLabel)customIconLabel.textContent=customIcon?.selectedOptions?.[0]?.textContent || 'Standard map pin';
+  };
+  customIcon?.addEventListener('change',syncIconPreview);
   const customNotes = document.querySelector('[data-map-custom-notes]');
   const customX = document.querySelector('[data-map-custom-x]');
   const customZ = document.querySelector('[data-map-custom-z]');
@@ -169,6 +184,7 @@
     const category = validText(rawPoi?.category, 40, 'Landmark');
     const description = validText(rawPoi?.description, 240, 'Public server map marker.');
     const colour = Object.hasOwn(COLOURS, rawPoi?.colour) ? rawPoi.colour : 'red';
+    const icon = markerIcon(rawPoi?.icon);
     const x = clampCoordinate(rawPoi?.x);
     const z = clampCoordinate(rawPoi?.z);
     if (!id || !name || x === null || z === null) return null;
@@ -179,6 +195,7 @@
       category,
       description,
       colour,
+      icon,
       x,
       z,
       visibility: 'public',
@@ -192,10 +209,11 @@
     const category = validText(rawPoi?.category, 40, 'Custom');
     const description = validText(rawPoi?.description ?? rawPoi?.notes, 240, 'Personal custom map location.');
     const colour = Object.hasOwn(COLOURS, rawPoi?.colour) ? rawPoi.colour : 'amber';
+    const icon = markerIcon(rawPoi?.icon);
     const x = clampCoordinate(rawPoi?.x);
     const z = clampCoordinate(rawPoi?.z);
     if (!name || x === null || z === null) return null;
-    return { id, name, category, description, colour, x, z, visibility: 'private-browser', scope: 'custom' };
+    return { id, name, category, description, colour, icon, x, z, visibility: 'private-browser', scope: 'custom' };
   };
 
   const validatePlaceName = (rawPlace) => {
@@ -244,7 +262,7 @@
     const query = currentQuery();
     return availableLocations().filter((poi) => {
       const categoryMatches = selectedCategory === 'All' || poi.category === selectedCategory;
-      const haystack = `${poi.name} ${poi.category} ${poi.description} ${poi.x} ${poi.z} ${poi.scope}`.toLowerCase();
+      const haystack = `${poi.name} ${poi.category} ${poi.description} ${poi.x} ${poi.z} ${poi.scope} ${poi.icon||''}`.toLowerCase();
       return categoryMatches && (!query || haystack.includes(query));
     });
   };
@@ -399,6 +417,8 @@
     customName.value = poi?.name || '';
     customCategory.value = poi?.category === 'Custom' ? '' : (poi?.category || '');
     customColour.value = poi?.colour || (requestedScope === 'public' ? 'red' : 'amber');
+    if(customIcon)customIcon.value=markerIcon(poi?.icon);
+    syncIconPreview();
     const defaultDescription = requestedScope === 'public' ? 'Public server map marker.' : 'Personal custom map location.';
     customNotes.value = poi?.description === defaultDescription ? '' : (poi?.description || '');
     const initialX = base?.x ?? selection?.x;
@@ -421,6 +441,7 @@
   const closeCustomEditor = () => {
     if (customPanel) customPanel.hidden = true;
     customForm?.reset();
+    syncIconPreview();
     if (customId) customId.value = '';
     editingLocation = null;
     editorScope = 'custom';
@@ -455,7 +476,13 @@
     const symbol = document.createElement('span');
     symbol.className = 'map-location-symbol';
     symbol.setAttribute('aria-hidden', 'true');
-    symbol.textContent = poi.scope === 'custom' ? '◆' : '⌖';
+    const imageUrl=window.WWZMap?.markerIconUrl?.(poi.icon);
+    if(imageUrl){
+      const image=document.createElement('img');
+      image.src=imageUrl;image.alt='';image.width=24;image.height=30;
+      image.className='wwz-map-list-icon';
+      symbol.appendChild(image);
+    }else symbol.textContent = poi.scope === 'custom' ? '◆' : '⌖';
     symbol.style.setProperty('--pin-colour', COLOURS[poi.colour] || (poi.scope === 'custom' ? COLOURS.amber : COLOURS.red));
 
     const copy = document.createElement('span');
@@ -737,6 +764,7 @@
         category: poi.category,
         description: poi.description,
         colour: poi.colour,
+        icon: markerIcon(poi.icon),
         x: poi.x,
         z: poi.z
       })
@@ -919,6 +947,7 @@
       category: customCategory?.value || (publicMode ? 'Landmark' : 'Custom'),
       description: customNotes?.value || (publicMode ? 'Public server map marker.' : 'Personal custom map location.'),
       colour: customColour?.value,
+      icon: customIcon?.value,
       x: customX?.value,
       z: customZ?.value,
       visibility: publicMode ? 'public' : undefined

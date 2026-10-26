@@ -62,7 +62,8 @@
     return {
       id: clean(raw?.id || `poi-${x}-${z}`).slice(0,100), name:clean(raw?.name || 'Public marker').slice(0,80),
       category:clean(raw?.category || 'Landmark').slice(0,40), description:clean(raw?.description || 'Public server map marker.').slice(0,240),
-      colour:String(raw?.colour || 'red').toLowerCase(), x, z, fallback:Boolean(raw?.fallback)
+      colour:String(raw?.colour || 'red').toLowerCase(),
+      icon:window.WWZMap.normaliseMarkerIcon(raw?.icon), x, z, fallback:Boolean(raw?.fallback)
     };
   };
 

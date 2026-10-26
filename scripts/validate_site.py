@@ -1120,8 +1120,8 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     map_runtime_assets = (
         ("Leaflet stylesheet", re.escape("https://unpkg.com/leaflet@1.9.4/dist/leaflet.css")),
         ("Leaflet runtime", re.escape("https://unpkg.com/leaflet@1.9.4/dist/leaflet.js")),
-        ("dashboard map styles", re.escape("assets/css/components/wwz-map.css?v=1.28.1&rev=nasdara-draw-order-1")),
-        ("shared WWZ map runtime", re.escape("assets/js/map/wwz-map.js?v=1.28.1&rev=nasdara-draw-order-1")),
+        ("dashboard map styles", re.escape("assets/css/components/wwz-map.css?v=1.28.2&rev=wwz-marker-icons-1")),
+        ("shared WWZ map runtime", re.escape("assets/js/map/wwz-map.js?v=1.28.2&rev=wwz-marker-icons-1")),
     )
     for label, asset_pattern in map_runtime_assets:
         if re.search(asset_pattern, dashboard.replace("&amp;", "&")):
@@ -1194,7 +1194,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append(f"lazy-assets.js: missing view-style lazy-loading guard: {token}")
 
     lazy_view_assets = (
-        ("dashboard map", f"assets/js/pages/dashboard-map-loader.js?v=1.55.0&rev=nasdara-stage2b-1", "ensureDashboardMap"),
+        ("dashboard map", f"assets/js/pages/dashboard-map-loader.js?v=1.55.1&rev=wwz-marker-icons-1", "ensureDashboardMap"),
         ("structured configuration", f"assets/js/dashboard/configuration-studio.js?v={EXPECTED_ASSET_VERSION}", "ensureConfigurationStudio"),
         ("dashboard Shop wiki previews", f"assets/js/shop-wiki-previews.js?v={EXPECTED_ASSET_VERSION}", "ensureShopWikiPreviews"),
     )

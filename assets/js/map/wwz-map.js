@@ -85,6 +85,32 @@
     })
   });
 
+  // WWZ map icon IDs are shared by editor, public API and renderer.
+  // Never derive an asset path from unvalidated marker input.
+  const MARKER_ICON_OPTIONS = Object.freeze([
+    Object.freeze({ id: 'default', label: 'Standard pin' }),
+    Object.freeze({ id: 'vehicle-repair', label: 'Vehicle repair centre' }),
+    Object.freeze({ id: 'mechanic-garage', label: 'Mechanic garage' }),
+    Object.freeze({ id: 'vehicle-rental', label: 'Vehicle rental' }),
+    Object.freeze({ id: 'tow-service', label: 'Tow service' }),
+    Object.freeze({ id: 'fuel-station', label: 'Fuel station' }),
+    Object.freeze({ id: 'vehicle-parts', label: 'Vehicle parts' }),
+    Object.freeze({ id: 'trader', label: 'Trader' }),
+    Object.freeze({ id: 'builder-shed', label: 'Builder shed' }),
+    Object.freeze({ id: 'medical', label: 'Medical' }),
+    Object.freeze({ id: 'police', label: 'Police' }),
+    Object.freeze({ id: 'fire-station', label: 'Fire station' }),
+    Object.freeze({ id: 'water-tower', label: 'Water tower' }),
+    Object.freeze({ id: 'radio-building', label: 'Radio building' })
+  ]);
+  const MARKER_ICON_IDS = new Set(MARKER_ICON_OPTIONS.map(option=>option.id));
+  const normaliseMarkerIcon = value => MARKER_ICON_IDS.has(String(value||'default').toLowerCase())
+    ? String(value||'default').toLowerCase() : 'default';
+  const markerIconUrl = value => {
+    const id=normaliseMarkerIcon(value);
+    return id==='default'?null:`assets/map-icons/${id}.svg`;
+  };
+
   const roadGeometryPromises = new Map();
   const instances = new Set();
 
@@ -535,10 +561,12 @@
       }
     }
 
-    const makeLocationIcon = ({ name = '', colour = '#d52b1e', selected = false, custom = false, showLabel = true, selection = false } = {}) => {
+    const makeLocationIcon = ({ name = '', colour = '#d52b1e', icon = 'default', selected = false, custom = false, showLabel = true, selection = false } = {}) => {
       const safeColour = /^#[0-9a-f]{6}$/i.test(String(colour)) ? String(colour) : '#d52b1e';
+      const imageUrl = markerIconUrl(icon);
       const classes = [
         'wwz-map-location-pin-wrap',
+        imageUrl ? 'has-marker-artwork' : '',
         custom ? 'is-custom' : 'is-public',
         selected ? 'is-selected' : '',
         selection ? 'is-selection' : ''
@@ -548,9 +576,11 @@
         : '';
       return L.divIcon({
         className: 'wwz-map-location-div-icon',
-        html: `<span class=\"${classes}\" style=\"--wwz-pin-colour:${safeColour}\"><span class=\"wwz-map-location-pin\"><span class=\"wwz-map-location-pin-core\"></span></span>${label}</span>`,
-        iconSize: [24, 32],
-        iconAnchor: [12, 30]
+        html: imageUrl
+          ? `<span class="${classes}" style="--wwz-pin-colour:${safeColour}"><img class="wwz-map-marker-artwork" src="${imageUrl}" width="32" height="40" alt="" aria-hidden="true">${label}</span>`
+          : `<span class="${classes}" style="--wwz-pin-colour:${safeColour}"><span class="wwz-map-location-pin"><span class="wwz-map-location-pin-core"></span></span>${label}</span>`,
+        iconSize: imageUrl ? [32, 40] : [24, 32],
+        iconAnchor: imageUrl ? [16, 38] : [12, 30]
       });
     };
 
@@ -780,6 +810,7 @@
       const makeIcon = (selected = false) => makeLocationIcon({
         name: poi?.name || 'Location',
         colour,
+        icon: poi?.icon,
         selected,
         custom: isCustom,
         showLabel: handlers.showLabel !== false
@@ -931,6 +962,9 @@
   };
 
   window.WWZMap = Object.freeze({
+    markerIconOptions: MARKER_ICON_OPTIONS,
+    normaliseMarkerIcon,
+    markerIconUrl,
     MIN_ZOOM,
     MAX_NATIVE_ZOOM,
     MAX_ZOOM,

@@ -84,7 +84,7 @@
     ),
     loadStylesheetOnce(
       'wwz-map-css',
-      'assets/css/components/wwz-map.css?v=1.28.1&rev=nasdara-draw-order-1'
+      'assets/css/components/wwz-map.css?v=1.28.2&rev=wwz-marker-icons-1'
     ),
     loadScriptOnce(
       'leaflet-runtime',
@@ -97,7 +97,7 @@
     )
   ]).then(() => loadScriptOnce(
     'wwz-map-runtime',
-    'assets/js/map/wwz-map.js?v=1.28.1&rev=nasdara-draw-order-1',
+    'assets/js/map/wwz-map.js?v=1.28.2&rev=wwz-marker-icons-1',
     () => Boolean(window.WWZMap?.create)
   ));
 
@@ -184,7 +184,7 @@
     ensureMapIntelligenceStyles(),
     loadScriptOnce(
       'dashboard-map',
-      'assets/js/pages/dashboard-map-loader.js?v=1.55.0&rev=nasdara-stage2b-1',
+      'assets/js/pages/dashboard-map-loader.js?v=1.55.1&rev=wwz-marker-icons-1',
       () => Boolean(window.WWZDashboardMap?.initialise)
     )
   ]))).then(() => loadScriptOnce(

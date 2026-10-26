@@ -50,6 +50,7 @@ jobs:
           python3 scripts/validate_pwa_revision.py
           python3 scripts/validate_site.py --require-map-assets
           node scripts/test_nasdara_satellite_integration.js
+          node scripts/test_marker_icon_pack.js
           node scripts/test_nasdara_scoped_auth_errors_stage2f.js
           node scripts/test_shop_checkout_retries.js
           node scripts/test_nasdara_scoped_panels.js

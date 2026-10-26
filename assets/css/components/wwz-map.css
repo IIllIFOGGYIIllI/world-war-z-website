@@ -1030,3 +1030,46 @@
   }
   .wwz-badlands-map .wwz-map-place-name--city .wwz-map-place-name-native{font-size:12px}
 }
+
+/* WWZ marker icon pack v1: validated SVG artwork instead of default teardrop. */
+.wwz-map-location-pin-wrap.has-marker-artwork{
+  width:32px;height:40px;transform-origin:16px 38px;
+}
+.wwz-map-marker-artwork{
+  position:absolute;left:0;top:0;display:block;width:32px;height:40px;
+  object-fit:contain;max-width:none;pointer-events:none;
+  filter:drop-shadow(0 2px 3px rgba(0,0,0,.6));
+}
+.wwz-map-location-pin-wrap.has-marker-artwork .wwz-map-location-pin-label{
+  left:35px;top:7px;
+}
+.wwz-map-location-pin-wrap.has-marker-artwork.is-selected .wwz-map-marker-artwork{
+  filter:drop-shadow(0 0 5px #ffe2a3);
+}
+.wwz-marker-icon-choice{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;
+  align-items:end;gap:10px;
+}
+.wwz-marker-icon-choice label{min-width:0}
+.wwz-marker-icon-choice select{min-height:42px;font-size:12px}
+.wwz-marker-icon-preview{
+  min-width:124px;min-height:52px;
+  display:flex;align-items:center;gap:8px;
+  padding:4px 8px;
+  border:1px solid rgba(237,194,104,.25);
+  border-radius:8px;background:rgba(12,20,24,.9);
+}
+.wwz-marker-icon-preview img{flex:none;width:40px;height:50px;object-fit:contain}
+.wwz-marker-icon-preview img[hidden]{display:none!important}
+.wwz-marker-icon-preview span{
+  color:#eadab7;font:700 11px/1.35 system-ui,sans-serif;
+  max-width:125px;
+}
+.map-location-symbol .wwz-map-list-icon{
+  display:block;width:24px;height:30px;object-fit:contain;
+}
+@media(max-width:560px){
+ .wwz-marker-icon-choice{grid-template-columns:1fr}
+ .wwz-marker-icon-preview{min-height:45px}
+ .wwz-marker-icon-preview img{height:42px;width:34px}
+}
