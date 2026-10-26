@@ -25,7 +25,7 @@ assert(source.includes("buildings.dataset.wwzBuildings='true'"));
 assert(source.includes("button.matches('[data-map-road-group=\"gravel\"], [data-map-trail-toggle]')"));
 assert(style.includes('.wwz-badlands-map .wwz-map-place-name-native{')&&style.includes('color:#fff5d9!important'));
 assert(style.includes('.wwz-map-ground-scale{'));
-assert(lazy.includes('nasdara-draw-order-1'),'Map assets must be cache-busted');
+assert(lazy.includes('wwz-marker-icons-1'),'Map assets must be cache-busted');
 
 const p=m.worldToLeaflet([10450,10634],'badlands');
 const back=m.leafletToWorld({lat:p[0],lng:p[1]},'badlands');
