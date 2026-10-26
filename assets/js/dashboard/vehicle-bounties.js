@@ -188,7 +188,7 @@
       for (const key of ['before_image', 'after_image']) {
         const file = fields.get(key);
         if (!(file instanceof File) || !file.size) throw new Error('Select both before and after screenshots.');
-        if (file.size > 1000000) throw new Error('Each screenshot must be under 1 MB.');
+        if (file.size > 4 * 1024 * 1024) throw new Error('Each screenshot must be under 4 MB.');
         if (!['image/png','image/jpeg','image/webp'].includes(file.type)) throw new Error('Only PNG, JPEG and WebP screenshots can be uploaded.');
       }
       fields.set('action', 'submit');
