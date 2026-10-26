@@ -483,7 +483,7 @@
     <section class="community-panel wwz-bounty-panel" data-dashboard-section="bounties" data-vehicle-bounties>
       <div class="community-panel-heading"><div><span class="community-kicker">Community Bounties / Nasdara</span><h3>Abandoned Vehicle Cleanup</h3></div><span class="community-inline-note" data-bounty-server>Choose a server</span></div>
       <p>Earn <strong>$5,000 in-game</strong> for each eligible abandoned vehicle you destroy. Maximum <strong>two claims per rolling 24 hours</strong>, per server. Staff review all evidence before credits are issued. Deliberately damaging owned, shop-purchased or actively used vehicles is not eligible.</p>
-      <p class="community-inline-note">Your PvE and PvP claims and wallets are separate. Submit the vehicle's location and two distinct screenshot links. The system cannot verify vehicle destruction automatically.</p>
+      <p class="community-inline-note">Your PvE and PvP claims and wallets are separate. Pick two screenshots from your phone or PC, or upload them from the Discord claim panel. The system cannot verify vehicle destruction automatically.</p>
       <p class="wwz-bounty-status" data-bounty-message role="status" hidden></p>
       <form data-bounty-form class="wwz-bounty-form">
         <label>Vehicle description<input name="vehicle_name" required maxlength="100" placeholder="e.g. abandoned Olga near the road"/></label>
@@ -495,8 +495,10 @@
           <button type="button" class="secondary-action" data-bounty-open-map>Open Nasdara Map</button>
           <button type="button" class="secondary-action" data-bounty-use-selection>Use Selected Map Point</button>
         </div>
-        <label>Before screenshot (HTTPS link)<input name="before_url" required type="url" maxlength="1000" placeholder="https://..."/></label>
-        <label>After screenshot (HTTPS link)<input name="after_url" required type="url" maxlength="1000" placeholder="https://..."/></label>
+        <div class="wwz-bounty-coordinates">
+          <label>Before screenshot<input name="before_image" required type="file" accept="image/png,image/jpeg,image/webp" data-bounty-image="before"/><small>Upload a picture of the abandoned vehicle before destruction (up to 1 MB).</small><img data-bounty-preview="before" class="wwz-bounty-preview" alt="Before screenshot preview" hidden/></label>
+          <label>After screenshot<input name="after_image" required type="file" accept="image/png,image/jpeg,image/webp" data-bounty-image="after"/><small>Upload a separate picture after destruction (up to 1 MB).</small><img data-bounty-preview="after" class="wwz-bounty-preview" alt="After screenshot preview" hidden/></label>
+        </div>
         <label>Additional details (optional)<textarea name="notes" maxlength="500" rows="3" placeholder="Describe why the vehicle was abandoned, and any helpful details."></textarea></label>
         <div class="community-form-actions"><button class="primary-action" type="submit" data-bounty-submit>Submit Claim For Review</button><button class="secondary-action" type="button" data-bounty-refresh>Refresh Claims</button></div>
       </form>
