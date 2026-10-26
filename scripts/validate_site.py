@@ -1594,7 +1594,7 @@ def validate_checkout_compatibility(errors: list[str]) -> None:
         errors.append("shop.html: missing standalone commerce stylesheet.")
     # Preserve the versioned storefront controller check without hardcoding an
     # obsolete cache-buster that preceded the Nasdara shop safety guard.
-    if not re.search(r'assets/js/pages/shop\.js\?v=2\.1\.0&amp;rev=[A-Za-z0-9][A-Za-z0-9_-]*', shop_html):
+    if not re.search(r'assets/js/pages/shop\.js\?v=2\.[12]\.0&amp;rev=[A-Za-z0-9][A-Za-z0-9_-]*', shop_html):
         errors.append("shop.html: missing versioned standalone commerce controller.")
 
 

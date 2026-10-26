@@ -2,7 +2,7 @@
 
 const WWZ_PWA_VERSION = '2.19.0';
 const CACHE_PREFIX = 'wwz-pwa-';
-const WWZ_PWA_CACHE_REVISION = 'nasdara-native-assets-1';
+const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 // Public release versions can advance without discarding the bounded map caches.
 // Keep this cache-generation version until a deliberate cache migration is needed.
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
