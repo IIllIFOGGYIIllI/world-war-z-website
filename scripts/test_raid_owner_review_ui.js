@@ -21,5 +21,5 @@ assert.ok(app.includes("confirmed.restart_observation !== 'owner_verified'"));
 assert.ok(app.includes('No Nitrado settings or restarts were changed.'));
 assert.ok(css.includes('.raid-restore-review[hidden]'));
 assert.ok(lazy.includes('ownerreview=1'));
-assert.ok(cache.includes('2026-10-26-ios-auth-return-2'));
+assert.ok(cache.includes('2026-10-26-ios-auth-return-3'));
 console.log('PASS: Owner-only restoration recovery, scoped state and PWA cache');
