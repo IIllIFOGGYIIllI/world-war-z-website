@@ -205,7 +205,7 @@
     const mapPreview = document.querySelector('.map-live-preview img');
     if (mapPreview) {
       mapPreview.src = server.map_key === 'badlands'
-        ? 'nasdara/Nasdara_Enhanced_Paper_Map.webp?v=1.2'
+        ? 'assets/maps/nasdara/preview.jpg?v=wwz-nasdara-1'
         : server.map_key === 'livonia'
           ? 'assets/maps/livonia/tiles/0/0/0.webp?v=1.22.93'
           : 'assets/maps/chernarus/tiles/z0/0/0.webp?v=1.22.93';

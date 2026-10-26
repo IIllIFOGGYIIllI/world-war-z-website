@@ -89,8 +89,8 @@ const isBadlandsWorld = () => activeMapKey() === 'badlands';
 const MAP_ASSETS = {
   leafletCss: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
   leafletJs: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
-  mapCss: 'assets/css/components/wwz-map.css?v=1.22.93&rev=2',
-  mapJs: 'assets/js/map/wwz-map.js?v=1.22.93&rev=nasdara-paper-4'
+  mapCss: 'assets/css/components/wwz-map.css?v=1.28.0&rev=nasdara-ui-1',
+  mapJs: 'assets/js/map/wwz-map.js?v=1.28.0&rev=nasdara-satellite-1'
 };
 let checkoutMapRuntimePromise = null;
 const loadStylesheetOnce = (key, href, integrity = '') => {
@@ -243,11 +243,13 @@ const openRentalMapPicker = async (target) => {
   if (rentalMapMessage) rentalMapMessage.textContent = 'Select a position, then confirm. Existing Y and rotation values will be preserved.';
   rentalMapDialog.showModal();
   if (activeMapKey() === 'badlands') {
-    // Embed the already validated, dependency-free Nasdara Atlas. Its click
-    // coordinates are returned via a same-origin message, not guessed pixels.
+    // Embed the unified WWZ satellite map; clicks return native game X/Z
+    // through the existing same-origin rental-picker message contract.
     if (rentalMapAtlas) {
-      const url = new URL('nasdara/index.html', location.href);
+      const url = new URL('map-link.html', location.href);
       url.searchParams.set('rental_picker', '1');
+      url.searchParams.set('map','badlands');
+      url.searchParams.set('server',rentalMapServerKey);
       const x = Number(target.x), z = Number(target.z);
       if (String(target.x).trim() && String(target.z).trim()
           && [x, z].every(Number.isFinite)) {

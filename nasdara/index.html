@@ -1,143 +1,28 @@
 <!doctype html>
 <html lang="en-AU">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>WORLD WAR Z | Nasdara Map</title>
-<style>
-:root{color-scheme:dark;--bg:#0d1014;--panel:#161a21;--line:#30363f;--ink:#e9edf1;--muted:#9da6b2;--red:#df4247;--gold:#cfad6c}*{box-sizing:border-box}html,body{margin:0;height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,Segoe UI,Arial,sans-serif}button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:2px solid #f1878a;outline-offset:2px}.shell{height:100dvh;display:grid;grid-template-columns:298px minmax(0,1fr);grid-template-rows:58px minmax(0,1fr)}header{grid-column:1/-1;display:flex;gap:14px;align-items:center;padding:0 19px;background:#11151b;border-bottom:1px solid var(--line);z-index:3}.logo{border:1px solid #8b383a;border-radius:9px;background:linear-gradient(145deg,#3c191d,#1c181e);padding:7px 9px;font-weight:900;color:#f7787b;letter-spacing:.11em}.brand{font-weight:800;letter-spacing:.06em}.brand small{display:block;font-weight:500;letter-spacing:0;color:var(--muted);font-size:11px}.headernote{margin-left:auto;font-size:12px;color:var(--muted);text-align:right}.sidebar{min-height:0;display:flex;flex-direction:column;background:var(--panel);border-right:1px solid var(--line);overflow:auto}.block{padding:18px 17px;border-bottom:1px solid var(--line)}.eyebrow{font-size:11px;letter-spacing:.17em;color:var(--gold);font-weight:750;margin:0 0 7px}.block h1{font-size:23px;line-height:1.1;margin:0 0 7px}.muted{color:var(--muted);font-size:12px;margin:0}.search{margin-top:14px;display:flex;align-items:center;border-radius:8px;background:#0d1117;border:1px solid #444a54;overflow:hidden}.search input{padding:12px;border:0;outline:0;background:none;color:var(--ink);width:100%}.search:focus-within{border-color:#e08b8c}.sectionlabel{display:flex;justify-content:space-between;align-items:center;color:#c8cdd4;letter-spacing:.09em;font-size:11px;font-weight:800;text-transform:uppercase;margin-bottom:10px}.count{font-size:10px;color:var(--muted);letter-spacing:0}.places{display:flex;flex-direction:column;gap:4px;max-height:48vh;overflow:auto;padding-right:4px}.place{display:flex;align-items:center;justify-content:space-between;width:100%;background:transparent;color:#d1d6dd;text-align:left;border:0;border-radius:7px;padding:8px 10px}.place:hover,.place.active{background:#2b3039;color:white}.place small{font-size:10px;color:#aaa;flex-shrink:0;padding-left:8px}.modebar{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}.mode{flex:1 1 78px;padding:8px 5px;background:#222731;color:#b6bdc7;border:1px solid #3e4651;border-radius:7px;font-size:12px}.mode.active{color:white;border-color:#b95759;background:#4a252b}.information{font-size:12px;color:#c4cad1}.information p{margin:0 0 7px}.map{position:relative;overflow:hidden;background:#28231e;touch-action:none;user-select:none;cursor:grab}.map.dragging{cursor:grabbing}.map:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at center,#6a493326,#0008);pointer-events:none}.paper{position:absolute;top:0;left:0;width:2600px;height:2600px;max-width:none;max-height:none;transform-origin:0 0;will-change:transform;user-select:none;-webkit-user-drag:none;pointer-events:none;image-rendering:auto}.paper.roadfocus{filter:contrast(1.29) saturate(1.13) brightness(.98)}.map .marker{position:absolute;width:24px;height:24px;border-radius:50%;border:3px solid white;background:#e4474a;box-shadow:0 0 0 6px #e4474a36,0 0 28px #f04c62;pointer-events:none;transform:translate(-50%,-50%);display:none;z-index:1}.map .marker.show{display:block;animation:pulse 1.3s ease-out 2}@keyframes pulse{50%{box-shadow:0 0 0 14px #e4474a12,0 0 22px #f04c62}}.markname{position:absolute;top:27px;left:50%;transform:translateX(-50%);white-space:nowrap;padding:5px 8px;border:1px solid #583438;border-radius:6px;background:#15171ded;color:#fff;font-size:12px;font-weight:750}.controls{position:absolute;right:18px;top:18px;display:flex;flex-direction:column;gap:7px;z-index:2}.ctrl{width:42px;height:42px;border:1px solid #48505a;background:#13171fe3;color:#eef0f4;border-radius:9px;font-size:22px;display:grid;place-items:center;box-shadow:0 2px 12px #0006}.ctrl:hover{border-color:#b86162;background:#35262c}.footer{position:absolute;bottom:15px;left:16px;right:16px;pointer-events:none;display:flex;justify-content:space-between;gap:10px;align-items:end}.hint,.zoomlabel{background:#11151bdb;color:#f0e9da;font-size:11px;border:1px solid #47403a;border-radius:6px;padding:7px 10px}.zoomlabel{font-variant-numeric:tabular-nums}.empty{color:#a3abb8;padding:10px 5px;font-size:12px}.sidebar-toggle{display:none}@media(max-width:760px){.shell{grid-template-columns:1fr;grid-template-rows:52px minmax(0,1fr)}header{padding:0 9px}.headernote{font-size:10px;max-width:110px}.sidebar{position:absolute;z-index:4;top:52px;bottom:0;left:0;width:min(330px,85vw);transform:translateX(-105%);transition:transform .18s;box-shadow:10px 0 35px #0007}.sidebar.open{transform:translateX(0)}.sidebar-toggle{display:block;color:white;border:1px solid #56505a;background:#2b2229;border-radius:7px;padding:7px 10px}.controls{right:10px;top:10px}.footer{left:8px;right:8px;bottom:8px}.hint{max-width:70%;font-size:10px}}
-
-/* The game paper grid is 1 km, calibrated to native PathD/road placements. */
-.coordinate-entry{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}
-.coordinate-entry label{font-size:11px;color:#c8cdd4;display:flex;flex-direction:column;gap:4px}
-.coordinate-entry input{width:100%;min-width:0;border:1px solid #444a54;border-radius:7px;background:#0d1117;color:#fff;padding:9px;font-variant-numeric:tabular-nums}
-.coordinate-actions{display:flex;gap:7px;margin-top:9px}
-.coordinate-actions button,.copycoord{flex:1;border:1px solid #5c626b;background:#262c36;color:#f0f2f5;border-radius:7px;padding:9px 11px;font-weight:600;font-size:12px}
-.coordinate-actions button:hover,.copycoord:hover{background:#393c49;border-color:#ce8d90}
-.coordstatus{margin:9px 0 0;color:#b9c2cc;font-size:11px;min-height:16px}
-.coordstatus.error{color:#ff9898}
-.coordmarker{position:absolute;z-index:1;display:none;pointer-events:none;transform:translate(-50%,-50%);border:3px solid white;background:#189bb5;box-shadow:0 0 0 5px #189bb544;width:18px;height:18px;border-radius:50%}
-.coordmarker.show{display:block}
-.coordmarker .markname{background:#10262bde;border-color:#29839c}
-.coordreadout{display:flex;align-items:center;gap:8px;pointer-events:auto;background:#11151be8;border:1px solid #47403a;border-radius:7px;padding:4px 5px 4px 10px;font:12px/1.2 ui-monospace,Consolas,monospace;color:#f7ece0;white-space:nowrap}
-.coordreadout .copycoord{flex:none;padding:6px 10px}
-.footer{align-items:end;flex-wrap:wrap}
-@media(max-width:950px){.footer .hint{display:none}.coordreadout{font-size:11px}}
-</style><meta name="description" content="Explore the official Nasdara paper map with roads, location names, grid coordinates and World War Z X/Z pin navigation.">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="refresh" content="0; url=../map-link.html?map=badlands">
+<title>World War Z | Nasdara Interactive Map</title>
+<meta name="description" content="The Nasdara map has moved to the unified World War Z interactive satellite map.">
 <meta property="og:site_name" content="World War Z">
-<meta property="og:title" content="World War Z | Nasdara Badlands Map">
-<meta property="og:description" content="Explore the official Nasdara paper map with roads, location names, grid coordinates and World War Z X/Z pin navigation.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://iillifoggyiilli.github.io/world-war-z-website/nasdara/index.html">
-<meta property="og:image" content="https://iillifoggyiilli.github.io/world-war-z-website/nasdara/Nasdara_Original_Paper_Map.jpg?preview=badlands-v1">
-<meta property="og:image:secure_url" content="https://iillifoggyiilli.github.io/world-war-z-website/nasdara/Nasdara_Original_Paper_Map.jpg?preview=badlands-v1">
-<meta property="og:image:type" content="image/jpeg">
-<meta property="og:image:width" content="2600">
-<meta property="og:image:height" content="2600">
-<meta property="og:image:alt" content="World War Z Badlands — original Nasdara paper map with roads and town names">
+<meta property="og:title" content="World War Z | Nasdara Interactive Map">
+<meta property="og:description" content="Satellite terrain, real road geometry, location labels, and DayZ world X/Z coordinates.">
+<meta property="og:image" content="https://iillifoggyiilli.github.io/world-war-z-website/assets/maps/nasdara/preview.jpg?v=wwz-nasdara-1">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="World War Z | Nasdara Badlands Map">
-<meta name="twitter:description" content="Explore the official Nasdara paper map with roads, location names, grid coordinates and World War Z X/Z pin navigation.">
-<meta name="twitter:image" content="https://iillifoggyiilli.github.io/world-war-z-website/nasdara/Nasdara_Original_Paper_Map.jpg?preview=badlands-v1">
-<meta name="twitter:image:alt" content="World War Z Badlands — original Nasdara paper map with roads and town names">
 </head>
-<body><div class="shell">
-<header><button class="sidebar-toggle" id="menuButton" aria-label="Locations and map options" aria-controls="sidebar">☰</button><div class="logo">WWZ</div><div class="brand">NASDARA ATLAS<small>World War Z · Badlands</small></div><a href="../" aria-label="Back to World War Z homepage" style="margin-left:auto;color:#e5d5bf;font-weight:600;font-size:12px;text-decoration:none;border:1px solid #555b66;border-radius:7px;padding:7px 10px">← WWZ Home</a><div class="headernote" style="margin-left:0">Original in-game paper map<br>Roads + town names</div></header>
-<aside class="sidebar" id="sidebar"><section class="block"><div class="eyebrow">BADLANDS / NASDARA</div><h1>The actual map.</h1><p class="muted">The game's original road drawing, place names and map grid. No experimental road vectors.</p><div class="search"><input type="search" id="search" placeholder="Find a town or landmark…" aria-label="Search locations" autocomplete="off"></div></section>
-<section class="block"><div class="sectionlabel">DayZ coordinates <span class="count">X / Z · metres</span></div><p class="muted">Click the map to pin a position, or enter its game coordinates.</p><div class="coordinate-entry"><label>X · east<input id="coordX" type="number" min="0" max="16384" step="1" placeholder="e.g. 10000" inputmode="numeric"></label><label>Z · north<input id="coordZ" type="number" min="0" max="16384" step="1" placeholder="e.g. 4000" inputmode="numeric"></label></div><div class="coordinate-actions"><button id="coordGo" type="button">Find X/Z</button><button id="coordCopy" type="button">Copy pin</button></div><p class="coordstatus" id="coordStatus" role="status">Calibrated to the printed 1 km grid. One Nitrado X/Z location checked in-game; verify further locations before automating gameplay.</p></section>
-<section class="block"><div class="sectionlabel">Locations <span class="count" id="count"></span></div><div class="places" id="places"></div></section>
-<section class="block"><div class="sectionlabel">Map appearance</div><p class="muted">Enhanced: sharper at close zoom. Original: untouched in-game scan. Both use identical X/Z coordinates.</p><div class="modebar"><button class="mode" type="button" data-mode="original">Original</button><button class="mode active" type="button" data-mode="enhanced">Enhanced</button><button class="mode" type="button" data-mode="contrast">Road contrast</button></div><p class="muted" style="margin-top:10px">Road contrast darkens existing paper-map lines. It does not add or relocate roads.</p></section>
-<section class="block information"><div class="sectionlabel">About this map</div><p>✓ Place names and printed roads are part of the same original in-game image.</p><p>✓ Works offline. No Python, CDN or map server required.</p><p>✓ Paper-map X/Z is calibrated to the printed 1 km grid.</p><p>⚠ One Nitrado-log location has been verified; independently validate additional regions before server automation.</p><p>⚠ This is the normal paper map—not the unfinished satellite/vector overlay.</p></section></aside>
-<main class="map" id="map" aria-label="Zoomable Nasdara paper map" tabindex="0"><img class="paper" id="paper" alt="Official DayZ Nasdara topographical paper map with town names and roads" src="Nasdara_Enhanced_Paper_Map.webp" draggable="false"><div id="mark" class="marker"><div id="markname" class="markname"></div></div><div id="coordPin" class="coordmarker"><div id="coordPinLabel" class="markname"></div></div><div class="controls"><button class="ctrl" type="button" id="zin" title="Zoom in" aria-label="Zoom in">+</button><button class="ctrl" type="button" id="zout" title="Zoom out" aria-label="Zoom out">−</button><button class="ctrl" type="button" id="reset" title="Fit entire map" aria-label="Fit entire map">⤢</button></div><div class="footer"><span class="hint">Drag to pan · Scroll to zoom · Click to pin X/Z</span><div class="coordreadout"><span id="coordReadout">Cursor X: — · Z: —</span><button id="coordCopyFooter" type="button" class="copycoord" title="Copy pinned or hovered X/Z">Copy X/Z</button></div><span class="zoomlabel" id="zoomLabel">100%</span></div></main>
-</div>
+<body style="margin:0;display:grid;place-items:center;min-height:100vh;background:#0e1419;color:#eee3d2;font:16px system-ui">
+<p>Opening the new <a href="../map-link.html?map=badlands" style="color:#e8ca85">Nasdara satellite map</a>…</p>
 <script>
-'use strict';
-// Paper-image pixel positions, visually indexed from the original in-game map.
-// These are NOT DayZ game-world coordinates. They are only for centering the paper map.
-const PLACES=[
-['Nasdara',1555,1900,'City'],['Dashtabad',1668,812,'City'],['Dashtabad Airbase',1900,870,'Airfield'],['Terminal Nas',1715,1940,'Airfield'],
-['Gandomabad',1294,604,'Town'],['Khoramabad',759,847,'Town'],['Bustanshahr',1210,1670,'Town'],['No Abad',1112,1760,'Town'],['Shah Yailaq',1660,1240,'Town'],
-['Gard Abad',1750,1370,'Town'],['Bam-e Sabz',1402,1220,'Town'],['Dar-e Ardis',595,1772,'Town'],['Kucha Dar',730,950,'Town'],['Sabzabad',1085,1405,'Town'],
-['Darvazeh-e Gharb',820,434,'Town'],['Panj Asyab',944,439,'Town'],['Marz-e Lut',2168,559,'Town'],['Varzaneh',2095,655,'Town'],['Dara-e Nur',1735,390,'Town'],
-['Pesh Kuh',605,830,'Town'],['Zulfiquar missile base',495,1015,'Military'],['Sard Sarhad',495,115,'Town'],['Kotal-e Khushk',704,309,'Landmark'],
-['Bar Kalay',1171,510,'Town'],['Chashme Sabz',1090,560,'Town'],['Suvin Shahr',922,585,'Town'],['Shinkay Wadi',1090,670,'Landmark'],['Sabz Pashan',750,714,'Town'],
-['Kati Golzar',986,700,'Town'],['OKB-754',1108,958,'Military'],['Sar-e Deh',485,1574,'Town'],['Bala Kalay',720,1375,'Town'],['Gul Zar',805,1544,'Town'],
-['Pay-e Kuh',1000,1650,'Town'],['Bagh-e Mir',765,1672,'Town'],['Mian Deh',1140,1892,'Town'],['Shana',868,2200,'Mountain'],
-['Nasdar-Beton factory',1585,1535,'Industrial'],['Sarman-Naft refinery',1763,1625,'Industrial'],['COP Neptune',1995,1515,'Landmark'],['Pesh Dasht',1805,1048,'Town'],
-['Mal Kalay',1520,1135,'Town'],['Kamar Zir',1518,680,'Town'],['Mian Dara',1425,599,'Town'],['Dehgankalay',1605,895,'Town'],
-['Bagh-e Dara',1527,2020,'Town'],['Danan-e Kavir',1820,2135,'Town'],['Zanu Ghar',216,1455,'Mountain']
-];
-// Correct typographical spelling of the town should follow the printed game image.
-const map=document.getElementById('map'),paper=document.getElementById('paper'),mark=document.getElementById('mark'),markname=document.getElementById('markname');
-const zoomLabel=document.getElementById('zoomLabel'),list=document.getElementById('places'),search=document.getElementById('search'),count=document.getElementById('count');
-const SIZE=2600;let scale=1,tx=0,ty=0,fit=1;let active=null,drag=null;const pointers=new Map();let pinchStart=null;
-// Verified against 16 paper-map grid lines and saved native-road grid-fit metadata.
-// Native DayZ axes: X increases east/right; Z increases north/up.
-// Printed paper grid: 1,000 world metres per square, NOT 1,024 metres.
-// y origin at Z=16,000 is 81.2px; equivalently Z=16,384 at y=21.784px.
-const GRID=Object.freeze({originX:24.63,yAtZ16000:81.2,pxPerKmX:156.05,pxPerKmY:154.75,worldMax:16384});
-function worldToPaper(x,z){return {x:GRID.originX+x*GRID.pxPerKmX/1000,y:GRID.yAtZ16000+(16000-z)*GRID.pxPerKmY/1000};}
-function paperToWorld(px,py){return {x:(px-GRID.originX)*1000/GRID.pxPerKmX,z:16000-(py-GRID.yAtZ16000)*1000/GRID.pxPerKmY};}
-function inWorld(p){return Number.isFinite(p.x)&&Number.isFinite(p.z)&&p.x>=0&&p.z>=0&&p.x<=GRID.worldMax&&p.z<=GRID.worldMax;}
-function worldAtPointer(clientX,clientY){const r=map.getBoundingClientRect();return paperToWorld((clientX-r.left-tx)/scale,(clientY-r.top-ty)/scale);}
-const coordPin=document.getElementById('coordPin'),coordPinLabel=document.getElementById('coordPinLabel');
-const coordX=document.getElementById('coordX'),coordZ=document.getElementById('coordZ');
-const coordReadout=document.getElementById('coordReadout'),coordStatus=document.getElementById('coordStatus');
-let pinnedWorld=null,hoverWorld=null,clickCandidate=null;
-function fmtCoords(p){return `X: ${Math.round(p.x).toLocaleString('en-AU')} · Z: ${Math.round(p.z).toLocaleString('en-AU')}`;}
-function statusCoords(msg,error=false){coordStatus.textContent=msg;coordStatus.classList.toggle('error',error);}
-function paintReadout(){const p=hoverWorld&&inWorld(hoverWorld)?hoverWorld:pinnedWorld;coordReadout.textContent=p?(hoverWorld&&inWorld(hoverWorld)?'Cursor ':'Pin ')+fmtCoords(p):'Cursor X: — · Z: —';}
-function pinCoordinates(p,centre=false){if(!inWorld(p)){statusCoords('Outside the 0–16,384 m DayZ world boundary.',true);return false;}pinnedWorld={x:p.x,z:p.z};const rounded={x:Math.round(p.x),z:Math.round(p.z)};coordX.value=String(rounded.x);coordZ.value=String(rounded.z);coordPin.classList.add('show');coordPinLabel.textContent=fmtCoords(rounded);statusCoords('Pinned '+fmtCoords(rounded)+' · paper-grid calibrated; verify exact locations before automated actions.');if(centre){const {w,h}=bounds();scale=clamp(Math.max(fit*2.5,.60),fit*.65,3.3);const pt=worldToPaper(p.x,p.z);tx=w/2-pt.x*scale;ty=h/2-pt.y*scale;limit();}render();paintReadout();if(window.parent!==window && new URLSearchParams(location.search).get('rental_picker')==='1'){window.parent.postMessage({type:'wwz:nasdara-rental-coordinate',x:rounded.x,z:rounded.z},window.location.origin);}return true;}
-async function copyCoordinates(){const p=pinnedWorld||(hoverWorld&&inWorld(hoverWorld)?hoverWorld:null);if(!p){statusCoords('Select a point on the map or enter X/Z first.',true);return;}const value=`${Math.round(p.x)} ${Math.round(p.z)}`;let done=false;try{if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(value);done=true;}}catch(_e){}if(!done){const t=document.createElement('textarea');t.value=value;t.setAttribute('readonly','');t.style.cssText='position:fixed;left:-9999px;top:0';document.body.append(t);t.select();try{done=document.execCommand('copy');}catch(_e){}t.remove();}statusCoords(done?`Copied X Z: ${value}`:`Clipboard unavailable. Coordinates: ${value}`,!done);}
-
-function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
-function bounds(){const r=map.getBoundingClientRect();return {w:r.width,h:r.height};}
-function limit(){const {w,h}=bounds();const margin=100;tx=clamp(tx,Math.min(margin,w-SIZE*scale-margin),Math.max(margin,w-margin));ty=clamp(ty,Math.min(margin,h-SIZE*scale-margin),Math.max(margin,h-margin));}
-function render(){paper.style.transform=`translate(${tx}px,${ty}px) scale(${scale})`;zoomLabel.textContent=`${Math.round(scale*100)}%`;if(active){mark.style.left=(tx+active[1]*scale)+'px';mark.style.top=(ty+active[2]*scale)+'px';}if(pinnedWorld){const pt=worldToPaper(pinnedWorld.x,pinnedWorld.z);coordPin.style.left=(tx+pt.x*scale)+'px';coordPin.style.top=(ty+pt.y*scale)+'px';}}
-function fitMap(){const {w,h}=bounds();fit=Math.min(w/SIZE,h/SIZE);scale=fit*.965;tx=(w-SIZE*scale)/2;ty=(h-SIZE*scale)/2;render();}
-function zoomAt(mult,cx,cy){const next=clamp(scale*mult,fit*.65,3.3);const rel=next/scale;tx=cx-(cx-tx)*rel;ty=cy-(cy-ty)*rel;scale=next;limit();render();}
-function focusPlace(place){active=place;const {w,h}=bounds();const next=clamp(Math.max(fit*2.5,.60),fit*.65,3.3);scale=next;tx=w/2-place[1]*scale;ty=h/2-place[2]*scale;limit();mark.classList.add('show');markname.textContent=place[0];render();renderPlaces();if(matchMedia('(max-width:760px)').matches)document.getElementById('sidebar').classList.remove('open');}
-function renderPlaces(){const q=search.value.trim().toLowerCase();const arr=PLACES.filter(p=>p[0].toLowerCase().includes(q)||p[3].toLowerCase().includes(q)).sort((a,b)=>a[0].localeCompare(b[0]));list.replaceChildren();count.textContent=`${arr.length} / ${PLACES.length}`;if(!arr.length){const div=document.createElement('div');div.className='empty';div.textContent='No matching paper-map locations';list.append(div);}for(const p of arr){const b=document.createElement('button');b.className='place'+(active===p?' active':'');b.type='button';const name=document.createElement('span');name.textContent=p[0];const cat=document.createElement('small');cat.textContent=p[3];b.append(name,cat);b.addEventListener('click',()=>focusPlace(p));list.append(b);}}
-search.addEventListener('input',renderPlaces);search.addEventListener('keydown',e=>{if(e.key==='Enter'){let first=list.querySelector('button');if(first)first.click();}});
-map.addEventListener('wheel',e=>{e.preventDefault();const r=map.getBoundingClientRect();zoomAt(Math.exp(-e.deltaY*.00145),e.clientX-r.left,e.clientY-r.top);},{passive:false});
-map.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;map.setPointerCapture(e.pointerId);if(pointers.size===0)clickCandidate={id:e.pointerId,x:e.clientX,y:e.clientY,eligible:true};else if(clickCandidate)clickCandidate.eligible=false;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===1){drag={x:e.clientX,y:e.clientY,tx,ty};map.classList.add('dragging');}else if(pointers.size===2){const a=[...pointers.values()];pinchStart={dist:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y),scale,tx,ty,cx:(a[0].x+a[1].x)/2,cy:(a[0].y+a[1].y)/2};drag=null;}});
-map.addEventListener('pointermove',e=>{hoverWorld=worldAtPointer(e.clientX,e.clientY);paintReadout();if(clickCandidate&&clickCandidate.id===e.pointerId&&Math.hypot(e.clientX-clickCandidate.x,e.clientY-clickCandidate.y)>6)clickCandidate.eligible=false;if(!pointers.has(e.pointerId))return;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===2&&pinchStart){const a=[...pointers.values()],d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);const r=map.getBoundingClientRect(),cx=(a[0].x+a[1].x)/2-r.left,cy=(a[0].y+a[1].y)/2-r.top;scale=clamp(pinchStart.scale*d/Math.max(pinchStart.dist,1),fit*.65,3.3);const factor=scale/pinchStart.scale;tx=cx-(pinchStart.cx-r.left-pinchStart.tx)*factor;ty=cy-(pinchStart.cy-r.top-pinchStart.ty)*factor;limit();render();}else if(drag){tx=drag.tx+e.clientX-drag.x;ty=drag.ty+e.clientY-drag.y;limit();render();}});
-function pointerEnd(e){if(e.type==='pointerup'&&clickCandidate&&clickCandidate.id===e.pointerId&&clickCandidate.eligible&&pointers.size===1&&Math.hypot(e.clientX-clickCandidate.x,e.clientY-clickCandidate.y)<=6)pinCoordinates(worldAtPointer(e.clientX,e.clientY));clickCandidate=null;pointers.delete(e.pointerId);if(pointers.size!==2)pinchStart=null;if(!pointers.size){drag=null;map.classList.remove('dragging');}else if(pointers.size===1){let a=[...pointers.values()][0];drag={x:a.x,y:a.y,tx,ty};}}
-map.addEventListener('pointerup',pointerEnd);map.addEventListener('pointercancel',pointerEnd);map.addEventListener('lostpointercapture',pointerEnd);map.addEventListener('pointerleave',()=>{if(!pointers.size){hoverWorld=null;paintReadout();}});
-map.addEventListener('dblclick',e=>{const r=map.getBoundingClientRect();zoomAt(1.7,e.clientX-r.left,e.clientY-r.top);});
-document.getElementById('coordGo').addEventListener('click',()=>{if(coordX.value.trim()===''||coordZ.value.trim()===''){statusCoords('Both X and Z are required.',true);return;}const p={x:Number(coordX.value),z:Number(coordZ.value)};pinCoordinates(p,true);});
-for(const el of [coordX,coordZ])el.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('coordGo').click();});
-for(const id of ['coordCopy','coordCopyFooter'])document.getElementById(id).addEventListener('click',copyCoordinates);
-document.getElementById('zin').addEventListener('click',()=>{const {w,h}=bounds();zoomAt(1.45,w/2,h/2);});
-document.getElementById('zout').addEventListener('click',()=>{const {w,h}=bounds();zoomAt(1/1.45,w/2,h/2);});
-document.getElementById('reset').addEventListener('click',()=>{active=null;mark.classList.remove('show');fitMap();renderPlaces();});
-const ORIGINAL_MAP='Nasdara_Original_Paper_Map.jpg', ENHANCED_MAP='Nasdara_Enhanced_Paper_Map.webp';
-let imageMode='enhanced';
-function selectMapMode(mode){
- imageMode=mode;
- document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
- paper.classList.toggle('roadfocus',mode==='contrast');
- const desired=mode==='original'?ORIGINAL_MAP:ENHANCED_MAP;
- if(paper.getAttribute('src')!==desired)paper.setAttribute('src',desired);
-}
-document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>selectMapMode(b.dataset.mode)));
-document.getElementById('menuButton').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('open'));
-window.addEventListener('resize',()=>{const current=active;if(current){const {w,h}=bounds();tx=w/2-current[1]*scale;ty=h/2-current[2]*scale;render();}else fitMap();});
-map.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();tx+=(e.key==='ArrowLeft'?55:e.key==='ArrowRight'?-55:0);ty+=(e.key==='ArrowUp'?55:e.key==='ArrowDown'?-55:0);limit();render();}else if(e.key==='+'||e.key==='='){e.preventDefault();document.getElementById('zin').click();}else if(e.key==='-'){e.preventDefault();document.getElementById('zout').click();}});
-paper.addEventListener('error',()=>{
- if(imageMode!=='original'){
-  selectMapMode('original');
-  statusCoords('Enhanced image unavailable; switched to original paper map. Extract the complete ZIP to enable enhanced mode.',true);
- }else{
-  statusCoords('Original paper-map image is missing. Extract the complete ZIP.',true);
- }
-});
-function applyInitialCoordinates(queryString){
- const query=new URLSearchParams(queryString);
- const sx=query.get('x'),sz=query.get('z');
- if(sx===null||sz===null||sx.trim()===''||sz.trim()==='')return false;
- const x=Number(sx),z=Number(sz);
- if(!Number.isFinite(x)||!Number.isFinite(z)||x<0||z<0||x>GRID.worldMax||z>GRID.worldMax){statusCoords('Invalid map link coordinates.',true);return false;}
- return pinCoordinates({x,z},true);
-}
-renderPlaces();fitMap();applyInitialCoordinates(window.location.search);
-</script></body></html>
+(() => {
+  // Preserve old shared links, rental picker coordinates and server scope.
+  const url=new URL('../map-link.html',location.href);
+  const prior=new URLSearchParams(location.search);
+  for(const [key,value] of prior)if(key!=='map')url.searchParams.append(key,value);
+  url.searchParams.set('map','badlands');
+  location.replace(url.href);
+})();
+</script>
+</body>
+</html>

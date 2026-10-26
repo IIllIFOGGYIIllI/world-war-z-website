@@ -614,7 +614,9 @@
       id: `label-${place.id}`,
       name: place.name,
       category: `${place.type[0].toUpperCase()}${place.type.slice(1)} label`,
-      description: place.nativeName !== place.name ? `Approved map label · ${place.nativeName}` : 'Approved map label.',
+      description: activeMapKey==='badlands'
+        ?'Published location label · approximate 100 m grid centre (±50 m per axis).'
+        :(place.nativeName!==place.name?`Approved map label · ${place.nativeName}`:'Approved map label.'),
       x: place.x,
       z: place.z,
       scope: 'selection'
@@ -829,12 +831,8 @@
         }
       });
       syncMapAppearance();
-      if (activeMapKey === 'badlands') {
-        // The road/name layers are already embedded in the official paper map.
-        for (const element of [
-          ...document.querySelectorAll('[data-map-road-toggle], [data-map-trail-toggle], [data-map-road-group], [data-map-place-names-toggle]')
-        ]) element.hidden = true;
-      }
+      // Nasdara now has independently toggleable native roads and names.
+      // Do not hide the shared map layer controls on Badlands.
 
       if (!mapInstance.map.getPane('wwzPlaceNames')) {
         const placeNamePane = mapInstance.map.createPane('wwzPlaceNames');

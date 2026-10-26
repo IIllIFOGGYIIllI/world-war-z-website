@@ -10,6 +10,7 @@
   const requestedPoi = String(params.get('poi') || '').trim().slice(0, 100);
   const requestedXRaw = params.get('x');
   const requestedZRaw = params.get('z');
+  const isRentalPicker=params.get('rental_picker')==='1';
   const requestedX = requestedXRaw === null || requestedXRaw.trim() === '' ? Number.NaN : Number(requestedXRaw);
   const requestedZ = requestedZRaw === null || requestedZRaw.trim() === '' ? Number.NaN : Number(requestedZRaw);
   const hasRequestedCoordinates = requestedXRaw !== null && requestedZRaw !== null && Number.isFinite(requestedX) && Number.isFinite(requestedZ);
@@ -38,6 +39,11 @@
   const poisToggle = document.querySelector('[data-layer-pois]');
   const zonesToggle = document.querySelector('[data-layer-zones]');
   const roadsToggle = document.querySelector('[data-layer-roads]');
+  const nameToggle=document.querySelector('[data-layer-names]');
+  const structuresToggle=document.querySelector('[data-layer-structures]');
+  const searchInput=document.querySelector('[data-map-hub-search]');
+  const quality=document.querySelector('[data-map-quality]');
+  let atlasPlaces=[],publicRecords=[];
   const dashboardLink = document.querySelector('[data-dashboard-map-link]');
   let selected = null;
 
@@ -63,10 +69,8 @@
   if (!container || !window.L || !window.WWZMap) { fail('The WWZ map runtime could not be loaded.'); return; }
   if (!['chernarus','livonia','badlands'].includes(mapKey)) { fail('This link does not contain a valid WWZ map.'); return; }
   const config = window.WWZMap.getConfig(mapKey);
-  if (mapKey === 'badlands') {
-    // These roads and town names are intrinsic to the approved paper map.
-    roadsToggle?.closest('label')?.setAttribute('hidden', '');
-  }
+  if (mapKey !== 'badlands')structuresToggle?.closest('label')?.setAttribute('hidden', '');
+  if(quality)quality.textContent=`${(config.mapMetres/1000).toFixed(3)} km world · native DayZ X/Z`;
   if (hasRequestedCoordinates && (requestedX < 0 || requestedZ < 0 || requestedX > config.mapMetres || requestedZ > config.mapMetres)) {
     fail(`This position is outside the ${config.name} map bounds.`); return;
   }
@@ -79,13 +83,29 @@
     dashboardLink.href = `dashboard.html?server=${encodeURIComponent(serverKey)}&map=${encodeURIComponent(mapKey)}&x=${centre.toFixed(1)}&z=${centre.toFixed(1)}&marker=${encodeURIComponent('WWZ Map Hub')}&source=map-hub#map`;
   }
 
+  // The public map's on-map sidebar must never select coordinates behind UI.
+  const hubPanel=container.querySelector('.hub-panel');
+  if(hubPanel){
+    window.L.DomEvent.disableClickPropagation(hubPanel);
+    window.L.DomEvent.disableScrollPropagation(hubPanel);
+  }
   const map = window.WWZMap.create(container, {
-    mapKey, mode:'full', selectable:false, copyOnSelect:false, roadsVisible:true, trailsVisible:true, gridVisible:false,
+    mapKey, mode:'full', selectable:true, copyOnSelect:false, roadsVisible:true, trailsVisible:true, gridVisible:false,
     loadingElement:loading,
+    onSelect:({x,z})=>{
+      const next={id:'map-click',name:'Selected map coordinates',category:'Map selection',x,z};
+      selected=next;
+      if(nameLabel)nameLabel.textContent=next.name;
+      if(coordinateLabel)coordinateLabel.textContent=`X ${x.toFixed(1)} · Z ${z.toFixed(1)}`;
+      if(copyButton)copyButton.disabled=false;
+      if(isRentalPicker&&window.parent!==window)
+        window.parent.postMessage({type:'wwz:nasdara-rental-coordinate',x:Number(x.toFixed(1)),z:Number(z.toFixed(1))},window.location.origin);
+    },
     zoomInButton:document.querySelector('[data-marker-zoom-in]'), zoomOutButton:document.querySelector('[data-marker-zoom-out]'),
     resetButton:document.querySelector('[data-marker-reset]'), fullscreenButton:document.querySelector('[data-marker-fullscreen]'), fullscreenTarget:container
   });
   const poiLayer = window.L.layerGroup().addTo(map.map);
+  const labelLayer = window.L.layerGroup().addTo(map.map);
   const zoneLayer = window.L.layerGroup().addTo(map.map);
   const selectionLayer = window.L.layerGroup().addTo(map.map);
   const markerById = new Map();
@@ -93,7 +113,7 @@
   const selectPoi = (poi, { focus=true } = {}) => {
     selected = poi;
     if (nameLabel) nameLabel.textContent = poi.name;
-    if (coordinateLabel) coordinateLabel.textContent = `${poi.category} · X ${poi.x.toFixed(1)} · Z ${poi.z.toFixed(1)}`;
+    if (coordinateLabel) coordinateLabel.textContent = `${poi.category} · X ${poi.x.toFixed(1)} · Z ${poi.z.toFixed(1)}${poi.approximate?' · approximate 100 m grid centre':''}`;
     if (copyButton) copyButton.disabled = false;
     document.querySelectorAll('[data-poi-id]').forEach((button) => button.classList.toggle('active', button.dataset.poiId === poi.id));
     markerById.forEach((marker,id) => marker?._wwzSetSelected?.(id === poi.id));
@@ -125,21 +145,54 @@
     return unique.sort((a,b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name));
   };
 
-  const renderPois = (pois) => {
-    poiLayer.clearLayers(); markerById.clear();
-    const fragment = document.createDocumentFragment(); let lastCategory = '';
-    for (const poi of pois) {
-      if (poi.category !== lastCategory) {
-        const heading = document.createElement('div'); heading.className='hub-category'; heading.textContent=poi.category; fragment.append(heading); lastCategory=poi.category;
-      }
-      const button = document.createElement('button'); button.type='button'; button.className='hub-poi'; button.dataset.poiId=poi.id;
-      const strong=document.createElement('strong'); strong.textContent=poi.name; const small=document.createElement('small'); small.textContent=`X ${poi.x.toFixed(0)} · Z ${poi.z.toFixed(0)}`;
-      button.append(strong,small); button.addEventListener('click',()=>selectPoi(poi)); fragment.append(button);
-      const marker = map.addPoi(poi,{layer:poiLayer,colour:COLOURS[poi.colour]||COLOURS.red,showLabel:true,onClick:()=>selectPoi(poi)});
-      if (marker) markerById.set(poi.id,marker);
+  const escapeHtml = value=>String(value||'').replace(/[&<>"']/g,character=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
+  const renderLabels=()=>{
+    labelLayer.clearLayers();
+    if(nameToggle&&!nameToggle.checked)return;
+    const zoom=map.map.getZoom(),viewport=map.map.getBounds();
+    const rendered=new Set();
+    const markerNames=new Set(publicRecords.map(p=>p.name.toLowerCase()));
+    for(const entry of atlasPlaces){
+      if(zoom<entry.minZoom||markerNames.has(entry.name.toLowerCase()))continue;
+      const ll=window.WWZMap.worldToLeaflet([entry.x,entry.z],mapKey);
+      if(!ll||!viewport.contains(ll)||rendered.has(entry.name.toLowerCase()))continue;
+      rendered.add(entry.name.toLowerCase());
+      const typ=entry.type.replace(/[^a-z0-9_-]/gi,'');
+      const icon=window.L.divIcon({className:'wwz-map-place-name-div-icon',
+        html:`<span class="wwz-map-place-name wwz-map-place-name--${typ}"><span class="wwz-map-place-name-native">${escapeHtml(entry.name)}</span><span class="wwz-map-place-name-latin">${escapeHtml(entry.nativeName!==entry.name?entry.name:'')}</span></span>`,
+        iconSize:[0,0],iconAnchor:[0,0]});
+      window.L.marker(ll,{icon,interactive:false,keyboard:false}).addTo(labelLayer);
+    }
+  };
+  const renderPois = (pois=publicRecords) => {
+    publicRecords=pois;
+    poiLayer.clearLayers();markerById.clear();
+    const q=String(searchInput?.value||'').trim().toLowerCase();
+    const coords=q.match(/^(\d+(?:\.\d+)?)\s*[, ]\s*(\d+(?:\.\d+)?)$/);
+    if(coords&&mapKey==='badlands'){
+      const x=Number(coords[1]),z=Number(coords[2]);
+      if(x>=0&&z>=0&&x<=config.mapMetres&&z<=config.mapMetres)
+        map.focus(x,z,6);
+    }
+    const fragment=document.createDocumentFragment();let lastCategory='';
+    const distinctNames=new Set(pois.map(p=>p.name.toLowerCase()));
+    const atlas=atlasPlaces.filter(p=>!distinctNames.has(p.name.toLowerCase()))
+      .map(p=>({id:p.id,name:p.name,x:p.x,z:p.z,category:'Map places',approximate:p.approximate,atlas:true}));
+    const listed=[...pois,...atlas].filter(p=>!q||[p.name,p.category,String(Math.round(p.x)),String(Math.round(p.z))].some(t=>String(t).toLowerCase().includes(q)));
+    for(const poi of listed){
+      if(poi.category!==lastCategory){const heading=document.createElement('div');heading.className='hub-category';heading.textContent=poi.category;fragment.append(heading);lastCategory=poi.category;}
+      const button=document.createElement('button');button.type='button';button.className='hub-poi';button.dataset.poiId=poi.id;
+      const strong=document.createElement('strong');strong.textContent=poi.name;
+      const small=document.createElement('small');small.textContent=`X ${poi.x.toFixed(0)} · Z ${poi.z.toFixed(0)}${poi.approximate?' · approx.':''}`;
+      button.append(strong,small);button.addEventListener('click',()=>selectPoi(poi));fragment.append(button);
+    }
+    // Filtering the sidebar must not silently hide public markers on the map.
+    for(const poi of pois){
+      const marker=map.addPoi(poi,{layer:poiLayer,colour:COLOURS[poi.colour]||COLOURS.red,showLabel:true,onClick:()=>selectPoi(poi)});
+      if(marker)markerById.set(poi.id,marker);
     }
     poiList?.replaceChildren(fragment);
-    if (!pois.length && poiList) poiList.textContent='No public POIs are currently published for this map.';
+    if(!listed.length&&poiList)poiList.textContent='No matching map locations.';
     return pois;
   };
 
@@ -166,10 +219,24 @@
     const payload=await response.json().catch(()=>({})); if(!response.ok||payload.status!=='ok') throw new Error(payload.message||'Live map data unavailable.'); return payload;
   };
 
+  if(config.labelUrl){
+    fetch(config.labelUrl,{cache:'force-cache'}).then(r=>{if(!r.ok)throw Error('Map labels unavailable');return r.json();})
+      .then(data=>{
+        const list=Array.isArray(data.labels)?data.labels:[];
+        atlasPlaces=list.filter(p=>Number.isFinite(Number(p.x))&&Number.isFinite(Number(p.z)))
+          .map((p,i)=>({id:String(p.id||'map-place-'+i),name:clean(p.name),nativeName:clean(p.nativeName||p.name),
+            type:String(p.type||'local').toLowerCase(),x:Number(p.x),z:Number(p.z),
+            minZoom:Number.isFinite(Number(p.minZoom))?Number(p.minZoom):3,approximate:Boolean(p.approximate)}));
+        renderLabels();renderPois(publicRecords);
+      }).catch(error=>console.warn('Map label layer:',error));
+  }
+  map.map.on('zoomend moveend',renderLabels);
+  searchInput?.addEventListener('input',()=>renderPois(publicRecords));
   Promise.allSettled([fetchJson('/api/map/markers'),fetchJson('/api/map/intelligence')]).then((results)=>{
     const markerPayload=results[0].status==='fulfilled'?results[0].value:null;
     const intelPayload=results[1].status==='fulfilled'?results[1].value:null;
     const pois=renderPois(mergePois(markerPayload?.markers)); const zoneCount=renderZones(intelPayload?.kill_zones);
+    renderLabels();
     if (status) status.textContent=`${pois.length} public POI${pois.length===1?'':'s'} · ${zoneCount} public PvP/kill-zone overlay${zoneCount===1?'':'s'} · live map`;
     const target = requestedPoi ? pois.find(p=>p.id===requestedPoi || p.name.toLowerCase()===requestedPoi.toLowerCase()) : null;
     if (target) selectPoi(target,{focus:true});
@@ -183,6 +250,8 @@
   poisToggle?.addEventListener('change',()=>{ if(poisToggle.checked) poiLayer.addTo(map.map); else poiLayer.remove(); });
   zonesToggle?.addEventListener('change',()=>{ if(zonesToggle.checked) zoneLayer.addTo(map.map); else zoneLayer.remove(); });
   roadsToggle?.addEventListener('change',()=>{ map.setRoadsVisible(roadsToggle.checked); map.setTrailsVisible(roadsToggle.checked); });
+  nameToggle?.addEventListener('change',renderLabels);
+  structuresToggle?.addEventListener('change',()=>map.setStructuresVisible(structuresToggle.checked));
 
   copyButton?.addEventListener('click', async()=>{
     if(!selected) return; const text=`${selected.x.toFixed(1)}, ${selected.z.toFixed(1)}`; let copied=false;

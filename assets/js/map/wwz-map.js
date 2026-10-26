@@ -41,13 +41,19 @@
       name: 'Badlands / Nasdara',
       mapMetres: 16384,
       mapUnits: 240,
-      // The v1.2 paper map is our only approved primary Badlands imagery.
-      // Printed roads and place names are in the source image; no invented vectors.
-      paperUrl: 'nasdara/Nasdara_Enhanced_Paper_Map.webp?v=1.2',
-      // Image coordinates at the original 2600x2600 pixel scale, independently
-      // calibrated against the printed 1 km grid and one Nitrado log position.
-      paperGrid: Object.freeze({width:2600,height:2600,originX:24.63,yAtZ16000:81.2,pxPerKmX:156.05,pxPerKmY:154.75}),
-      roadOrder: [], roadGroups: Object.freeze({}), trailGroups: [], roadStyles: Object.freeze({})
+      // Exact north-up image transform: pixel X=x/4, pixel Y=(16384-z)/4.
+      satelliteImageUrl: 'assets/maps/nasdara/satellite.webp?v=wwz-nasdara-1',
+      roadBinaryUrl: 'assets/maps/nasdara/roads.bin?v=wwz-nasdara-1',
+      structureUrl: 'assets/maps/nasdara/objects.bin?v=wwz-nasdara-1',
+      structureClassUrl: 'assets/maps/nasdara/object-classes.json?v=wwz-nasdara-1',
+      labelUrl: 'assets/maps/nasdara/labels.json?v=wwz-nasdara-1',
+      roadOrder: ['nasdara_paved','nasdara_dirt'],
+      roadGroups: Object.freeze({paved:['nasdara_paved'],mud:['nasdara_dirt']}),
+      trailGroups:['nasdara_dirt'],
+      roadStyles:Object.freeze({
+        nasdara_paved:{label:'Paved roads',minZoom:0,width:3.9,colour:'#f2d35b',casing:'#59451f',opacity:.98},
+        nasdara_dirt:{label:'Dirt roads',minZoom:0,width:2.2,colour:'#c7ad86',casing:'#4a3a29',opacity:.88}
+      })
     }),
     livonia: Object.freeze({
       key: 'livonia',
@@ -218,18 +224,38 @@
     return groups;
   };
 
+  const parseNasdaraRoadBinary = (buffer,config) => {
+    const view=new DataView(buffer);
+    if(view.byteLength<16||String.fromCharCode(...new Uint8Array(buffer,0,8))!=='DVMROAD1')
+      throw Error('Invalid Nasdara road header');
+    const count=view.getUint32(8,true),world=view.getFloat32(12,true);
+    if(count!==47236||world!==16384||view.byteLength!==16+count*20)
+      throw Error('Unexpected Nasdara road source or calibration');
+    const groups={nasdara_paved:[],nasdara_dirt:[]};
+    for(let i=0;i<count;i++){
+      const at=16+i*20,x=view.getFloat32(at,true),z=view.getFloat32(at+4,true),
+        ex=view.getFloat32(at+8,true),ez=view.getFloat32(at+12,true),kind=view.getUint8(at+16);
+      if([x,z,ex,ez].some(v=>!Number.isFinite(v)||v< -2||v>16386)||kind>1)
+        throw Error('Invalid Nasdara road coordinate');
+      const first=worldToLeaflet([x,z],config.key),last=worldToLeaflet([ex,ez],config.key);
+      groups[kind===0?'nasdara_paved':'nasdara_dirt'].push([first,last]);
+    }
+    return groups;
+  };
+
   const loadRoadGeometry = (config) => {
     if (roadGeometryPromises.has(config.key)) return roadGeometryPromises.get(config.key);
-    const promise = fetch(config.roadUrl, {
+    const binary=Boolean(config.roadBinaryUrl);
+    const promise = fetch(binary?config.roadBinaryUrl:config.roadUrl, {
       method: 'GET',
-      headers: { Accept: 'application/geo+json, application/json' },
+      headers: { Accept: binary?'application/octet-stream':'application/geo+json, application/json' },
       cache: 'force-cache'
     })
       .then((response) => {
         if (!response.ok) throw new Error(`Road data returned HTTP ${response.status}.`);
-        return response.json();
+        return binary?response.arrayBuffer():response.json();
       })
-      .then((data) => normaliseRoadDataset(data, config))
+      .then((data) => binary?parseNasdaraRoadBinary(data,config):normaliseRoadDataset(data,config))
       .catch((error) => {
         roadGeometryPromises.delete(config.key);
         throw error;
@@ -330,6 +356,23 @@
       `wwz-chernarus-map--${options.mode || 'picker'}`
     );
     container.dataset.mapKey = config.key;
+    // Collapsible map controls keep terrain visible on both desktop and phone.
+    const visualPanel=container.querySelector('.map-visual-controls');
+    if(visualPanel&&!visualPanel.querySelector('.wwz-map-layer-disclosure')){
+      const title=document.createElement('button');
+      title.type='button';title.className='wwz-map-layer-disclosure';
+      title.setAttribute('aria-expanded','false');
+      title.setAttribute('aria-label','Show map appearance controls');
+      title.textContent='Layers & opacity';
+      visualPanel.prepend(title);
+      visualPanel.classList.add('wwz-layers-collapsed');
+      title.addEventListener('click',()=>{
+        const closed=visualPanel.classList.toggle('wwz-layers-collapsed');
+        title.setAttribute('aria-expanded',String(!closed));
+        title.setAttribute('aria-label',closed?'Show map appearance controls':'Hide map appearance controls');
+      });
+    }
+    if(L.control?.scale)L.control.scale({imperial:false,metric:true,maxWidth:128,position:'bottomleft'}).addTo(map);
 
     const casingPane = map.createPane('wwzRoadCasingPane');
     const surfacePane = map.createPane('wwzRoadSurfacePane');
@@ -345,19 +388,10 @@
       L.DomEvent.disableScrollPropagation(element);
     });
 
-    // Do not assume the paper-image edges coincide with the DayZ world edges.
-    // Use the exact transform from the validated offline Nasdara atlas.
-    const paperBounds = config.paperGrid ? (() => {
-      const g = config.paperGrid;
-      const atPixel = (px, py) => projectWorld([
-        (px - g.originX) * 1000 / g.pxPerKmX,
-        16000 - (py - g.yAtZ16000) * 1000 / g.pxPerKmY
-      ]);
-      return L.latLngBounds(atPixel(0, g.height), atPixel(g.width, 0));
-    })() : null;
-    const satellite = config.paperUrl
-      ? L.imageOverlay(config.paperUrl, paperBounds, {
-          opacity: 1, interactive: false, className: 'wwz-nasdara-paper'
+    // Nasdara's calibrated satellite covers the full world extent exactly.
+    const satellite = config.satelliteImageUrl
+      ? L.imageOverlay(config.satelliteImageUrl, bounds, {
+          opacity: 1, interactive: false, className: 'wwz-nasdara-satellite'
         }).addTo(map)
       : L.tileLayer(config.satelliteUrl, {
           tileSize: 256,
@@ -384,6 +418,7 @@
       satelliteOpacity: clamp(Number(options.satelliteOpacity ?? 1), 0, 1),
       gridVisible: options.gridVisible === true,
       roadGroupVisibility: new Map(Object.keys(config.roadGroups).map((key) => [key, true])),
+      structuresVisible:options.structuresVisible!==false,
       destroyed: false
     };
     satellite.setOpacity(state.satelliteOpacity);
@@ -558,9 +593,6 @@
     };
 
     const loadRoads = () => {
-      // Nasdara roads are printed on the paper itself. Never fetch the
-      // unfinished vector data or a Chernarus/Livonia GeoJSON substitute.
-      if (config.paperUrl) { roadsReady = true; setLoading(''); return Promise.resolve(); }
       if (options.loadRoads === false || roadsReady) return Promise.resolve();
       setLoading('Loading production road network…');
       return loadRoadGeometry(config)
@@ -749,10 +781,30 @@
     satellite.on('load', () => {
       if (!roadsReady && options.loadRoads === false) setLoading('');
     });
-    satellite.on(config.paperUrl ? 'error' : 'tileerror', () => {
+    satellite.on(config.satelliteImageUrl ? 'error' : 'tileerror', () => {
       options.onTileError?.();
-      if (config.paperUrl) setLoading('Nasdara paper-map image missing. Check /nasdara/ assets.', 'error');
+      if (config.satelliteImageUrl) setLoading('Nasdara satellite unavailable — deployment assets did not load.', 'error');
     });
+
+    // Load structure rendering on demand; no heavy Nasdara parser on other worlds.
+    let structureController=null,structureLoading=null;
+    const loadStructures=()=>{
+      if(!config.structureUrl||state.destroyed||map.getZoom()<4.75||structureController||structureLoading)return;
+      const start=()=>{if(!state.destroyed&&window.WWZNasdaraStructures){
+        structureController=window.WWZNasdaraStructures.attach(map,config);
+        structureController.setVisible(state.structuresVisible);
+      }};
+      if(window.WWZNasdaraStructures){start();return;}
+      structureLoading=new Promise((resolve,reject)=>{
+        const script=document.createElement('script');
+        script.src='assets/js/map/nasdara-structures.js?v=wwz-nasdara-1';
+        script.async=true;
+        script.onload=resolve;script.onerror=()=>reject(Error('Nasdara building renderer unavailable'));
+        document.head.appendChild(script);
+      }).then(start).catch(error=>console.warn(error)).finally(()=>{structureLoading=null;});
+    };
+    map.on('zoomend',loadStructures);
+    window.setTimeout(loadStructures,0);
 
     const api = {
       map,
@@ -781,10 +833,13 @@
       },
       setGridVisible: (visible) => { state.gridVisible = Boolean(visible); updateGridLayer(); },
       setRoadOpacity: (opacity) => { state.roadOpacity = clamp(Number(opacity), 0, 1); updateRoadLayers(); },
+      setStructuresVisible: visible => {state.structuresVisible=Boolean(visible);loadStructures();structureController?.setVisible(state.structuresVisible);},
       setSatelliteOpacity: (opacity) => { state.satelliteOpacity = clamp(Number(opacity), 0, 1); satellite.setOpacity(state.satelliteOpacity); },
       destroy: () => {
         state.destroyed = true;
         document.removeEventListener('fullscreenchange', fullscreenChange);
+        map.off('zoomend',loadStructures);
+        structureController?.destroy();
         instances.delete(api);
         map.remove();
         delete container._wwzMapInstance;
