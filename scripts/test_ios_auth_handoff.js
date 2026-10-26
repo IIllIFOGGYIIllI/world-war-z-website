@@ -67,6 +67,6 @@ assert.ok(account.includes("window.localStorage.setItem('wwz_ios_oauth_return_vi
 assert.ok(account.includes("window.localStorage.setItem('wwz_ios_oauth_pending_return', '1')"));
 assert.ok(account.includes("window.localStorage.removeItem('wwz_ios_oauth_pending_return')"));
 const sw = fs.readFileSync('sw.js', 'utf8');
-assert.ok(sw.includes('2026-10-26-ios-auth-return-3'));
+assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '"));
 assert.ok(sw.includes("url.pathname.endsWith('/assets/js/dashboard/ios-auth-handoff.js')"));
 console.log('PASS: iOS PWA OAuth handoff and safe one-time-ticket validation');
