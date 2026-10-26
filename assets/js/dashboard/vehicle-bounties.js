@@ -31,7 +31,7 @@
       headers: {
         Accept: 'application/json',
         Authorization: 'Bearer ' + token,
-        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+        ...(options.body && !(options.body instanceof FormData) ? { 'Content-Type': 'application/json' } : {}),
       },
     }, 30000);
     if (initialScope !== scope() || token !== session()) {
@@ -61,6 +61,24 @@
         anchor.href = url.href;
         anchor.target = '_blank';
         anchor.rel = 'noopener noreferrer';
+        if (url.origin === API && url.pathname.startsWith('/api/account/vehicle-bounties/evidence/')) {
+          anchor.addEventListener('click', event => {
+            event.preventDefault();
+            const tab = window.open('', '_blank');
+            if (!tab) { message('Allow a new tab to view your private screenshot.', 'error'); return; }
+            const token = session();
+            const selected = scope();
+            window.WWZHttp.request(url.href, {headers: {Authorization: 'Bearer ' + token}}, 30000)
+              .then(async response => {
+                if (!response.ok || token !== session() || selected !== scope()) throw new Error('Private screenshot is unavailable.');
+                const data = await response.blob();
+                if (!['image/png','image/jpeg','image/webp'].includes(data.type)) throw new Error('The uploaded image has an invalid format.');
+                const objectUrl = URL.createObjectURL(data);
+                tab.location.replace(objectUrl);
+              })
+              .catch(error => { tab.close(); message(error.message, 'error'); });
+          });
+        }
         links.append(anchor);
       } catch {}
     }
@@ -167,11 +185,18 @@
     const submit = qs('[data-bounty-submit]');
     submit.disabled = true;
     try {
-      const payload = Object.fromEntries(fields.entries());
+      for (const key of ['before_image', 'after_image']) {
+        const file = fields.get(key);
+        if (!(file instanceof File) || !file.size) throw new Error('Select both before and after screenshots.');
+        if (file.size > 1000000) throw new Error('Each screenshot must be under 1 MB.');
+        if (!['image/png','image/jpeg','image/webp'].includes(file.type)) throw new Error('Only PNG, JPEG and WebP screenshots can be uploaded.');
+      }
+      fields.set('action', 'submit');
       const response = await request('/api/account/vehicle-bounties/action', {
-        method: 'POST', body: JSON.stringify({ ...payload, action: 'submit' }),
+        method: 'POST', body: fields,
       });
       form.reset();
+      root.querySelectorAll('[data-bounty-preview]').forEach(image => { image.hidden = true; image.removeAttribute('src'); });
       message(response.message || 'Claim submitted for staff review.', 'success');
       await refresh(true);
     } catch (error) {
@@ -180,6 +205,18 @@
       requestBusy = false;
       submit.disabled = false;
     }
+  });
+  root.querySelectorAll('[data-bounty-image]').forEach(input => {
+    input.addEventListener('change', () => {
+      const preview = qs('[data-bounty-preview="' + input.dataset.bountyImage + '"]');
+      if (!preview) return;
+      const file = input.files?.[0];
+      preview.hidden = !file;
+      if (file) {
+        preview.src = URL.createObjectURL(file);
+        preview.onload = () => URL.revokeObjectURL(preview.src);
+      } else preview.removeAttribute('src');
+    });
   });
   qs('[data-bounty-refresh]')?.addEventListener('click', () => {
     refresh(true).catch(error => message(error.message, 'error'));
