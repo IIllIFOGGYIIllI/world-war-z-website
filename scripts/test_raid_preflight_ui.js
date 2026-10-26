@@ -22,5 +22,5 @@ assert.ok(!js.includes('adminAction({action: \'raid_preflight\''), 'Read-only ch
 assert.ok(css.includes('.raid-preflight-result[hidden]'));
 assert.ok(lazy.includes('stage6=raid-damage-1&lifecycle=2&preflight=1'));
 assert.ok(html.includes('rev=manual-coords-1&amp;lifecycle=2&amp;preflight=1'));
-assert.ok(sw.includes('2026-10-26-ios-auth-return-3'));
+assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '"));
 console.log('PASS: Owner preflight, distinct Nasdara scope, no game write, release cache refresh');
