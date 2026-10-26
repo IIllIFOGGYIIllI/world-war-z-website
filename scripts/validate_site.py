@@ -306,7 +306,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
                 errors.append(f"{label}: missing background-tab polling guard: {token}")
     if "window.setInterval(refreshLiveStatus, LIVE_STATUS_REFRESH_MS)" in account:
         errors.append("account.js: live status must not poll continuously while the tab is hidden.")
-    for token in ("for (let attempt = 0; attempt < 3; attempt += 1)", "applySignedOutState({ preserveSelection: true })", "Discord sign-in is still available"):
+    for token in ("for (let attempt = 0; attempt < 3; attempt += 1)", "applySignedOutState({ preserveSelection: true })", "showSavedSessionRetry(true)", "Your Discord session is still saved"):
         if token not in account:
             errors.append(f"account.js: missing transient Discord session recovery guard: {token}")
 
