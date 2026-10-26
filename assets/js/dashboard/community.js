@@ -254,13 +254,21 @@
     const raidServer = window.WWZServerContext?.getSelectedServer?.();
     const raidEligible = raidServer?.map_key === 'badlands' && raidServer?.gameplay_mode === 'pve';
     if (raidControls) raidControls.hidden = !(owner && raidEligible);
-    for (const selector of ['[data-raid-preflight-result]', '[data-raid-recovery-result]']) {
+    for (const selector of ['[data-raid-preflight-result]', '[data-raid-recovery-result]', '[data-raid-restoration-result]']) {
       const output = qs(selector);
       if (output && output.dataset.serverScope !== selectedScope()) {
         output.hidden = true;
         output.textContent = '';
         output.dataset.serverScope = selectedScope();
       }
+    }
+    const restorationPanel = qs('[data-raid-restoration-panel]');
+    if (restorationPanel) restorationPanel.hidden = !(owner && raidEligible && live && raid.owner_restoration_review_available === true);
+    const restorationButton = qs('[data-raid-restoration-confirm]');
+    if (restorationButton) {
+      restorationButton.hidden = !(owner && raidEligible && live && raid.owner_restoration_review_available === true);
+      restorationButton.disabled = !live;
+      restorationButton.dataset.windowStart = String(raid.owner_restoration_review_window || '');
     }
     const raidToggle = qs('[data-raid-damage-toggle]');
     if (raidToggle) {
@@ -509,6 +517,52 @@
       }
     } finally {
       if (button) button.disabled = false;
+    }
+  });
+  qs('[data-raid-restoration-confirm]')?.addEventListener('click', async () => {
+    if (dashboardAccessLevel !== 'owner') return;
+    const server = window.WWZServerContext?.getSelectedServer?.();
+    if (server?.map_key !== 'badlands' || server?.gameplay_mode !== 'pve') return;
+    const button = qs('[data-raid-restoration-confirm]');
+    if (!button || button.hidden || button.disabled) return;
+    const raidWindow = button.dataset.windowStart;
+    const confirmation = 'Confirm only after you have observed the Nasdara PvE server restart and verified PvE protection in-game. The bot will independently recheck damage protection, internal KILLZONES and Nitrado online status. This records your verification without changing or restarting the server. Continue?';
+    if (!confirm(confirmation)) return;
+    const scope = selectedScope();
+    const result = qs('[data-raid-restoration-result]');
+    button.disabled = true;
+    if (result) {
+      result.hidden = false;
+      result.dataset.kind = 'checking';
+      result.dataset.serverScope = scope;
+      result.textContent = 'Checking Nitrado and PvE protections before recording Owner verification…';
+    }
+    try {
+      const response = await request(API.adminAction, {
+        method: 'POST',
+        body: JSON.stringify({action: 'raid_confirm_restoration', owner_verified: true})
+      }, true);
+      if (scope !== selectedScope()) return;
+      const confirmed = response.result || {};
+      if (!confirmed.confirmed_by_owner || confirmed.restart_observation !== 'owner_verified') {
+        throw new Error('The server did not confirm the Owner review.');
+      }
+      if (result) {
+        result.dataset.kind = 'ready';
+        result.textContent = 'Owner verification recorded for ' + fmtSydney(confirmed.raid_window_start)
+          + '. No Nitrado settings or restarts were changed.';
+      }
+      if (confirmed.raid) renderRaidPanel(confirmed.raid);
+      setStatus('Raid restoration review recorded after safety checks.', 'success');
+      await loadAdmin();
+    } catch (error) {
+      if (scope !== selectedScope()) return;
+      if (result) {
+        result.dataset.kind = 'blocked';
+        result.textContent = 'Owner verification refused: ' + (error.message || 'The required protection checks did not pass.');
+      }
+    } finally {
+      if (scope === selectedScope() && button) button.disabled = false;
     }
   });
   qs('[data-raid-damage-toggle]')?.addEventListener('click', async () => {

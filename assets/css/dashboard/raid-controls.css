@@ -71,3 +71,14 @@
   border-color: rgba(230,134,94,.6); color: #ffd2bb;
 }
 .community-raid-controls .raid-preflight-result[hidden] { display: none !important; }
+
+/* Emergency confirmation appears only for a previously unverified restoration. */
+.community-raid-controls .raid-restore-review {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(192,204,220,.23);
+}
+.community-raid-controls .raid-restore-review[hidden],
+.community-raid-controls [data-raid-restoration-confirm][hidden] { display: none !important; }

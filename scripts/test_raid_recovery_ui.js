@@ -29,6 +29,6 @@ assert.ok(js.includes('Request Nitrado restart — completion unverified'));
 assert.ok(js.includes('WWZ internal KILLZONE suspension/restoration'));
 assert.ok(js.includes('Nitrado restart accepted (reboot not independently verified)'));
 assert.ok(js.includes('External DayZ++ bans are NOT changed'));
-assert.ok(lazy.includes('recovery=3'));
-assert.ok(sw.includes('2026-10-26-restart-observation-1'));
+assert.ok(lazy.includes('recovery=3&ownerreview=1'));
+assert.ok(sw.includes('2026-10-26-raid-owner-review-1'));
 console.log('PASS: Raid recovery, WWZ internal KILLZONE coordination, external DayZ++ safeguards');
