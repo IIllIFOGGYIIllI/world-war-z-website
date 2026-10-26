@@ -844,6 +844,12 @@
         trailToggle: document.querySelector('[data-map-trail-toggle]'),
         gridToggle,
         onSelect: (position) => {
+          // Share selected coordinates with community bounty claims in memory only.
+          // Bind the point to the selected server, not merely the shared Nasdara map.
+          window.WWZBountyMapSelection = {
+            serverKey: String(window.WWZServerContext?.getSelectedServer?.()?.key || ''),
+            x: Number(position.x), z: Number(position.z)
+          };
           selectedLocation = {
             id: null,
             name: 'Selected Coordinates',
