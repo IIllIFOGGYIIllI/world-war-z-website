@@ -59,16 +59,25 @@ const controller=window.WWZNasdaraStructures.attach(map,{
   structureAtlasUrl:folder+'building-atlas.json',
   onStructureStatus:value=>statuses.push(value)
 });
-setTimeout(()=>{
+// The 295k native objects are parsed in a promise and pictures load on
+// requestAnimationFrame. On slower CI, a single fixed timer can run before
+// the pending animation frame even when the renderer is working correctly.
+let attempts=0;
+const check=()=>{
   const status=controller.getStatus();
-  assert(status.loaded,'Building data did not load');
+  if((!status.loaded||status.drawn<=100||status.detailed<=100||picturesDrawn<=100)&&attempts++<80){
+    setTimeout(check,100);
+    return;
+  }
+  assert(status.loaded,'Building data did not load: '+String(status.error));
   assert.equal(status.placements,295195);
-  assert(status.drawn>100,'Native buildings not visible at zoom 6');
-  assert(status.detailed>100,'Top-down roof artwork not rendered');
-  assert(picturesDrawn>100,'Atlas pictures not drawn');
+  assert(status.drawn>100,'Native buildings not visible at zoom 6: '+JSON.stringify(status));
+  assert(status.detailed>100,'Top-down roof artwork not rendered: '+JSON.stringify(status));
+  assert(picturesDrawn>100,'Atlas pictures were not drawn');
   controller.setVisible(false);
   assert.equal(controller.getVisible(),false);
   controller.destroy();
   assert.equal(events.size,0,'Renderer leaked event handlers');
   console.log('PASS authentic 1694 building pictures, source transforms, canvas draw and visibility');
-},250);
+};
+setTimeout(check,100);
