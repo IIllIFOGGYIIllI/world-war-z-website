@@ -86,7 +86,7 @@ assert.ok(account.includes('window.WWZHttp.request(AUTH_COMPLETE_URL'));
 assert.ok(account.includes('window.WWZHttp.request(AUTH_ME_URL'));
 assert.ok(!account.includes("window.open(AUTH_LOGIN_URL, '_self')"));
 assert.ok(page.includes('data-auth-session-retry'));
-assert.ok(page.includes('iosreturn=4'));
+assert.ok(page.includes('iosreturn=5'));
 assert.ok(core.includes("window.localStorage.getItem('wwz_ios_oauth_return_view')"));
 assert.ok(core.includes("window.localStorage.removeItem('wwz_ios_oauth_return_view')"));
 assert.ok(account.includes("window.localStorage.setItem('wwz_ios_oauth_return_view', returnKey)"));
