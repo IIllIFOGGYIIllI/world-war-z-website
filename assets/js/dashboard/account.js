@@ -304,6 +304,73 @@ const loadCurrentAccount = async (sessionToken) => {
 };
 
 const IOS_AUTH_PENDING_KEY = 'wwz_ios_oauth_pending';
+const IOS_TAB_HANDOFF_KEY = 'wwz_ios_oauth_tab_nonce';
+const IOS_TAB_HANDOFF_PATTERN = /^[a-z0-9_-]{32,128}$/i;
+
+const readIOSOAuthTabNonce = () => {
+  const value = new URLSearchParams(location.search).get('wwz_tab_handoff') || '';
+  return IOS_TAB_HANDOFF_PATTERN.test(value) ? value : '';
+};
+
+const makeIOSOAuthTabNonce = () => {
+  try {
+    const bytes = new Uint8Array(32);
+    window.crypto.getRandomValues(bytes);
+    return Array.from(bytes, (value) => value.toString(16).padStart(2, '0')).join('');
+  } catch (_) {
+    return '';
+  }
+};
+
+const iosAuthTabChannelName = (nonce) => 'wwz-dashboard-auth-' + nonce;
+
+const startIOSAuthTabHandoffListener = (nonce) => {
+  if (!IOS_TAB_HANDOFF_PATTERN.test(nonce) || typeof BroadcastChannel !== 'function') return false;
+  let channel;
+  try {
+    channel = new BroadcastChannel(iosAuthTabChannelName(nonce));
+  } catch (_) {
+    return false;
+  }
+  channel.onmessage = async (event) => {
+    if (storageGet(IOS_TAB_HANDOFF_KEY) !== nonce) {
+      channel.close();
+      return;
+    }
+    const message = event.data;
+    if (!message || message.nonce !== nonce) return;
+    const transfer = window.WWZIOSAuth?.parseSessionHandoff?.(message.handoff, Date.now());
+    if (!transfer) return;
+    if (!storageSet(AUTH_SESSION_KEY, transfer.token)) {
+      storageRemove(IOS_TAB_HANDOFF_KEY);
+      channel.close();
+      showAuthMessage('Discord signed you in, but this Safari tab could not save the session. Please sign in again.', 'error');
+      return;
+    }
+    storageRemove(IOS_TAB_HANDOFF_KEY);
+    channel.close();
+    showAuthMessage('Discord sign-in completed in the other Safari tab. Restoring your Command Centre…', 'info');
+    await loadCurrentAccount(transfer.token);
+  };
+  // This is deliberately in-memory, not localStorage. A callback in a new
+  // Safari tab can deliver the one-use token to the tab that started login.
+  window.setTimeout(() => channel.close(), window.WWZIOSAuth?.SESSION_HANDOFF_TTL_MS || 45000);
+  return true;
+};
+
+const publishIOSAuthTabHandoff = (nonce, sessionToken) => {
+  if (!IOS_TAB_HANDOFF_PATTERN.test(nonce) || typeof BroadcastChannel !== 'function') return;
+  const handoff = window.WWZIOSAuth?.createSessionHandoff?.(sessionToken, Date.now());
+  if (!handoff) return;
+  try {
+    const channel = new BroadcastChannel(iosAuthTabChannelName(nonce));
+    channel.postMessage({ nonce, handoff });
+    window.setTimeout(() => channel.close(), 1000);
+  } catch (_) {
+    // The callback tab remains signed in; the bridge is best-effort recovery.
+  }
+};
+
 
 const prepareIOSAuthRecovery = () => {
   const help = document.querySelector('[data-ios-auth-app-help]');
@@ -326,6 +393,10 @@ const displaySafariTransferChoice = () => {
 
 const completeDiscordLogin = async (loginTicket) => {
   if (authRequestInProgress) return;
+  const tabHandoffNonce = readIOSOAuthTabNonce();
+  const callbackReturnedToInitiatingTab = Boolean(
+    tabHandoffNonce && storageGet(IOS_TAB_HANDOFF_KEY) === tabHandoffNonce
+  );
   authRequestInProgress = true;
   let sessionSaved = false;
   showAuthMessage('Finishing your secure Discord sign-in…', 'info');
@@ -351,6 +422,13 @@ const completeDiscordLogin = async (loginTicket) => {
     sessionSaved = true;
     showSavedSessionRetry(false);
     storageRemove(IOS_AUTH_PENDING_KEY);
+    if (tabHandoffNonce) {
+      if (callbackReturnedToInitiatingTab) {
+        storageRemove(IOS_TAB_HANDOFF_KEY);
+      } else {
+        publishIOSAuthTabHandoff(tabHandoffNonce, payload.session_token);
+      }
+    }
     if (window.WWZIOSAuth?.isIOS?.()) {
       try { window.localStorage.removeItem('wwz_ios_oauth_pending_return'); } catch (_) {}
     }
@@ -464,11 +542,21 @@ const startDiscordOAuth = () => {
     } catch (_) {}
   }
   if (isIOSInstalledWebApp()) {
-    // Bind the app handoff intent to the server-side OAuth state. Safari must
-    // not guess based on missing sessionStorage (new tabs have none).
+    // The installed Home Screen app and Safari have separate storage. Keep the
+    // existing explicit one-time-ticket transfer for that distinct context.
     storageSet(IOS_AUTH_PENDING_KEY, '1');
     prepareIOSAuthRecovery();
     loginUrl.searchParams.set('handoff', 'ios_app');
+  } else if (window.WWZIOSAuth?.isIOS?.() && typeof BroadcastChannel === 'function') {
+    // If iOS returns OAuth in another Safari tab, carry only a random nonce in
+    // the URL. The session token crosses tabs later through BroadcastChannel.
+    const nonce = makeIOSOAuthTabNonce();
+    if (nonce && storageSet(IOS_TAB_HANDOFF_KEY, nonce)
+        && startIOSAuthTabHandoffListener(nonce)) {
+      loginUrl.searchParams.set('tab_handoff', nonce);
+    } else {
+      storageRemove(IOS_TAB_HANDOFF_KEY);
+    }
   }
   // Exactly one navigation: window.open('_self') can return null on iOS even
   // after starting a navigation, which previously caused a second redirect.
