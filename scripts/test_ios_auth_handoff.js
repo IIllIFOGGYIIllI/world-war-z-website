@@ -65,7 +65,7 @@ assert.ok(account.includes("new URLSearchParams(location.search).get('wwz_handof
 assert.ok(account.includes("wwz_tab_handoff"));
 assert.ok(account.includes("new BroadcastChannel(iosAuthTabChannelName(nonce))"));
 assert.ok(account.includes("publishIOSAuthTabHandoff(tabHandoffNonce, payload.session_token)"));
-assert.ok(account.includes("parseSessionHandoff(message.handoff, Date.now())"));
+assert.ok(account.includes("parseSessionHandoff?.(message.handoff, Date.now())"));
 const core = fs.readFileSync('assets/js/dashboard/core.js','utf8');
 assert.ok(core.includes("currentUrl.searchParams.delete('wwz_tab_handoff')"));
 assert.ok(account.includes('showSavedSessionRetry(true)'));
