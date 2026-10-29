@@ -59,6 +59,18 @@ assert.ok(account.includes('shouldOfferSafariHandoff(locallyStartedInSafari, app
 assert.ok(account.includes("loginUrl.searchParams.set('handoff', 'ios_app')"));
 assert.ok(account.includes('window.location.assign(loginUrl.toString())'));
 assert.ok(!account.includes("window.open(AUTH_LOGIN_URL, '_self')"));
+const oauthStartAt = account.indexOf('const startDiscordOAuth = () => {');
+const oauthCopyButtonAt = account.indexOf("document.querySelector('[data-ios-auth-copy-link]')", oauthStartAt);
+assert.ok(oauthStartAt >= 0 && oauthCopyButtonAt > oauthStartAt, 'OAuth start function is present');
+const oauthStart = account.slice(oauthStartAt, oauthCopyButtonAt);
+const blankTabAt = oauthStart.indexOf("window.open('about:blank', '_blank')");
+const nonceStoreAt = oauthStart.indexOf('storageSet(IOS_TAB_HANDOFF_KEY, nonce)');
+assert.ok(blankTabAt >= 0 && nonceStoreAt > blankTabAt,
+  'create the Safari tab before storing its nonce so sessionStorage cannot copy it');
+assert.ok(oauthStart.includes('authWindow.location.replace(loginUrl.toString())'),
+  'perform OAuth in the new tab so the initiating tab keeps its BroadcastChannel listener');
+assert.ok(oauthStart.includes('Keep this tab open'));
+
 assert.ok(account.includes('Do not consume the one-time ticket in Safari'));
 assert.ok(account.includes('await completeDiscordLogin(ticket)'));
 assert.ok(account.includes("new URLSearchParams(location.search).get('wwz_handoff') === 'ios_app'"));
