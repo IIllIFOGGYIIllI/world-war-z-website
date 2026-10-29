@@ -541,25 +541,52 @@ const startDiscordOAuth = () => {
       window.localStorage.setItem('wwz_ios_oauth_pending_return', '1');
     } catch (_) {}
   }
+
   if (isIOSInstalledWebApp()) {
     // The installed Home Screen app and Safari have separate storage. Keep the
-    // existing explicit one-time-ticket transfer for that distinct context.
+    // explicit one-time-ticket transfer for that distinct browser context.
     storageSet(IOS_AUTH_PENDING_KEY, '1');
     prepareIOSAuthRecovery();
     loginUrl.searchParams.set('handoff', 'ios_app');
-  } else if (window.WWZIOSAuth?.isIOS?.() && typeof BroadcastChannel === 'function') {
-    // If iOS returns OAuth in another Safari tab, carry only a random nonce in
-    // the URL. The session token crosses tabs later through BroadcastChannel.
-    const nonce = makeIOSOAuthTabNonce();
-    if (nonce && storageSet(IOS_TAB_HANDOFF_KEY, nonce)
-        && startIOSAuthTabHandoffListener(nonce)) {
-      loginUrl.searchParams.set('tab_handoff', nonce);
-    } else {
+    window.location.assign(loginUrl.toString());
+    return;
+  }
+
+  if (window.WWZIOSAuth?.isIOS?.() && typeof BroadcastChannel === 'function') {
+    // Leave this page alive as the receiver. Opening the blank tab BEFORE
+    // writing the new nonce is important: sessionStorage is copied from an
+    // opener when a tab is created, so the callback tab must not inherit its
+    // own receiver nonce and mistake itself for the originating tab.
+    let authWindow = null;
+    try {
+      authWindow = window.open('about:blank', '_blank');
+    } catch (_) {}
+
+    if (authWindow) {
+      try {
+        authWindow.opener = null;
+        const nonce = makeIOSOAuthTabNonce();
+        if (nonce && storageSet(IOS_TAB_HANDOFF_KEY, nonce)
+            && startIOSAuthTabHandoffListener(nonce)) {
+          loginUrl.searchParams.set('tab_handoff', nonce);
+          authWindow.location.replace(loginUrl.toString());
+          showAuthMessage(
+            'Continue signing in in the new Safari tab. Keep this tab open; it will reconnect automatically when Discord returns.',
+            'info'
+          );
+          return;
+        }
+      } catch (_) {
+        // Fall back to the normal same-tab flow if Safari rejects the tab bridge.
+      }
       storageRemove(IOS_TAB_HANDOFF_KEY);
+      try { authWindow.close(); } catch (_) {}
     }
   }
-  // Exactly one navigation: window.open('_self') can return null on iOS even
-  // after starting a navigation, which previously caused a second redirect.
+
+  // Desktop/Android and browsers that block a new tab keep the standard
+  // same-tab redirect. When Safari permits it, the original tab stays alive
+  // long enough to receive the short-lived BroadcastChannel handoff.
   window.location.assign(loginUrl.toString());
 };
 
