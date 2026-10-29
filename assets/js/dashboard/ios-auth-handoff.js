@@ -5,6 +5,42 @@
   const isInstalled = () => isIOS()
     && (navigator.standalone === true
       || window.matchMedia?.('(display-mode: standalone)')?.matches === true);
+  const SESSION_HANDOFF_TTL_MS = 45_000;
+  const SESSION_TOKEN_PATTERN = /^[a-z0-9_-]{32,256}$/i;
+
+  // Share a newly issued token with another already-open Safari tab only when
+  // iOS returned OAuth to a different tab. The record is short-lived and is
+  // removed by the receiving tab; it is never used for installed-app storage.
+  const createSessionHandoff = (rawToken, now = Date.now()) => {
+    const token = String(rawToken || '');
+    const createdAt = Number(now);
+    if (!SESSION_TOKEN_PATTERN.test(token) || !Number.isSafeInteger(createdAt) || createdAt < 0) return null;
+    return JSON.stringify({
+      version: 1,
+      token,
+      created_at: createdAt,
+      expires_at: createdAt + SESSION_HANDOFF_TTL_MS
+    });
+  };
+  const parseSessionHandoff = (raw, now = Date.now()) => {
+    try {
+      const value = String(raw || '');
+      if (!value || value.length > 512) return null;
+      const record = JSON.parse(value);
+      const createdAt = Number(record?.created_at);
+      const expiresAt = Number(record?.expires_at);
+      const checkedAt = Number(now);
+      if (record?.version !== 1 || !SESSION_TOKEN_PATTERN.test(String(record?.token || ''))
+          || !Number.isSafeInteger(createdAt) || !Number.isSafeInteger(expiresAt)
+          || !Number.isSafeInteger(checkedAt) || createdAt < 0
+          || createdAt > checkedAt + 5_000 || expiresAt <= checkedAt
+          || expiresAt <= createdAt || expiresAt - createdAt > SESSION_HANDOFF_TTL_MS
+          || checkedAt - createdAt > SESSION_HANDOFF_TTL_MS) return null;
+      return Object.freeze({ token: String(record.token), expiresAt });
+    } catch (_) {
+      return null;
+    }
+  };
   const parseTransferLink = (raw, dashboardUrl = location.href) => {
     try {
       const value = String(raw || '').trim();
@@ -34,5 +70,8 @@
   // from the installed app generally arrives without that marker.
   const shouldOfferSafariHandoff = (hasLocalLoginMarker = false, appHandoffRequested = false) =>
     isIOS() && !isInstalled() && appHandoffRequested === true && !hasLocalLoginMarker;
-  window.WWZIOSAuth = Object.freeze({ isIOS, isInstalled, parseTransferLink, shouldOfferSafariHandoff });
+  window.WWZIOSAuth = Object.freeze({
+    isIOS, isInstalled, parseTransferLink, shouldOfferSafariHandoff,
+    createSessionHandoff, parseSessionHandoff, SESSION_HANDOFF_TTL_MS
+  });
 })();
