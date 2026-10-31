@@ -164,6 +164,13 @@ const applyAccountSummary = (payload) => {
   setText('[data-profile-linked]', formatAccountDate(profile.linked_at));
   setText('[data-profile-playtime]', formatDuration(profile.playtime_seconds));
   setText('[data-profile-sessions]', new Intl.NumberFormat('en-AU').format(Number(profile.total_sessions) || 0));
+  const rawTravelMetres = Number(profile.distance_travelled_metres);
+  const travelMetres = Number.isFinite(rawTravelMetres) ? Math.max(0, rawTravelMetres) : 0;
+  const travelDisplay = travelMetres >= 1000
+    ? (travelMetres / 1000).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' km'
+    : Math.round(travelMetres).toLocaleString('en-AU') + ' m';
+  setText('[data-profile-distance-travelled]', travelDisplay);
+  setText('[data-profile-distance-tracked-since]', formatAccountDate(profile.distance_tracked_since));
   setText('[data-profile-kd]', Number(pvp.kd_ratio || 0).toFixed(2));
   setText('[data-profile-kills]', new Intl.NumberFormat('en-AU').format(Number(pvp.kills) || 0));
   setText('[data-profile-deaths]', new Intl.NumberFormat('en-AU').format(Number(pvp.deaths) || 0));
