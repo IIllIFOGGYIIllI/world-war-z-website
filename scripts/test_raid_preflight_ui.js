@@ -21,6 +21,6 @@ assert.ok(js.includes('const response = await request(API.adminAction'), 'Must u
 assert.ok(!js.includes('adminAction({action: \'raid_preflight\''), 'Read-only check must not act as saved mutation');
 assert.ok(css.includes('.raid-preflight-result[hidden]'));
 assert.ok(lazy.includes('stage6=raid-damage-1&lifecycle=2&preflight=1'));
-assert.ok(html.includes('rev=manual-coords-1&amp;lifecycle=2&amp;preflight=1'));
+assert.ok(html.includes('rev=manual-coords-1&amp;leaderboardfix=1&amp;lifecycle=2&amp;preflight=1'));
 assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '"));
 console.log('PASS: Owner preflight, distinct Nasdara scope, no game write, release cache refresh');
