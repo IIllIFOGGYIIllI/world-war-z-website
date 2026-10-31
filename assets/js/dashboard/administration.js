@@ -1783,6 +1783,9 @@ adminPlayerLeaderboardRefresh?.addEventListener('click', loadAdminPlayerLeaderbo
 window.addEventListener('wwz:serverchange', () => {
   adminPlayerLeaderboardRequestId += 1;
   adminPlayerLeaderboardPayload = null;
+  adminPlayerLeaderboardRefresh?.removeAttribute('disabled');
+  adminPlayerLeaderboardRefresh?.removeAttribute('aria-busy');
+  adminPlayerLeaderboardRoot?.removeAttribute('aria-busy');
   adminPlayerLeaderboardList?.replaceChildren();
   if (adminPlayerLeaderboardEmpty) adminPlayerLeaderboardEmpty.hidden = true;
   if (adminPlayerLeaderboardError) adminPlayerLeaderboardError.hidden = true;
