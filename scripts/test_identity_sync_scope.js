@@ -6,7 +6,7 @@ const text = fs.readFileSync('assets/js/dashboard/account.js','utf8');
 const html = fs.readFileSync('dashboard.html','utf8');
 const scoped = text.split('// Admin identity-sync controls. Settings are always scoped by the selected WWZ server.')[1];
 assert.ok(scoped);
-assert.ok(html.includes('account.js?v=1.58.3&amp;rev=stage5-status-1'));
+assert.ok(html.includes('assets/js/dashboard/account.js?v='), 'Account script must remain loaded by the dashboard');
 for (const part of [
   'requestEpoch += 1',
   'selectedServerKey() === key && authorized()',
