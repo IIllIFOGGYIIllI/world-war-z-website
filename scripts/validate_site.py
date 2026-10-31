@@ -838,7 +838,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         'payload.server?.key !== serverKey',
         "'wwz:serverchange'",
         'assets/css/dashboard/player-intelligence.css?v=1.32.0',
-        'assets/js/dashboard/administration.js?v=1.54.1&rev=player-leaderboard-api-fix-1',
+        'assets/js/dashboard/administration.js?v=1.54.2&rev=survivor-profile-statistics-2',
     ):
         source = player_intelligence_lazy if token.startswith('assets/') else player_intelligence
         if token not in source:
@@ -1098,7 +1098,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         errors.append(
             "dashboard.html: command library must be lazy-loaded instead of downloaded on every dashboard visit."
         )
-    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=2.8.4&amp;rev=manual-coords-1&amp;leaderboardfix=1'
+    lazy_script = 'assets/js/dashboard/lazy-assets.js?v=2.8.5&amp;rev=manual-coords-1&amp;leaderboardfix=1'
     lazy_index = dashboard.find(lazy_script)
     shell_index = dashboard.find("assets/js/dashboard/shell.js")
     if lazy_index < 0:
@@ -1239,7 +1239,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append(f"dashboard-map-intelligence.js: collaborative Group/Faction data must not be persisted in browser storage: {forbidden}")
 
     lazy_dashboard_controllers = (
-        ("Administration controller", "assets/js/dashboard/administration.js?v=1.54.1&rev=player-leaderboard-api-fix-1", "ensureAdministration", "__wwzAdministrationReady", "assets/js/dashboard/administration.js"),
+        ("Administration controller", "assets/js/dashboard/administration.js?v=1.54.2&rev=survivor-profile-statistics-2", "ensureAdministration", "__wwzAdministrationReady", "assets/js/dashboard/administration.js"),
         ("Appeals controller", f"assets/js/dashboard/appeals.js?v={EXPECTED_ASSET_VERSION}", "ensureAppeals", "__wwzAppealsReady", "assets/js/dashboard/appeals.js"),
         ("Tickets controller", f"assets/js/dashboard/tickets.js?v={EXPECTED_ASSET_VERSION}", "ensureTickets", "__wwzTicketsReady", "assets/js/dashboard/tickets.js"),
         ("Progression controller", "assets/js/dashboard/progression.js?v=1.37.0&rev=progression-scoped-access-1", "ensureProgression", "__wwzProgressionReady", "assets/js/dashboard/progression.js"),
@@ -2008,7 +2008,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     launch_requirements = {
         "index.html": ("PvE + PvP", "91 random spawn loadouts", "Fortnightly", "Full PvP"),
-        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/lazy-assets.js?v=2.8.4&amp;rev=manual-coords-1&amp;leaderboardfix=1"),
+        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/lazy-assets.js?v=2.8.5&amp;rev=manual-coords-1&amp;leaderboardfix=1"),
         "assets/js/dashboard/server-context.js": ("player_capacity", "Capacity', `${server.player_capacity} slots`"),
         "assets/js/dashboard/account.js": ("payload.server?.player_capacity",),
         "assets/js/dashboard/livonia-pvp.js": ("rotation.player_capacity", "players online"),
