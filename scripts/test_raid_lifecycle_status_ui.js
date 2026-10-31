@@ -17,6 +17,6 @@ assert.ok(js.includes('The separate map-wide kill-ban zone is NOT modified.'));
 assert.ok(js.includes('Never arm another weekend while the backend reports an unresolved restore'));
 assert.ok(css.includes('.raid-operator-alert[hidden]'));
 assert.ok(lazy.includes('stage6=raid-damage-1&lifecycle=2'));
-assert.ok(html.includes('rev=manual-coords-1&amp;lifecycle=2'));
+assert.ok(html.includes('rev=manual-coords-1&amp;leaderboardfix=1&amp;lifecycle=2'));
 assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '"));
 console.log('PASS: Raid lifecycle states, next schedule, attention handling and PWA cache revision');
