@@ -15,5 +15,5 @@ assert.ok(html.includes('data-zone-undo-point="" type="button"'),'Undo must be b
 assert.ok(html.includes('data-zone-clear-points="" type="button"'),'Clear must be button');
 assert.ok(html.includes('data-zone-add-dynamic-list="" type="button"'),'Dynamic List button must not submit');
 assert.ok(lazy.includes('zones.js?v=1.59.5&rev=manual-coords-1'),'cache bust for zone editor');
-assert.ok(html.includes('lazy-assets.js?v=2.8.3&amp;rev=manual-coords-1'),'cache bust loader');
+assert.ok(html.includes('lazy-assets.js?v=2.8.4&amp;rev=manual-coords-1&amp;leaderboardfix=1'),'cache bust loader');
 console.log('PASS: Polygon editor hidden required input and save UI lifecycle');
