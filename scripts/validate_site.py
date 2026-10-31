@@ -827,8 +827,8 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     for token in (
         'renderPlayerIntelligence',
         'renderPlayerIntelligenceTimeline',
-        'profile.distance_travelled_metres',
-        'profile.distance_tracked_since',
+        'profile?.distance_travelled_metres',
+        'profile?.distance_tracked_since',
         'assets/css/dashboard/player-intelligence.css?v=1.31.0',
         'assets/js/dashboard/administration.js?v=1.53.0&rev=player-distance-1',
     ):
