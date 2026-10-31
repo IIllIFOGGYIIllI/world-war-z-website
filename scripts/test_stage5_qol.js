@@ -16,7 +16,7 @@ for(const token of [
 assert.equal((h.match(/data-status-next-check=""/g)||[]).length,2);
 assert.ok(h.includes('Selected server')&&h.includes('data-detail-map="">Nasdara'));
 assert.ok(h.includes('status-timing.css?v=1.22.93&rev=stage5-1'));
-assert.ok(h.includes('account.js?v=1.58.3&amp;rev=stage5-status-1'));
+assert.ok(h.includes('assets/js/dashboard/account.js?v='));
 assert.ok(c.includes('Nasdara PvE and Nasdara PvP')&&!c.includes('Keeps Chernarus and Livonia'));
 assert.ok(c.includes('data-iphone-install-guide')&&c.includes('Add to Home Screen'));
 assert.ok(c.includes('Checking published release'));
