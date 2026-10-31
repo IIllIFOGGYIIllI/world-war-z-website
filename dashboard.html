@@ -1301,6 +1301,20 @@ Participation | 50000 | 0"></textarea><small>One line per prize: Prize name | Cu
 <div class="metric-grid three"><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">⌕</span><small>Player search</small></div><strong>Live</strong><p>PSN or Discord display name</p></article><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">15</span><small>Result limit</small></div><strong>15</strong><p>No database-wide listings</p></article><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">✓</span><small>Write controls</small></div><strong>Protected</strong><p>Confirmation and audit required</p></article></div>
 <article class="panel admin-player-search-panel" data-admin-player-search-panel="" data-dashboard-section="players" id="dashboard-admin-players">
 <div class="panel-heading"><div><p class="panel-kicker">Unified survivor intelligence</p><h2>Player Intelligence Centre</h2></div><span class="lock-label">Admin only · audited actions</span></div>
+<section class="admin-player-leaderboards" data-admin-player-leaderboards="" aria-labelledby="admin-player-leaderboards-title">
+<div class="admin-player-leaderboard-heading"><div><p class="panel-kicker">Selected server · top 10 per category</p><h3 id="admin-player-leaderboards-title">Server Player Leaderboard</h3><p class="table-note" data-admin-player-leaderboard-server="">Loading selected server…</p></div><button class="secondary-action compact-action" data-admin-player-leaderboard-refresh="" type="button">Refresh</button></div>
+<div class="admin-player-leaderboard-tabs" role="group" aria-label="Leaderboard category">
+<button class="admin-player-leaderboard-tab is-active" data-admin-player-leaderboard-category="travelled" aria-pressed="true" type="button">Most Travelled</button>
+<button class="admin-player-leaderboard-tab" data-admin-player-leaderboard-category="active" aria-pressed="false" type="button">Most Active</button>
+<button class="admin-player-leaderboard-tab" data-admin-player-leaderboard-category="combat" aria-pressed="false" type="button">Combat</button>
+<button class="admin-player-leaderboard-tab" data-admin-player-leaderboard-category="progression" aria-pressed="false" type="button">Progression</button>
+<button class="admin-player-leaderboard-tab" data-admin-player-leaderboard-category="events" aria-pressed="false" type="button">Event Wins</button>
+</div>
+<div class="admin-player-leaderboard-state" data-admin-player-leaderboard-state="" aria-live="polite" role="status">Top 10 for the currently selected server only.</div>
+<ol class="admin-player-leaderboard-list" data-admin-player-leaderboard-list="" aria-live="polite"></ol>
+<p class="table-note" data-admin-player-leaderboard-empty="" hidden="">No leaderboard entries have been recorded for this category yet.</p>
+<p class="table-note history-error" data-admin-player-leaderboard-error="" hidden="">Player leaderboards are temporarily unavailable.</p>
+</section>
 <form class="admin-player-search" data-admin-player-search-form="">
 <label for="admin-player-search"><span>PlayStation ID or Discord display name</span><input autocomplete="off" data-admin-player-search-input="" id="admin-player-search" maxlength="64" minlength="3" placeholder="Enter at least 3 characters" spellcheck="false" type="search"/></label>
 <button class="primary-action" data-admin-player-search-button="" type="submit">Search Players</button>
