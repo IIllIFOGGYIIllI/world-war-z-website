@@ -284,10 +284,10 @@
 
   const ensureAdministration = () => Promise.all([
     ensureModerationStyles(),
-    loadStylesheetOnce('player-intelligence-css', 'assets/css/dashboard/player-intelligence.css?v=1.31.0&rev=player-intelligence-1')
+    loadStylesheetOnce('player-intelligence-css', 'assets/css/dashboard/player-intelligence.css?v=1.32.0&rev=player-leaderboards-1')
   ]).then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
     'administration',
-    'assets/js/dashboard/administration.js?v=1.53.0&rev=player-distance-1',
+    'assets/js/dashboard/administration.js?v=1.54.0&rev=player-leaderboard-1',
     () => window.__wwzAdministrationReady === true
   )));
 

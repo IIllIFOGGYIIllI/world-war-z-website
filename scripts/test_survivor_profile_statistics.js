@@ -32,6 +32,21 @@ for (const selector of ['data-admin-player-distance-travelled', 'data-admin-play
 }
 assert.ok(adminPlayers.includes('profile?.distance_travelled_metres'), 'Admin dossier must render validated travel distance');
 assert.ok(adminPlayers.includes('profile?.distance_tracked_since'), 'Admin dossier must show the travel tracking baseline');
+
+for (const selector of [
+  'data-admin-player-leaderboards',
+  'data-admin-player-leaderboard-list',
+  'data-admin-player-leaderboard-category="travelled"',
+  'data-admin-player-leaderboard-category="active"',
+  'data-admin-player-leaderboard-category="combat"',
+  'data-admin-player-leaderboard-category="progression"',
+  'data-admin-player-leaderboard-category="events"'
+]) assert.ok(page.includes(selector), 'Admin Player Intelligence leaderboard is missing ' + selector);
+assert.ok(adminPlayers.includes("'/api/admin/players/leaderboards'"), 'Admin leaderboard endpoint is not wired');
+assert.ok(adminPlayers.includes('loadAdminPlayerLeaderboards'), 'Admin leaderboard loader is missing');
+assert.ok(adminPlayers.includes('payload.server?.key !== serverKey'), 'Leaderboard responses must match the selected server');
+assert.ok(adminPlayers.includes("window.addEventListener('wwz:serverchange'"), 'Leaderboard must reset when the selected server changes');
+assert.ok(adminPlayers.includes('.slice(0, 10)'), 'Leaderboard rendering must stay capped at ten rows');
 assert.ok(home.includes('profile.distance_travelled_metres'), 'Personal home must render validated travel distance');
 assert.ok(home.includes('profile.distance_tracked_since'), 'Personal home must indicate when distance tracking began');
 
@@ -69,6 +84,6 @@ assert.ok(homeCss.includes('@media (max-width: 520px)'), 'Small-screen stat layo
 assert.ok(bootstrap.includes('my-wwz.js?v=1.41.1&rev=travel-distance-1'));
 assert.ok(bootstrap.includes('my-wwz.css?v=1.41.1&rev=travel-distance-1'));
 assert.ok(page.includes('account.js?v=1.59.1&amp;rev=travel-distance-1'));
-assert.ok(serviceWorker.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-01-admin-player-distance-1';"));
+assert.ok(serviceWorker.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-01-player-leaderboards-1';"));
 
 console.log('PASS: Server-scoped survivor profile and performance statistics');

@@ -821,6 +821,9 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         'data-player-intel-flag',
         'data-admin-player-distance-travelled',
         'data-admin-player-distance-tracked-since',
+        'data-admin-player-leaderboards',
+        'data-admin-player-leaderboard-list',
+        'data-admin-player-leaderboard-category="travelled"',
     ):
         if token not in dashboard:
             errors.append(f"dashboard.html: missing Player Intelligence Centre surface: {token}")
@@ -829,8 +832,12 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         'renderPlayerIntelligenceTimeline',
         'profile?.distance_travelled_metres',
         'profile?.distance_tracked_since',
-        'assets/css/dashboard/player-intelligence.css?v=1.31.0',
-        'assets/js/dashboard/administration.js?v=1.53.0&rev=player-distance-1',
+        'loadAdminPlayerLeaderboards',
+        'ADMIN_PLAYER_LEADERBOARDS_URL',
+        'payload.server?.key !== serverKey',
+        "'wwz:serverchange'",
+        'assets/css/dashboard/player-intelligence.css?v=1.32.0',
+        'assets/js/dashboard/administration.js?v=1.54.0&rev=player-leaderboard-1',
     ):
         source = player_intelligence_lazy if token.startswith('assets/') else player_intelligence
         if token not in source:

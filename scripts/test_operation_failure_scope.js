@@ -14,5 +14,5 @@ for (const guard of [
   'Manual retry queued',
   'server_key: serverKey'
 ]) assert.ok(admin.includes(guard), 'Missing retry scope safeguard: ' + guard);
-assert.ok(lazy.includes('administration.js?v=1.53.0&rev=player-distance-1'));
+assert.ok(lazy.includes('administration.js?v=1.54.0&rev=player-leaderboard-1'));
 console.log('PASS: Server-isolated operation failures and retries');
