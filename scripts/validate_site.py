@@ -834,10 +834,11 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         'profile?.distance_tracked_since',
         'loadAdminPlayerLeaderboards',
         'ADMIN_PLAYER_LEADERBOARDS_URL',
+        'const ADMIN_PLAYER_LEADERBOARDS_URL = `${DASHBOARD_API_BASE}/api/admin/players/leaderboards`;',
         'payload.server?.key !== serverKey',
         "'wwz:serverchange'",
         'assets/css/dashboard/player-intelligence.css?v=1.32.0',
-        'assets/js/dashboard/administration.js?v=1.54.0&rev=player-leaderboard-1',
+        'assets/js/dashboard/administration.js?v=1.54.1&rev=player-leaderboard-api-fix-1',
     ):
         source = player_intelligence_lazy if token.startswith('assets/') else player_intelligence
         if token not in source:
