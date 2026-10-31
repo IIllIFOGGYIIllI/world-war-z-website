@@ -768,15 +768,15 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     member_home_js = member_home_js_path.read_text(encoding="utf-8") if member_home_js_path.is_file() else ""
     member_home_css = member_home_css_path.read_text(encoding="utf-8") if member_home_css_path.is_file() else ""
     for token in (
-        "assets/js/dashboard/bootstrap.js?v=1.40.0&amp;rev=member-home-overhaul-1",
+        "assets/js/dashboard/bootstrap.js?v=1.41.0&amp;rev=survivor-statistics-1",
         'class="dashboard-view active" data-view-panel="overview"',
         "Your survivor, progression, faction, quests, events, orders and current priorities",
     ):
         if token not in dashboard:
             errors.append(f"dashboard.html: missing Member Home release surface: {token}")
     for token in (
-        "assets/css/dashboard/my-wwz.css?v=1.40.0&rev=member-home-overhaul-1",
-        "assets/js/dashboard/my-wwz.js?v=1.40.0&rev=member-home-overhaul-1",
+        "assets/css/dashboard/my-wwz.css?v=1.41.0&rev=survivor-statistics-1",
+        "assets/js/dashboard/my-wwz.js?v=1.41.0&rev=survivor-statistics-1",
         "loadMyWwzExperience",
     ):
         if token not in member_home_bootstrap:
@@ -1340,8 +1340,8 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         if token not in bank_layout_css:
             errors.append(f"bank-layout.css: missing responsive bank layout guard: {token}")
 
-    account_script = 'assets/js/dashboard/account.js?v=1.58.3&amp;rev=stage5-status-1'
-    bootstrap_script = 'assets/js/dashboard/bootstrap.js?v=1.40.0&amp;rev=member-home-overhaul-1'
+    account_script = 'assets/js/dashboard/account.js?v=1.59.0&amp;rev=survivor-profile-1'
+    bootstrap_script = 'assets/js/dashboard/bootstrap.js?v=1.41.0&amp;rev=survivor-statistics-1'
     account_index = dashboard.find(account_script)
     bootstrap_index = dashboard.find(bootstrap_script)
     if bootstrap_index < 0:
