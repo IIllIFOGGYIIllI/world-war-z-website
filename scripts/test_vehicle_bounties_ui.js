@@ -28,5 +28,5 @@ assert.ok(script.includes("body instanceof FormData"), 'Browser must set multipa
 assert.ok(!script.includes('localStorage.setItem('), 'Never persist a bearer token or claim evidence');
 assert.ok(map.includes('window.WWZBountyMapSelection = {'));
 assert.ok(map.includes('serverKey: String(window.WWZServerContext?.getSelectedServer?.()?.key || \'\')'));
-assert.ok(sw.includes('2026-10-30-ios-safari-tab-bridge-2'));
+assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '"), 'Service worker exposes its update revision');
 console.log('PASS: Dual-server vehicle bounties, staff reviews and map point handoff');
