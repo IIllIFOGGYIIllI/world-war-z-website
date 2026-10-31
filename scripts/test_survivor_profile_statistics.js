@@ -35,6 +35,16 @@ assert.ok(adminPlayers.includes('profile?.distance_travelled_metres'), 'Admin do
 assert.ok(adminPlayers.includes('profile?.distance_tracked_since'), 'Admin dossier must show the travel tracking baseline');
 
 for (const selector of [
+  'data-admin-player-best-streak',
+  'data-admin-player-favourite-opponent',
+  'data-admin-player-nemesis',
+  'data-admin-player-last-kill'
+]) {
+  assert.ok(page.includes(selector), 'Admin dossier is missing ' + selector);
+  assert.ok(adminPlayers.includes(selector), 'Admin dossier renderer is missing ' + selector);
+}
+
+for (const selector of [
   'data-admin-player-leaderboards',
   'data-admin-player-leaderboard-list',
   'data-admin-player-leaderboard-category="travelled"',
@@ -45,7 +55,7 @@ for (const selector of [
 ]) assert.ok(page.includes(selector), 'Admin Player Intelligence leaderboard is missing ' + selector);
 assert.ok(adminPlayers.includes('const ADMIN_PLAYER_LEADERBOARDS_URL = `${DASHBOARD_API_BASE}/api/admin/players/leaderboards`;'), 'Admin leaderboard endpoint must use the trusted Railway API origin');
 assert.ok(adminPlayers.includes('loadAdminPlayerLeaderboards'), 'Admin leaderboard loader is missing');
-assert.ok(lazyAssets.includes('assets/js/dashboard/administration.js?v=1.54.1&rev=player-leaderboard-api-fix-1'), 'Leaderboard API fix must use a fresh administration script URL');
+assert.ok(lazyAssets.includes('assets/js/dashboard/administration.js?v=1.54.2&rev=survivor-profile-statistics-2'), 'Survivor profile statistics must use a fresh administration script URL');
 assert.ok(adminPlayers.includes('payload.server?.key !== serverKey'), 'Leaderboard responses must match the selected server');
 assert.ok(adminPlayers.includes("window.addEventListener('wwz:serverchange'"), 'Leaderboard must reset when the selected server changes');
 assert.ok(adminPlayers.includes('.slice(0, 10)'), 'Leaderboard rendering must stay capped at ten rows');
@@ -86,6 +96,6 @@ assert.ok(homeCss.includes('@media (max-width: 520px)'), 'Small-screen stat layo
 assert.ok(bootstrap.includes('my-wwz.js?v=1.41.1&rev=travel-distance-1'));
 assert.ok(bootstrap.includes('my-wwz.css?v=1.41.1&rev=travel-distance-1'));
 assert.ok(page.includes('account.js?v=1.59.1&amp;rev=travel-distance-1'));
-assert.ok(serviceWorker.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-01-player-leaderboard-api-fix-1';"));
+assert.ok(serviceWorker.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-01-survivor-profile-statistics-2';"));
 
 console.log('PASS: Server-scoped survivor profile and performance statistics');

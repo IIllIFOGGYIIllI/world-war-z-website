@@ -2715,8 +2715,29 @@ const renderAdminPlayerDetails = (payload) => {
   setText('[data-admin-player-linked-at]', identity.linked ? formatAccountDate(activity.linked_at) : 'Not linked');
   setText('[data-admin-player-session-start]', activity.online ? formatAccountDate(activity.session_started_at, 'Session time unavailable') : 'Offline');
   setText('[data-admin-player-streak]', pvp.available ? new Intl.NumberFormat('en-AU').format(Number(pvp.current_streak) || 0) : 'Unavailable');
+  setText('[data-admin-player-best-streak]', pvp.available ? new Intl.NumberFormat('en-AU').format(Number(pvp.best_streak) || 0) : 'Unavailable');
   setText('[data-admin-player-longest]', pvp.longest_kill_metres == null ? 'Not recorded' : `${Number(pvp.longest_kill_metres).toFixed(1)} m`);
   setText('[data-admin-player-weapon]', String(pvp.favourite_weapon || 'Not recorded'));
+  const favouriteOpponent = pvp.favourite_opponent || null;
+  setText('[data-admin-player-favourite-opponent]', pvp.available
+    ? (favouriteOpponent?.psn_id
+      ? `${String(favouriteOpponent.psn_id)} · ${new Intl.NumberFormat('en-AU').format(Number(favouriteOpponent.kill_count) || 0)} kills`
+      : 'Not recorded')
+    : 'Unavailable');
+  const nemesis = pvp.nemesis || null;
+  setText('[data-admin-player-nemesis]', pvp.available
+    ? (nemesis?.psn_id
+      ? `${String(nemesis.psn_id)} · ${new Intl.NumberFormat('en-AU').format(Number(nemesis.death_count) || 0)} deaths`
+      : 'Not recorded')
+    : 'Unavailable');
+  const recentKill = pvp.last_confirmed_kill || {};
+  const recentKillDetail = [
+    recentKill.weapon,
+    recentKill.distance_metres == null ? '' : `${Number(recentKill.distance_metres).toFixed(1)} m`,
+    recentKill.hit_location,
+    recentKill.event_time ? formatAccountDate(recentKill.event_time) : ''
+  ].filter(Boolean).join(' · ');
+  setText('[data-admin-player-last-kill]', pvp.available ? (recentKillDetail || 'Not recorded') : 'Unavailable');
   renderPlayerIntelligence(intelligence);
   renderAdminProgression(progression);
   renderAdminEventWins(profile?.event_wins || {});
