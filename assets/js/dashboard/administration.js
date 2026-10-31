@@ -2481,6 +2481,16 @@ const renderAdminPlayerDetails = (payload) => {
 
   setText('[data-admin-player-playtime]', activity.playtime_seconds == null ? 'Unavailable' : formatDuration(activity.playtime_seconds));
   setText('[data-admin-player-sessions]', new Intl.NumberFormat('en-AU').format(Number(activity.total_sessions) || 0));
+  const travelDistance = Number(profile?.distance_travelled_metres);
+  const trackingStarted = String(profile?.distance_tracked_since || '').trim();
+  const safeTravelDistance = Number.isFinite(travelDistance) ? Math.max(0, travelDistance) : 0;
+  const travelDistanceLabel = safeTravelDistance >= 1000
+    ? `${new Intl.NumberFormat('en-AU', { maximumFractionDigits: 1 }).format(safeTravelDistance / 1000)} km`
+    : `${new Intl.NumberFormat('en-AU', { maximumFractionDigits: 0 }).format(safeTravelDistance)} m`;
+  setText('[data-admin-player-distance-travelled]', trackingStarted ? travelDistanceLabel : 'Not recorded');
+  setText('[data-admin-player-distance-tracked-since]', trackingStarted
+    ? `Tracking since ${formatAccountDate(trackingStarted)} · invalid jumps excluded`
+    : 'No validated movement recorded yet');
   setText('[data-admin-player-kd]', pvp.available ? Number(pvp.kd_ratio || 0).toFixed(2) : 'Unavailable');
   setText('[data-admin-player-kills]', new Intl.NumberFormat('en-AU').format(Number(pvp.kills) || 0));
   setText('[data-admin-player-deaths]', new Intl.NumberFormat('en-AU').format(Number(pvp.deaths) || 0));

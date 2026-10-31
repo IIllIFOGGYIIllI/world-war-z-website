@@ -6,6 +6,7 @@ const fs = require('node:fs');
 const read = (path) => fs.readFileSync(path, 'utf8');
 const page = read('dashboard.html');
 const account = read('assets/js/dashboard/account.js');
+const adminPlayers = read('assets/js/dashboard/administration.js');
 const home = read('assets/js/dashboard/my-wwz.js');
 const homeCss = read('assets/css/dashboard/my-wwz.css');
 const bootstrap = read('assets/js/dashboard/bootstrap.js');
@@ -25,6 +26,12 @@ for (const selector of [
 
 assert.ok(account.includes('profile.distance_travelled_metres'), 'Account Profile must render validated travel distance');
 assert.ok(account.includes('profile.distance_tracked_since'), 'Account Profile must show the travel tracking baseline');
+for (const selector of ['data-admin-player-distance-travelled', 'data-admin-player-distance-tracked-since']) {
+  assert.ok(page.includes(selector), 'Admin dossier is missing ' + selector);
+  assert.ok(adminPlayers.includes(selector), 'Admin dossier renderer is missing ' + selector);
+}
+assert.ok(adminPlayers.includes('profile?.distance_travelled_metres'), 'Admin dossier must render validated travel distance');
+assert.ok(adminPlayers.includes('profile?.distance_tracked_since'), 'Admin dossier must show the travel tracking baseline');
 assert.ok(home.includes('profile.distance_travelled_metres'), 'Personal home must render validated travel distance');
 assert.ok(home.includes('profile.distance_tracked_since'), 'Personal home must indicate when distance tracking began');
 
@@ -62,6 +69,6 @@ assert.ok(homeCss.includes('@media (max-width: 520px)'), 'Small-screen stat layo
 assert.ok(bootstrap.includes('my-wwz.js?v=1.41.1&rev=travel-distance-1'));
 assert.ok(bootstrap.includes('my-wwz.css?v=1.41.1&rev=travel-distance-1'));
 assert.ok(page.includes('account.js?v=1.59.1&amp;rev=travel-distance-1'));
-assert.ok(serviceWorker.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-01-travel-distance-1';"));
+assert.ok(serviceWorker.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-01-admin-player-distance-1';"));
 
 console.log('PASS: Server-scoped survivor profile and performance statistics');
