@@ -36,6 +36,6 @@ assert.ok(js.includes("if (state.editorManaged || state.editorShape !== 'polygon
 assert.ok(js.includes("document.querySelectorAll('[data-zone-circle-fields] input').forEach"));
 assert.ok(js.includes("document.querySelectorAll('[data-zone-manual-point-entry] input, [data-zone-add-manual-point], [data-zone-preview-circle]').forEach"));
 assert.ok(js.includes("document.querySelectorAll('[data-zone-center-x], [data-zone-center-z], [data-zone-manual-point-x], [data-zone-manual-point-z], [data-zone-point-coordinate]').forEach"));
-assert.ok(html.includes('lazy-assets.js?v=2.8.3&amp;rev=manual-coords-1'));
+assert.ok(html.includes('lazy-assets.js?v=2.8.4&amp;rev=manual-coords-1&amp;leaderboardfix=1'));
 assert.ok(fs.readFileSync('assets/js/dashboard/lazy-assets.js','utf8').includes('zones.js?v=1.59.5&rev=manual-coords-1'));
 console.log('PASS: Manual circle and polygon X/Z, inline editing, bounds and mobile controls');
