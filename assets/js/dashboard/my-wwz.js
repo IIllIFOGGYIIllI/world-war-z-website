@@ -383,6 +383,15 @@
     const longest = pvp.longest_kill_metres == null
       ? 'Not recorded'
       : Number(pvp.longest_kill_metres).toFixed(1) + ' m';
+    const rawTravelMetres = Number(profile.distance_travelled_metres);
+    const travelMetres = Number.isFinite(rawTravelMetres) ? Math.max(0, rawTravelMetres) : 0;
+    const travelDisplay = travelMetres >= 1000
+      ? (travelMetres / 1000).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' km'
+      : Math.round(travelMetres).toLocaleString('en-AU') + ' m';
+    const trackedSinceDate = profile.distance_tracked_since ? new Date(profile.distance_tracked_since) : null;
+    const travelNote = trackedSinceDate && Number.isFinite(trackedSinceDate.getTime())
+      ? 'Validated movement since ' + trackedSinceDate.toLocaleDateString('en-AU')
+      : 'Validated ADM movement';
     const scope = [snapshot.server?.map_name, snapshot.server?.name].filter(Boolean).join(' · ');
     root.querySelector('[data-my-wwz-stats-scope]').textContent = scope
       ? scope + ' · This server only'
@@ -390,6 +399,7 @@
 
     grid.replaceChildren(
       metric('Playtime', duration(profile.playtime_seconds), 'Tracked server time'),
+      metric('Distance travelled', travelDisplay, travelNote),
       metric('Sessions', number(profile.total_sessions), 'Recorded joins'),
       metric('Kills', number(pvp.kills), 'Confirmed PvP'),
       metric('Deaths', number(pvp.deaths), 'Confirmed PvP'),
