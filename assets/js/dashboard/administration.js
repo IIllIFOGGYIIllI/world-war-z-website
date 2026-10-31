@@ -1587,7 +1587,7 @@ createWebhookButton?.addEventListener('click', async () => {
 });
 
 
-const ADMIN_PLAYER_LEADERBOARDS_URL = '/api/admin/players/leaderboards';
+const ADMIN_PLAYER_LEADERBOARDS_URL = `${DASHBOARD_API_BASE}/api/admin/players/leaderboards`;
 const adminPlayerLeaderboardRoot = document.querySelector('[data-admin-player-leaderboards]');
 const adminPlayerLeaderboardServer = adminPlayerLeaderboardRoot?.querySelector('[data-admin-player-leaderboard-server]');
 const adminPlayerLeaderboardState = adminPlayerLeaderboardRoot?.querySelector('[data-admin-player-leaderboard-state]');
