@@ -67,6 +67,7 @@ jobs:
           node scripts/test_mobile_dashboard_reliability.js
           node scripts/test_action_centre_scope_refresh.js
           node scripts/test_stage5_qol.js
+          node scripts/test_survivor_profile_statistics.js
           node scripts/test_phase2_shop_reliability.js
           node scripts/test_stage6_raid_calendar.js
           node scripts/test_stage6_raid_automation_ui.js
