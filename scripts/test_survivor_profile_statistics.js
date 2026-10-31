@@ -84,6 +84,6 @@ assert.ok(homeCss.includes('@media (max-width: 520px)'), 'Small-screen stat layo
 assert.ok(bootstrap.includes('my-wwz.js?v=1.41.1&rev=travel-distance-1'));
 assert.ok(bootstrap.includes('my-wwz.css?v=1.41.1&rev=travel-distance-1'));
 assert.ok(page.includes('account.js?v=1.59.1&amp;rev=travel-distance-1'));
-assert.ok(serviceWorker.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-01-player-leaderboards-1';"));
+assert.ok(serviceWorker.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-01-player-leaderboards-2';"));
 
 console.log('PASS: Server-scoped survivor profile and performance statistics');
