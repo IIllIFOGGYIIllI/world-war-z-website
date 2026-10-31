@@ -7,6 +7,7 @@ const read = (path) => fs.readFileSync(path, 'utf8');
 const page = read('dashboard.html');
 const account = read('assets/js/dashboard/account.js');
 const adminPlayers = read('assets/js/dashboard/administration.js');
+const lazyAssets = read('assets/js/dashboard/lazy-assets.js');
 const home = read('assets/js/dashboard/my-wwz.js');
 const homeCss = read('assets/css/dashboard/my-wwz.css');
 const bootstrap = read('assets/js/dashboard/bootstrap.js');
@@ -42,8 +43,9 @@ for (const selector of [
   'data-admin-player-leaderboard-category="progression"',
   'data-admin-player-leaderboard-category="events"'
 ]) assert.ok(page.includes(selector), 'Admin Player Intelligence leaderboard is missing ' + selector);
-assert.ok(adminPlayers.includes("'/api/admin/players/leaderboards'"), 'Admin leaderboard endpoint is not wired');
+assert.ok(adminPlayers.includes('const ADMIN_PLAYER_LEADERBOARDS_URL = `${DASHBOARD_API_BASE}/api/admin/players/leaderboards`;'), 'Admin leaderboard endpoint must use the trusted Railway API origin');
 assert.ok(adminPlayers.includes('loadAdminPlayerLeaderboards'), 'Admin leaderboard loader is missing');
+assert.ok(lazyAssets.includes('assets/js/dashboard/administration.js?v=1.54.1&rev=player-leaderboard-api-fix-1'), 'Leaderboard API fix must use a fresh administration script URL');
 assert.ok(adminPlayers.includes('payload.server?.key !== serverKey'), 'Leaderboard responses must match the selected server');
 assert.ok(adminPlayers.includes("window.addEventListener('wwz:serverchange'"), 'Leaderboard must reset when the selected server changes');
 assert.ok(adminPlayers.includes('.slice(0, 10)'), 'Leaderboard rendering must stay capped at ten rows');
@@ -84,6 +86,6 @@ assert.ok(homeCss.includes('@media (max-width: 520px)'), 'Small-screen stat layo
 assert.ok(bootstrap.includes('my-wwz.js?v=1.41.1&rev=travel-distance-1'));
 assert.ok(bootstrap.includes('my-wwz.css?v=1.41.1&rev=travel-distance-1'));
 assert.ok(page.includes('account.js?v=1.59.1&amp;rev=travel-distance-1'));
-assert.ok(serviceWorker.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-01-player-leaderboards-3';"));
+assert.ok(serviceWorker.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-01-player-leaderboard-api-fix-1';"));
 
 console.log('PASS: Server-scoped survivor profile and performance statistics');
