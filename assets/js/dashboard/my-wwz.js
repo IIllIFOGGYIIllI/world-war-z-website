@@ -203,6 +203,12 @@
           <div class="my-wwz-card-body" data-my-wwz-progress-body></div>
           <footer><button class="my-wwz-link" data-my-wwz-quests-open type="button">Open Objectives →</button><button class="my-wwz-link" data-my-wwz-progress-open type="button">Progression →</button></footer>
         </article>
+        <article class="my-wwz-card my-wwz-card-wide my-wwz-survivor-card" data-my-wwz-survivor-stats hidden>
+          <header><div><span>SURVIVOR RECORD</span><h2>Your Performance</h2></div><b data-my-wwz-stats-scope>Selected server only</b></header>
+          <div class="my-wwz-stat-grid" data-my-wwz-stat-grid></div>
+          <div class="my-wwz-combat-highlights" data-my-wwz-combat-highlights></div>
+          <footer><button class="my-wwz-link" data-my-wwz-profile-open type="button">Open full Survivor Profile →</button></footer>
+        </article>
         <article class="my-wwz-card" data-my-wwz-faction>
           <header><div><span>FACTION</span><h2>Your Group</h2></div><b data-my-wwz-faction-state>Independent</b></header>
           <div class="my-wwz-card-body" data-my-wwz-faction-body></div>
@@ -235,6 +241,7 @@
     root.querySelector('[data-my-wwz-link-account]')?.addEventListener('click', () => nav('players', 'account'));
     root.querySelector('[data-my-wwz-quests-open]')?.addEventListener('click', () => nav('objectives', 'quests'));
     root.querySelector('[data-my-wwz-progress-open]')?.addEventListener('click', () => nav('progression', 'progress'));
+    root.querySelector('[data-my-wwz-profile-open]')?.addEventListener('click', () => nav('players', 'identity'));
     root.querySelector('[data-my-wwz-faction-open]')?.addEventListener('click', () => nav('factions', 'directory'));
     root.querySelector('[data-my-wwz-events-open]')?.addEventListener('click', () => nav('community', 'events'));
     root.querySelector('[data-my-wwz-shop-open]')?.addEventListener('click', () => nav('shop', 'catalogue'));
@@ -356,6 +363,74 @@
       metric('Faction', factionValue, factionNote),
       metric('Quests', `${integer(quests.claimable)} claimable`, `${integer(quests.active_count)} current objectives`, questTone),
       metric('Action Centre', `${integer(actions.actions)} actions`, `${integer(actions.unread)} unread${integer(actions.admin_actions) ? ` · ${integer(actions.admin_actions)} admin` : ''}`, actionTone),
+    );
+  };
+
+  const renderSurvivorStats = (snapshot) => {
+    const card = root.querySelector('[data-my-wwz-survivor-stats]');
+    const profile = snapshot.home?.profile || {};
+    if (!profile.linked) {
+      card.hidden = true;
+      return;
+    }
+
+    card.hidden = false;
+    const pvp = profile.pvp || {};
+    const grid = root.querySelector('[data-my-wwz-stat-grid]');
+    const highlights = root.querySelector('[data-my-wwz-combat-highlights]');
+    const number = (value) => formatNumber(integer(value));
+    const kd = Number.isFinite(Number(pvp.kd_ratio)) ? Number(pvp.kd_ratio).toFixed(2) : '0.00';
+    const longest = pvp.longest_kill_metres == null
+      ? 'Not recorded'
+      : Number(pvp.longest_kill_metres).toFixed(1) + ' m';
+    const scope = [snapshot.server?.map_name, snapshot.server?.name].filter(Boolean).join(' · ');
+    root.querySelector('[data-my-wwz-stats-scope]').textContent = scope
+      ? scope + ' · This server only'
+      : 'Selected server only';
+
+    grid.replaceChildren(
+      metric('Playtime', duration(profile.playtime_seconds), 'Tracked server time'),
+      metric('Sessions', number(profile.total_sessions), 'Recorded joins'),
+      metric('Kills', number(pvp.kills), 'Confirmed PvP'),
+      metric('Deaths', number(pvp.deaths), 'Confirmed PvP'),
+      metric('K/D ratio', kd, 'Kills divided by deaths'),
+      metric('Best streak', number(pvp.best_streak ?? pvp.current_streak), 'Consecutive kills'),
+      metric('Longest kill', longest, 'Confirmed distance'),
+      metric('Event wins', number(profile.event_wins), 'Recorded victories'),
+      metric('Flags captured', number(profile.flags_captured), 'Server profile'),
+      metric('Reputation', formatNumber(profile.reputation), 'Survivor record'),
+    );
+
+    const favourite = pvp.favourite_opponent;
+    const nemesis = pvp.nemesis;
+    const lastKill = pvp.last_confirmed_kill || {};
+    const lastKillDetail = [
+      lastKill.weapon,
+      lastKill.distance_metres == null ? '' : Number(lastKill.distance_metres).toFixed(1) + ' m',
+      lastKill.hit_location,
+      lastKill.event_time ? relative(lastKill.event_time) : '',
+    ].filter(Boolean).join(' · ');
+    highlights.replaceChildren(
+      row({
+        title: 'Favourite weapon',
+        value: String(pvp.favourite_weapon || 'Not recorded'),
+        detail: 'Most credited kills',
+      }),
+      row({
+        title: 'Favourite opponent',
+        value: favourite?.psn_id || 'Not recorded',
+        detail: favourite ? number(favourite.kill_count) + ' credited kills' : 'No repeated opponent recorded',
+      }),
+      row({
+        title: 'Nemesis',
+        value: nemesis?.psn_id || 'Not recorded',
+        detail: nemesis ? number(nemesis.death_count) + ' credited deaths' : 'No repeated opponent recorded',
+      }),
+      row({
+        title: 'Latest confirmed kill',
+        value: lastKill.weapon || 'Not recorded',
+        detail: lastKillDetail || 'No confirmed kill recorded yet',
+      }),
     );
   };
 
@@ -558,6 +633,7 @@
     overviewPanel.classList.add('member-home-ready');
     renderHero(snapshot);
     renderMetrics(snapshot);
+    renderSurvivorStats(snapshot);
     renderNext(snapshot);
     renderWorld(snapshot);
     renderProgress(snapshot);
@@ -595,6 +671,7 @@
     ensureRoot();
     overviewPanel.classList.remove('member-home-ready');
     root.dataset.state = 'guest';
+    root.querySelector('[data-my-wwz-survivor-stats]').hidden = true;
     root.querySelector('[data-my-wwz-title]').textContent = 'Your personal WWZ home';
     root.querySelector('[data-my-wwz-subtitle]').textContent = 'Sign in with Discord to load your survivor, objectives, faction, events, orders and activity.';
     setMessage('Discord sign-in is required to load your personal command centre.', 'info');

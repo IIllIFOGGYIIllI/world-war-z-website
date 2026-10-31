@@ -174,8 +174,36 @@ const applyAccountSummary = (payload) => {
   setText('[data-profile-faction]', String(profile.faction || 'None'));
   setText('[data-profile-reputation]', new Intl.NumberFormat('en-AU').format(Number(profile.reputation) || 0));
   setText('[data-profile-streak]', new Intl.NumberFormat('en-AU').format(Number(pvp.current_streak) || 0));
+  setText('[data-profile-best-streak]', new Intl.NumberFormat('en-AU').format(Number(pvp.best_streak) || 0));
   setText('[data-profile-longest]', pvp.longest_kill_metres == null ? 'Not recorded' : `${Number(pvp.longest_kill_metres).toFixed(1)} m`);
   setText('[data-profile-weapon]', String(pvp.favourite_weapon || 'Not recorded'));
+
+  const favouriteOpponent = pvp.favourite_opponent;
+  setText(
+    '[data-profile-favourite-opponent]',
+    favouriteOpponent?.psn_id
+      ? String(favouriteOpponent.psn_id) + ' · ' + new Intl.NumberFormat('en-AU').format(Number(favouriteOpponent.kill_count) || 0) + ' kills'
+      : 'Not recorded'
+  );
+  const nemesis = pvp.nemesis;
+  setText(
+    '[data-profile-nemesis]',
+    nemesis?.psn_id
+      ? String(nemesis.psn_id) + ' · ' + new Intl.NumberFormat('en-AU').format(Number(nemesis.death_count) || 0) + ' deaths'
+      : 'Not recorded'
+  );
+  const lastKill = pvp.last_confirmed_kill;
+  const lastKillParts = [];
+  if (lastKill?.weapon) lastKillParts.push(String(lastKill.weapon));
+  if (lastKill?.distance_metres != null && Number.isFinite(Number(lastKill.distance_metres))) {
+    lastKillParts.push(Number(lastKill.distance_metres).toFixed(1) + ' m');
+  }
+  if (lastKill?.hit_location && String(lastKill.hit_location).toLowerCase() !== 'unknown') {
+    lastKillParts.push(String(lastKill.hit_location));
+  }
+  const lastKillDate = formatAccountDate(lastKill?.event_time);
+  if (lastKillDate && lastKillDate !== '—') lastKillParts.push(lastKillDate);
+  setText('[data-profile-last-kill]', lastKillParts.join(' · ') || 'Not recorded');
 
   const onlineState = document.querySelector('[data-profile-online-state]');
   onlineState?.classList.toggle('online', Boolean(profile.online));
