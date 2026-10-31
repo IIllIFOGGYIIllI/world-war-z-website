@@ -238,6 +238,23 @@
 .my-wwz-row[data-tone="high"] .my-wwz-row-side b { color: #e4c27e; }
 .my-wwz-row[data-tone="pvp"] .my-wwz-row-side b { color: #e9877f; }
 
+.my-wwz-survivor-card { min-height: 0; }
+.my-wwz-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  padding: 13px 15px 7px;
+}
+.my-wwz-stat-grid .my-wwz-metric { padding: 11px 12px; }
+.my-wwz-stat-grid .my-wwz-metric > strong { font-size: 15px; }
+.my-wwz-stat-grid .my-wwz-metric > small { white-space: normal; }
+.my-wwz-combat-highlights {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 18px;
+  padding: 0 12px 10px;
+}
+
 .my-wwz-empty { padding: 16px 0; }
 .my-wwz-empty strong, .my-wwz-empty small { display: block; }
 .my-wwz-empty strong { color: #c7ccd3; font-size: 11px; }
