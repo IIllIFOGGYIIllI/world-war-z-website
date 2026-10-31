@@ -398,7 +398,7 @@
       metric('Longest kill', longest, 'Confirmed distance'),
       metric('Event wins', number(profile.event_wins), 'Recorded victories'),
       metric('Flags captured', number(profile.flags_captured), 'Server profile'),
-      metric('Reputation', number(profile.reputation), 'Survivor record'),
+      metric('Reputation', formatNumber(profile.reputation), 'Survivor record'),
     );
 
     const favourite = pvp.favourite_opponent;
