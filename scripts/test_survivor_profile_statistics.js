@@ -30,8 +30,8 @@ for (const selector of ['data-admin-player-distance-travelled', 'data-admin-play
   assert.ok(page.includes(selector), 'Admin dossier is missing ' + selector);
   assert.ok(adminPlayers.includes(selector), 'Admin dossier renderer is missing ' + selector);
 }
-assert.ok(adminPlayers.includes('profile.distance_travelled_metres'), 'Admin dossier must render validated travel distance');
-assert.ok(adminPlayers.includes('profile.distance_tracked_since'), 'Admin dossier must show the travel tracking baseline');
+assert.ok(adminPlayers.includes('profile?.distance_travelled_metres'), 'Admin dossier must render validated travel distance');
+assert.ok(adminPlayers.includes('profile?.distance_tracked_since'), 'Admin dossier must show the travel tracking baseline');
 assert.ok(home.includes('profile.distance_travelled_metres'), 'Personal home must render validated travel distance');
 assert.ok(home.includes('profile.distance_tracked_since'), 'Personal home must indicate when distance tracking began');
 
