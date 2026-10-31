@@ -24,6 +24,7 @@ const syncMobileSidebar = () => {
     sidebar.setAttribute('aria-hidden', String(mobile && !open));
   }
   sidebarToggle?.setAttribute('aria-expanded', String(open));
+  sidebarToggle?.setAttribute('aria-label', open ? 'Close dashboard menu' : 'Open dashboard menu');
   document.body.classList.toggle('wwz-mobile-nav-open', open);
 };
 const closeSidebar = (restoreFocus = false) => {
@@ -35,6 +36,23 @@ const closeSidebar = (restoreFocus = false) => {
   if (wasOpen && mobileSidebarMedia.matches && (restoreFocus || focusedInside)) {
     sidebarToggle?.focus({ preventScroll: true });
   }
+};
+
+const getSidebarFocusableElements = () => {
+  if (!sidebar) return [];
+  const selector = [
+    'a[href]',
+    'button:not([disabled])',
+    'input:not([disabled]):not([type="hidden"])',
+    'select:not([disabled])',
+    'textarea:not([disabled])',
+    'summary',
+    '[tabindex]:not([tabindex="-1"])'
+  ].join(',');
+  return [...sidebar.querySelectorAll(selector)].filter((element) =>
+    element.getClientRects().length > 0 &&
+    !element.closest('[hidden], [inert], [aria-hidden="true"]')
+  );
 };
 
 sidebarToggle?.addEventListener('click', () => {
@@ -280,6 +298,24 @@ document.addEventListener('keydown', (event) => {
   if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
     event.preventDefault();
     openCommandPalette();
+    return;
+  }
+  if (event.key === 'Tab' && mobileSidebarMedia.matches && sidebar?.classList.contains('open')) {
+    const focusableElements = getSidebarFocusableElements();
+    if (!focusableElements.length) {
+      event.preventDefault();
+      sidebarToggle?.focus({ preventScroll: true });
+      return;
+    }
+    const activeIndex = focusableElements.indexOf(document.activeElement);
+    const lastIndex = focusableElements.length - 1;
+    if (event.shiftKey && activeIndex <= 0) {
+      event.preventDefault();
+      focusableElements[lastIndex].focus({ preventScroll: true });
+    } else if (!event.shiftKey && (activeIndex < 0 || activeIndex === lastIndex)) {
+      event.preventDefault();
+      focusableElements[0].focus({ preventScroll: true });
+    }
     return;
   }
   if (event.key === 'Escape') closeSidebar(true);
