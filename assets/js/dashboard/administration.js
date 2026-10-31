@@ -1586,12 +1586,220 @@ createWebhookButton?.addEventListener('click', async () => {
   if (created && webhookLabelInput) webhookLabelInput.value = '';
 });
 
+
+const ADMIN_PLAYER_LEADERBOARDS_URL = '/api/admin/players/leaderboards';
+const adminPlayerLeaderboardRoot = document.querySelector('[data-admin-player-leaderboards]');
+const adminPlayerLeaderboardServer = adminPlayerLeaderboardRoot?.querySelector('[data-admin-player-leaderboard-server]');
+const adminPlayerLeaderboardState = adminPlayerLeaderboardRoot?.querySelector('[data-admin-player-leaderboard-state]');
+const adminPlayerLeaderboardList = adminPlayerLeaderboardRoot?.querySelector('[data-admin-player-leaderboard-list]');
+const adminPlayerLeaderboardEmpty = adminPlayerLeaderboardRoot?.querySelector('[data-admin-player-leaderboard-empty]');
+const adminPlayerLeaderboardError = adminPlayerLeaderboardRoot?.querySelector('[data-admin-player-leaderboard-error]');
+const adminPlayerLeaderboardRefresh = adminPlayerLeaderboardRoot?.querySelector('[data-admin-player-leaderboard-refresh]');
+const adminPlayerLeaderboardTabs = [...(adminPlayerLeaderboardRoot?.querySelectorAll('[data-admin-player-leaderboard-category]') || [])];
+const ADMIN_PLAYER_LEADERBOARD_CATEGORIES = ['travelled', 'active', 'combat', 'progression', 'events'];
+let adminPlayerLeaderboardCategory = 'travelled';
+let adminPlayerLeaderboardRequestId = 0;
+let adminPlayerLeaderboardPayload = null;
+
+const adminLeaderboardServerKey = () => String(window.WWZServerContext?.getSelectedServer?.()?.key || '');
+
+const setAdminPlayerLeaderboardState = (message, state = 'idle') => {
+  if (!adminPlayerLeaderboardState) return;
+  adminPlayerLeaderboardState.textContent = message;
+  adminPlayerLeaderboardState.dataset.state = state;
+};
+
+const formatAdminLeaderboardNumber = (value) => new Intl.NumberFormat('en-AU').format(Math.max(0, Math.trunc(Number(value) || 0)));
+
+const formatAdminLeaderboardDistance = (value) => {
+  const metres = Math.max(0, Number(value) || 0);
+  if (metres >= 1000) {
+    return new Intl.NumberFormat('en-AU', { maximumFractionDigits: 1 }).format(metres / 1000) + ' km';
+  }
+  return formatAdminLeaderboardNumber(metres) + ' m';
+};
+
+const formatAdminLeaderboardDuration = (value) => {
+  const seconds = Math.max(0, Math.trunc(Number(value) || 0));
+  const days = Math.floor(seconds / 86400);
+  const hours = Math.floor((seconds % 86400) / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  if (days) return days + 'd ' + hours + 'h';
+  if (hours) return hours + 'h ' + minutes + 'm';
+  return minutes + 'm';
+};
+
+const adminLeaderboardMetric = (category, row) => {
+  if (category === 'travelled') {
+    return {
+      primary: formatAdminLeaderboardDistance(row?.distance_travelled_metres),
+      detail: 'Validated ADM travel total'
+    };
+  }
+  if (category === 'active') {
+    return {
+      primary: formatAdminLeaderboardDuration(row?.playtime_seconds),
+      detail: formatAdminLeaderboardNumber(row?.total_sessions) + ' sessions' + (row?.online ? ' · Online now' : '')
+    };
+  }
+  if (category === 'combat') {
+    const longest = row?.longest_kill_metres == null
+      ? 'No distance record'
+      : 'Longest ' + formatAdminLeaderboardDistance(row.longest_kill_metres);
+    return {
+      primary: formatAdminLeaderboardNumber(row?.kills) + ' kills',
+      detail: 'K/D ' + Math.max(0, Number(row?.kd_ratio) || 0).toFixed(2) + ' · ' + longest
+    };
+  }
+  if (category === 'progression') {
+    return {
+      primary: 'Level ' + formatAdminLeaderboardNumber(row?.level) + ' · Prestige ' + formatAdminLeaderboardNumber(row?.prestige),
+      detail: formatAdminLeaderboardNumber(row?.lifetime_xp) + ' lifetime XP'
+    };
+  }
+  return {
+    primary: formatAdminLeaderboardNumber(row?.event_wins) + ' event wins',
+    detail: 'Recorded server event victories'
+  };
+};
+
+const renderAdminPlayerLeaderboard = () => {
+  if (!adminPlayerLeaderboardList) return;
+  const rows = Array.isArray(adminPlayerLeaderboardPayload?.leaderboards?.[adminPlayerLeaderboardCategory])
+    ? adminPlayerLeaderboardPayload.leaderboards[adminPlayerLeaderboardCategory].slice(0, 10)
+    : [];
+  adminPlayerLeaderboardList.replaceChildren();
+  if (adminPlayerLeaderboardEmpty) adminPlayerLeaderboardEmpty.hidden = rows.length !== 0;
+  rows.forEach((row, index) => {
+    const item = document.createElement('li');
+    item.className = 'admin-player-leaderboard-row';
+
+    const rank = document.createElement('span');
+    rank.className = 'admin-player-leaderboard-rank';
+    rank.textContent = String(index + 1);
+
+    const identity = document.createElement('div');
+    identity.className = 'admin-player-leaderboard-identity';
+    const name = document.createElement('strong');
+    name.textContent = String(row?.display_name || row?.discord_name || row?.psn_id || 'Unknown survivor');
+    const psn = document.createElement('small');
+    psn.textContent = String(row?.psn_id || 'PlayStation ID unavailable');
+    identity.append(name, psn);
+
+    const metric = adminLeaderboardMetric(adminPlayerLeaderboardCategory, row);
+    const score = document.createElement('div');
+    score.className = 'admin-player-leaderboard-score';
+    const primary = document.createElement('strong');
+    primary.textContent = metric.primary;
+    const detail = document.createElement('small');
+    detail.textContent = metric.detail;
+    score.append(primary, detail);
+
+    item.append(rank, identity, score);
+    adminPlayerLeaderboardList.append(item);
+  });
+};
+
+const loadAdminPlayerLeaderboards = async () => {
+  const sessionToken = storageGet(AUTH_SESSION_KEY);
+  const serverKey = adminLeaderboardServerKey();
+  if (!adminPlayerLeaderboardRoot || !hasServerActionAccess() || !sessionToken || !serverKey) {
+    setAdminPlayerLeaderboardState('A verified Admin session and selected server are required.', 'error');
+    return;
+  }
+
+  const requestId = ++adminPlayerLeaderboardRequestId;
+  adminPlayerLeaderboardRefresh?.setAttribute('disabled', '');
+  adminPlayerLeaderboardRefresh?.setAttribute('aria-busy', 'true');
+  adminPlayerLeaderboardRoot.setAttribute('aria-busy', 'true');
+  if (adminPlayerLeaderboardError) adminPlayerLeaderboardError.hidden = true;
+  setAdminPlayerLeaderboardState('Loading the selected server’s top 10 rankings…', 'loading');
+
+  try {
+    const response = await authFetch(ADMIN_PLAYER_LEADERBOARDS_URL, {
+      method: 'GET',
+      headers: { Accept: 'application/json', Authorization: 'Bearer ' + sessionToken }
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (requestId !== adminPlayerLeaderboardRequestId || serverKey !== adminLeaderboardServerKey()) return;
+    if (handleAdminPlayerAuthorizationResponse(response, payload)) return;
+    if (!response.ok || payload.status !== 'ok' || payload.server?.key !== serverKey) {
+      throw new Error('Player leaderboard unavailable for the selected server');
+    }
+
+    adminPlayerLeaderboardPayload = payload;
+    const serverName = String(payload.server?.name || 'Selected server');
+    const mapName = String(payload.server?.map || 'Nasdara');
+    const mode = String(payload.server?.gameplay_mode || '').toUpperCase();
+    if (adminPlayerLeaderboardServer) {
+      adminPlayerLeaderboardServer.textContent = serverName + ' · ' + mapName + (mode ? ' · ' + mode : '');
+    }
+    renderAdminPlayerLeaderboard();
+    const count = adminPlayerLeaderboardPayload.leaderboards?.[adminPlayerLeaderboardCategory]?.length || 0;
+    setAdminPlayerLeaderboardState(
+      count + ' ranked player' + (count === 1 ? '' : 's') + ' · Top 10 · Selected server only',
+      count ? 'success' : 'idle'
+    );
+  } catch (error) {
+    if (requestId !== adminPlayerLeaderboardRequestId || serverKey !== adminLeaderboardServerKey()) return;
+    adminPlayerLeaderboardPayload = null;
+    adminPlayerLeaderboardList?.replaceChildren();
+    if (adminPlayerLeaderboardEmpty) adminPlayerLeaderboardEmpty.hidden = true;
+    if (adminPlayerLeaderboardError) adminPlayerLeaderboardError.hidden = false;
+    setAdminPlayerLeaderboardState('Player leaderboards are temporarily unavailable. Refresh to try again.', 'error');
+  } finally {
+    if (requestId === adminPlayerLeaderboardRequestId) {
+      adminPlayerLeaderboardRefresh?.removeAttribute('disabled');
+      adminPlayerLeaderboardRefresh?.removeAttribute('aria-busy');
+      adminPlayerLeaderboardRoot?.removeAttribute('aria-busy');
+    }
+  }
+};
+
+adminPlayerLeaderboardTabs.forEach((tab) => {
+  tab.addEventListener('click', () => {
+    const category = String(tab.dataset.adminPlayerLeaderboardCategory || '');
+    if (!ADMIN_PLAYER_LEADERBOARD_CATEGORIES.includes(category)) return;
+    adminPlayerLeaderboardCategory = category;
+    adminPlayerLeaderboardTabs.forEach((candidate) => {
+      const selected = candidate === tab;
+      candidate.classList.toggle('is-active', selected);
+      candidate.setAttribute('aria-pressed', String(selected));
+    });
+    if (adminPlayerLeaderboardPayload) {
+      renderAdminPlayerLeaderboard();
+      const count = adminPlayerLeaderboardPayload.leaderboards?.[category]?.length || 0;
+      setAdminPlayerLeaderboardState(
+        count + ' ranked player' + (count === 1 ? '' : 's') + ' · Top 10 · Selected server only',
+        count ? 'success' : 'idle'
+      );
+    } else {
+      loadAdminPlayerLeaderboards();
+    }
+  });
+});
+adminPlayerLeaderboardRefresh?.addEventListener('click', loadAdminPlayerLeaderboards);
+
+window.addEventListener('wwz:serverchange', () => {
+  adminPlayerLeaderboardRequestId += 1;
+  adminPlayerLeaderboardPayload = null;
+  adminPlayerLeaderboardList?.replaceChildren();
+  if (adminPlayerLeaderboardEmpty) adminPlayerLeaderboardEmpty.hidden = true;
+  if (adminPlayerLeaderboardError) adminPlayerLeaderboardError.hidden = true;
+  if (adminPlayerLeaderboardServer) adminPlayerLeaderboardServer.textContent = 'Loading selected server…';
+  setAdminPlayerLeaderboardState('Server changed. Loading its separate rankings…', 'loading');
+  if (adminPlayerLeaderboardRoot && !adminPlayerLeaderboardRoot.closest('[hidden]')) {
+    loadAdminPlayerLeaderboards();
+  }
+});
+
 const activateAdministrationView = ({ view = '', section = '' } = {}) => {
   if (view === 'staff' && section === 'queue') loadModerationQueue();
   if (view === 'staff' && section === 'cases') loadModerationCases();
   if (view === 'staff' && section === 'banlists') loadCurrentBanlists();
   if (view === 'staff' && section === 'failures') loadOperationFailures();
   if (view === 'staff' && section === 'server-audit') loadServerActionHistory();
+  if (view === 'staff' && section === 'players') loadAdminPlayerLeaderboards();
   if (view === 'configuration' && section === 'discord-onboarding') loadOnboardingConfiguration();
   if (view === 'configuration' && section === 'community-tools') loadCommunityTools();
   if (view === 'configuration' && section === 'discord-logs') loadDiscordLogConfiguration();
@@ -2823,6 +3031,7 @@ window.WWZAdministration = Object.freeze({
   resetAdminPlayerAdministration,
   openModerationCase,
   openPlayerDossier: loadAdminPlayerDetails,
+  loadPlayerLeaderboards: loadAdminPlayerLeaderboards,
 });
 window.__wwzAdministrationReady = true;
 
