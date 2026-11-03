@@ -1,0 +1,16 @@
+.wwz-gps-panel{margin:16px 0;padding:18px;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(6,5,5,.72))}
+.wwz-gps-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:12px}
+.wwz-gps-heading h3{margin:3px 0 4px;font-size:17px}.wwz-gps-heading p{margin:0;color:#8e8580;font-size:9px;line-height:1.5}
+.wwz-gps-range{display:grid;gap:5px;min-width:126px}.wwz-gps-range span{color:#817974;font-size:7px;font-weight:800;letter-spacing:.09em;text-transform:uppercase}
+.wwz-gps-range select{min-height:36px;padding:0 9px;border:1px solid var(--line);border-radius:8px;background:#12100f;color:var(--paper)}
+.wwz-gps-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}
+.wwz-gps-stat{display:grid;gap:4px;min-width:0;padding:10px 12px;border:1px solid rgba(255,255,255,.07);border-radius:8px;background:rgba(255,255,255,.02)}
+.wwz-gps-stat span{color:#817974;font-size:7px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.wwz-gps-stat strong{color:#ece8e3;font-size:13px;overflow-wrap:anywhere}
+.wwz-gps-map{position:relative;min-height:290px;height:clamp(290px,42vw,520px);overflow:hidden;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:#171b1e}
+.wwz-gps-map-loading{display:grid;min-height:290px;place-items:center;color:#a99f97;font-size:10px}
+.wwz-gps-timeline{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;margin-top:12px}
+.wwz-gps-timeline input{width:100%;accent-color:#d9a85a}.wwz-gps-timeline time{color:#d4c9b9;font-size:9px;white-space:nowrap}
+.wwz-gps-state{min-height:18px;margin:10px 0 0;color:#8e8580;font-size:8px;line-height:1.5}
+.wwz-gps-note{margin:8px 0 0;color:#817974;font-size:8px;line-height:1.55}
+@media(max-width:700px){.wwz-gps-panel{padding:13px}.wwz-gps-heading{flex-direction:column}.wwz-gps-range{width:100%}.wwz-gps-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.wwz-gps-map{height:300px;min-height:300px}.wwz-gps-timeline{grid-template-columns:1fr}.wwz-gps-timeline time{white-space:normal}}
