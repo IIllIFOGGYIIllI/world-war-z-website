@@ -26,7 +26,7 @@
     (Array.isArray(samples) ? samples : []).forEach((point) => {
       const nextSession = String(point?.session_key || '');
       const reason = String(point?.rejection_reason || '');
-      if (current.length && (nextSession !== session || (reason && reason !== 'chain_start'))) {
+      if (current.length && (nextSession !== session || Boolean(reason))) {
         output.push(current);
         current = [];
       }
