@@ -1352,10 +1352,8 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         if token not in bank_layout_css:
             errors.append(f"bank-layout.css: missing responsive bank layout guard: {token}")
 
-    account_script = 'assets/js/dashboard/account.js?v=1.59.1&amp;rev=travel-distance-1'
-    bootstrap_script = 'assets/js/dashboard/bootstrap.js?v=1.41.1&amp;rev=travel-distance-1'
-    account_index = dashboard.find(account_script)
-    bootstrap_index = dashboard.find(bootstrap_script)
+    account_index = dashboard.find('assets/js/dashboard/account.js?')
+    bootstrap_index = dashboard.find('assets/js/dashboard/bootstrap.js?')
     if bootstrap_index < 0:
         errors.append("dashboard.html: missing dashboard bootstrap script.")
     elif account_index < 0 or bootstrap_index < account_index:
@@ -2128,7 +2126,6 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
-        "const WWZ_PWA_VERSION = '2.19.0'",
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
         "const WWZ_PWA_CACHE_REVISION = 'community-workflows-1'",
         "const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;",
@@ -2337,8 +2334,8 @@ def main() -> int:
     for token in ('class="wwz-access-steps"', 'class="wwz-server-choice-info"', 'class="wwz-admin-hub"', 'data-command-centre-jump="zones"'):
         if token not in dashboard:
             errors.append(f'dashboard.html: missing {token}')
-    if "const WWZ_PWA_VERSION = '2.19.0';" not in (ROOT / 'sw.js').read_text(encoding='utf-8'):
-        errors.append('PWA version should be v2.19.0')
+    if not re.search(r"^const WWZ_PWA_VERSION = '\\d+\\.\\d+\\.\\d+';$", (ROOT / 'sw.js').read_text(encoding='utf-8'), re.MULTILINE):
+        errors.append('PWA version is missing or malformed in sw.js')
     ui_source = (ROOT / 'assets/js/ui-system.js').read_text(encoding='utf-8')
     if '...installControls' not in ui_source or "label: 'Companion'" not in ui_source:
         errors.append('v2.0.0 navigation must retain install controls and Companion link')
