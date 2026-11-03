@@ -122,6 +122,105 @@ const performBankAction = async (action) => {
   }
 };
 
+const formatCareerValue = (value, unit) => {
+  const amount = Math.max(0, Number(value) || 0);
+  if (unit === 'metres') {
+    return amount >= 1000
+      ? (amount / 1000).toLocaleString('en-AU', { maximumFractionDigits: 2 }) + ' km'
+      : Math.round(amount).toLocaleString('en-AU') + ' m';
+  }
+  if (unit === 'seconds') return formatDuration(amount);
+  return new Intl.NumberFormat('en-AU', { maximumFractionDigits: 1 }).format(amount);
+};
+
+const renderCareerRecords = (career = {}) => {
+  const recordsList = document.querySelector('[data-profile-career-records]');
+  const achievementsList = document.querySelector('[data-profile-career-achievements]');
+  if (!recordsList || !achievementsList) return;
+
+  const records = Array.isArray(career.records) ? career.records : [];
+  const achievements = Array.isArray(career.achievements) ? career.achievements : [];
+  const unlocked = Math.max(0, Math.trunc(Number(career.achievement_count) || 0));
+  const total = Math.max(0, Math.trunc(Number(career.achievement_total) || achievements.length));
+  setText('[data-profile-career-count]', `${unlocked} / ${total} unlocked`);
+
+  recordsList.replaceChildren();
+  if (!records.length) {
+    const empty = document.createElement('p');
+    empty.className = 'empty-state';
+    empty.textContent = 'Your career records will appear as verified activity is recorded.';
+    recordsList.append(empty);
+  } else {
+    records.forEach((record) => {
+      const card = document.createElement('article');
+      card.className = 'career-record-card';
+      const label = document.createElement('small');
+      label.textContent = String(record.label || 'Career record');
+      const value = document.createElement('strong');
+      value.textContent = formatCareerValue(record.value, record.unit);
+      const date = document.createElement('span');
+      const recorded = formatAccountDate(record.recorded_at);
+      date.textContent = recorded && recorded !== '—' ? `Best recorded ${recorded}` : 'Personal best';
+      card.append(label, value, date);
+      recordsList.append(card);
+    });
+  }
+
+  achievementsList.replaceChildren();
+  if (!achievements.length) {
+    const empty = document.createElement('p');
+    empty.className = 'empty-state';
+    empty.textContent = 'No career achievements are available yet.';
+    achievementsList.append(empty);
+    return;
+  }
+
+  achievements.forEach((achievement) => {
+    const isUnlocked = Boolean(achievement.unlocked);
+    const progress = Math.max(0, Number(achievement.progress) || 0);
+    const target = Math.max(0, Number(achievement.target) || 0);
+    const percent = Math.max(0, Math.min(100, Number(achievement.progress_percent) || 0));
+    const card = document.createElement('article');
+    card.className = `career-achievement-card ${isUnlocked ? 'is-unlocked' : 'is-locked'}`;
+
+    const meta = document.createElement('div');
+    meta.className = 'career-achievement-meta';
+    const category = document.createElement('span');
+    category.textContent = String(achievement.category || 'career');
+    const state = document.createElement('span');
+    state.className = 'career-achievement-state';
+    state.textContent = isUnlocked ? 'Unlocked' : 'In progress';
+    meta.append(category, state);
+
+    const title = document.createElement('h4');
+    title.textContent = String(achievement.title || 'Achievement');
+    const description = document.createElement('p');
+    description.textContent = String(achievement.description || '');
+
+    const track = document.createElement('div');
+    track.className = 'career-achievement-progress';
+    track.setAttribute('role', 'progressbar');
+    track.setAttribute('aria-valuemin', '0');
+    track.setAttribute('aria-valuemax', '100');
+    track.setAttribute('aria-valuenow', String(Math.round(percent)));
+    track.setAttribute('aria-label', `${title.textContent} progress`);
+    track.style.setProperty('--career-progress', `${percent}%`);
+    const fill = document.createElement('span');
+    track.append(fill);
+
+    const footer = document.createElement('div');
+    footer.className = 'career-achievement-footer';
+    const amount = document.createElement('span');
+    amount.textContent = `${formatCareerValue(progress, achievement.unit)} / ${formatCareerValue(target, achievement.unit)}`;
+    const date = document.createElement('span');
+    const recorded = isUnlocked ? formatAccountDate(achievement.recorded_at) : '';
+    date.textContent = recorded && recorded !== '—' ? `First recorded ${recorded}` : (isUnlocked ? 'Unlocked' : `${Math.round(percent)}% complete`);
+    footer.append(amount, date);
+    card.append(meta, title, description, track, footer);
+    achievementsList.append(card);
+  });
+};
+
 const applyAccountSummary = (payload) => {
   const profile = payload?.profile;
   const economy = payload?.economy;
@@ -150,6 +249,7 @@ const applyAccountSummary = (payload) => {
   document.querySelector('[data-economy-content]')?.removeAttribute('hidden');
 
   const pvp = profile.pvp || {};
+  renderCareerRecords(profile.career || {});
   const discord = payload.discord || {};
   const discordName = String(discord.display_name || authenticatedUser?.user?.display_name || 'Discord survivor');
   const discordUsername = String(discord.username || authenticatedUser?.user?.username || 'account');
