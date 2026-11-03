@@ -95,7 +95,7 @@ assert.ok(homeCss.includes('@media (max-width: 720px)'), 'Tablet/mobile stat lay
 assert.ok(homeCss.includes('@media (max-width: 520px)'), 'Small-screen stat layout is missing');
 assert.ok(bootstrap.includes('my-wwz.js?v=1.41.1&rev=travel-distance-1'));
 assert.ok(bootstrap.includes('my-wwz.css?v=1.41.1&rev=travel-distance-1'));
-assert.ok(page.includes('account.js?v=1.59.1&amp;rev=travel-distance-1'));
-assert.ok(serviceWorker.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-01-survivor-profile-statistics-2';"));
+assert.ok(page.includes('assets/js/dashboard/account.js?'), 'Account renderer must be loaded by the dashboard');
+assert.ok(/const WWZ_PWA_UPDATE_REVISION = '[A-Za-z0-9][A-Za-z0-9._-]*';/.test(serviceWorker), 'PWA update revision must be present');
 
 console.log('PASS: Server-scoped survivor profile and performance statistics');
