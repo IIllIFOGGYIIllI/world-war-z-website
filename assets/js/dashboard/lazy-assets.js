@@ -298,7 +298,7 @@
     loadStylesheetOnce('player-intelligence-css', 'assets/css/dashboard/player-intelligence.css?v=1.32.0&rev=player-leaderboards-1')
   ]).then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
     'administration',
-    'assets/js/dashboard/administration.js?v=1.54.2&rev=survivor-profile-statistics-2',
+    'assets/js/dashboard/administration.js?v=1.54.3&rev=player-gps-1',
     () => window.__wwzAdministrationReady === true
   )));
 
