@@ -512,7 +512,7 @@
           mapKey: server?.map_key || payload.server?.map_key,
           timeline: root.querySelector('[data-my-gps-timeline]'),
           timeLabel: root.querySelector('[data-my-gps-time]'),
-          status,
+          status: state,
         });
       } else {
         map.replaceChildren();
