@@ -2334,7 +2334,7 @@ def main() -> int:
     for token in ('class="wwz-access-steps"', 'class="wwz-server-choice-info"', 'class="wwz-admin-hub"', 'data-command-centre-jump="zones"'):
         if token not in dashboard:
             errors.append(f'dashboard.html: missing {token}')
-    if not re.search(r"^const WWZ_PWA_VERSION = '\\d+\\.\\d+\\.\\d+';$", (ROOT / 'sw.js').read_text(encoding='utf-8'), re.MULTILINE):
+    if not re.search(r"^const WWZ_PWA_VERSION = '[0-9]+[.][0-9]+[.][0-9]+';$", (ROOT / 'sw.js').read_text(encoding='utf-8'), re.MULTILINE):
         errors.append('PWA version is missing or malformed in sw.js')
     ui_source = (ROOT / 'assets/js/ui-system.js').read_text(encoding='utf-8')
     if '...installControls' not in ui_source or "label: 'Companion'" not in ui_source:
