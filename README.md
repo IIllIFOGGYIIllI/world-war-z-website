@@ -1,3 +1,13 @@
+## Survivor career records (3 November 2026)
+
+- The signed-in member profile now includes a dedicated Career Records & Achievements panel with lifetime personal records and 25 progress-based achievements.
+- Records and first-recorded unlocks are retained by the Bot and isolated to the selected server; Nasdara PvE and PvP never share career progress.
+- The panel uses existing verified movement, ADM playtime/session, confirmed PvP, event and flag statistics. It does not create additional XP/cash payouts or modify gameplay.
+- Paired Bot change: `Add survivor career records` (PR #16). Deploy the Bot API update before validating the live profile panel.
+- PWA release revision: `2026-11-03-survivor-career-2`; map tile/data cache generations are unchanged.
+
+---
+
 ## Nasdara Community Event Operations (20 October 2026)
 
 - Event Planner: four prefilled Nasdara-specific activity templates. Desert Relief Run, Survivor Rescue Patrol, Shelter Challenge are PvE; Military Recon Clash uses an existing verified military KILLZONE. No event positions are invented; Admin selects actual site/boundary.
