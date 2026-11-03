@@ -1,3 +1,9 @@
+const ADMIN_PLAYER_GPS_URL = `${DASHBOARD_API_BASE}/api/admin/players/gps-history`;
+const ADMIN_GPS_ACCESS_AUDIT_URL = `${DASHBOARD_API_BASE}/api/admin/gps/access-audit`;
+let adminGpsRequestId = 0;
+let adminGpsMapController = null;
+let adminGpsAuditLoaded = false;
+
 const auditSubsystemLabel = (value) => ({
   moderation: 'Moderation',
   players: 'Player Admin',
@@ -2755,6 +2761,138 @@ const renderAdminPlayerDetails = (payload) => {
   adminPlayerDetail?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 
+const adminGpsRoot = document.querySelector('[data-admin-player-gps]');
+const adminGpsMap = adminGpsRoot?.querySelector('[data-admin-gps-map]');
+const adminGpsRange = adminGpsRoot?.querySelector('[data-admin-gps-range]');
+const adminGpsState = adminGpsRoot?.querySelector('[data-admin-gps-state]');
+const adminGpsTimeline = adminGpsRoot?.querySelector('[data-admin-gps-timeline]');
+const adminGpsTime = adminGpsRoot?.querySelector('[data-admin-gps-time]');
+const adminGpsAuditRoot = adminGpsRoot?.querySelector('[data-admin-gps-audit]');
+const adminGpsAuditList = adminGpsRoot?.querySelector('[data-admin-gps-audit-list]');
+const adminGpsAuditEmpty = adminGpsRoot?.querySelector('[data-admin-gps-audit-empty]');
+
+const loadAdminPlayerGpsHistory = async ({ force = false } = {}) => {
+  const psnId = String(selectedAdminPlayer?.psnId || '').trim();
+  const sessionToken = storageGet(AUTH_SESSION_KEY);
+  if (!adminGpsRoot || !psnId || !hasServerActionAccess() || !sessionToken) return;
+  const requestId = ++adminGpsRequestId;
+  const days = Math.max(1, Math.min(14, Number(adminGpsRange?.value) || 7));
+  adminGpsRoot.hidden = false;
+  adminGpsRoot.setAttribute('aria-busy', 'true');
+  if (adminGpsState) adminGpsState.textContent = 'Loading protected player movement history…';
+  const refresh = adminGpsRoot.querySelector('[data-admin-gps-refresh]');
+  if (refresh) refresh.disabled = true;
+
+  try {
+    const response = await authFetch(`${ADMIN_PLAYER_GPS_URL}?psn=${encodeURIComponent(psnId)}&days=${encodeURIComponent(days)}`, {
+      method: 'GET',
+      headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` },
+      cache: 'no-store'
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (requestId !== adminGpsRequestId) return;
+    if (response.status === 401 || response.status === 403) {
+      throw new Error(payload?.message || 'Current Admin access is required to view player GPS history.');
+    }
+    if (!response.ok || payload.status !== 'ok') throw new Error(payload?.message || 'Player GPS history is unavailable.');
+
+    setText('[data-admin-gps-server]', `${payload.server?.name || 'Selected server'} · ${payload.server?.map_name || 'DayZ map'}`);
+    setText('[data-admin-gps-total]', window.WWZGpsTracker?.formatDistance(payload.total_distance_metres) || '—');
+    setText('[data-admin-gps-period]', window.WWZGpsTracker?.formatDistance(payload.period_distance_metres) || '—');
+    setText('[data-admin-gps-count]', Number(payload.sample_count || 0).toLocaleString('en-AU'));
+    setText('[data-admin-gps-latest]', payload.last_observed_at
+      ? new Date(payload.last_observed_at).toLocaleString('en-AU', { dateStyle: 'short', timeStyle: 'short' })
+      : 'Not recorded');
+
+    adminGpsMapController?.destroy?.();
+    adminGpsMapController = null;
+    if (Array.isArray(payload.samples) && payload.samples.length) {
+      await window.WWZLazyAssets?.ensureGpsTracker?.();
+      if (requestId !== adminGpsRequestId) return;
+      adminGpsMapController = await window.WWZGpsTracker.mount({
+        container: adminGpsMap,
+        payload,
+        mapKey: payload.server?.map_key || window.WWZServerContext?.getMapKey?.(),
+        timeline: adminGpsTimeline,
+        timeLabel: adminGpsTime,
+        status: adminGpsState
+      });
+    } else {
+      adminGpsMap?.replaceChildren();
+      const empty = document.createElement('div');
+      empty.className = 'wwz-gps-map-loading';
+      empty.textContent = 'No position history recorded for this player in the selected period.';
+      adminGpsMap?.append(empty);
+      if (adminGpsTime) adminGpsTime.textContent = '—';
+      if (adminGpsState) adminGpsState.textContent = 'No historical ADM position samples are available for this range.';
+    }
+    if (payload.truncated && adminGpsState) adminGpsState.textContent += ' Older retained points are outside the display limit.';
+    if (adminGpsAuditRoot && !adminGpsAuditRoot.hidden) loadAdminGpsAccessAudit();
+  } catch (error) {
+    if (requestId !== adminGpsRequestId) return;
+    if (adminGpsState) adminGpsState.textContent = error?.message || 'Player GPS history is temporarily unavailable.';
+  } finally {
+    if (requestId === adminGpsRequestId) {
+      adminGpsRoot.removeAttribute('aria-busy');
+      if (refresh) refresh.disabled = false;
+    }
+  }
+};
+
+const loadAdminGpsAccessAudit = async () => {
+  const sessionToken = storageGet(AUTH_SESSION_KEY);
+  if (!adminGpsAuditList || !hasServerActionAccess() || !sessionToken) return;
+  try {
+    const response = await authFetch(ADMIN_GPS_ACCESS_AUDIT_URL, {
+      method: 'GET',
+      headers: { Accept: 'application/json', Authorization: `Bearer ${sessionToken}` },
+      cache: 'no-store'
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (response.status === 401 || response.status === 403 || !response.ok || payload.status !== 'ok') {
+      throw new Error(payload?.message || 'GPS access audit unavailable.');
+    }
+    adminGpsAuditList.replaceChildren();
+    const rows = Array.isArray(payload.entries) ? payload.entries : [];
+    rows.forEach((entry) => {
+      const item = document.createElement('li');
+      const body = document.createElement('div');
+      const title = document.createElement('strong');
+      const meta = document.createElement('small');
+      title.textContent = `${entry.actor_name || 'Staff'} viewed ${entry.target_psn || 'a player'}`;
+      meta.textContent = `${entry.range_days} day range · ${Number(entry.result_count || 0).toLocaleString('en-AU')} positions · ${entry.accessed_at ? new Date(entry.accessed_at).toLocaleString('en-AU', { dateStyle: 'medium', timeStyle: 'short' }) : 'time unavailable'}`;
+      body.append(title, meta);
+      item.append(body);
+      adminGpsAuditList.append(item);
+    });
+    if (adminGpsAuditEmpty) adminGpsAuditEmpty.hidden = rows.length !== 0;
+    adminGpsAuditLoaded = true;
+  } catch (error) {
+    adminGpsAuditList.replaceChildren();
+    const item = document.createElement('li');
+    item.textContent = error?.message || 'GPS access audit unavailable.';
+    adminGpsAuditList.append(item);
+  }
+};
+
+adminGpsRange?.addEventListener('change', () => loadAdminPlayerGpsHistory({ force: true }));
+adminGpsRoot?.querySelector('[data-admin-gps-refresh]')?.addEventListener('click', () => loadAdminPlayerGpsHistory({ force: true }));
+adminGpsRoot?.querySelector('[data-admin-gps-audit-toggle]')?.addEventListener('click', () => {
+  if (!adminGpsAuditRoot) return;
+  adminGpsAuditRoot.hidden = !adminGpsAuditRoot.hidden;
+  if (!adminGpsAuditRoot.hidden || !adminGpsAuditLoaded) loadAdminGpsAccessAudit();
+});
+
+window.addEventListener('wwz:serverchange', () => {
+  adminGpsRequestId += 1;
+  adminGpsMapController?.destroy?.();
+  adminGpsMapController = null;
+  adminGpsAuditLoaded = false;
+  if (selectedAdminPlayer?.psnId && adminPlayerDetail && !adminPlayerDetail.hidden) {
+    loadAdminPlayerGpsHistory({ force: true });
+  }
+});
+
 const loadAdminPlayerDetails = async (psnId) => {
   const sessionToken = storageGet(AUTH_SESSION_KEY);
   if (!hasServerActionAccess() || !sessionToken || adminPlayerDetailRequestInProgress) return;
@@ -2776,6 +2914,7 @@ const loadAdminPlayerDetails = async (psnId) => {
     }
     if (!response.ok || payload.status !== 'ok') throw new Error('Player details unavailable');
     renderAdminPlayerDetails(payload);
+    loadAdminPlayerGpsHistory({ force: true });
     setAdminPlayerSearchState(`Showing protected administration controls for ${psnId}.`, 'success');
   } catch (error) {
     selectedAdminPlayer = null;
