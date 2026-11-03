@@ -282,7 +282,18 @@
     () => window.__wwzAppealsReady === true
   )));
 
+  const ensureGpsTracker = () => Promise.all([
+    ensureMapRuntime(),
+    loadStylesheetOnce('gps-tracker-css', 'assets/css/dashboard/gps-tracker.css?v=1.0.0&rev=player-gps-1'),
+    loadAfterDashboardRuntime(() => loadScriptOnce(
+      'gps-tracker',
+      'assets/js/dashboard/gps-tracker.js?v=1.0.0&rev=player-gps-1',
+      () => window.__wwzGpsTrackerReady === true
+    ))
+  ]).then(() => undefined);
+
   const ensureAdministration = () => Promise.all([
+    ensureGpsTracker(),
     ensureModerationStyles(),
     loadStylesheetOnce('player-intelligence-css', 'assets/css/dashboard/player-intelligence.css?v=1.32.0&rev=player-leaderboards-1')
   ]).then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
@@ -583,6 +594,7 @@
     ensureProgressionStyles,
     ensureTicketsStyles,
     ensureFactionsStyles,
+    ensureGpsTracker,
     ensureProgression,
     ensureShopController,
     ensureShopHelpers,

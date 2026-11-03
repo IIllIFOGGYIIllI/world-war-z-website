@@ -7,6 +7,7 @@
 
   const API = Object.freeze({
     home: `${DASHBOARD_API_BASE}/api/account/home`,
+    gps: `${DASHBOARD_API_BASE}/api/account/gps-history`,
     status: SERVER_STATUS_URL,
     chernarus: `${DASHBOARD_API_BASE}/api/chernarus/pve`,
     livonia: `${DASHBOARD_API_BASE}/api/livonia/pvp`,
@@ -18,6 +19,9 @@
   let transientTimer = 0;
   let refreshInProgress = false;
   let lastSnapshot = null;
+  let gpsRequestId = 0;
+  let gpsHistoryKey = '';
+  let gpsMapController = null;
 
   const token = () => {
     try { return storageGet(AUTH_SESSION_KEY) || ''; } catch (_) { return ''; }
@@ -209,6 +213,25 @@
           <div class="my-wwz-combat-highlights" data-my-wwz-combat-highlights></div>
           <footer><button class="my-wwz-link" data-my-wwz-profile-open type="button">Open full Survivor Profile →</button></footer>
         </article>
+        <article class="my-wwz-card my-wwz-card-wide wwz-gps-panel" data-my-wwz-gps hidden>
+          <header class="wwz-gps-heading">
+            <div><span>GPS ROUTE HISTORY</span><h2>Your Journey</h2><p>Recorded movement snapshots for this server only.</p></div>
+            <div class="heading-actions">
+              <label class="wwz-gps-range"><span>History range</span><select data-my-gps-range><option value="1">Last 24 hours</option><option value="3">Last 3 days</option><option value="7" selected>Last 7 days</option><option value="14">Last 14 days</option></select></label>
+              <button class="secondary-action compact-action" data-my-gps-refresh type="button">Refresh Route</button>
+            </div>
+          </header>
+          <div class="wwz-gps-stats" aria-label="Journey summary">
+            <div class="wwz-gps-stat"><span>All-time distance</span><strong data-my-gps-total>—</strong></div>
+            <div class="wwz-gps-stat"><span>Selected period</span><strong data-my-gps-period>—</strong></div>
+            <div class="wwz-gps-stat"><span>Recorded positions</span><strong data-my-gps-count>—</strong></div>
+            <div class="wwz-gps-stat"><span>Latest observation</span><strong data-my-gps-latest>—</strong></div>
+          </div>
+          <div class="wwz-gps-map" data-my-gps-map aria-label="Your recorded movement route on the selected DayZ map"></div>
+          <div class="wwz-gps-timeline"><input aria-label="Replay route timeline" data-my-gps-timeline type="range" min="0" max="0" value="0" disabled><time data-my-gps-time>—</time></div>
+          <p class="wwz-gps-state" data-my-gps-state role="status">Loading your recorded route…</p>
+          <p class="wwz-gps-note">Historical ADM snapshots only — not continuous or live GPS. Gaps are preserved across reconnects and rejected jumps. Route history is retained for up to 14 days; validated all-time distance remains on your career record.</p>
+        </article>
         <article class="my-wwz-card" data-my-wwz-faction>
           <header><div><span>FACTION</span><h2>Your Group</h2></div><b data-my-wwz-faction-state>Independent</b></header>
           <div class="my-wwz-card-body" data-my-wwz-faction-body></div>
@@ -247,6 +270,8 @@
     root.querySelector('[data-my-wwz-shop-open]')?.addEventListener('click', () => nav('shop', 'catalogue'));
     root.querySelector('[data-my-wwz-tickets-open]')?.addEventListener('click', () => nav('tickets', 'support'));
     root.querySelector('[data-my-wwz-world-open]')?.addEventListener('click', () => openWorld());
+    root.querySelector('[data-my-gps-range]')?.addEventListener('change', () => loadPlayerGps({ force: true }));
+    root.querySelector('[data-my-gps-refresh]')?.addEventListener('click', () => loadPlayerGps({ force: true }));
     renderQuickLinks();
     return root;
   };
@@ -442,6 +467,70 @@
         detail: lastKillDetail || 'No confirmed kill recorded yet',
       }),
     );
+  };
+
+  const loadPlayerGps = async ({ force = false } = {}) => {
+    if (!root?.isConnected || !token() || !lastSnapshot) return;
+    const profile = lastSnapshot.home?.profile || {};
+    const card = root.querySelector('[data-my-wwz-gps]');
+    if (!profile.linked || !profile.verified) {
+      card.hidden = true;
+      return;
+    }
+    card.hidden = false;
+    const days = Math.max(1, Math.min(14, Number(root.querySelector('[data-my-gps-range]')?.value) || 7));
+    const server = selectedServer();
+    const serverKey = String(server?.key || server?.name || server?.map_key || '');
+    const requestKey = serverKey + ':' + days;
+    if (!force && gpsHistoryKey === requestKey) return;
+    const requestId = ++gpsRequestId;
+    gpsHistoryKey = requestKey;
+    const state = root.querySelector('[data-my-gps-state]');
+    const refreshButton = root.querySelector('[data-my-gps-refresh]');
+    if (state) state.textContent = 'Loading recorded route…';
+    if (refreshButton) refreshButton.disabled = true;
+    try {
+      const payload = await requestJson(API.gps + '?days=' + encodeURIComponent(days), { auth: true });
+      if (requestId !== gpsRequestId || !card.isConnected) return;
+      const total = payload.total_distance_metres || 0;
+      const period = payload.period_distance_metres || 0;
+      root.querySelector('[data-my-gps-total]').textContent = window.WWZGpsTracker?.formatDistance(total) || Math.round(total) + ' m';
+      root.querySelector('[data-my-gps-period]').textContent = window.WWZGpsTracker?.formatDistance(period) || Math.round(period) + ' m';
+      root.querySelector('[data-my-gps-count]').textContent = Number(payload.sample_count || 0).toLocaleString('en-AU');
+      root.querySelector('[data-my-gps-latest]').textContent = payload.last_observed_at
+        ? new Date(payload.last_observed_at).toLocaleString('en-AU', { dateStyle: 'short', timeStyle: 'short' })
+        : 'Not recorded';
+      const map = root.querySelector('[data-my-gps-map]');
+      if (gpsMapController?.destroy) gpsMapController.destroy();
+      gpsMapController = null;
+      if (Array.isArray(payload.samples) && payload.samples.length) {
+        await window.WWZLazyAssets?.ensureGpsTracker?.();
+        if (requestId !== gpsRequestId || !card.isConnected) return;
+        gpsMapController = await window.WWZGpsTracker.mount({
+          container: map,
+          payload,
+          mapKey: server?.map_key || payload.server?.map_key,
+          timeline: root.querySelector('[data-my-gps-timeline]'),
+          timeLabel: root.querySelector('[data-my-gps-time]'),
+          status: state,
+        });
+      } else {
+        map.replaceChildren();
+        const empty = document.createElement('div');
+        empty.className = 'wwz-gps-map-loading';
+        empty.textContent = 'No position history recorded for this period yet.';
+        map.append(empty);
+        root.querySelector('[data-my-gps-time]').textContent = '—';
+        if (state) state.textContent = 'Your next recorded ADM snapshots will appear here.';
+      }
+      if (payload.truncated && state) state.textContent += ' Older points are outside the displayed sample limit.';
+    } catch (error) {
+      if (requestId !== gpsRequestId) return;
+      gpsHistoryKey = '';
+      if (state) state.textContent = error?.message || 'GPS history is temporarily unavailable.';
+    } finally {
+      if (requestId === gpsRequestId && refreshButton) refreshButton.disabled = false;
+    }
   };
 
   const renderNext = (snapshot) => {
@@ -644,6 +733,7 @@
     renderHero(snapshot);
     renderMetrics(snapshot);
     renderSurvivorStats(snapshot);
+    loadPlayerGps();
     renderNext(snapshot);
     renderWorld(snapshot);
     renderProgress(snapshot);
@@ -682,6 +772,11 @@
     overviewPanel.classList.remove('member-home-ready');
     root.dataset.state = 'guest';
     root.querySelector('[data-my-wwz-survivor-stats]').hidden = true;
+    root.querySelector('[data-my-wwz-gps]').hidden = true;
+    gpsHistoryKey = '';
+    gpsRequestId += 1;
+    gpsMapController?.destroy?.();
+    gpsMapController = null;
     root.querySelector('[data-my-wwz-title]').textContent = 'Your personal WWZ home';
     root.querySelector('[data-my-wwz-subtitle]').textContent = 'Sign in with Discord to load your survivor, objectives, faction, events, orders and activity.';
     setMessage('Discord sign-in is required to load your personal command centre.', 'info');
@@ -756,6 +851,10 @@
   });
   window.addEventListener('wwz:serverchange', () => {
     lastSnapshot = null;
+    gpsHistoryKey = '';
+    gpsRequestId += 1;
+    gpsMapController?.destroy?.();
+    gpsMapController = null;
     renderQuickLinks();
     if (active) refresh({ force: true });
   });
