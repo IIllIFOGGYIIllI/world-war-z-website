@@ -1,0 +1,164 @@
+.survivor-career-panel {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.survivor-career-panel > .panel-heading {
+  align-items: flex-start;
+}
+
+.survivor-career-panel .panel-heading .panel-note {
+  margin: 0.45rem 0 0;
+  max-width: 52rem;
+}
+
+.career-record-section,
+.career-achievement-section {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.career-record-section > h3,
+.career-achievement-heading h3 {
+  margin: 0;
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+}
+
+.career-record-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
+  gap: 0.75rem;
+}
+
+.career-record-card {
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--border, rgba(255,255,255,0.1));
+  border-radius: 14px;
+  background: var(--panel-soft, rgba(255,255,255,0.025));
+}
+
+.career-record-card small,
+.career-record-card strong,
+.career-record-card span {
+  display: block;
+}
+
+.career-record-card small {
+  color: var(--muted, #9aa4b2);
+  font-size: 0.75rem;
+}
+
+.career-record-card strong {
+  margin-top: 0.35rem;
+  font-size: clamp(1.1rem, 2vw, 1.45rem);
+  overflow-wrap: anywhere;
+}
+
+.career-record-card span {
+  margin-top: 0.3rem;
+  color: var(--muted, #9aa4b2);
+  font-size: 0.72rem;
+}
+
+.career-achievement-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.career-achievement-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 235px), 1fr));
+  gap: 0.75rem;
+}
+
+.career-achievement-card {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 0.55rem;
+  padding: 1rem;
+  border: 1px solid var(--border, rgba(255,255,255,0.1));
+  border-radius: 14px;
+  background: var(--panel-soft, rgba(255,255,255,0.025));
+}
+
+.career-achievement-card.is-unlocked {
+  border-color: rgba(89, 183, 132, 0.38);
+  background: rgba(89, 183, 132, 0.055);
+}
+
+.career-achievement-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  color: var(--muted, #9aa4b2);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.career-achievement-state {
+  flex: 0 0 auto;
+  font-weight: 700;
+}
+
+.career-achievement-card.is-unlocked .career-achievement-state {
+  color: #78d6a3;
+}
+
+.career-achievement-card h4 {
+  margin: 0;
+  font-size: 0.98rem;
+}
+
+.career-achievement-card p {
+  min-height: 2.6em;
+  margin: 0;
+  color: var(--muted, #9aa4b2);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.career-achievement-progress {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: rgba(255,255,255,0.09);
+}
+
+.career-achievement-progress span {
+  display: block;
+  width: var(--career-progress, 0%);
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent, #c9a96e);
+}
+
+.career-achievement-card.is-unlocked .career-achievement-progress span {
+  background: #59b784;
+}
+
+.career-achievement-footer {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  color: var(--muted, #9aa4b2);
+  font-size: 0.72rem;
+}
+
+@media (max-width: 640px) {
+  .survivor-career-panel {
+    gap: 1.1rem;
+  }
+
+  .career-achievement-card p {
+    min-height: 0;
+  }
+}
