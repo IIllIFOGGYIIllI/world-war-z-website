@@ -284,10 +284,10 @@
 
   const ensureGpsTracker = () => Promise.all([
     ensureMapRuntime(),
-    loadStylesheetOnce('gps-tracker-css', 'assets/css/dashboard/gps-tracker.css?v=1.0.0&rev=player-gps-1'),
+    loadStylesheetOnce('gps-tracker-css', 'assets/css/dashboard/gps-tracker.css?v=1.0.0&rev=player-gps-2'),
     loadAfterDashboardRuntime(() => loadScriptOnce(
       'gps-tracker',
-      'assets/js/dashboard/gps-tracker.js?v=1.0.1&rev=player-gps-3',
+      'assets/js/dashboard/gps-tracker.js?v=1.0.1&rev=player-gps-4',
       () => window.__wwzGpsTrackerReady === true
     ))
   ]).then(() => undefined);

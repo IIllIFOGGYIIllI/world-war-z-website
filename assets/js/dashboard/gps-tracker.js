@@ -106,21 +106,21 @@
       splitSamples(samples.slice(0, index + 1)).forEach((segment) => {
         const points = projectSamples(segment, mapKey);
         if (points.length >= 2) {
-          // The replayed portion uses a separate magenta highlight with the
+          // The replayed portion uses a separate yellow highlight with the
           // same dark casing so it is distinct from the cyan full route.
           L.polyline(points, {
             color: '#06131b', weight: 10, opacity: 0.98,
             lineCap: 'round', lineJoin: 'round', interactive: false,
           }).addTo(progressLayer);
           L.polyline(points, {
-            color: '#FF4FD8', weight: 5.5, opacity: 1,
+            color: '#ffd84a', weight: 5.5, opacity: 1,
             lineCap: 'round', lineJoin: 'round', interactive: false,
           }).addTo(progressLayer);
         }
       });
       const selected = samplePositions[index] || last || first;
       if (selected) L.circleMarker(selected, {
-        radius: 7, color: '#FF9DEA', weight: 2.5, fillColor: '#8A245F', fillOpacity: 1,
+        radius: 7, color: '#f6d17b', weight: 2.5, fillColor: '#8e5f19', fillOpacity: 1,
       }).bindTooltip('Selected route position').addTo(progressLayer);
       if (timeLabel) timeLabel.textContent = formatTime(samples[index]?.observed_at);
     };
