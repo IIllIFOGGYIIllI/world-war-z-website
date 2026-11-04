@@ -287,7 +287,7 @@
     loadStylesheetOnce('gps-tracker-css', 'assets/css/dashboard/gps-tracker.css?v=1.0.0&rev=player-gps-1'),
     loadAfterDashboardRuntime(() => loadScriptOnce(
       'gps-tracker',
-      'assets/js/dashboard/gps-tracker.js?v=1.0.1&rev=player-gps-2',
+      'assets/js/dashboard/gps-tracker.js?v=1.0.1&rev=player-gps-3',
       () => window.__wwzGpsTrackerReady === true
     ))
   ]).then(() => undefined);
