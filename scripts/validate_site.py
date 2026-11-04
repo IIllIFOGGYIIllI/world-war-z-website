@@ -1120,7 +1120,8 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     for token, message in (
         ("requestedXRaw = params.get('x')", "map-link.js: missing explicit X query-presence guard."),
         ("requestedZRaw = params.get('z')", "map-link.js: missing explicit Z query-presence guard."),
-        ("Math.hypot(dx, dz) <= 75", "map-link.js: missing nearby-POI fallback deduplication guard."),
+        ("const unique = [], seen = new Set();", "map-link.js: missing public POI deduplication guard."),
+        ("if (seen.has(key)) continue;", "map-link.js: missing duplicate public POI rejection guard."),
     ):
         if token not in map_link_js:
             errors.append(message)
@@ -1940,7 +1941,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
 
     launch_requirements = {
         "index.html": ("PvE + PvP", "91 random spawn loadouts", "Fortnightly", "Full PvP"),
-        "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/lazy-assets.js?v=2.8.6&amp;rev=player-gps-1&amp;leaderboardfix=1"),
+        "dashboard.html": ("Nasdara PvE / PvP isolated", "assets/js/dashboard/lazy-assets.js?v=2.8.6&amp;rev=player-gps-1&amp;leaderboardfix=1"),
         "assets/js/dashboard/server-context.js": ("player_capacity", "Capacity', `${server.player_capacity} slots`"),
         "assets/js/dashboard/account.js": ("payload.server?.player_capacity",),
     }
@@ -1948,7 +1949,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
         source = (ROOT / relative).read_text(encoding="utf-8")
         for token in tokens:
             if token not in source:
-                errors.append(f"{relative}: missing Livonia live-launch integration token: {token}")
+                errors.append(f"{relative}: missing current Nasdara integration token: {token}")
 
     # Server-context cache keys advance with world changes; ensure the
     # actual Livonia-aware controller is present and versioned instead.
