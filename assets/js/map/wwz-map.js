@@ -8,34 +8,6 @@
   const MAX_ZOOM = 8;
   const PRODUCTION_WIDTH_MULTIPLIER = 1.80;
   const MAP_CONFIGS = Object.freeze({
-    chernarus: Object.freeze({
-      key: 'chernarus',
-      name: 'Chernarus',
-      mapMetres: 15360,
-      mapUnits: 240,
-      satelliteUrl: 'assets/maps/chernarus/tiles/z{z}/{y}/{x}.webp?v=1.22.90',
-      roadUrl: 'assets/maps/chernarus/roads.geojson?v=1.22.90',
-      labelUrl: 'assets/maps/chernarus/labels.json?v=1.22.90',
-      roadOrder: ['paved_primary', 'paved_secondary', 'bridge', 'paved_local', 'city', 'gravel', 'paved_other', 'mud', 'trail'],
-      roadGroups: Object.freeze({
-        paved: ['paved_primary', 'paved_secondary', 'bridge', 'paved_local', 'city', 'paved_other'],
-        gravel: ['gravel'],
-        mud: ['mud'],
-        trail: ['trail']
-      }),
-      trailGroups: ['trail'],
-      roadStyles: Object.freeze({
-        paved_primary:   { label: 'Primary paved',   minZoom: 0, width: 3.40, colour: '#f2ead8', casing: '#393224', opacity: 0.98 },
-        paved_secondary: { label: 'Secondary paved', minZoom: 0, width: 3.00, colour: '#ddc386', casing: '#393224', opacity: 0.96 },
-        paved_local:     { label: 'Local paved',     minZoom: 0, width: 2.50, colour: '#d79a62', casing: '#34312a', opacity: 0.94 },
-        city:            { label: 'Town / city',     minZoom: 0, width: 2.40, colour: '#c7b59a', casing: '#34312a', opacity: 0.92 },
-        bridge:          { label: 'Bridge',          minZoom: 0, width: 3.60, colour: '#f1e5b8', casing: '#2d2921', opacity: 1.00 },
-        paved_other:     { label: 'Other paved',     minZoom: 0, width: 2.20, colour: '#aaa9a1', casing: '#33312b', opacity: 0.90 },
-        gravel:          { label: 'Gravel',          minZoom: 0, width: 2.10, colour: '#b99a72', casing: '#40392c', opacity: 0.88 },
-        mud:             { label: 'Dirt / mud',      minZoom: 0, width: 1.80, colour: '#936d4c', casing: '#3b3024', opacity: 0.84 },
-        trail:           { label: 'Trails / paths',  minZoom: 0, width: 1.50, colour: '#8d9661', casing: '#353128', opacity: 0.72 }
-      })
-    }),
     badlands: Object.freeze({
       key: 'badlands',
       name: 'Badlands / Nasdara',
@@ -54,34 +26,6 @@
       roadStyles:Object.freeze({
         nasdara_paved:{label:'Paved roads',minZoom:0,width:3.9,colour:'#f2d35b',casing:'#59451f',opacity:.98},
         nasdara_dirt:{label:'Dirt roads',minZoom:0,width:2.2,colour:'#c7ad86',casing:'#4a3a29',opacity:.88}
-      })
-    }),
-    livonia: Object.freeze({
-      key: 'livonia',
-      name: 'Livonia',
-      mapMetres: 12800,
-      mapUnits: 240,
-      satelliteUrl: 'assets/maps/livonia/tiles/{z}/{x}/{y}.webp?v=1.22.90',
-      roadUrl: 'assets/maps/livonia/roads.geojson?v=1.22.90',
-      labelUrl: 'assets/maps/livonia/labels.json?v=1.22.90',
-      roadOrder: ['asf1enoch', 'asf2enoch', 'bridge', 'taxiway', 'mudenoch', 'quarryenoch', 'path_dirt', 'path_rock', 'centerline'],
-      roadGroups: Object.freeze({
-        paved: ['asf1enoch', 'asf2enoch', 'bridge', 'taxiway', 'centerline'],
-        gravel: ['quarryenoch'],
-        mud: ['mudenoch'],
-        trail: ['path_dirt', 'path_rock']
-      }),
-      trailGroups: ['path_dirt', 'path_rock'],
-      roadStyles: Object.freeze({
-        asf1enoch:  { label: 'Primary paved',   minZoom: 0, width: 3.70, colour: '#fff5cf', casing: '#483d2d', opacity: 0.98 },
-        asf2enoch:  { label: 'Secondary paved', minZoom: 0, width: 3.00, colour: '#eadcae', casing: '#514735', opacity: 0.96 },
-        mudenoch:   { label: 'Mud road',        minZoom: 1, width: 2.30, colour: '#b89b73', casing: '#514638', opacity: 0.90 },
-        quarryenoch:{ label: 'Quarry road',     minZoom: 1, width: 2.20, colour: '#c8b58b', casing: '#51483c', opacity: 0.90 },
-        path_dirt:  { label: 'Dirt paths',      minZoom: 2, width: 1.70, colour: '#997c58', casing: '#483d32', opacity: 0.82, dashArray: '6 4' },
-        path_rock:  { label: 'Rock paths',      minZoom: 2, width: 1.60, colour: '#827768', casing: '#403b34', opacity: 0.78, dashArray: '4 4' },
-        bridge:     { label: 'Bridge',          minZoom: 0, width: 4.30, colour: '#fff9dc', casing: '#302b23', opacity: 1.00 },
-        taxiway:    { label: 'Taxiway',         minZoom: 1, width: 3.70, colour: '#d9d9d9', casing: '#454545', opacity: 0.92 },
-        centerline: { label: 'Centerline',      minZoom: 0, width: 1.80, colour: '#ff40ff', casing: '#40223f', opacity: 0.86, dashArray: '5 4' }
       })
     })
   });
@@ -130,9 +74,9 @@
     return number.toFixed(decimals);
   };
 
-  const getConfig = (mapKey = 'chernarus') => MAP_CONFIGS[String(mapKey || '').toLowerCase()] || null;
+  const getConfig = (mapKey = 'badlands') => MAP_CONFIGS[String(mapKey || '').toLowerCase()] || null;
 
-  const worldToLeaflet = (coordinate, mapKey = 'chernarus') => {
+  const worldToLeaflet = (coordinate, mapKey = 'badlands') => {
     const config = getConfig(mapKey);
     if (!config) return null;
     const scale = config.mapUnits / config.mapMetres;
@@ -142,7 +86,7 @@
     return [(z - config.mapMetres) * scale, x * scale];
   };
 
-  const leafletToWorld = (latlng, mapKey = 'chernarus') => {
+  const leafletToWorld = (latlng, mapKey = 'badlands') => {
     const config = getConfig(mapKey);
     if (!config) return null;
     const scale = config.mapUnits / config.mapMetres;
@@ -303,22 +247,7 @@
     return Math.min(2.45, 1.10 + ((z - 6) * 0.18));
   };
 
-  const roadClassOpacity = (config, group, zoom) => {
-    if (config.key !== 'chernarus') return 1;
-    if (zoom <= 1) {
-      if (group === 'trail') return 0.30;
-      if (group === 'mud') return 0.42;
-      if (group === 'gravel') return 0.58;
-      if (group === 'paved_local') return 0.72;
-      return 1;
-    }
-    if (zoom <= 3) {
-      if (group === 'trail') return 0.55;
-      if (group === 'mud') return 0.68;
-      if (group === 'gravel') return 0.82;
-    }
-    return 1;
-  };
+  const roadClassOpacity = () => 1;
 
   const fallbackCopy = (text) => {
     const field = document.createElement('textarea');

@@ -4,7 +4,7 @@
   const API_BASE = 'https://world-war-z.up.railway.app';
   const params = new URLSearchParams(window.location.search);
   const mapKey = String(params.get('map') || 'badlands').trim().toLowerCase();
-  const serverKey = String(params.get('server') || (mapKey === 'livonia' ? 'livonia' : 'world-war-z')).trim().toLowerCase();
+  const serverKey = String(params.get('server') || 'world-war-z').trim().toLowerCase();
   const viewMode = String(params.get('view') || '').trim().toLowerCase();
   const requestedMarker = String(params.get('marker') || '').trim().slice(0, 80);
   const requestedPoi = String(params.get('poi') || '').trim().slice(0, 100);
@@ -15,16 +15,6 @@
   const requestedZ = requestedZRaw === null || requestedZRaw.trim() === '' ? Number.NaN : Number(requestedZRaw);
   const hasRequestedCoordinates = requestedXRaw !== null && requestedZRaw !== null && Number.isFinite(requestedX) && Number.isFinite(requestedZ);
 
-  const STATIC_CHERNARUS_POIS = Object.freeze([
-    { id:'public-radio-zenit-fallback', name:'Radio Zenit Trader', category:'Trader', description:'World War Z public trader.', colour:'amber', x:8143, z:9156, fallback:true },
-    { id:'public-cherno-builder-shed', name:'Chernogorsk Builder Shed', category:'Builder Shed', description:'Public Chernarus builder shed.', colour:'green', x:5726, z:3136 },
-    { id:'public-pustoshka-builder-shed', name:'Pustoshka Builder Shed', category:'Builder Shed', description:'Public Chernarus builder shed.', colour:'green', x:3022, z:7496 },
-    { id:'public-stary-sobor-builder-shed', name:'Stary Sobor Builder Shed', category:'Builder Shed', description:'Public Chernarus builder shed.', colour:'green', x:5949, z:7565 },
-    { id:'public-black-lake-builder-shed', name:'Black Lake Builder Shed', category:'Builder Shed', description:'Public Chernarus builder shed.', colour:'green', x:13518, z:11867 },
-    { id:'public-tisy-bunker', name:'Tisy Bunker', category:'Bunker', description:'Public Chernarus bunker.', colour:'red', x:1329, z:14482 },
-    { id:'public-nwaf-bunker', name:'NWAF Bunker', category:'Bunker', description:'Public Chernarus bunker.', colour:'red', x:4483, z:10377 },
-    { id:'public-rify-bunker', name:'Rify Bunker', category:'Bunker', description:'Public Chernarus bunker.', colour:'red', x:13847, z:11196 }
-  ]);
   const COLOURS = { red:'#d52b1e', green:'#3ba55d', blue:'#3498db', amber:'#f0a500', white:'#ededed' };
 
   const container = document.getElementById('wwz-detection-map');
@@ -68,9 +58,8 @@
   };
 
   if (!container || !window.L || !window.WWZMap) { fail('The WWZ map runtime could not be loaded.'); return; }
-  if (!['chernarus','livonia','badlands'].includes(mapKey)) { fail('This link does not contain a valid WWZ map.'); return; }
+  if (mapKey !== 'badlands') { fail('This link does not contain a valid WWZ map.'); return; }
   const config = window.WWZMap.getConfig(mapKey);
-  if (mapKey !== 'badlands')structuresToggle?.closest('label')?.setAttribute('hidden', '');
   if(quality)quality.textContent=`${(config.mapMetres/1000).toFixed(3)} km world · native DayZ X/Z`;
   if (hasRequestedCoordinates && (requestedX < 0 || requestedZ < 0 || requestedX > config.mapMetres || requestedZ > config.mapMetres)) {
     fail(`This position is outside the ${config.name} map bounds.`); return;
@@ -80,7 +69,7 @@
   if (title) title.textContent = hasRequestedCoordinates && requestedMarker ? requestedMarker : `${config.name} Interactive Map`;
   if (mapLabel) mapLabel.textContent = `${config.name} · WWZ public map hub`;
   if (dashboardLink) {
-    const centre = mapKey === 'livonia' ? 6400 : mapKey === 'badlands' ? 8192 : 7680;
+    const centre = 8192;
     dashboardLink.href = `dashboard.html?server=${encodeURIComponent(serverKey)}&map=${encodeURIComponent(mapKey)}&x=${centre.toFixed(1)}&z=${centre.toFixed(1)}&marker=${encodeURIComponent('WWZ Map Hub')}&source=map-hub#map`;
   }
 
@@ -124,19 +113,6 @@
   const mergePois = (dynamic) => {
     const live = (Array.isArray(dynamic) ? dynamic : []).map(validPoi).filter(Boolean);
     const merged = [...live];
-    if (mapKey === 'chernarus') {
-      for (const raw of STATIC_CHERNARUS_POIS) {
-        const poi = validPoi(raw); if (!poi) continue;
-        const duplicate = merged.some((existing) => {
-          const sameName = clean(existing.name).toLowerCase() === clean(poi.name).toLowerCase();
-          const dx = Number(existing.x) - Number(poi.x);
-          const dz = Number(existing.z) - Number(poi.z);
-          const sameLocation = Number.isFinite(dx) && Number.isFinite(dz) && Math.hypot(dx, dz) <= 75;
-          return sameName || sameLocation;
-        });
-        if (!duplicate) merged.push(poi);
-      }
-    }
     const unique = [], seen = new Set();
     for (const poi of merged) {
       const key = keyFor(poi);

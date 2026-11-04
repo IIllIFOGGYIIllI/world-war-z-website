@@ -362,34 +362,6 @@
     () => window.__wwzFactionsReady === true
   )));
 
-  const ensureLivoniaPvp = () => Promise.all([
-    loadStylesheetOnce('livonia-pvp-css', 'assets/css/dashboard/livonia-pvp.css?v=1.25.3'),
-    loadAfterDashboardRuntime(() => loadScriptOnce(
-      'livonia-pvp',
-      'assets/js/dashboard/livonia-pvp.js?v=1.42.0&rev=livonia-live-1',
-      () => window.__wwzLivoniaPvpReady === true
-    ))
-  ]).then(() => undefined);
-
-  const ensureDeathmatchRotation = () => Promise.all([
-    loadStylesheetOnce('deathmatch-rotation-css', 'assets/css/dashboard/deathmatch-rotation.css?v=1.32.0&rev=livonia-dm-1'),
-    loadAfterDashboardRuntime(() => loadScriptOnce(
-      'deathmatch-rotation',
-      'assets/js/dashboard/deathmatch-rotation.js?v=1.42.0&rev=livonia-live-1',
-      () => window.__wwzDeathmatchRotationReady === true
-    ))
-  ]).then(() => undefined);
-
-  const ensureChernarusPve = () => Promise.all([
-    loadStylesheetOnce('chernarus-pve-css', 'assets/css/dashboard/chernarus-pve.css?v=1.26.0&rev=chernarus-progression-1'),
-    loadAfterDashboardRuntime(() => loadScriptOnce(
-      'chernarus-pve',
-      'assets/js/dashboard/chernarus-pve.js?v=1.54.1&rev=pvp-expedition-sync-1',
-      () => window.__wwzChernarusPveReady === true
-    ))
-  ]).then(() => undefined);
-
-
   const ensureRaidWeekendCalendar = () => loadAfterDashboardRuntime(() => loadScriptOnce(
     'raid-weekend-calendar',
     'assets/js/dashboard/raid-weekends.js?v=1.0.0&rev=stage6-fortnightly-1',
@@ -460,9 +432,6 @@
     if (view === 'progression' || view === 'players') ensureProgression().catch(() => {});
     if (view === 'objectives') ensureObjectives().catch(() => {});
     if (view === 'factions') ensureFactions().catch(() => {});
-    if (view === 'livoniapvp') ensureLivoniaPvp().then(() => window.WWZLivoniaPvp?.activate?.(detail)).catch(() => {});
-    if (view === 'deathmatch') ensureDeathmatchRotation().then(() => window.WWZDeathmatchRotation?.activate?.(detail)).catch(() => {});
-    if (view === 'chernaruspve') ensureChernarusPve().then(() => window.WWZChernarusPve?.activate?.(detail)).catch(() => {});
     if (view === 'community') ensureCommunity().then(() => window.WWZCommunity?.activate?.(detail)).catch(() => {});
     if (view === 'flags') ensureFlagClaims().then(() => window.WWZFlagClaims?.activate?.(detail)).catch(() => {});
     if (view === 'staff' && section === 'command-centre') ensureCommandCentre().catch(() => {});
@@ -490,7 +459,6 @@
     ['players', ensureProgression],
     ['objectives', ensureObjectives],
     ['factions', ensureFactions],
-    ['livoniapvp', ensureLivoniaPvp],
     ['community', ensureCommunity],
     ['flags', ensureFlagClaims],
   ];
@@ -580,7 +548,6 @@
     ensureDeliveryController,
     ensureFactions,
     ensureFlagClaims,
-    ensureLivoniaPvp,
     ensureMapRuntime,
     ensureModerationStyles,
     ensureOperationsCentre,
