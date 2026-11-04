@@ -10,14 +10,10 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
-MAP_ROOT = ROOT / "assets/maps/chernarus"
-SATELLITE_ROOT = MAP_ROOT / "tiles"
-ROAD_FILE = MAP_ROOT / "roads.geojson"
-OPTIONAL_PATCH_ASSET_PREFIXES = (
-    "assets/maps/chernarus/tiles/",
-    "assets/maps/livonia/tiles/",
-)
+OPTIONAL_PATCH_ASSET_PREFIXES: tuple[str, ...] = ()
 RETIRED_MAP_PATHS = (
+    ROOT / "assets/maps/chernarus",
+    ROOT / "assets/maps/livonia",
     ROOT / "assets/chernarus-map",
     ROOT / "assets/data/chernarus",
     ROOT / "assets/js/map/chernarus-map.js",
@@ -847,34 +843,6 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         if token not in notification_sources:
             errors.append(f"Notifications & Webhooks missing configuration guard: {token}")
 
-    deathmatch_runtime = (ROOT / "assets/js/dashboard/deathmatch-rotation.js").read_text(encoding="utf-8")
-    for token in (
-        'data-view-panel="deathmatch"',
-        'data-dm-rotation-root',
-        'JSON file manifest',
-        'data-dm-position',
-        'data-livonia-dm-public',
-    ):
-        if token not in dashboard:
-            errors.append(f"dashboard.html: missing Livonia Deathmatch Rotation surface: {token}")
-    for token in (
-        'assets/css/dashboard/deathmatch-rotation.css?v=1.32.0',
-        'assets/js/dashboard/deathmatch-rotation.js?v=1.42.0&rev=livonia-live-1',
-        'const ensureDeathmatchRotation = () =>',
-        "view === 'deathmatch'",
-    ):
-        if token not in player_intelligence_lazy:
-            errors.append(f"lazy-assets.js: missing Livonia Deathmatch Rotation loader: {token}")
-    for token in (
-        '/api/admin/deathmatch-rotation',
-        "action:'stage'",
-        "action:'publish_panel'",
-        "position:q('[data-dm-position]')",
-        '__wwzDeathmatchRotationReady',
-    ):
-        if token not in deathmatch_runtime:
-            errors.append(f"deathmatch-rotation.js: missing management guard: {token}")
-
     onboarding_tokens = (
         'data-nav-label="Discord Onboarding"',
         'data-section="discord-onboarding" data-view="configuration"',
@@ -1329,7 +1297,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         if "showLogin({ unavailable: true })" not in unavailable_block:
             errors.append("core.js: temporary auth outage must release the gateway to the unavailable login state.")
         if "clearSelection()" in unavailable_block:
-            errors.append("core.js: temporary auth outage must preserve the selected Chernarus/Livonia server context.")
+            errors.append("core.js: temporary auth outage must preserve the selected Nasdara PvE/PvP server context.")
         if "else if (preserveSelection)" not in signed_out or "showLogin();" not in signed_out:
             errors.append("core.js: transient saved-session failures must preserve server context without claiming Discord is unavailable.")
     bank_layout_css = (ROOT / "assets/css/dashboard/bank-layout.css").read_text(encoding="utf-8")
@@ -1661,8 +1629,7 @@ def validate_dual_server_public_parity(errors: list[str]) -> None:
 
 def validate_json(errors: list[str]) -> None:
     required_json = (
-        ROOT / "assets/maps/chernarus/labels.json",
-        ROOT / "assets/maps/livonia/labels.json",
+        ROOT / "assets/maps/nasdara/labels.json",
         ROOT / "assets/data/companion-release.json",
     )
     for json_path in required_json:
@@ -1803,10 +1770,12 @@ def validate_retired_map_assets(errors: list[str]) -> None:
     for path in RETIRED_MAP_PATHS:
         if path.exists():
             errors.append(
-                f"Retired Chernarus map asset still exists: {path.relative_to(ROOT)}"
+                f"Retired map asset still exists: {path.relative_to(ROOT)}"
             )
 
     retired_references = (
+        "assets/maps/chernarus/",
+        "assets/maps/livonia/",
         "assets/chernarus-map/",
         "assets/data/chernarus/",
         "assets/js/map/chernarus-map.js",
@@ -1884,59 +1853,24 @@ def validate_satellite_assets(errors: list[str], info: list[str], *, required: b
     return
 
 
+
+
+
 def validate_shared_map_assets(errors: list[str], info: list[str]) -> None:
-    expected = {
-        "chernarus": {"world_size": 15360, "road_parts": 51431, "labels": 201},
-        "livonia": {"world_size": 12800, "road_parts": 36263, "labels": 60},
-    }
-    for map_key, specification in expected.items():
-        map_root = ROOT / "assets/maps" / map_key
-        tile_root = map_root / "tiles"
-        road_path = map_root / "roads.geojson"
-        label_path = map_root / "labels.json"
-        missing = [path for path in (tile_root, road_path, label_path) if not path.exists()]
-        if missing:
-            errors.append(
-                f"{map_key.title()} shared map assets are incomplete: "
-                + ", ".join(str(path.relative_to(ROOT)) for path in missing)
-            )
-            continue
-
-        tile_count = len(list(tile_root.rglob("*.webp")))
-        if tile_count != 4810:
-            errors.append(
-                f"{map_key.title()} WebP pyramid contains {tile_count:,} tiles; expected 4,810."
-            )
-
-        try:
-            roads = json.loads(road_path.read_text(encoding="utf-8-sig"))
-            labels = json.loads(label_path.read_text(encoding="utf-8-sig"))
-        except (OSError, json.JSONDecodeError) as error:
-            errors.append(f"{map_key.title()} shared map data is invalid: {error}")
-            continue
-
-        metadata = roads.get("metadata") or {}
-        road_parts = int(metadata.get("preservedLinePartCount") or metadata.get("linePartCount") or 0)
-        world_size = int(metadata.get("worldSize") or 0)
-        label_count = len(labels.get("labels") or [])
-        if road_parts != specification["road_parts"]:
-            errors.append(
-                f"{map_key.title()} road dataset reports {road_parts:,} line parts; "
-                f"expected {specification['road_parts']:,}."
-            )
-        if world_size != specification["world_size"]:
-            errors.append(
-                f"{map_key.title()} road world size is {world_size}; expected {specification['world_size']}."
-            )
-        if label_count != specification["labels"]:
-            errors.append(
-                f"{map_key.title()} label dataset contains {label_count} labels; "
-                f"expected {specification['labels']}."
-            )
-        info.append(
-            f"{map_key.title()} shared map: {tile_count:,} tiles, "
-            f"{road_parts:,} road parts, {label_count} labels"
-        )
+    """Validate the retained Nasdara label index; generated binary datasets have their own validator."""
+    labels_path = ROOT / "assets/maps/nasdara/labels.json"
+    if not labels_path.is_file():
+        errors.append("Nasdara map labels are missing.")
+        return
+    try:
+        labels = json.loads(labels_path.read_text(encoding="utf-8-sig"))
+    except (OSError, json.JSONDecodeError) as error:
+        errors.append(f"Nasdara map labels are invalid: {error}")
+        return
+    label_count = len(labels.get("labels") or [])
+    if label_count < 1:
+        errors.append("Nasdara map labels contain no locations.")
+    info.append(f"Nasdara map: {label_count:,} named locations; generated satellite, roads and building assets validated separately")
 
 
 
@@ -2009,8 +1943,6 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
         "dashboard.html": ("LIVE · 26 SLOTS", "assets/js/dashboard/lazy-assets.js?v=2.8.6&amp;rev=player-gps-1&amp;leaderboardfix=1"),
         "assets/js/dashboard/server-context.js": ("player_capacity", "Capacity', `${server.player_capacity} slots`"),
         "assets/js/dashboard/account.js": ("payload.server?.player_capacity",),
-        "assets/js/dashboard/livonia-pvp.js": ("rotation.player_capacity", "players online"),
-        "assets/js/dashboard/deathmatch-rotation.js": ("activation.ready", "Activation readiness"),
     }
     for relative, tokens in launch_requirements.items():
         source = (ROOT / relative).read_text(encoding="utf-8")
@@ -2087,43 +2019,6 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
     if 'Faction Treasury' not in dashboard_source:
         errors.append("dashboard.html: missing Faction Treasury controls")
 
-    trader_js = (ROOT / "assets/js/dashboard/trader-status.js").read_text(encoding="utf-8")
-    trader_css = (ROOT / "assets/css/dashboard/trader-status.css").read_text(encoding="utf-8")
-    for token in (
-        'data-view="trader"',
-        'data-view-panel="trader"',
-        'data-trader-set-state="open"',
-        'data-trader-set-state="closed"',
-        'assets/trader/wwz-trader-closed.gif?v=1.57.0&rev=asset-opt-1',
-    ):
-        if token not in dashboard_source:
-            errors.append(f"dashboard.html: missing Trader Status surface: {token}")
-    for token in (
-        '/api/trader/status',
-        '/api/admin/trader/action',
-        'Intl.DateTimeFormat',
-        '@everyone announcement',
-        'wwz-trader-${state}.gif?v=1.57.0&rev=asset-opt-1',
-    ):
-        if token not in trader_js:
-            errors.append(f"trader-status.js: missing synchronized Trader guard: {token}")
-    for token in ('.trader-status-layout', '.trader-state-badge', '.trader-admin-controls'):
-        if token not in trader_css:
-            errors.append(f"trader-status.css: missing Trader layout guard: {token}")
-    for relative in (
-        "assets/trader/wwz-trader-open.gif",
-        "assets/trader/wwz-trader-closed.gif",
-    ):
-        artwork_path = ROOT / relative
-        if not artwork_path.is_file():
-            errors.append(f"{relative}: Trader artwork is missing")
-            continue
-        payload = artwork_path.read_bytes()
-        if not payload.startswith((b"GIF87a", b"GIF89a")):
-            errors.append(f"{relative}: Trader artwork is not genuine GIF data")
-        elif b"NETSCAPE2.0" not in payload or payload.count(b"\x21\xf9\x04") < 2:
-            errors.append(f"{relative}: Trader artwork is not an animated multi-frame GIF")
-
     service_worker = service_worker_path.read_text(encoding="utf-8") if service_worker_path.is_file() else ""
     required_sw_tokens = (
         "const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0'",
@@ -2162,7 +2057,7 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
                 errors.append(f"sw.js: app-shell precache target does not exist: {relative}")
         if "/world-war-z-website/" in app_shell:
             errors.append("sw.js: app-shell paths must remain relative to the service-worker scope, not hardcode the GitHub Pages repository path.")
-        for heavy in ("dashboard.html", "shop.html", "assets/js/map/wwz-map.js", "assets/js/dashboard/trader-status.js", "assets/css/dashboard/trader-status.css", "assets/trader/wwz-trader-open.gif", "assets/trader/wwz-trader-closed.gif", "assets/js/dashboard/rules-manager.js", "assets/js/dashboard/donation-manager.js", "assets/js/dashboard/donation-orders.js"):
+        for heavy in ("dashboard.html", "shop.html", "assets/js/map/wwz-map.js", "assets/js/dashboard/rules-manager.js", "assets/js/dashboard/donation-manager.js", "assets/js/dashboard/donation-orders.js"):
             if heavy in app_shell:
                 errors.append(f"sw.js: performance regression: heavy/non-shell asset must remain lazy: {heavy}")
 
@@ -2292,13 +2187,9 @@ def validate_repository_hygiene(errors: list[str], info: list[str]) -> None:
         ROOT / "assets/trader/wwz-trader-open.gif",
         ROOT / "assets/trader/wwz-trader-closed.gif",
     )
-    total = 0
-    for artwork_path in trader_paths:
-        if artwork_path.is_file():
-            total += artwork_path.stat().st_size
-    if total > 15 * 1024 * 1024:
-        errors.append("Trader animated artwork exceeds the 15 MiB combined repository budget.")
-    info.append(f"Repository hygiene: retired map/runtime artefacts absent; Trader GIF payload {total / (1024 * 1024):.1f} MiB")
+    if any(path.exists() for path in trader_paths):
+        errors.append("Retired Radio Zenit Trader artwork must be removed.")
+    info.append("Repository hygiene: retired Chernarus/Livonia map assets and Radio Zenit Trader artwork absent")
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Validate the World War Z static website.")

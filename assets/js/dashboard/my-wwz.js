@@ -9,8 +9,6 @@
     home: `${DASHBOARD_API_BASE}/api/account/home`,
     gps: `${DASHBOARD_API_BASE}/api/account/gps-history`,
     status: SERVER_STATUS_URL,
-    chernarus: `${DASHBOARD_API_BASE}/api/chernarus/pve`,
-    livonia: `${DASHBOARD_API_BASE}/api/livonia/pvp`,
   });
 
   let root = null;
@@ -297,9 +295,7 @@
 
   const openWorld = () => {
     const server = selectedServer();
-    if (server?.map_key === 'livonia') nav('livoniapvp', 'operations');
-    else if (server?.map_key === 'chernarus') nav('chernaruspve', 'operations');
-    else nav('players', 'account');
+    nav('map', 'explorer');
   };
 
   const renderQuickLinks = () => {
@@ -307,9 +303,6 @@
     const container = root.querySelector('[data-my-wwz-quick-links]');
     container.replaceChildren();
     const mapKey = selectedServer()?.map_key;
-    const world = mapKey === 'livonia'
-      ? ['PvP Intel', () => nav('livoniapvp', 'operations')]
-      : mapKey === 'chernarus' ? ['PvE Operations', () => nav('chernaruspve', 'operations')] : null;
     [
       ['Account', () => nav('players', 'account')],
       ['Progression', () => nav('progression', 'progress')],
@@ -319,8 +312,7 @@
       ['Shop', () => nav('shop', 'catalogue')],
       ['Tickets', () => nav('tickets', 'support')],
       ['Action Centre', () => nav('actioncentre', 'inbox')],
-      ...(mapKey === 'badlands' ? [] : [['Map', () => nav('map', 'explorer')]]),
-      ...(world ? [world] : []),
+      ['Map', () => nav('map', 'explorer')],
     ].forEach(([label, handler]) => container.append(button(label, handler, 'my-wwz-quick-link')));
   };
 
@@ -568,7 +560,6 @@
     body.replaceChildren();
     const status = snapshot.status || {};
     const server = snapshot.server || {};
-    const world = snapshot.world || {};
     const players = status.players || {};
     const operations = status.operations || {};
     const statusLabel = titleCase(status.status || 'unknown');
@@ -581,26 +572,8 @@
       tone,
     }));
 
-    if (server.map_key === 'chernarus') {
-      const expedition = world.expeditions?.[0];
-      const goal = world.community_goal || {};
-      const passport = world.personal?.passport || {};
-      if (expedition) body.append(row({ title: 'Active PvE expedition', value: expedition.name || 'Expedition', detail: expedition.ends_at ? `Ends ${relative(expedition.ends_at)}` : (expedition.tier || 'PvE operation'), target: '/dashboard.html#chernaruspve/operations', tone: 'pve' }));
-      if (goal?.name) body.append(row({ title: 'Community goal', value: `${Number(goal.percent || 0).toFixed(0)}%`, detail: goal.name, target: '/dashboard.html#chernaruspve/operations', tone: goal.completed ? 'good' : 'pve' }));
-      if (snapshot.home?.profile?.linked && passport.total) body.append(row({ title: 'Survivor Passport', value: `${integer(passport.discovered)} / ${integer(passport.total)}`, detail: `${Number(passport.percent || 0).toFixed(0)}% of Chernarus discovered`, target: '/dashboard.html#chernaruspve/operations', tone: 'pve' }));
-      root.querySelector('[data-my-wwz-world-state]').textContent = 'Chernarus PvE · Military PvP Zones';
-    } else if (server.map_key === 'livonia') {
-      const hotspot = world.hotspots?.[0];
-      const wanted = world.most_wanted?.[0];
-      if (hotspot) body.append(row({ title: 'Active PvP hotspot', value: hotspot.name || 'Hotspot', detail: hotspot.ends_at ? `Rotates ${relative(hotspot.ends_at)}` : 'Confirmed PvP hotspot', target: '/dashboard.html#livoniapvp/operations', tone: 'pvp' }));
-      if (wanted) body.append(row({ title: 'Most Wanted', value: wanted.target_psn || 'Target', detail: `${formatNumber(wanted.amount)} credit bounty`, target: '/dashboard.html#livoniapvp/operations', tone: 'danger' }));
-      const pvp = snapshot.home?.profile?.pvp || {};
-      if (snapshot.home?.profile?.linked) body.append(row({ title: 'Your confirmed PvP', value: `${integer(pvp.kills)} K · ${integer(pvp.deaths)} D`, detail: `${Number(pvp.kd_ratio || 0).toFixed(2)} K/D · ${integer(pvp.current_streak)} current streak`, target: '/dashboard.html#players/activity', tone: 'pvp' }));
-      root.querySelector('[data-my-wwz-world-state]').textContent = 'Livonia PvP';
-    } else {
-      root.querySelector('[data-my-wwz-world-state]').textContent = 'Badlands · Fresh Start';
-      body.append(empty('Badlands map intelligence pending', 'No Chernarus or Livonia map content is displayed for this world.'));
-    }
+    root.querySelector('[data-my-wwz-world-state]').textContent = `${server.map_name || 'Nasdara'} · ${server.gameplay_mode === 'pvp' ? 'PvP' : 'PvE'}`;
+    body.append(empty('Nasdara world intelligence', 'Your selected server uses the shared Nasdara map. Player history and server-specific records remain separate.'));
     if (snapshot.failures.some((item) => item.key === 'world')) body.append(empty('Live world intelligence unavailable', 'Your private account cards remain current; live world data will retry automatically.'));
   };
 
@@ -750,7 +723,7 @@
     const calls = {
       home: requestJson(API.home, { auth: true }),
       status: requestJson(API.status),
-      world: server.map_key === 'badlands' ? Promise.resolve(null) : requestJson(server.map_key === 'livonia' ? API.livonia : API.chernarus),
+      world: Promise.resolve(null),
     };
     const keys = Object.keys(calls);
     const settled = await Promise.allSettled(keys.map((key) => calls[key]));

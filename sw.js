@@ -8,7 +8,7 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-11-05-player-gps-4';
+const WWZ_PWA_UPDATE_REVISION = '2026-11-05-nasdara-cleanup-1';
 const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-ios-safari-tab-bridge-2`;
 const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${APP_CACHE_RELEASE}`;
@@ -175,15 +175,9 @@ const networkFirstMapData = async (request) => {
 };
 
 const isMapTile = (pathname) =>
-  pathname.includes('/assets/maps/chernarus/tiles/') ||
-  pathname.includes('/assets/maps/livonia/tiles/') ||
   pathname.endsWith('/assets/maps/nasdara/satellite.webp');
 
 const isMapData = (pathname) =>
-  pathname.endsWith('/assets/maps/chernarus/roads.geojson') ||
-  pathname.endsWith('/assets/maps/chernarus/labels.json') ||
-  pathname.endsWith('/assets/maps/livonia/roads.geojson') ||
-  pathname.endsWith('/assets/maps/livonia/labels.json') ||
   pathname.includes('/assets/maps/nasdara/');
 
 const isStaticAsset = (pathname) =>

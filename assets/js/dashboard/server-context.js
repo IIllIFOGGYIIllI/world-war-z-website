@@ -128,7 +128,7 @@
       map_name: mapName,
       gameplay_mode: mode,
       selector_label: mode === 'pvp' ? 'PvP' : 'PvE',
-      world_size: mapKey === 'badlands' ? 16384 : (mapKey === 'livonia' ? 12800 : 15360),
+      world_size: 16384,
       platform: String(value.platform || 'PlayStation 4 & 5'),
       player_capacity: Math.max(1, Math.trunc(Number(value.player_capacity) || 26)),
       access_level: String(value.access_level || 'member'),
@@ -204,11 +204,7 @@
     });
     const mapPreview = document.querySelector('.map-live-preview img');
     if (mapPreview) {
-      mapPreview.src = server.map_key === 'badlands'
-        ? 'assets/maps/nasdara/preview.jpg?v=wwz-nasdara-1'
-        : server.map_key === 'livonia'
-          ? 'assets/maps/livonia/tiles/0/0/0.webp?v=1.22.93'
-          : 'assets/maps/chernarus/tiles/z0/0/0.webp?v=1.22.93';
+      mapPreview.src = 'assets/maps/nasdara/preview.jpg?v=wwz-nasdara-1';
       mapPreview.alt = `${server.map_name} game map preview`;
     }
     document.querySelectorAll('[data-map-frame], [data-location-map], [data-shop-coordinate-map]').forEach((element) => {
@@ -228,12 +224,6 @@
       mapNavigation.dataset.navLabel = server.world_size > 0 ? `${server.map_name} Map` : 'Badlands Map Unavailable';
       mapNavigation.setAttribute('aria-disabled', String(server.world_size === 0));
     }
-    document.querySelectorAll('[data-livonia-only]').forEach((element) => {
-      element.hidden = server.map_key !== 'livonia';
-    });
-    document.querySelectorAll('[data-chernarus-only]').forEach((element) => {
-      element.hidden = server.map_key !== 'chernarus';
-    });
     changeServerButton?.removeAttribute('hidden');
   };
 
