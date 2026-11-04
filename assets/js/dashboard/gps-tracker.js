@@ -73,8 +73,14 @@
     const projectedSegments = routeSegments.map((segment) => {
       const positions = projectSamples(segment, mapKey);
       if (positions.length >= 2) {
+        // Draw a dark casing first so the route remains legible over roads,
+        // trails and terrain labels, then lay a bright cyan centre stroke over it.
         L.polyline(positions, {
-          color: '#d8dfe8', weight: 3, opacity: 0.62,
+          color: '#06131b', weight: 8, opacity: 0.98,
+          lineCap: 'round', lineJoin: 'round', interactive: false,
+        }).addTo(fullLayer);
+        L.polyline(positions, {
+          color: '#35e6ff', weight: 4.5, opacity: 1,
           lineCap: 'round', lineJoin: 'round', interactive: false,
         }).addTo(fullLayer);
         allLatLngs.push(...positions);
@@ -100,8 +106,14 @@
       splitSamples(samples.slice(0, index + 1)).forEach((segment) => {
         const points = projectSamples(segment, mapKey);
         if (points.length >= 2) {
+          // The replayed portion uses a separate yellow highlight with the
+          // same dark casing so it is distinct from the cyan full route.
           L.polyline(points, {
-            color: '#e3ad58', weight: 4, opacity: 0.96,
+            color: '#06131b', weight: 10, opacity: 0.98,
+            lineCap: 'round', lineJoin: 'round', interactive: false,
+          }).addTo(progressLayer);
+          L.polyline(points, {
+            color: '#ffd84a', weight: 5.5, opacity: 1,
             lineCap: 'round', lineJoin: 'round', interactive: false,
           }).addTo(progressLayer);
         }
