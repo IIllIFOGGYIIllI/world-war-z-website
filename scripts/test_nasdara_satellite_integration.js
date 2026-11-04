@@ -42,8 +42,8 @@ assert(shop.includes("url.searchParams.set('rental_picker', '1')"));
 assert(mapLink.includes('wwz:nasdara-rental-coordinate'));
 assert(legacy.includes("location.replace(url.href)"));
 assert(!legacy.includes('Nasdara_Enhanced_Paper_Map.webp'));
-for(const world of ['chernarus','livonia']){
- const config=m.getConfig(world);assert(config.satelliteUrl&&config.roadUrl);
- assert(!config.structureUrl);
+for(const retiredWorld of ['chernarus','livonia']){
+ assert.equal(m.getConfig(retiredWorld), null, 'Retired maps must not be resolvable');
 }
-console.log('PASS Nasdara satellite integration, coordinates, labels, rental handoff, legacy links, two-world isolation');
+assert.equal(m.getConfig('badlands').name, 'Badlands / Nasdara');
+console.log('PASS Nasdara-only satellite integration, coordinates, labels and rental handoff');
