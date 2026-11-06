@@ -409,6 +409,13 @@
     const travelNote = trackedSinceDate && Number.isFinite(trackedSinceDate.getTime())
       ? 'Validated movement since ' + trackedSinceDate.toLocaleDateString('en-AU')
       : 'Validated ADM movement';
+    const recentTravel = profile.travel_summary || {};
+    const formatRecentTravel = (metres) => {
+      const number = Math.max(0, Number(metres) || 0);
+      return number >= 1000
+        ? (number / 1000).toLocaleString('en-AU', { maximumFractionDigits: 2 }) + ' km'
+        : Math.round(number).toLocaleString('en-AU') + ' m';
+    };
     const scope = [snapshot.server?.map_name, snapshot.server?.name].filter(Boolean).join(' · ');
     root.querySelector('[data-my-wwz-stats-scope]').textContent = scope
       ? scope + ' · This server only'
@@ -417,6 +424,9 @@
     grid.replaceChildren(
       metric('Playtime', duration(profile.playtime_seconds), 'Tracked server time'),
       metric('Distance travelled', travelDisplay, travelNote),
+      metric('Last 24h travel', formatRecentTravel(recentTravel.last_24h_metres), 'Validated ADM movement'),
+      metric('Last 7 days', formatRecentTravel(recentTravel.last_7d_metres), 'Recorded movement only'),
+      metric('Best recorded session', formatRecentTravel(recentTravel.best_recorded_session_7d_metres), 'Within last 7 days'),
       metric('Sessions', number(profile.total_sessions), 'Recorded joins'),
       metric('Kills', number(pvp.kills), 'Confirmed PvP'),
       metric('Deaths', number(pvp.deaths), 'Confirmed PvP'),
@@ -650,9 +660,19 @@
     const body = root.querySelector('[data-my-wwz-orders-body]');
     body.replaceChildren();
     const orders = snapshot.home?.orders || {};
+    const activeRentalCount = integer(orders.active_rentals);
     const support = snapshot.home?.support || {};
     const openTotal = integer(orders.open_total) + integer(support.open_count);
-    root.querySelector('[data-my-wwz-order-count]').textContent = `${openTotal} open`;
+    root.querySelector('[data-my-wwz-order-count]').textContent = `${openTotal} open · ${activeRentalCount} active vehicle${activeRentalCount === 1 ? '' : 's'}`;
+    if (activeRentalCount) {
+      body.append(row({
+        title: 'Active vehicle rentals',
+        value: String(activeRentalCount),
+        detail: `${formatNumber(orders.rental_remaining_restarts)} remaining restart credits across active and queued rentals`,
+        target: '/dashboard.html#shop/orders',
+        meta: 'Persistent rental portfolio',
+      }));
+    }
     (orders.recent || []).slice(0, 3).forEach((orderItem) => {
       const donation = orderItem.kind === 'donation';
       body.append(row({
