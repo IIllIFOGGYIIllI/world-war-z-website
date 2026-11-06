@@ -224,6 +224,7 @@
             <div class="wwz-gps-stat"><span>Selected period</span><strong data-my-gps-period>—</strong></div>
             <div class="wwz-gps-stat"><span>Recorded positions</span><strong data-my-gps-count>—</strong></div>
             <div class="wwz-gps-stat"><span>Latest observation</span><strong data-my-gps-latest>—</strong></div>
+            <div class="wwz-gps-stat"><span>Interrupted legs</span><strong data-my-gps-interruptions>—</strong></div>
           </div>
           <div class="wwz-gps-map" data-my-gps-map aria-label="Your recorded movement route on the selected DayZ map"></div>
           <div class="wwz-gps-timeline"><input aria-label="Replay route timeline" data-my-gps-timeline type="range" min="0" max="0" value="0" disabled><time data-my-gps-time>—</time></div>
@@ -499,6 +500,7 @@
       root.querySelector('[data-my-gps-total]').textContent = window.WWZGpsTracker?.formatDistance(total) || Math.round(total) + ' m';
       root.querySelector('[data-my-gps-period]').textContent = window.WWZGpsTracker?.formatDistance(period) || Math.round(period) + ' m';
       root.querySelector('[data-my-gps-count]').textContent = Number(payload.sample_count || 0).toLocaleString('en-AU');
+      root.querySelector('[data-my-gps-interruptions]').textContent = Number(payload.interrupted_leg_count || 0).toLocaleString('en-AU');
       root.querySelector('[data-my-gps-latest]').textContent = payload.last_observed_at
         ? new Date(payload.last_observed_at).toLocaleString('en-AU', { dateStyle: 'short', timeStyle: 'short' })
         : 'Not recorded';
