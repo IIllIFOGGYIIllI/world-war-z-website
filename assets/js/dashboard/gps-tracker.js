@@ -70,6 +70,15 @@
     const fullLayer = L.layerGroup().addTo(instance.map);
     const progressLayer = L.layerGroup().addTo(instance.map);
     const allLatLngs = [];
+    // Preserve the ADM sample index for each segment. Timeline replay can
+    // reuse already projected coordinates instead of rebuilding the entire
+    // route on each slider event, especially on mobile devices.
+    let segmentOffset = 0;
+    const segmentStarts = routeSegments.map((segment) => {
+      const offset = segmentOffset;
+      segmentOffset += segment.length;
+      return offset;
+    });
     const projectedSegments = routeSegments.map((segment) => {
       const positions = projectSamples(segment, mapKey);
       if (positions.length >= 2) {
@@ -103,20 +112,20 @@
     });
     const drawProgress = (index) => {
       progressLayer.clearLayers();
-      splitSamples(samples.slice(0, index + 1)).forEach((segment) => {
-        const points = projectSamples(segment, mapKey);
-        if (points.length >= 2) {
-          // The replayed portion uses a separate magenta highlight with the
-          // same dark casing so it is distinct from the cyan full route.
-          L.polyline(points, {
-            color: '#06131b', weight: 10, opacity: 0.98,
-            lineCap: 'round', lineJoin: 'round', interactive: false,
-          }).addTo(progressLayer);
-          L.polyline(points, {
-            color: '#FF4FD8', weight: 5.5, opacity: 1,
-            lineCap: 'round', lineJoin: 'round', interactive: false,
-          }).addTo(progressLayer);
-        }
+      projectedSegments.forEach((positions, segmentIndex) => {
+        const visibleCount = Math.max(0, Math.min(positions.length, index - segmentStarts[segmentIndex] + 1));
+        if (visibleCount < 2) return;
+        const points = positions.slice(0, visibleCount);
+        // The replay highlight stays magenta with a dark casing; no
+        // interpolated bends are fabricated between ADM observations.
+        L.polyline(points, {
+          color: '#06131b', weight: 10, opacity: 0.98,
+          lineCap: 'round', lineJoin: 'round', interactive: false,
+        }).addTo(progressLayer);
+        L.polyline(points, {
+          color: '#FF4FD8', weight: 5.5, opacity: 1,
+          lineCap: 'round', lineJoin: 'round', interactive: false,
+        }).addTo(progressLayer);
       });
       const selected = samplePositions[index] || last || first;
       if (selected) L.circleMarker(selected, {
@@ -125,21 +134,36 @@
       if (timeLabel) timeLabel.textContent = formatTime(samples[index]?.observed_at);
     };
 
+    let frame = null;
+    const scheduleProgress = (index) => {
+      if (typeof window.requestAnimationFrame !== 'function') {
+        drawProgress(index);
+        return;
+      }
+      if (frame !== null) window.cancelAnimationFrame?.(frame);
+      frame = window.requestAnimationFrame(() => {
+        frame = null;
+        drawProgress(index);
+      });
+    };
     if (timeline) {
       timeline.min = '0';
       timeline.max = String(Math.max(0, samples.length - 1));
       timeline.step = '1';
       timeline.value = String(samples.length - 1);
       timeline.disabled = samples.length < 2;
-      timeline.oninput = () => drawProgress(Math.max(0, Math.min(samples.length - 1, Number(timeline.value) || 0)));
+      timeline.oninput = () => scheduleProgress(Math.max(0, Math.min(samples.length - 1, Number(timeline.value) || 0)));
     }
     drawProgress(samples.length - 1);
     if (status) {
       status.textContent = samples.length.toLocaleString('en-AU') + ' position snapshots · ' +
-        (payload.truncated ? 'showing the latest retained samples' : 'selected retention window');
+        (payload.truncated ? 'showing the latest retained samples' : 'selected retention window') +
+        ' · ' + Number(payload.interrupted_leg_count || 0).toLocaleString('en-AU') + ' interrupted legs · gaps are not interpolated';
     }
     return {
       destroy: () => {
+        if (frame !== null) window.cancelAnimationFrame?.(frame);
+        if (timeline) timeline.oninput = null;
         if (container._wwzGpsMap === instance) delete container._wwzGpsMap;
         instance.destroy?.();
       },
