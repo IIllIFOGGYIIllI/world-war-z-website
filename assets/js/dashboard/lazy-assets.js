@@ -243,7 +243,7 @@
 
   const ensureShopController = () => Promise.all([ensureShopHelpers(), ensureCheckoutIdempotency()]).then(() => loadScriptOnce(
     'shop-controller',
-    'assets/js/dashboard/shop.js?v=2.1.1&rev=phase2-reliability-1',
+    'assets/js/dashboard/shop.js?v=2.1.1&rev=phase2-reliability-1&portfolio=1',
     () => window.__wwzShopControllerReady === true
   ));
 
@@ -287,7 +287,7 @@
     loadStylesheetOnce('gps-tracker-css', 'assets/css/dashboard/gps-tracker.css?v=1.0.0&rev=player-gps-2'),
     loadAfterDashboardRuntime(() => loadScriptOnce(
       'gps-tracker',
-      'assets/js/dashboard/gps-tracker.js?v=1.0.1&rev=player-gps-4',
+      'assets/js/dashboard/gps-tracker.js?v=1.0.1&rev=player-gps-4&replay=1',
       () => window.__wwzGpsTrackerReady === true
     ))
   ]).then(() => undefined);
@@ -449,10 +449,10 @@
     ['map', ensureDashboardMap],
     ['zones', ensureZones],
     ['feeds', ensureServerFeeds],
-    ['shop', () => Promise.all([ensureCommerceRuntime(), ensureMapRuntime()])],
-    ['shopadmin', () => Promise.all([ensureCommerceRuntime(), ensureMapRuntime()])],
-    ['locations', () => Promise.all([ensureCommerceRuntime(), ensureMapRuntime()])],
-    ['delivery', () => Promise.all([ensureCommerceRuntime(), ensureMapRuntime()])],
+    ['shop', ensureCommerceRuntime],
+    ['shopadmin', ensureCommerceRuntime],
+    ['locations', ensureCommerceRuntime],
+    ['delivery', ensureCommerceRuntime],
     ['serverconfig', ensureCommerceRuntime],
     ['tickets', ensureTickets],
     ['progression', ensureProgression],

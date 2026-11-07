@@ -27,6 +27,7 @@ const state = {
   access: {},
   items: [],
   orders: [],
+  rentalPortfolio: { rentals: [], summary: {} },
   locations: [],
   mode: String(new URLSearchParams(location.search).get('mode') || '').trim().toLowerCase() === 'event' ? 'event' : 'manual',
   selectedItem: null,
@@ -366,6 +367,7 @@ const renderServerChoices = () => {
       saveSelectedServer(server);
       state.locations = [];
       state.orders = [];
+      state.rentalPortfolio = { rentals: [], summary: {} };
       loadCart();
       rentalCart.setServer(server);
       acceptServerContext({ servers: state.servers });
@@ -1020,6 +1022,15 @@ const orderMatchesScope = (order) => {
   if (scope === 'history') return orderClosed(order);
   return true;
 };
+const rentalPortfolioOrders = (recent, portfolio) => {
+  const byId = new Map();
+  [...(Array.isArray(recent) ? recent : []), ...(Array.isArray(portfolio?.rentals) ? portfolio.rentals : [])]
+    .forEach((order) => {
+      const id = Number(order?.order_id);
+      if (Number.isSafeInteger(id) && id > 0) byId.set(id, order);
+    });
+  return [...byId.values()].sort((a, b) => Number(b.order_id) - Number(a.order_id));
+};
 const renderOrders = () => {
   elements.orderList.replaceChildren();
   if (!state.user) return;
@@ -1029,10 +1040,10 @@ const renderOrders = () => {
   }
   elements.ordersUnlinked.hidden = true; elements.orderList.hidden = false;
   if (elements.ordersOverview) elements.ordersOverview.hidden = false;
-  const allOrders = Array.isArray(state.orders) ? state.orders : [];
+  const allOrders = rentalPortfolioOrders(state.orders, state.rentalPortfolio);
   const openCount = allOrders.filter((order) => ['pending', 'processing'].includes(String(order.status || '').toLowerCase())).length;
   const waitingCount = allOrders.filter((order) => orderDeliveryState(order) === 'restart_pending').length;
-  const activeRentals = allOrders.filter((order) => order.delivery_type === 'event' && orderDeliveryState(order) === 'active').length;
+  const activeRentals = Number(state.rentalPortfolio?.summary?.active ?? allOrders.filter((order) => order.delivery_type === 'event' && orderDeliveryState(order) === 'active').length);
   const completed = allOrders.filter((order) => String(order.status || '').toLowerCase() === 'fulfilled').length;
   if (elements.ordersOpen) elements.ordersOpen.textContent = String(openCount);
   if (elements.ordersWaiting) elements.ordersWaiting.textContent = String(waitingCount);
@@ -1105,6 +1116,7 @@ const applyPayload = (payload, member = false) => {
   };
   state.items = Array.isArray(payload.items) ? payload.items : [];
   state.orders = member && Array.isArray(payload.orders) ? payload.orders : [];
+  state.rentalPortfolio = member && payload.rental_portfolio ? payload.rental_portfolio : { rentals: [], summary: {} };
   state.cataloguePage = 1;
   elements.title.textContent = state.settings.title || 'Survivor Shop';
   elements.description.textContent = state.settings.description || 'Spend your verified community balance on approved DayZ goods and services.';

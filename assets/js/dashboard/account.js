@@ -271,6 +271,17 @@ const applyAccountSummary = (payload) => {
     : Math.round(travelMetres).toLocaleString('en-AU') + ' m';
   setText('[data-profile-distance-travelled]', travelDisplay);
   setText('[data-profile-distance-tracked-since]', formatAccountDate(profile.distance_tracked_since));
+  const recentTravel = profile.travel_summary || {};
+  const formatValidatedMetres = (raw) => {
+    const metres = Math.max(0, Number(raw) || 0);
+    return metres >= 1000 ? (metres / 1000).toLocaleString('en-AU', { maximumFractionDigits: 2 }) + ' km'
+      : Math.round(metres).toLocaleString('en-AU') + ' m';
+  };
+  setText('[data-profile-travel-24h]', formatValidatedMetres(recentTravel.last_24h_metres));
+  setText('[data-profile-travel-7d]', formatValidatedMetres(recentTravel.last_7d_metres));
+  setText('[data-profile-best-session-7d]', formatValidatedMetres(recentTravel.best_recorded_session_7d_metres));
+  setText('[data-profile-travel-legs]', new Intl.NumberFormat('en-AU').format(Number(recentTravel.validated_legs_7d) || 0));
+  setText('[data-profile-travel-interruptions]', new Intl.NumberFormat('en-AU').format(Number(recentTravel.interrupted_legs_7d) || 0));
   setText('[data-profile-kd]', Number(pvp.kd_ratio || 0).toFixed(2));
   setText('[data-profile-kills]', new Intl.NumberFormat('en-AU').format(Number(pvp.kills) || 0));
   setText('[data-profile-deaths]', new Intl.NumberFormat('en-AU').format(Number(pvp.deaths) || 0));

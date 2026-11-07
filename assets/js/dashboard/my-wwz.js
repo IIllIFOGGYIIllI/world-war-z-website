@@ -224,6 +224,7 @@
             <div class="wwz-gps-stat"><span>Selected period</span><strong data-my-gps-period>—</strong></div>
             <div class="wwz-gps-stat"><span>Recorded positions</span><strong data-my-gps-count>—</strong></div>
             <div class="wwz-gps-stat"><span>Latest observation</span><strong data-my-gps-latest>—</strong></div>
+            <div class="wwz-gps-stat"><span>Interrupted legs</span><strong data-my-gps-interruptions>—</strong></div>
           </div>
           <div class="wwz-gps-map" data-my-gps-map aria-label="Your recorded movement route on the selected DayZ map"></div>
           <div class="wwz-gps-timeline"><input aria-label="Replay route timeline" data-my-gps-timeline type="range" min="0" max="0" value="0" disabled><time data-my-gps-time>—</time></div>
@@ -409,6 +410,13 @@
     const travelNote = trackedSinceDate && Number.isFinite(trackedSinceDate.getTime())
       ? 'Validated movement since ' + trackedSinceDate.toLocaleDateString('en-AU')
       : 'Validated ADM movement';
+    const recentTravel = profile.travel_summary || {};
+    const formatRecentTravel = (metres) => {
+      const number = Math.max(0, Number(metres) || 0);
+      return number >= 1000
+        ? (number / 1000).toLocaleString('en-AU', { maximumFractionDigits: 2 }) + ' km'
+        : Math.round(number).toLocaleString('en-AU') + ' m';
+    };
     const scope = [snapshot.server?.map_name, snapshot.server?.name].filter(Boolean).join(' · ');
     root.querySelector('[data-my-wwz-stats-scope]').textContent = scope
       ? scope + ' · This server only'
@@ -417,6 +425,9 @@
     grid.replaceChildren(
       metric('Playtime', duration(profile.playtime_seconds), 'Tracked server time'),
       metric('Distance travelled', travelDisplay, travelNote),
+      metric('Last 24h travel', formatRecentTravel(recentTravel.last_24h_metres), 'Validated ADM movement'),
+      metric('Last 7 days', formatRecentTravel(recentTravel.last_7d_metres), 'Recorded movement only'),
+      metric('Best recorded session', formatRecentTravel(recentTravel.best_recorded_session_7d_metres), 'Within last 7 days'),
       metric('Sessions', number(profile.total_sessions), 'Recorded joins'),
       metric('Kills', number(pvp.kills), 'Confirmed PvP'),
       metric('Deaths', number(pvp.deaths), 'Confirmed PvP'),
@@ -489,6 +500,7 @@
       root.querySelector('[data-my-gps-total]').textContent = window.WWZGpsTracker?.formatDistance(total) || Math.round(total) + ' m';
       root.querySelector('[data-my-gps-period]').textContent = window.WWZGpsTracker?.formatDistance(period) || Math.round(period) + ' m';
       root.querySelector('[data-my-gps-count]').textContent = Number(payload.sample_count || 0).toLocaleString('en-AU');
+      root.querySelector('[data-my-gps-interruptions]').textContent = Number(payload.interrupted_leg_count || 0).toLocaleString('en-AU');
       root.querySelector('[data-my-gps-latest]').textContent = payload.last_observed_at
         ? new Date(payload.last_observed_at).toLocaleString('en-AU', { dateStyle: 'short', timeStyle: 'short' })
         : 'Not recorded';
@@ -650,9 +662,19 @@
     const body = root.querySelector('[data-my-wwz-orders-body]');
     body.replaceChildren();
     const orders = snapshot.home?.orders || {};
+    const activeRentalCount = integer(orders.active_rentals);
     const support = snapshot.home?.support || {};
     const openTotal = integer(orders.open_total) + integer(support.open_count);
-    root.querySelector('[data-my-wwz-order-count]').textContent = `${openTotal} open`;
+    root.querySelector('[data-my-wwz-order-count]').textContent = `${openTotal} open · ${activeRentalCount} active vehicle${activeRentalCount === 1 ? '' : 's'}`;
+    if (activeRentalCount) {
+      body.append(row({
+        title: 'Active vehicle rentals',
+        value: String(activeRentalCount),
+        detail: `${formatNumber(orders.rental_remaining_restarts)} remaining restart credits across active and queued rentals`,
+        target: '/dashboard.html#shop/orders',
+        meta: 'Persistent rental portfolio',
+      }));
+    }
     (orders.recent || []).slice(0, 3).forEach((orderItem) => {
       const donation = orderItem.kind === 'donation';
       body.append(row({

@@ -644,6 +644,16 @@ const appendDashboardRentalProgress = (card, order) => {
   block.append(head, meter, note, link);
   card.append(block);
 };
+// Recent shop history is bounded; keep independently persisted rentals visible.
+const mergeShopOrderPortfolio = (recent, portfolio) => {
+  const combined = new Map();
+  [...(Array.isArray(recent) ? recent : []), ...(Array.isArray(portfolio?.rentals) ? portfolio.rentals : [])]
+    .forEach((order) => {
+      const id = Number(order?.order_id);
+      if (Number.isSafeInteger(id) && id > 0) combined.set(id, order);
+    });
+  return [...combined.values()].sort((a, b) => Number(b.order_id) - Number(a.order_id));
+};
 const renderMemberShopOrders = (orders) => {
   if (!shopOrderList) return;
   shopOrderList.replaceChildren();
@@ -690,12 +700,19 @@ const applyShopPayload = (payload, { member = false } = {}) => {
     } else {
       shopOrderUnlinked?.setAttribute('hidden', '');
       shopOrderContent?.removeAttribute('hidden');
-      memberShopOrders = Array.isArray(payload.orders) ? payload.orders : [];
+      memberShopOrders = mergeShopOrderPortfolio(payload.orders, payload.rental_portfolio);
+      const portfolioNotice = document.querySelector('[data-rental-portfolio-notice]');
+      if (portfolioNotice) {
+        portfolioNotice.hidden = !payload.rental_portfolio?.truncated;
+        portfolioNotice.textContent = portfolioNotice.hidden ? '' : 'The latest 250 ongoing rentals are shown; older rental records remain stored.';
+      }
       shopCashBalance = Math.max(0, Number(payload.balance) || 0); shopBankBalance = Math.max(0, Number(payload.bank_balance) || 0);
       setText('[data-shop-wallet]', formatMoney(shopCashBalance));
       setText('[data-shop-bank]', formatMoney(shopBankBalance));
       setText('[data-shop-open-orders]', String(memberShopOrders.filter((order) => ['pending', 'processing'].includes(order.status)).length));
       renderMemberShopOrders(memberShopOrders);
+      const rentalSummary = payload.rental_portfolio?.summary;
+      if (rentalSummary) setText('[data-shop-orders-rental-summary]', String(Number(rentalSummary.active || 0)));
     }
   }
   normalizeDashboardShopCart();
