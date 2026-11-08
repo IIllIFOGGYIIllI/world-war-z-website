@@ -20,7 +20,7 @@ assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-09-v3-2-economy-
 for(const token of [
   'data-economy-content=""',
   'class="wwz-v32-finance-navigation"',
-  'class="wwz-v32-wallet-overview"',
+  'class="metric-grid wwz-v32-wallet-overview"',
   'data-v32-finance-target="wallet"',
   'data-v32-finance-target="banking"',
   'data-v32-finance-target="treasury"',
