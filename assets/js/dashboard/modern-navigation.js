@@ -4,7 +4,9 @@
   const groups = [...document.querySelectorAll('.sidebar-navigation details[data-nav-group]')];
   if (!groups.length) return;
   const openOnly = (selected) => {
-    if (!selected) return;
+    // Sidebar filtering may need several groups expanded simultaneously.
+    // Outside search, retain the original single-open accordion behaviour.
+    if (!selected || document.body.classList.contains('wwz-sidebar-searching')) return;
     groups.forEach((group) => { if (group !== selected && group.open) group.open = false; });
   };
   groups.forEach((group) => group.addEventListener('toggle', () => {
