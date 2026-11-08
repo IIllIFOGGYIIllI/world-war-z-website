@@ -41,6 +41,7 @@
 <link rel="stylesheet" href="assets/css/command-centre-v3.css?v=3.0.0&amp;rev=command-centre-redesign-1"/>
 <link rel="stylesheet" href="assets/css/command-centre-v3-layout-recovery.css?v=3.0.1&amp;rev=v3-layout-recovery-1"/>
 <link rel="stylesheet" href="assets/css/dashboard/navigation-v31.css?v=3.1.0&amp;rev=nav-overhaul-1"/>\n<link rel="stylesheet" href="assets/css/dashboard/workspace-v32-profile-gps.css?v=3.2.0&amp;rev=profile-gps-v32-1"/>
+<link rel="stylesheet" href="assets/css/dashboard/workspace-v32-economy.css?v=3.2.1&amp;rev=v3-2-finance-1"/>
 </head>
 <body class="dashboard-gated wwz-v3 wwz-v3-dashboard">
 <a class="skip-link" href="#dashboard-content">Skip to dashboard content</a>
@@ -839,7 +840,21 @@ Participation | 50000 | 0"></textarea><small>One line per prize: Prize name | Cu
 <div class="locked-hero panel" data-economy-guest=""><div class="locked-copy"><span aria-hidden="true" class="large-lock">$</span><p class="panel-kicker">Personal account required</p><h2>Connect Your Discord Profile</h2><p>Sign in to securely load your own verified wallet. Other members' account data is never returned by this page.</p><button class="primary-action" data-open-login="" type="button">Sign In With Discord</button></div><div class="balance-preview"><small>Protected Wallet</small><strong>PRIVATE</strong><span>Railway session required</span><div class="balance-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div></div>
 <div data-economy-unlinked="" hidden=""><div class="security-notice"><span aria-hidden="true">⌁</span><div><strong>No verified survivor profile found</strong><p>Use <code>/account link</code> in Discord with your exact PlayStation ID, then join the DayZ server to complete verification.</p></div></div></div>
 <div data-economy-content="" hidden="">
-<div class="metric-grid"><article class="metric-card featured"><div><span aria-hidden="true" class="metric-icon">$</span><small>Wallet balance</small></div><strong data-economy-balance="">—</strong><p>Live verified balance</p></article><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">♢</span><small>Community jackpot</small></div><strong data-economy-jackpot="">—</strong><p>Current shared prize</p></article><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">🔥</span><small>Heat</small></div><strong data-economy-heat="">○○○○○</strong><p>Current underworld heat</p></article><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">✓</span><small>Daily streak</small></div><strong data-economy-daily="">0</strong><p>Consecutive claims</p></article></div>
+<div class="wwz-v32-finance-intro"><div>
+<p class="panel-kicker">Private survivor finances</p>
+<h2>Financial Command Centre</h2>
+<p>Balances, protected savings and community funds for your currently selected World War Z server.</p>
+</div><span class="wwz-v32-finance-server-badge">Server-scoped accounts</span></div>
+<nav class="wwz-v32-finance-navigation" aria-label="Economy sections">
+<button type="button" data-v32-finance-target="wallet" aria-current="location">Wallet</button>
+<button type="button" data-v32-finance-target="banking">WWZ Bank</button>
+<button type="button" data-v32-finance-target="treasury">Treasury</button>
+<button type="button" data-v32-finance-target="ledger">Transactions</button>
+<a href="shop.html?section=rentals">My Rentals ↗</a>
+</nav>
+<div class="wwz-v32-finance-heading"><h2>Wallet overview</h2><p>Current balances and activity, isolated to your selected server</p></div>
+<div class="metric-grid wwz-v32-wallet-overview"><article class="metric-card featured"><div><span aria-hidden="true" class="metric-icon">$</span><small>Wallet balance</small></div><strong data-economy-balance="">—</strong><p>Live verified balance</p></article><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">♢</span><small>Community jackpot</small></div><strong data-economy-jackpot="">—</strong><p>Current shared prize</p></article><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">🔥</span><small>Heat</small></div><strong data-economy-heat="">○○○○○</strong><p>Current underworld heat</p></article><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">✓</span><small>Daily streak</small></div><strong data-economy-daily="">0</strong><p>Consecutive claims</p></article></div>
+<div class="wwz-v32-finance-heading"><h2>WWZ Bank</h2><p>Deposit, withdraw and review protected savings</p></div>
 <div class="dashboard-grid account-data-grid" data-dashboard-section="banking" id="dashboard-economy-banking">
 <article class="panel bank-account-panel"><div class="panel-heading"><div><p class="panel-kicker">Protected savings</p><h2>WWZ Bank</h2></div><span class="muted-label">Server scoped</span></div>
 <div class="metric-grid bank-metric-grid"><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">$</span><small>Wallet</small></div><strong data-bank-wallet="">—</strong><p>Spendable cash</p></article><article class="metric-card featured"><div><span aria-hidden="true" class="metric-icon">🏦</span><small>Bank</small></div><strong data-bank-balance="">—</strong><p>Protected savings</p></article><article class="metric-card"><div><span aria-hidden="true" class="metric-icon">Σ</span><small>Net worth</small></div><strong data-bank-net-worth="">—</strong><p>Wallet + bank</p></article></div>
@@ -859,6 +874,7 @@ Participation | 50000 | 0"></textarea><small>One line per prize: Prize name | Cu
 <dl class="detail-list"><div><dt>Total deposited</dt><dd data-bank-deposited="">—</dd></div><div><dt>Total withdrawn</dt><dd data-bank-withdrawn="">—</dd></div><div><dt>Bank transfers</dt><dd data-bank-transfers="">—</dd></div></dl>
 <ol class="activity-list" data-bank-transactions=""><li><span class="activity-symbol">…</span><div><strong>Loading bank activity</strong><small>Secure Railway request</small></div></li></ol><p class="table-note" data-bank-empty="" hidden="">No bank transactions have been recorded yet.</p>
 </article></div>
+<div class="wwz-v32-finance-heading"><h2>Community Treasury</h2><p>Contributions, audited community spending and escrow</p></div>
 <div class="dashboard-grid account-data-grid treasury-workspace" data-dashboard-section="treasury" data-treasury-root="" id="dashboard-economy-treasury">
 <article class="panel treasury-panel"><div class="panel-heading"><div><p class="panel-kicker">Shared server funds</p><h2>Community Treasury</h2></div><span class="muted-label" data-treasury-server-name="">Selected server</span></div>
 <div class="treasury-metric-grid"><div><span>Available</span><strong data-treasury-available="">—</strong><small>Ready for community use</small></div><div><span>Reserved</span><strong data-treasury-reserved="">—</strong><small>Protected in escrow</small></div><div><span>Managed total</span><strong data-treasury-managed="">—</strong><small>Available + reserved</small></div></div>
@@ -878,6 +894,7 @@ Participation | 50000 | 0"></textarea><small>One line per prize: Prize name | Cu
 <div class="treasury-escrow-head"><div><p class="panel-kicker">Escrow reserve</p><h3>Active Reservations</h3></div><span class="muted-label">Release or refund</span></div><ol class="treasury-escrow-list" data-treasury-escrows=""></ol><p class="table-note" data-treasury-escrows-empty="" hidden="">No active escrow reservations.</p>
 </article>
 </div>
+<div class="wwz-v32-finance-heading"><h2>Economy history</h2><p>Lifetime totals and recent transactions</p></div>
 <div class="dashboard-grid account-data-grid" data-dashboard-section="ledger" id="dashboard-economy-ledger"><article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Lifetime ledger</p><h2>Economy Totals</h2></div><span class="muted-label">Read only</span></div><dl class="detail-list"><div><dt>Total earned</dt><dd data-economy-earned="">—</dd></div><div><dt>Total spent</dt><dd data-economy-spent="">—</dd></div><div><dt>Work completed</dt><dd data-economy-work="">—</dd></div><div><dt>Gambling record</dt><dd data-economy-gambling="">—</dd></div><div><dt>Crime record</dt><dd data-economy-crime="">—</dd></div><div><dt>Robbery protection</dt><dd data-economy-protection="">Inactive</dd></div></dl></article><article class="panel"><div class="panel-heading"><div><p class="panel-kicker">Your ledger</p><h2>Recent Transactions</h2></div><span class="muted-label">Latest six</span></div><ol class="activity-list" data-economy-transactions=""><li><span class="activity-symbol">…</span><div><strong>Loading your activity</strong><small>Secure Railway request</small></div></li></ol><p class="table-note" data-economy-empty="" hidden="">No economy transactions have been recorded yet.</p></article></div>
 </div>
 </section>
@@ -1896,5 +1913,6 @@ CarBattery,1" rows="6"></textarea></label>
 <script defer src="assets/js/dashboard/workspace-phase2.js?v=2.2.0&amp;rev=dashboard-phase2-1"></script>
 <script defer src="assets/js/command-centre-v3.js?v=3.0.0&amp;rev=command-centre-redesign-1"></script>
 <script defer src="assets/js/dashboard/navigation-v31.js?v=3.1.0&amp;rev=nav-overhaul-1"></script>\n<script defer src="assets/js/dashboard/workspace-v32-profile-gps.js?v=3.2.0&amp;rev=profile-gps-v32-1"></script>
+<script defer src="assets/js/dashboard/workspace-v32-economy.js?v=3.2.1&amp;rev=v3-2-finance-1"></script>
 </body>
 </html>
