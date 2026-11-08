@@ -19,7 +19,7 @@ assert.equal(html.split(sheet).length-1,1,'V3.2 stylesheet loaded exactly once')
 assert.ok(html.indexOf(sheet)>html.indexOf('navigation-v31.css'),'V3.2 styles follow V3.1');
 assert.ok(html.indexOf(script)>html.indexOf('navigation-v31.js'),'V3.2 script follows V3.1');
 assert.ok(sw.includes('./assets/css/dashboard/workspace-v32-profile-gps.css?v=3.2.0&rev=profile-gps-v32-1')&&sw.includes('./assets/js/dashboard/workspace-v32-profile-gps.js?v=3.2.0&rev=profile-gps-v32-1'),'V3.2 assets included in PWA shell');
-assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-09-v3-2-economy-banking-1';"));
+assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-09-v3-2-community-factions-1';"));
 for(const token of [
   'class="wwz-v32-profile-navigation"',
   'data-v32-profile-tab="identity"',

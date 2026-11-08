@@ -37,6 +37,7 @@ jobs:
           node scripts/test_navigation_v31.js
           node scripts/test_workspace_v32_profile_gps.js
           node scripts/test_workspace_v32_economy.js
+          node scripts/test_workspace_v32_community.js
           node scripts/test_command_centre_v3.js
       - name: Build generated Nasdara map assets for full site check
         run: |
