@@ -22,7 +22,7 @@
       'Wallet & Economy', 'WWZ Bank', 'Economy Ledger', 'Community Treasury',
       'Account Centre', 'Support Tickets', 'My Appeals'
     ],
-    'Shop & Trader': ['Member Shop', 'My Shop Orders', 'Saved Delivery Locations'],
+    'Survivor Shop': ['Member Shop', 'My Shop Orders', 'Saved Delivery Locations'],
     'Administration': [
       'Command Centre', 'Player Intelligence', 'Moderation Centre',
       'Moderation Queue', 'Moderation Cases', 'Current Ban Lists', 'Identity Sync',
