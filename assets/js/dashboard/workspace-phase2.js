@@ -190,6 +190,9 @@
       $$('.side-link', group).forEach((link) => link.classList.remove('wwz-nav-filtered-out'));
     });
     empty.hidden = true;
+    const active = $('.sidebar-navigation .side-link.active');
+    const activeGroup = active?.closest('details[data-nav-group]');
+    if (activeGroup) groups.forEach((group) => { group.open = group === activeGroup; });
   };
   const filter = () => {
     const needle = search.value.trim().toLocaleLowerCase();
