@@ -11,7 +11,7 @@ assert.ok(page.indexOf('assets/css/dashboard/workspace-v33-administration.css?v=
 assert.ok(page.indexOf('assets/js/dashboard/workspace-v33-administration.js?v=3.3.0&amp;rev=v33-admin-owner-1')>page.indexOf('workspace-v32-community.js'));
 assert.ok(sw.includes('./assets/css/dashboard/workspace-v33-administration.css?v=3.3.0&rev=v33-admin-owner-1'));
 assert.ok(sw.includes('./assets/js/dashboard/workspace-v33-administration.js?v=3.3.0&rev=v33-admin-owner-1'));
-assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-09-v3-3-administration-1';"));
+assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-09-v3-4-sitewide-consistency-1';"));
 for(const tok of [
  'data-view-panel="staff"','data-view-panel="serverconfig"',
  'data-view-panel="shopadmin"','data-view-panel="configuration"',

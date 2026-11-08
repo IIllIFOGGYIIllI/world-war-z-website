@@ -120,6 +120,6 @@ assert.ok(recoveryCss.includes('grid-column:1!important; grid-row:2!important'),
 assert.ok(!recoveryCss.includes('fetch(') && !recoveryCss.includes('XMLHttpRequest') && !recoveryCss.includes('WebSocket'), 'Presentation-only recovery');
 
 assert.ok(sw.includes('./assets/js/command-centre-v3.js?v=3.0.0&rev=command-centre-redesign-1'));
-assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-09-v3-3-administration-1';"));
+assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-09-v3-4-sitewide-consistency-1';"));
 new vm.Script(js,{filename:'command-centre-v3.js'});
 console.log('PASS: genuine home, dashboard and shop V3 layouts with unchanged protected flows');

@@ -12,7 +12,7 @@ assert.ok(page.indexOf(sheet)>page.indexOf('workspace-v32-economy.css'),'Shared 
 assert.ok(page.indexOf(script)>page.indexOf('workspace-v32-economy.js'),'Existing navigation must initialise first');
 assert.ok(sw.includes('./assets/css/dashboard/workspace-v32-community.css?v=3.2.2&rev=v3-2-community-2'));
 assert.ok(sw.includes('./assets/js/dashboard/workspace-v32-community.js?v=3.2.2&rev=v3-2-community-2'));
-assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-09-v3-3-administration-1';"));
+assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-09-v3-4-sitewide-consistency-1';"));
 for(const token of [
   'data-view-panel="community"','data-view-panel="factions"',
   'data-view-panel="objectives"','data-view-panel="progression"',

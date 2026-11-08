@@ -193,3 +193,132 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialize, { once: true });
   else initialize();
 })();
+
+
+/* V3.4 progressive improvements: preserve all feature controllers and privacy. */
+(() => {
+  'use strict';
+  const VERSION='3.4.0';
+  const tableRegion='.responsive-table, .wwz-table-scroll';
+  const excludedImages='.site-header,.page-header,.hero,.dashboard-topbar,.dashboard-sidebar,.shop-topbar,.donation-topbar,.leaflet-container,.wwz-gps-map,[data-map],.account-avatar,.profile-avatar';
+  const mediaSelector='img,dialog,table,'+tableRegion;
+  const registered=new WeakSet();
+  const observedTables=new WeakSet();
+  let dialogIndex=0;
+  function updateOverflow(region){
+    if(!region.isConnected)return;
+    const overflowing=region.scrollWidth>region.clientWidth+8;
+    if(overflowing){
+      region.dataset.wwzV34Overflowing='true';
+      if(!region.hasAttribute('aria-description'))
+        region.setAttribute('aria-description','Scroll horizontally to reveal additional table columns.');
+    }else{
+      delete region.dataset.wwzV34Overflowing;
+      if(region.getAttribute('aria-description')==='Scroll horizontally to reveal additional table columns.')
+        region.removeAttribute('aria-description');
+    }
+  }
+  const resize=typeof ResizeObserver==='function'?new ResizeObserver(entries=>{
+    const regions=new Set();
+    for(const entry of entries){
+      const region=entry.target.matches?.(tableRegion)?entry.target:entry.target.closest?.(tableRegion);
+      if(region)regions.add(region);
+    }
+    regions.forEach(updateOverflow);
+  }):null;
+  const removeDuplicateSkip=()=>{
+    const original=document.querySelector('a.skip-link[href^="#"]');
+    if(!original)return;
+    document.querySelectorAll('a[data-wwz-skip]').forEach(generated=>{
+      if(generated!==original&&generated.getAttribute('href')===original.getAttribute('href'))
+        generated.remove();
+    });
+  };
+  const enhanceImage=img=>{
+    if(!(img instanceof HTMLImageElement)||img.closest(excludedImages))return;
+    if(!img.hasAttribute('decoding'))img.decoding='async';
+    if(img.hasAttribute('loading'))return;
+    const bounds=img.getBoundingClientRect();
+    if(bounds.top>(window.innerHeight||768)*1.2){
+      img.loading='lazy';
+      if(!img.hasAttribute('fetchpriority'))img.setAttribute('fetchpriority','low');
+    }
+  };
+  const enhanceTable=table=>{
+    if(!(table instanceof HTMLTableElement))return;
+    const region=table.closest(tableRegion);
+    if(!region)return; // Dashboard UX owns wrapping, not this enhancement.
+    if(!region.hasAttribute('tabindex'))region.tabIndex=0;
+    if(!region.hasAttribute('role'))region.setAttribute('role','region');
+    if(!region.hasAttribute('aria-label')&&!region.hasAttribute('aria-labelledby')){
+      const title=region.closest('.panel,.inset-panel,section,article')?.querySelector('h2,h3,h4');
+      region.setAttribute('aria-label',title?.textContent?.trim()||'Scrollable data table');
+    }
+    if(!registered.has(region)){
+      registered.add(region);
+      resize?.observe(region);
+    }
+    if(!observedTables.has(table)){
+      observedTables.add(table);
+      resize?.observe(table);
+    }
+    updateOverflow(region);
+  };
+  const enhanceDialog=dialog=>{
+    if(!(dialog instanceof HTMLDialogElement))return;
+    if(dialog.hasAttribute('aria-label')||dialog.hasAttribute('aria-labelledby'))return;
+    const heading=dialog.querySelector('h1,h2,h3');
+    if(!heading)return;
+    if(!heading.id)heading.id='wwz-v34-dialog-'+(++dialogIndex);
+    dialog.setAttribute('aria-labelledby',heading.id);
+  };
+  const scan=scope=>{
+    if(!(scope instanceof Element||scope instanceof Document))return;
+    if(scope.matches?.('img'))enhanceImage(scope);
+    if(scope.matches?.('dialog'))enhanceDialog(scope);
+    if(scope.matches?.('table'))enhanceTable(scope);
+    scope.querySelectorAll('img').forEach(enhanceImage);
+    scope.querySelectorAll('dialog').forEach(enhanceDialog);
+    scope.querySelectorAll('table').forEach(enhanceTable);
+  };
+  const observeDynamic=()=>{
+    if(typeof MutationObserver!=='function')return;
+    const roots=['.dashboard-main','.member-shop-shell','.donation-store-shell','.page-content']
+      .map(s=>document.querySelector(s)).filter(Boolean);
+    const unique=roots.filter(root=>!roots.some(other=>other!==root&&other.contains(root)));
+    if(!unique.length)return;
+    const pending=new Set();
+    let scheduled=false;
+    const flush=()=>{
+      scheduled=false;
+      const nodes=[...pending];pending.clear();
+      nodes.forEach(scan);
+    };
+    const schedule=()=>{
+      if(scheduled)return;
+      scheduled=true;
+      if(typeof window.requestIdleCallback==='function')
+        window.requestIdleCallback(flush,{timeout:900});
+      else window.setTimeout(flush,50);
+    };
+    const observer=new MutationObserver(records=>{
+      for(const record of records)for(const node of record.addedNodes){
+        if(!(node instanceof Element))continue;
+        if(node.closest('.leaflet-container,.wwz-gps-map,[data-map]'))continue;
+        if(node.matches(mediaSelector)||node.querySelector(mediaSelector))pending.add(node);
+      }
+      if(pending.size)schedule();
+    });
+    unique.forEach(root=>observer.observe(root,{childList:true,subtree:true}));
+  };
+  const initialize=()=>{
+    if(document.body.dataset.wwzV34Ready==='1')return;
+    document.body.dataset.wwzV34Ready='1';
+    document.documentElement.dataset.wwzV34Version=VERSION;
+    removeDuplicateSkip();
+    scan(document);
+    observeDynamic();
+  };
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initialize,{once:true});
+  else initialize();
+})();
