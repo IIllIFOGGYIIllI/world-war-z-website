@@ -59,7 +59,7 @@ assert.ok(!js.includes('fetch(') && !js.includes('localStorage'),
   'UI enhancement must not fetch user data or write persistent browser state');
 assert.ok(shell.includes('./assets/css/site-refinement.css?v=2.1.0&rev=sitewide-ui-1'));
 assert.ok(shell.includes('./assets/js/site-refinement.js?v=2.1.0&rev=sitewide-ui-1'));
-assert.ok(shell.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-08-v3-overview-organisation-1';"));
+assert.ok(shell.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-08-v3-1-navigation-overhaul-1';"));
 assert.ok(css.includes("input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='hidden'])"), 'Text input selector must remain a single compound selector');
 assert.ok(!/input:not\([^\n]*\n\s+:not\(/.test(css), 'Whitespace before :not would stop input styles matching');
 assert.ok(read('dashboard.html').includes('data-raid-damage-controls'), 'Raid controls must remain');
