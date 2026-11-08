@@ -18,6 +18,49 @@
     }
   };
 
+  const improvePageTabs = () => {
+    const page = location.pathname.split('/').pop() || 'index.html';
+    let tabs = $('.wwz-page-tabs');
+    // The global navigation deliberately replaces the shop's old anchors:
+    // restore them as a dedicated, visible shopping journey instead.
+    if (page === 'shop.html' && !tabs) {
+      tabs = document.createElement('nav');
+      tabs.className = 'wwz-page-tabs';
+      tabs.setAttribute('aria-label', 'Shop sections');
+      for (const [label, id] of [
+        ['Catalogue', 'catalogue'], ['Vehicle Rentals', 'rentals'],
+        ['Shopping Cart', 'cart'], ['My Orders', 'orders'],
+      ]) {
+        if (!document.getElementById(id)) continue;
+        const link = document.createElement('a');
+        link.href = '#' + id;
+        link.textContent = label;
+        tabs.append(link);
+      }
+      const before = $('.wwz-network-rail, .shop-topbar');
+      before?.insertAdjacentElement('afterend', tabs);
+    }
+    if (!tabs) return;
+    const preferred = page === 'donations.html'
+      ? ['Packages', 'Single Items', 'Payment', 'My Orders']
+      : page === 'index.html'
+        ? ['Start Here', 'Overview', 'Systems', 'Commands', 'Roadmap']
+        : [];
+    if (page === 'index.html' && document.getElementById('getting-started')
+        && ![...tabs.querySelectorAll('a')].some((a) => a.getAttribute('href') === '#getting-started')) {
+      const start = document.createElement('a');
+      start.href = '#getting-started';
+      start.textContent = 'Start Here';
+      tabs.prepend(start);
+    }
+    // Explicit journey order instead of alphabetical sorting; keep the
+    // original anchor nodes and their event handlers.
+    for (const label of preferred) {
+      const link = [...tabs.querySelectorAll('a')].find((a) => a.textContent.trim() === label);
+      if (link) tabs.append(link);
+    }
+  };
+
   const watchPageTabs = () => {
     const tabs = $('.wwz-page-tabs');
     if (!tabs) return;
@@ -140,6 +183,7 @@
 
   const initialize = () => {
     accessibleMain();
+    improvePageTabs();
     watchPageTabs();
     workspaceLocation();
     // Yield image processing until after the critical first layout.
