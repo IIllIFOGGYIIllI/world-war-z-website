@@ -1,0 +1,125 @@
+/* WWZ V3.0.1 – desktop/mobile layout regression recovery.
+   Presentation only: leaves routes, account data, maps, checkout and server
+   controls untouched. Loaded AFTER command-centre-v3.css. */
+
+/* Make the command hero a bounded grid, never an intrinsic-height skyscraper. */
+body.wwz-v3-dashboard [data-view-panel='overview'],
+body.wwz-v3-dashboard [data-view-panel='overview'] .wwz-v3-command-intro {
+  box-sizing:border-box; width:100%; max-width:100%; min-width:0;
+}
+body.wwz-v3-dashboard .wwz-v3-command-intro {
+  display:grid!important;
+  grid-template-columns:minmax(0,1.6fr) minmax(295px,.85fr)!important;
+  grid-template-rows:auto!important;
+  gap:16px!important; align-items:stretch!important;
+}
+body.wwz-v3-dashboard .wwz-v3-command-intro > .view-heading {
+  box-sizing:border-box; display:flex!important;
+  flex-direction:column!important; align-items:stretch!important;
+  justify-content:space-between!important;
+  grid-column:1!important; grid-row:1!important;
+  width:100%!important; min-width:0!important; max-width:100%!important;
+  min-height:345px!important; height:auto!important;
+  max-height:540px!important; overflow:hidden!important;
+}
+body.wwz-v3-dashboard .wwz-v3-command-intro > .wwz-start-here {
+  box-sizing:border-box; grid-column:2!important; grid-row:1!important;
+  width:100%!important; min-width:0!important; max-width:100%!important;
+  min-height:345px!important; height:auto!important;
+  align-self:stretch!important; overflow:hidden;
+}
+body.wwz-v3-dashboard .wwz-v3-command-intro .overview-heading-copy {
+  box-sizing:border-box; display:block!important;
+  flex:0 1 auto!important; align-self:stretch!important;
+  width:100%!important; min-width:0!important; max-width:100%!important;
+  writing-mode:horizontal-tb!important; direction:ltr;
+  text-align:left!important; white-space:normal!important;
+}
+body.wwz-v3-dashboard .wwz-v3-command-intro .overview-heading-copy h1 {
+  display:block!important; width:100%!important; max-width:100%!important;
+  margin:0!important; font-size:clamp(32px,3vw,54px)!important;
+  line-height:1.08!important; letter-spacing:-.04em!important;
+  overflow-wrap:anywhere!important; word-break:normal!important;
+  white-space:normal!important; text-wrap:wrap!important;
+}
+body.wwz-v3-dashboard .wwz-v3-command-intro .overview-heading-copy p {
+  display:block!important; width:auto!important; max-width:100%!important;
+  overflow-wrap:break-word!important; word-break:normal!important;
+  writing-mode:horizontal-tb!important; white-space:normal!important;
+}
+body.wwz-v3-dashboard .wwz-v3-command-intro .overview-heading-copy p:last-child {
+  margin-top:15px!important; max-width:580px!important;
+  font-size:13px!important; line-height:1.55!important;
+}
+body.wwz-v3-dashboard .wwz-v3-command-intro .breadcrumb {
+  margin:0 0 14px!important; font-size:10px!important;
+}
+body.wwz-v3-dashboard .wwz-v3-command-intro .overview-command-mark {
+  /* The legacy decorative badge interfered with the responsive command hero. */
+  display:none!important;
+}
+body.wwz-v3-dashboard .wwz-v3-command-intro .heading-actions {
+  flex:0 0 auto!important; align-self:stretch!important;
+  width:100%!important; min-width:0!important;
+  justify-content:flex-start!important; margin-top:18px!important;
+}
+body.wwz-v3-dashboard .wwz-v3-command-intro .wwz-v3-hero-live {
+  flex:0 0 auto!important; max-width:100%!important;
+  margin-top:14px!important;
+}
+body.wwz-v3-dashboard .wwz-v3-command-intro .wwz-start-grid {
+  min-width:0!important; grid-auto-rows:minmax(82px,auto)!important;
+}
+body.wwz-v3-dashboard .wwz-v3-command-intro .wwz-start-grid > * {
+  min-width:0!important; max-width:100%!important;
+  overflow-wrap:break-word!important;
+}
+/* Public landing: keep headline and operations summary readable together. */
+body.wwz-v3-home .hero-content,
+body.wwz-v3-home .wwz-v3-home-feature,
+body.wwz-v3-home .hero-copy-block,
+body.wwz-v3-home .hero-ops-board {
+  box-sizing:border-box; min-width:0!important; max-width:100%;
+}
+body.wwz-v3-home .hero h1 {
+  font-size:clamp(40px,5vw,76px)!important;
+  line-height:1.05!important; letter-spacing:-.052em!important;
+  overflow-wrap:normal!important; word-break:normal!important;
+}
+body.wwz-v3-home .hero-ops-board {
+  align-self:center; width:100%!important;
+}
+body.member-shop-page.wwz-v3 .wwz-v3-shop-intro > * {
+  box-sizing:border-box; min-width:0!important;
+}
+body.member-shop-page.wwz-v3 .shop-hero h1 {
+  font-size:clamp(34px,3vw,54px)!important;
+  line-height:1.04!important; overflow-wrap:break-word!important;
+}
+@media(max-width:1180px) {
+  body.wwz-v3-dashboard .wwz-v3-command-intro {
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  body.wwz-v3-dashboard .wwz-v3-command-intro > .view-heading {
+    grid-column:1!important; grid-row:1!important;
+    max-height:none!important; min-height:300px!important;
+  }
+  body.wwz-v3-dashboard .wwz-v3-command-intro > .wwz-start-here {
+    grid-column:1!important; grid-row:2!important;
+    min-height:0!important; height:auto!important;
+  }
+}
+@media(max-width:700px) {
+  body.wwz-v3-dashboard .wwz-v3-command-intro > .view-heading {
+    min-height:280px!important; max-height:none!important;
+  }
+  body.wwz-v3-dashboard .wwz-v3-command-intro .overview-heading-copy h1 {
+    font-size:clamp(29px,7vw,42px)!important;
+  }
+  body.wwz-v3-dashboard .wwz-v3-command-intro .heading-actions button {
+    min-width:0!important; max-width:100%;
+  }
+  body.wwz-v3-home .hero h1 {
+    font-size:clamp(37px,8vw,54px)!important;
+  }
+}

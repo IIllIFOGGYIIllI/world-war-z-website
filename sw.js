@@ -1,6 +1,6 @@
 'use strict';
 
-const WWZ_PWA_VERSION = '2.21.1';
+const WWZ_PWA_VERSION = '2.21.2';
 const CACHE_PREFIX = 'wwz-pwa-';
 const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 // Public release versions can advance without discarding the bounded map caches.
@@ -8,7 +8,7 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-11-08-full-command-centre-redesign-v3-2';
+const WWZ_PWA_UPDATE_REVISION = '2026-11-08-command-centre-v3-layout-recovery-1';
 const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-ios-safari-tab-bridge-2`;
 const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${APP_CACHE_RELEASE}`;
@@ -60,7 +60,8 @@ const APP_SHELL = [
   './assets/css/workspace-phase2.css?v=2.2.0&rev=dashboard-phase2-1',
   './assets/js/dashboard/workspace-phase2.js?v=2.2.0&rev=dashboard-phase2-1',
   './assets/css/command-centre-v3.css?v=3.0.0&rev=command-centre-redesign-1',
-  './assets/js/command-centre-v3.js?v=3.0.0&rev=command-centre-redesign-1'
+  './assets/js/command-centre-v3.js?v=3.0.0&rev=command-centre-redesign-1',
+  './assets/css/command-centre-v3-layout-recovery.css?v=3.0.1&rev=v3-layout-recovery-1'
 ].map(scopedUrl);
 
 const UPDATE_INVALIDATIONS = [];
