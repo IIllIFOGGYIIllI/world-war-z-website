@@ -93,8 +93,8 @@ for (const label of [
 assert.ok(homeCss.includes('.my-wwz-stat-grid'), 'Survivor stat grid styling is missing');
 assert.ok(homeCss.includes('@media (max-width: 720px)'), 'Tablet/mobile stat layout is missing');
 assert.ok(homeCss.includes('@media (max-width: 520px)'), 'Small-screen stat layout is missing');
-assert.ok(bootstrap.includes('my-wwz.js?v=1.41.2&rev=player-gps-1'));
-assert.ok(bootstrap.includes('my-wwz.css?v=1.41.2&rev=player-gps-1'));
+assert.ok(bootstrap.includes('my-wwz.js?v=1.41.3&rev=v3-member-home-layout-1'));
+assert.ok(bootstrap.includes('my-wwz.css?v=1.41.3&rev=v3-member-home-layout-1'));
 assert.ok(page.includes('assets/js/dashboard/account.js?'), 'Account renderer must be loaded by the dashboard');
 assert.ok(/const WWZ_PWA_UPDATE_REVISION = '[A-Za-z0-9][A-Za-z0-9._-]*';/.test(serviceWorker), 'PWA update revision must be present');
 

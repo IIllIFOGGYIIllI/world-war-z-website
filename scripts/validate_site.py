@@ -764,15 +764,15 @@ def validate_final_parity_polish(errors: list[str]) -> None:
     member_home_js = member_home_js_path.read_text(encoding="utf-8") if member_home_js_path.is_file() else ""
     member_home_css = member_home_css_path.read_text(encoding="utf-8") if member_home_css_path.is_file() else ""
     for token in (
-        "assets/js/dashboard/bootstrap.js?v=1.41.2&amp;rev=player-gps-1",
+        "assets/js/dashboard/bootstrap.js?v=1.41.3&amp;rev=v3-member-home-layout-1",
         'class="dashboard-view active" data-view-panel="overview"',
         "Your survivor, progression, faction, quests, events, orders and current priorities",
     ):
         if token not in dashboard:
             errors.append(f"dashboard.html: missing Member Home release surface: {token}")
     for token in (
-        "assets/css/dashboard/my-wwz.css?v=1.41.2&rev=player-gps-1",
-        "assets/js/dashboard/my-wwz.js?v=1.41.2&rev=player-gps-1",
+        "assets/css/dashboard/my-wwz.css?v=1.41.3&rev=v3-member-home-layout-1",
+        "assets/js/dashboard/my-wwz.js?v=1.41.3&rev=v3-member-home-layout-1",
         "loadMyWwzExperience",
     ):
         if token not in member_home_bootstrap:
