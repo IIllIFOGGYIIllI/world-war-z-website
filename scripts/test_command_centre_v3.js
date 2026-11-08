@@ -95,13 +95,17 @@ const dashboardBootstrap=read('assets/js/dashboard/bootstrap.js');
 // Regression from signed-in recording: personal profile mounted inside V3
 // two-column intro, crushing its width and vertically wrapping usernames.
 assert.ok(memberScript.includes("overviewPanel.querySelector(':scope > .wwz-v3-command-intro')"));
-assert.ok(memberScript.includes("v3Intro.insertAdjacentElement('afterend', root)"));
+assert.ok(memberScript.includes("v3NetworkTiles.insertAdjacentElement('afterend', root)"), 'Member overview must follow live network tiles');
+assert.ok(memberScript.includes("memberGrid.prepend(quickCard)"), 'Shortcuts should appear before the activity feed');
+assert.ok(memberStyle.includes('member-home-ready > .metric-grid'), 'Live network tiles stay visible for members');
+assert.ok(memberStyle.includes('member-home-ready > .dashboard-grid.main-grid'), 'Duplicate legacy server panels hidden for members');
+assert.ok(memberStyle.includes('my-wwz-group-heading'), 'The member dashboard has semantic groups');
 assert.ok(!memberScript.includes("overviewPanel.querySelector('.view-heading')?.insertAdjacentElement('afterend', root)"));
 assert.ok(memberStyle.includes('> .my-wwz-shell'));
 assert.ok(memberStyle.includes('overflow-wrap:anywhere'));
-assert.ok(dashboardBootstrap.includes('my-wwz.js?v=1.41.3&rev=v3-member-home-layout-1'));
-assert.ok(dashboardBootstrap.includes('my-wwz.css?v=1.41.3&rev=v3-member-home-layout-1'));
-assert.ok(dash.includes('bootstrap.js?v=1.41.3&amp;rev=v3-member-home-layout-1'));
+assert.ok(dashboardBootstrap.includes('my-wwz.js?v=1.41.4&rev=v3-overview-organised-1'));
+assert.ok(dashboardBootstrap.includes('my-wwz.css?v=1.41.4&rev=v3-overview-organised-1'));
+assert.ok(dash.includes('bootstrap.js?v=1.41.4&amp;rev=v3-overview-organised-1'));
 assert.ok(memberScript.includes('data-my-wwz-gps'), 'Member GPS panel preserved');
 assert.ok(memberScript.includes('data-my-wwz-orders'), 'Orders and rentals preserved');
 
@@ -116,6 +120,6 @@ assert.ok(recoveryCss.includes('grid-column:1!important; grid-row:2!important'),
 assert.ok(!recoveryCss.includes('fetch(') && !recoveryCss.includes('XMLHttpRequest') && !recoveryCss.includes('WebSocket'), 'Presentation-only recovery');
 
 assert.ok(sw.includes('./assets/js/command-centre-v3.js?v=3.0.0&rev=command-centre-redesign-1'));
-assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-08-v3-member-home-layout-2';"));
+assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-08-v3-overview-organisation-1';"));
 new vm.Script(js,{filename:'command-centre-v3.js'});
 console.log('PASS: genuine home, dashboard and shop V3 layouts with unchanged protected flows');

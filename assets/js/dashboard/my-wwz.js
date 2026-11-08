@@ -255,13 +255,42 @@
           <div class="my-wwz-quick-links" data-my-wwz-quick-links></div>
         </article>
       </div>`;
-    // V3 wraps its static heading inside a two-column intro grid. Attach the
-    // personalised dashboard AFTER that grid, never as an implicit grid child:
-    // the old heading-based insertion collapsed the survivor hero into a narrow
-    // column and left the remaining half of the page empty.
+    // Group the authenticated member experience by user task rather than
+    // appending the most important shortcuts after the entire activity feed.
+    // These are existing cards: moving them preserves every live data binding.
+    const memberGrid = root.querySelector('.my-wwz-grid');
+    const quickCard = memberGrid?.querySelector('[data-my-wwz-quick]');
+    if (memberGrid && quickCard) memberGrid.prepend(quickCard);
+
+    const makeGroupHeading = (name, description) => {
+      const heading = document.createElement('div');
+      heading.className = 'my-wwz-group-heading';
+      heading.setAttribute('role', 'heading');
+      heading.setAttribute('aria-level', '2');
+      const strong = document.createElement('strong');
+      strong.textContent = name;
+      const small = document.createElement('small');
+      small.textContent = description;
+      heading.append(strong, small);
+      return heading;
+    };
+    for (const [selector, name, description] of [
+      ['[data-my-wwz-next]', 'Your priorities', 'Actions, current world and survivor progression'],
+      ['[data-my-wwz-faction]', 'Community & services', 'Factions, events, purchases and support'],
+      ['[data-my-wwz-recent]', 'Activity history', 'Your latest activity for the selected server'],
+    ]) {
+      const anchor = memberGrid?.querySelector(selector);
+      if (anchor) memberGrid.insertBefore(makeGroupHeading(name, description), anchor);
+    }
+
+    // On V3, keep the live Network At A Glance tiles near the top and place
+    // the personalised workspace AFTER them. Guests retain the existing
+    // command hero and original server/quick-action panels.
+    const v3NetworkTiles = overviewPanel.querySelector(':scope > .metric-grid');
     const v3Intro = overviewPanel.querySelector(':scope > .wwz-v3-command-intro');
     const legacyHeading = overviewPanel.querySelector(':scope > .view-heading');
-    if (v3Intro) v3Intro.insertAdjacentElement('afterend', root);
+    if (v3NetworkTiles && v3Intro) v3NetworkTiles.insertAdjacentElement('afterend', root);
+    else if (v3Intro) v3Intro.insertAdjacentElement('afterend', root);
     else if (legacyHeading) legacyHeading.insertAdjacentElement('afterend', root);
     else overviewPanel.prepend(root);
 
