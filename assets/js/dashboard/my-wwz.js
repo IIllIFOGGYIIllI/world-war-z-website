@@ -233,9 +233,11 @@
             <span><i class="latest" aria-hidden="true"></i>Latest position</span>
           </div>
           <div class="wwz-gps-map" data-my-gps-map aria-label="Your recorded movement route on the selected DayZ map"></div>
-          <div class="wwz-v32-replay-heading"><strong>Route replay</strong><small>Move through recorded observations · No interpolation</small></div>\n          <div class="wwz-gps-timeline"><input aria-label="Replay route timeline" data-my-gps-timeline type="range" min="0" max="0" value="0" disabled><time data-my-gps-time>—</time></div>
+          <div class="wwz-v32-replay-heading"><strong>Route replay</strong><small>Move through recorded observations · No interpolation</small></div>
+          <div class="wwz-gps-timeline"><input aria-label="Replay route timeline" data-my-gps-timeline type="range" min="0" max="0" value="0" disabled><time data-my-gps-time>—</time></div>
           <p class="wwz-gps-state" data-my-gps-state role="status">Loading your recorded route…</p>
-          <p class="wwz-gps-note">Historical ADM snapshots only — not continuous or live GPS. Gaps are preserved across reconnects and rejected jumps. Route history is retained for up to 14 days; validated all-time distance remains on your career record.</p>\n          <footer class="wwz-v32-gps-footer"><button class="secondary-action compact-action" type="button" data-v32-profile-return>Open Survivor Profile →</button></footer>
+          <p class="wwz-gps-note">Historical ADM snapshots only — not continuous or live GPS. Gaps are preserved across reconnects and rejected jumps. Route history is retained for up to 14 days; validated all-time distance remains on your career record.</p>
+          <footer class="wwz-v32-gps-footer"><button class="secondary-action compact-action" type="button" data-v32-profile-return>Open Survivor Profile →</button></footer>
         </article>
         <article class="my-wwz-card" data-my-wwz-faction>
           <header><div><span>FACTION</span><h2>Your Group</h2></div><b data-my-wwz-faction-state>Independent</b></header>
