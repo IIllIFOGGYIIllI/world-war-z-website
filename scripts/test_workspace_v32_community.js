@@ -5,14 +5,14 @@ const fs=require('node:fs');const {Script}=require('node:vm');
 const read=x=>fs.readFileSync(x,'utf8');
 const page=read('dashboard.html'),sw=read('sw.js');
 const js=read('assets/js/dashboard/workspace-v32-community.js'),css=read('assets/css/dashboard/workspace-v32-community.css');
-const sheet='assets/css/dashboard/workspace-v32-community.css?v=3.2.2&amp;rev=v3-2-community-1',script='assets/js/dashboard/workspace-v32-community.js?v=3.2.2&amp;rev=v3-2-community-1';
+const sheet='assets/css/dashboard/workspace-v32-community.css?v=3.2.2&amp;rev=v3-2-community-2',script='assets/js/dashboard/workspace-v32-community.js?v=3.2.2&amp;rev=v3-2-community-2';
 assert.equal(page.split(sheet).length-1,1,'Community stylesheet loaded once');
 assert.equal(page.split(script).length-1,1,'Community navigation loaded once');
 assert.ok(page.indexOf(sheet)>page.indexOf('workspace-v32-economy.css'),'Shared V3 theme must win cascade');
 assert.ok(page.indexOf(script)>page.indexOf('workspace-v32-economy.js'),'Existing navigation must initialise first');
-assert.ok(sw.includes('./assets/css/dashboard/workspace-v32-community.css?v=3.2.2&rev=v3-2-community-1'));
-assert.ok(sw.includes('./assets/js/dashboard/workspace-v32-community.js?v=3.2.2&rev=v3-2-community-1'));
-assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-09-v3-2-community-factions-1';"));
+assert.ok(sw.includes('./assets/css/dashboard/workspace-v32-community.css?v=3.2.2&rev=v3-2-community-2'));
+assert.ok(sw.includes('./assets/js/dashboard/workspace-v32-community.js?v=3.2.2&rev=v3-2-community-2'));
+assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-09-v3-2-community-factions-2';"));
 for(const token of [
   'data-view-panel="community"','data-view-panel="factions"',
   'data-view-panel="objectives"','data-view-panel="progression"',

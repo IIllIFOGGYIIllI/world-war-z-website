@@ -20,7 +20,7 @@ assert.ok(dashboard.indexOf(script)>dashboard.indexOf('command-centre-v3.js'),'V
 assert.ok(dashboard.indexOf(sheet)>dashboard.indexOf('command-centre-v3-layout-recovery.css'),'V3.1 styles must win the cascade');
 assert.ok(!shop.includes('navigation-v31.js')&&!map.includes('navigation-v31.js'),'Dashboard-only navigation must not run on other pages');
 assert.ok(sw.includes('./assets/css/dashboard/navigation-v31.css?v=3.1.0&rev=nav-overhaul-1')&&sw.includes('./assets/js/dashboard/navigation-v31.js?v=3.1.0&rev=nav-overhaul-1'),'PWA must cache both new assets');
-assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-09-v3-2-community-factions-1';"));
+assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-09-v3-2-community-factions-2';"));
 
 for(const token of [
   "document.querySelector('body.wwz-v3-dashboard .dashboard-sidebar')",
