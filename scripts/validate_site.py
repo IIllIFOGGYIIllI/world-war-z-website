@@ -882,13 +882,13 @@ def validate_final_parity_polish(errors: list[str]) -> None:
             errors.append(f"administration.js: Discord onboarding controller missing: {token}")
 
     required_shop_labels = (
-        "<strong>Shop &amp; Trader</strong><small>3</small>",
+        "<strong>Survivor Shop</strong><small>3</small>",
         'data-nav-label="Automatic Delivery Queue"',
         "<h2>Trader Ticket Fulfilment</h2>",
     )
     for token in required_shop_labels:
         if token not in dashboard:
-            errors.append(f"dashboard.html: required Shop/Trader workflow label missing: {token}")
+            errors.append(f"dashboard.html: required Survivor Shop workflow label missing: {token}")
 
     formatters = (ROOT / "assets/js/dashboard/formatters.js").read_text(encoding="utf-8")
     shared_formatters = (
