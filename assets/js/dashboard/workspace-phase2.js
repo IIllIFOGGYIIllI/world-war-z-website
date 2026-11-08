@@ -10,11 +10,11 @@
   const $$ = (query, within = document) => Array.from(within.querySelectorAll(query));
   const groups = $$('details[data-nav-group]', root);
   const ordered = {
-    'Dashboard': ['Overview', 'Action Centre'],
+    'Dashboard': ['Overview', 'Action & Notification Centre'],
     'Server & World': [
       'World Map', 'Live Server Status', 'Event Calendar', 'Public Locations',
       'Operational Health', 'Flag Claims', 'Vehicle Bounties', 'Community Analytics',
-      'Command Library', 'Notifications', 'App & PWA', 'Event Planner', 'Refresh Data'
+      'Command Library', 'Browser Notifications', 'App & PWA', 'Event Planner', 'Refresh Server Data'
     ],
     'My Account': [
       'Survivor Profile', 'Activity & Combat', 'XP & Prestige',
