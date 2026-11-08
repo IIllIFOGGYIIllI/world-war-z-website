@@ -38,8 +38,9 @@
 <meta name="twitter:image:alt" content="World War Z Badlands — calibrated Nasdara satellite terrain and roads">
 <link rel="stylesheet" href="assets/css/site-refinement.css?v=2.1.0&amp;rev=sitewide-ui-1"/>
 <link rel="stylesheet" href="assets/css/workspace-phase2.css?v=2.2.0&amp;rev=dashboard-phase2-1"/>
+<link rel="stylesheet" href="assets/css/command-centre-v3.css?v=3.0.0&amp;rev=command-centre-redesign-1"/>
 </head>
-<body class="dashboard-gated">
+<body class="dashboard-gated wwz-v3 wwz-v3-dashboard">
 <a class="skip-link" href="#dashboard-content">Skip to dashboard content</a>
 <section aria-label="World War Z dashboard access" class="wwz-gateway" data-dashboard-gateway="">
 <div aria-hidden="true" class="wwz-gateway-vignette"></div>
@@ -98,6 +99,7 @@
 <span aria-hidden="true" class="dashboard-brand-mark"><img alt="" data-wwz-selected-server-logo="" src="assets/branding/nasdara-community.webp?v=3.0.0"/></span>
 <span><strong>WORLD WAR Z</strong><small>COMMAND CENTRE</small></span>
 </a>
+<button type="button" class="wwz-v3-layout-control" data-v3-wide-toggle aria-pressed="false" aria-label="Expand dashboard workspace" title="Expand workspace"><span aria-hidden="true" data-v3-wide-icon>⇤</span></button>
 <div aria-live="polite" class="topbar-workspace">
 <small>Current Workspace</small>
 <strong data-workspace-label="">Overview</strong>
@@ -235,19 +237,23 @@
 </div>
 <div class="auth-message" data-auth-message="" hidden="" role="status"></div>
 <section aria-labelledby="overview-title" class="dashboard-view active" data-view-panel="overview">
+<div class="wwz-v3-command-intro">
 <div class="view-heading" data-dashboard-section="summary" id="dashboard-overview-summary">
-<div class="overview-heading-copy"><p class="breadcrumb">Dashboard / Overview</p><h1 id="overview-title">Welcome, Survivor</h1><p data-welcome-copy="">Your survivor, progression, faction, quests, events, orders and current priorities in one personalised command centre.</p></div>
+<div class="overview-heading-copy"><p class="breadcrumb">Command centre / Nasdara operations</p><h1 id="overview-title">Welcome, Survivor</h1><p data-welcome-copy="">Your survivor, progression, faction, quests, events, orders and current priorities in one personalised command centre.</p></div>
 <div aria-hidden="true" class="overview-command-mark"><img alt="" data-wwz-selected-server-logo="" src="assets/branding/nasdara-community.webp?v=3.0.0"/><span>CONTROL CENTRE</span></div>
-<div class="heading-actions"><button class="secondary-action" data-jump="commands" type="button">View Commands</button><button class="primary-action" data-auth-cta="" data-open-login="" type="button">Connect Discord</button></div>
+<div class="heading-actions"><button class="secondary-action" data-jump="commands" type="button">Explore commands</button><button class="primary-action" data-auth-cta="" data-open-login="" type="button">Connect Discord</button></div>
+<div class="wwz-v3-hero-live" aria-label="Current server connection"><span class="wwz-v3-live-pulse" aria-hidden="true"></span><span>Selected server</span><strong data-v3-live-status aria-live="polite">Connecting</strong></div>
 </div>
 <section class="wwz-start-here" aria-label="Popular survivor destinations">
-<div><h2>Where would you like to go?</h2><p>Quickly jump into the most-used WWZ features.</p></div>
+<div><h2>Your shortcuts</h2><p>Jump straight into the tools you use most.</p></div>
 <div class="wwz-start-grid">
 <button type="button" data-jump="map" data-jump-section="explorer"><span class="wwz-start-icon" aria-hidden="true">⌖</span><strong>Explore the Map</strong><small>Locations and navigation</small></button>
 <button type="button" data-jump="community" data-jump-section="events"><span class="wwz-start-icon" aria-hidden="true">▦</span><strong>Upcoming Events</strong><small>See what's happening</small></button>
 <a href="shop.html"><span class="wwz-start-icon" aria-hidden="true">▣</span><strong>Survivor Shop</strong><small>Browse items and rentals</small></a>
 <button type="button" data-jump="players" data-jump-section="account"><span class="wwz-start-icon" aria-hidden="true">◎</span><strong>My Survivor</strong><small>Profile and progression</small></button>
 </div></section>
+</div>
+<div class="wwz-v3-section-heading"><h2>Network at a glance</h2><p>Live server information and your survivor account</p></div>
 <div class="metric-grid">
 <article class="metric-card"><div><span aria-hidden="true" class="metric-icon" data-live-status-class="">◉</span><small>DayZ server</small></div><strong data-server-status="">Loading</strong><p data-server-status-note="">Contacting the server-status API</p><p class="status-next-refresh" data-status-next-check="" aria-live="off">Select a server to start website status checks.</p></article>
 <article class="metric-card"><div><span aria-hidden="true" class="metric-icon">♙</span><small>Players</small></div><strong data-player-count="">— <em>/ —</em></strong><p>Live server population</p></article>
@@ -1882,5 +1888,6 @@ CarBattery,1" rows="6"></textarea></label>
 <script defer src="assets/js/dashboard/community-experience.js?v=1.64.0&amp;rev=community-ux-1"></script>
 <script defer src="assets/js/site-refinement.js?v=2.1.0&amp;rev=sitewide-ui-1"></script>
 <script defer src="assets/js/dashboard/workspace-phase2.js?v=2.2.0&amp;rev=dashboard-phase2-1"></script>
+<script defer src="assets/js/command-centre-v3.js?v=3.0.0&amp;rev=command-centre-redesign-1"></script>
 </body>
 </html>

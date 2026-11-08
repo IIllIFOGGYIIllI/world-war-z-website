@@ -266,7 +266,7 @@ body.wwz-v3-dashboard .wwz-v3-command-intro > .view-heading{
   min-height:345px;overflow:hidden;
   background:#162839!important;
   background-image:linear-gradient(90deg,rgba(11,22,35,.97) 0%,rgba(16,30,45,.89) 46%,rgba(22,39,57,.48) 100%),
-    url('..//world-war-z-dashboard-bg.webp')!important;
+    url('../world-war-z-dashboard-bg.webp')!important;
   background-size:cover!important;background-position:center!important;
   border:1px solid rgba(218,167,142,.25)!important;border-radius:25px!important;
   box-shadow:0 23px 54px rgba(0,0,0,.3)!important;
@@ -814,4 +814,35 @@ body.wwz-v3-home .status-strip{background:#172b3d!important;border-radius:17px!i
   body.wwz-v3 :where(.dashboard-sidebar,.wwz-v3-command-intro,.wwz-v3-shop-intro,.wwz-start-here,.nav-group){
     border:1px solid CanvasText!important;
   }
+}
+
+/* Structural components in the rebuilt V3 markup. */
+body.wwz-v3-dashboard .wwz-v3-hero-live{
+  position:relative;z-index:2;display:inline-flex;align-items:center;
+  gap:9px;align-self:flex-start;
+  border:1px solid rgba(122,203,221,.25);border-radius:999px;
+  background:rgba(16,36,51,.82);padding:8px 12px;
+  color:#c9deeb;font-size:11px;font-weight:660;margin-top:14px;
+}
+body.wwz-v3-dashboard .wwz-v3-hero-live strong{font-size:11px;color:#fff;font-weight:820}
+body.wwz-v3-dashboard .wwz-v3-live-pulse{
+  display:inline-block;flex:none;width:8px;height:8px;border-radius:50%;
+  background:#f1ad73;box-shadow:0 0 0 4px rgba(241,173,115,.15);
+}
+body.wwz-v3-dashboard .wwz-v3-hero-live:has([data-state='online']) .wwz-v3-live-pulse{
+  background:#82d6a8;box-shadow:0 0 0 4px rgba(92,192,139,.15);
+}
+body.wwz-v3-dashboard .wwz-v3-hero-live:has([data-state='offline']) .wwz-v3-live-pulse{
+  background:#f17e7a;box-shadow:0 0 0 4px rgba(241,126,122,.15);
+}
+body.wwz-v3-home .wwz-v3-home-feature{
+  min-width:0;display:flex;flex-direction:column;
+  gap:24px;justify-content:center;
+}
+body.wwz-v3-home .wwz-v3-home-feature .hero-emblem{
+  align-self:flex-start;margin:0;
+}
+@media(max-width:700px){
+  body.wwz-v3-dashboard .wwz-v3-hero-live{max-width:100%;flex-wrap:wrap}
+  body.wwz-v3-home .wwz-v3-home-feature{gap:18px}
 }
