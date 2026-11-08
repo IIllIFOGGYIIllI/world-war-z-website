@@ -16,6 +16,19 @@ for (const [name,page] of [['dashboard',dash],['shop',shop],['home',home]]) {
   assert.ok(page.indexOf(style)>page.indexOf('site-refinement.css'),name+' V3 styles load after old base');
   assert.ok(page.lastIndexOf(style)<page.indexOf('</head>'),name+' CSS belongs in head');
 }
+const publicPages=['donations.html','companion.html','rules.html','flags.html',
+  'legal.html','terms.html','privacy.html','community-guidelines.html',
+  'moderation-policy.html','changelog.html','offline.html','404.html'];
+for(const path of publicPages){
+  const page=read(path);
+  assert.equal(page.split(style).length-1,1,path+' must load V3 visual theme once');
+  assert.match(page,/<body[^>]+class="[^"]*wwz-v3-public/,'Missing V3 scope on '+path);
+}
+const map=read('map-link.html');
+assert.ok(!map.includes('command-centre-v3.css'),'Map canvas must preserve its established render CSS');
+assert.ok(!map.includes('wwz-v3-public'),'Map viewport remains isolated from full-site redesign');
+assert.ok(!read('dashboard.html').includes('Shop &amp; Trader'),'No retired Trader group');
+assert.ok(read('dashboard.html').includes('<strong>Survivor Shop</strong><small>3</small>'),'Shop group remains reachable');
 assert.ok(dash.includes('class="dashboard-gated wwz-v3 wwz-v3-dashboard"'));
 assert.ok(shop.includes('class="member-shop-page wwz-v3"'));
 assert.ok(home.includes('class="wwz-v3 wwz-v3-home"'));
