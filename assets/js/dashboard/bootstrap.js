@@ -76,7 +76,7 @@
     if (document.querySelector('script[data-wwz-my-wwz-script]')) return;
 
     const script = document.createElement('script');
-    script.src = 'assets/js/dashboard/my-wwz.js?v=1.41.4&rev=v3-overview-organised-1&travel=1&portfolio=1';
+    script.src = 'assets/js/dashboard/my-wwz.js?v=1.41.5&rev=profile-gps-v32-1&travel=1&portfolio=1';
     script.async = true;
     script.dataset.wwzMyWwzScript = '';
     script.addEventListener('load', () => window.WWZMyWwz?.activate?.(), { once: true });

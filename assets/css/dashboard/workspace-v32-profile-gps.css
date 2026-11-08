@@ -1,0 +1,426 @@
+/* World War Z V3.2 – Survivor Profile and GPS Journey workspace redesign.
+   Layout and wayfinding only. The existing member-data, ADM and map controllers
+   retain exclusive ownership of data, privacy, routing, route segmentation and replay.
+*/
+body.wwz-v3-dashboard {
+  --v32-surface:#172838;
+  --v32-elevated:#1d3245;
+  --v32-border:rgba(186,212,232,.17);
+  --v32-muted:#b3c9d8;
+}
+/* Signed-in Profile: two compact identity cards followed by structured sections. */
+body.wwz-v3-dashboard [data-view-panel="players"] [data-profile-content]:not([hidden]){
+  display:grid!important;
+  grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);
+  column-gap:14px;row-gap:14px;
+  align-items:stretch;
+  min-width:0;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] [data-profile-content][hidden]{
+  display:none!important;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .wwz-v32-profile-navigation,
+body.wwz-v3-dashboard [data-view-panel="players"] .wwz-v32-section-heading,
+body.wwz-v3-dashboard [data-view-panel="players"] [data-profile-content] > .metric-grid,
+body.wwz-v3-dashboard [data-view-panel="players"] [data-profile-content] > .profile-progression-card,
+body.wwz-v3-dashboard [data-view-panel="players"] [data-profile-content] > .account-data-grid,
+body.wwz-v3-dashboard [data-view-panel="players"] [data-profile-content] > .survivor-career-panel {
+  grid-column:1/-1;
+  min-width:0;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .wwz-v32-profile-navigation{
+  display:flex;
+  gap:7px;flex-wrap:wrap;
+  align-items:center;
+  border:1px solid var(--v32-border);
+  border-radius:15px;
+  padding:9px;
+  background:linear-gradient(115deg,#1b2d40,#122133);
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .wwz-v32-profile-navigation button {
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:42px;min-width:0;
+  flex:1 1 128px;
+  gap:8px;
+  padding:9px 14px;
+  border:1px solid transparent;
+  border-radius:10px;
+  color:#d6e5f0;
+  background:transparent;
+  font:750 12px/1.35 Inter,"Segoe UI",system-ui,sans-serif;
+  cursor:pointer;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .wwz-v32-profile-navigation button:hover,
+body.wwz-v3-dashboard [data-view-panel="players"] .wwz-v32-profile-navigation button[aria-current="location"]{
+  border-color:rgba(248,146,127,.35);
+  color:#fff;background:#2a4358;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .wwz-v32-profile-navigation button:focus-visible{
+  outline:2px solid #fba593;outline-offset:2px;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .wwz-v32-section-heading {
+  display:flex;align-items:baseline;justify-content:space-between;
+  flex-wrap:wrap;gap:7px 15px;
+  margin:6px 2px 0;padding:0 0 10px;
+  border-bottom:1px solid var(--v32-border);
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .wwz-v32-section-heading h2{
+  margin:0;
+  color:#f4f8fc;
+  font:800 clamp(16px,1.6vw,21px)/1.2 Inter,"Segoe UI",system-ui,sans-serif!important;
+  letter-spacing:-.025em!important;text-transform:none!important;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .wwz-v32-section-heading p {
+  margin:0;color:var(--v32-muted);font-size:11px;line-height:1.5;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] [data-profile-content] > .discord-profile-card,
+body.wwz-v3-dashboard [data-view-panel="players"] [data-profile-content] > .survivor-identity {
+  min-width:0;min-height:155px;margin:0!important;
+  border-radius:17px!important;
+  border:1px solid var(--v32-border)!important;
+  padding:20px!important;
+  box-shadow:0 12px 30px rgba(0,0,0,.14);
+}
+body.wwz-v3-dashboard [data-view-panel="players"] [data-profile-content] > .discord-profile-card {
+  display:grid!important;
+  grid-template-columns:63px minmax(0,1fr)!important;
+  gap:10px 15px;
+  align-content:center;
+  background:linear-gradient(125deg,#24334e,#142436)!important;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .profile-discord-avatar{
+  width:60px!important;height:60px!important;border-radius:16px!important;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .discord-profile-card > div:not(.profile-quick-links){
+  min-width:0;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .discord-profile-card h2,
+body.wwz-v3-dashboard [data-view-panel="players"] .survivor-identity h2{
+  margin:0 0 6px!important;
+  font:800 clamp(19px,2vw,26px)/1.13 Inter,"Segoe UI",system-ui,sans-serif!important;
+  letter-spacing:-.035em!important;text-transform:none!important;
+  overflow-wrap:anywhere;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .discord-profile-card p,
+body.wwz-v3-dashboard [data-view-panel="players"] .survivor-identity p {
+  color:var(--v32-muted)!important;
+  line-height:1.45!important;font-size:11px!important;
+  overflow-wrap:break-word;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .profile-quick-links {
+  grid-column:1/-1;
+  justify-content:flex-start!important;
+  gap:7px;
+  min-width:0;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .profile-quick-links button{
+  min-height:35px!important;
+  padding:7px 11px!important;
+  font-size:11px!important;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] [data-profile-content] > .survivor-identity{
+  display:grid!important;
+  grid-template-columns:53px minmax(0,1fr)!important;
+  gap:12px!important;
+  align-content:center;
+  background:linear-gradient(125deg,#1c3846,#142432)!important;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .survivor-identity .survivor-mark{
+  width:50px;height:50px;display:grid;place-items:center;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .survivor-identity .validation-pass{
+  grid-column:1/-1;justify-self:start;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] [data-profile-content] > .metric-grid{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:12px!important;margin:0!important;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .metric-grid > .metric-card {
+  padding:18px!important;min-height:126px!important;
+  border:1px solid var(--v32-border)!important;
+  border-radius:16px!important;
+  background:linear-gradient(145deg,#21374a,#152637)!important;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .metric-grid > .metric-card strong{
+  overflow-wrap:anywhere;
+  font-size:clamp(20px,2.2vw,30px)!important;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .metric-grid > .metric-card :is(p,small){
+  color:var(--v32-muted)!important;line-height:1.4;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .profile-progression-card,
+body.wwz-v3-dashboard [data-view-panel="players"] .account-data-grid .panel,
+body.wwz-v3-dashboard [data-view-panel="players"] .survivor-career-panel {
+  border:1px solid var(--v32-border)!important;
+  border-radius:17px!important;
+  background:linear-gradient(145deg,#1a2d3e,#111f2e)!important;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .account-data-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:14px!important;margin:0!important;
+  align-items:stretch;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .account-data-grid .panel{
+  min-width:0;padding:20px!important;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .account-data-grid .detail-list > div{
+  min-width:0;
+  border-bottom:1px solid rgba(196,221,236,.09);
+  padding:9px 0;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .account-data-grid .detail-list :is(dt,dd){
+  overflow-wrap:anywhere;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .account-data-grid .detail-list dt{
+  color:var(--v32-muted);
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .survivor-career-panel{
+  min-width:0;padding:21px!important;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .career-record-card,
+body.wwz-v3-dashboard [data-view-panel="players"] .career-achievement-card{
+  background:#203548!important;
+  border-color:var(--v32-border)!important;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .wwz-member-paths {
+  margin-bottom:14px!important;
+}
+/* Retire the duplicate four-tile marketing rail for authenticated profiles.
+   Guests retain the original helpful navigation and account linking prompts. */
+body.wwz-v3-dashboard [data-view-panel="players"]:has([data-profile-content]:not([hidden])) > .wwz-member-paths{
+  display:none!important;
+}
+/* GPS Journey: existing historic snapshots, selector, map and replay retained. */
+body.wwz-v3-dashboard :is([data-my-wwz-gps],[data-admin-player-gps]){
+  padding:0!important;
+  border-radius:19px!important;
+  border:1px solid var(--v32-border)!important;
+  background:linear-gradient(145deg,#162a3d,#0f1d2b)!important;
+  overflow:hidden;
+}
+body.wwz-v3-dashboard :is([data-my-wwz-gps],[data-admin-player-gps]) > .wwz-gps-heading,
+body.wwz-v3-dashboard [data-admin-player-gps] > .wwz-gps-heading{
+  display:flex;flex-wrap:wrap;
+  align-items:center;justify-content:space-between;
+  gap:12px;
+  margin:0!important;
+  padding:20px 22px!important;
+  background:linear-gradient(125deg,#234054,#162638);
+  border-bottom:1px solid var(--v32-border);
+}
+body.wwz-v3-dashboard [data-my-wwz-gps] > .wwz-gps-heading :is(h2,h3),
+body.wwz-v3-dashboard [data-admin-player-gps] > .wwz-gps-heading :is(h2,h3){
+  margin:4px 0 6px!important;
+  font:850 clamp(18px,1.8vw,23px)/1.2 Inter,"Segoe UI",system-ui,sans-serif!important;
+  text-transform:none!important;letter-spacing:-.025em!important;
+  color:#f5f8fb!important;
+}
+body.wwz-v3-dashboard :is([data-my-wwz-gps],[data-admin-player-gps]) .wwz-gps-heading p {
+  color:var(--v32-muted)!important;
+  font-size:12px!important;
+  line-height:1.5!important;
+}
+body.wwz-v3-dashboard :is([data-my-wwz-gps],[data-admin-player-gps]) .wwz-gps-heading .heading-actions{
+  display:flex;gap:10px;align-items:end;flex-wrap:wrap;
+}
+body.wwz-v3-dashboard :is([data-my-wwz-gps],[data-admin-player-gps]) .wwz-gps-range {
+  min-width:160px;
+}
+body.wwz-v3-dashboard :is([data-my-wwz-gps],[data-admin-player-gps]) .wwz-gps-range > span{
+  font-size:10px!important;color:#c6d5e0!important;
+}
+body.wwz-v3-dashboard :is([data-my-wwz-gps],[data-admin-player-gps]) .wwz-gps-range select{
+  min-height:42px!important;
+  padding:8px 12px!important;
+  background:#142537!important;
+  border-color:rgba(185,212,232,.24)!important;
+  color:white!important;
+  font-size:12px!important;
+}
+body.wwz-v3-dashboard :is([data-my-wwz-gps],[data-admin-player-gps]) .wwz-gps-stats {
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  gap:10px!important;
+  margin:0!important;
+  padding:18px 20px 14px;
+}
+body.wwz-v3-dashboard :is([data-my-wwz-gps],[data-admin-player-gps]) .wwz-gps-stat {
+  min-width:0;
+  padding:14px!important;
+  border:1px solid var(--v32-border)!important;
+  border-radius:13px!important;
+  background:#203749!important;
+}
+body.wwz-v3-dashboard :is([data-my-wwz-gps],[data-admin-player-gps]) .wwz-gps-stat span{
+  font-size:10px!important;
+  line-height:1.4!important;
+  color:#b9cbda!important;
+}
+body.wwz-v3-dashboard :is([data-my-wwz-gps],[data-admin-player-gps]) .wwz-gps-stat strong {
+  color:#f8fbff!important;
+  font-size:clamp(14px,1.4vw,21px)!important;
+  line-height:1.15!important;
+}
+body.wwz-v3-dashboard [data-my-wwz-gps] .wwz-v32-route-legend{
+  display:flex;flex-wrap:wrap;
+  gap:8px 17px;
+  margin:0 20px 12px;
+  padding:11px 13px;
+  border-radius:11px;
+  background:#102334;
+  border:1px solid var(--v32-border);
+  color:#d6e6ef;
+  font-size:11px;
+}
+body.wwz-v3-dashboard [data-my-wwz-gps] .wwz-v32-route-legend span{
+  display:inline-flex;align-items:center;gap:7px;
+}
+body.wwz-v3-dashboard [data-my-wwz-gps] .wwz-v32-route-legend i {
+  display:inline-block;flex:0 0 auto;
+  width:14px;height:5px;border-radius:8px;background:#35e6ff;
+}
+body.wwz-v3-dashboard [data-my-wwz-gps] .wwz-v32-route-legend .replay{background:#ff4fd8}
+body.wwz-v3-dashboard [data-my-wwz-gps] .wwz-v32-route-legend .start{background:#85d7a2}
+body.wwz-v3-dashboard [data-my-wwz-gps] .wwz-v32-route-legend .latest{background:#ed8279}
+body.wwz-v3-dashboard :is([data-my-wwz-gps],[data-admin-player-gps]) .wwz-gps-map {
+  width:calc(100% - 40px)!important;
+  margin:0 20px 12px!important;
+  height:clamp(340px,43vw,600px)!important;
+  min-height:340px!important;
+  max-width:100%;
+  border:1px solid rgba(182,220,236,.25)!important;
+  border-radius:13px!important;
+  background:#11202b!important;
+}
+body.wwz-v3-dashboard :is([data-my-wwz-gps],[data-admin-player-gps]) .wwz-gps-timeline{
+  margin:12px 20px!important;
+  padding:14px!important;
+  border:1px solid var(--v32-border);
+  border-radius:11px;
+  background:#1d3245;
+}
+body.wwz-v3-dashboard :is([data-my-wwz-gps],[data-admin-player-gps]) .wwz-gps-timeline input{
+  min-height:24px;
+  accent-color:#ff4fd8;
+}
+body.wwz-v3-dashboard :is([data-my-wwz-gps],[data-admin-player-gps]) .wwz-gps-timeline time{
+  color:#f2d3ea!important;
+  font-size:11px!important;
+}
+body.wwz-v3-dashboard [data-my-wwz-gps] .wwz-v32-replay-heading{
+  display:flex;align-items:baseline;justify-content:space-between;
+  flex-wrap:wrap;gap:6px 12px;
+  margin:4px 20px 0;
+  color:#f3f7fb;
+}
+body.wwz-v3-dashboard [data-my-wwz-gps] .wwz-v32-replay-heading strong{
+  font-size:13px;
+}
+body.wwz-v3-dashboard [data-my-wwz-gps] .wwz-v32-replay-heading small{
+  font-size:11px;color:var(--v32-muted);
+}
+body.wwz-v3-dashboard :is([data-my-wwz-gps],[data-admin-player-gps]) .wwz-gps-state{
+  margin:12px 20px 0!important;
+  color:#d7e5ed!important;
+  font-size:11px!important;
+  line-height:1.55!important;
+}
+body.wwz-v3-dashboard :is([data-my-wwz-gps],[data-admin-player-gps]) .wwz-gps-note{
+  margin:6px 20px 0!important;
+  padding:0 0 16px!important;
+  color:#a6c1d2!important;
+  font-size:11px!important;
+  line-height:1.5!important;
+}
+body.wwz-v3-dashboard [data-my-wwz-gps] .wwz-v32-gps-footer{
+  display:flex;justify-content:flex-end;
+  padding:12px 20px 18px;
+  border-top:1px solid var(--v32-border);
+}
+body.wwz-v3-dashboard [data-my-wwz-gps] [data-v32-profile-return]{
+  min-height:41px;
+}
+@media(max-width:1250px) {
+  body.wwz-v3-dashboard [data-view-panel="players"] [data-profile-content]:not([hidden]){
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  body.wwz-v3-dashboard :is([data-my-wwz-gps],[data-admin-player-gps]) .wwz-gps-stats{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+}
+@media(max-width:980px){
+  body.wwz-v3-dashboard [data-view-panel="players"] [data-profile-content]:not([hidden]) {
+    grid-template-columns:minmax(0,1fr);
+  }
+  body.wwz-v3-dashboard [data-view-panel="players"] [data-profile-content] > .metric-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  body.wwz-v3-dashboard [data-view-panel="players"] .account-data-grid{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+}
+@media(max-width:700px) {
+  body.wwz-v3-dashboard [data-view-panel="players"] .wwz-v32-profile-navigation{
+    gap:6px;padding:7px;
+  }
+  body.wwz-v3-dashboard [data-view-panel="players"] .wwz-v32-profile-navigation button{
+    flex:1 1 calc(50% - 6px);
+    min-height:44px;
+    padding:10px 8px;
+  }
+  body.wwz-v3-dashboard [data-view-panel="players"] [data-profile-content] > .discord-profile-card,
+  body.wwz-v3-dashboard [data-view-panel="players"] [data-profile-content] > .survivor-identity{
+    padding:15px!important;
+  }
+  body.wwz-v3-dashboard :is([data-my-wwz-gps],[data-admin-player-gps]) .wwz-gps-heading{
+    padding:16px!important;
+    align-items:stretch;
+  }
+  body.wwz-v3-dashboard :is([data-my-wwz-gps],[data-admin-player-gps]) .wwz-gps-heading .heading-actions{
+    width:100%;
+  }
+  body.wwz-v3-dashboard :is([data-my-wwz-gps],[data-admin-player-gps]) .wwz-gps-range{
+    flex:1 1 150px;
+  }
+  body.wwz-v3-dashboard :is([data-my-wwz-gps],[data-admin-player-gps]) .wwz-gps-stats{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    padding:12px!important;
+  }
+  body.wwz-v3-dashboard :is([data-my-wwz-gps],[data-admin-player-gps]) .wwz-gps-map{
+    width:calc(100% - 24px)!important;
+    margin:0 12px 12px!important;
+    height:360px!important;min-height:300px!important;
+  }
+  body.wwz-v3-dashboard [data-my-wwz-gps] .wwz-v32-route-legend{
+    margin:0 12px 12px!important;
+  }
+  body.wwz-v3-dashboard :is([data-my-wwz-gps],[data-admin-player-gps]) .wwz-gps-timeline,
+  body.wwz-v3-dashboard :is([data-my-wwz-gps],[data-admin-player-gps]) .wwz-gps-state{
+    margin:12px!important;
+  }
+  body.wwz-v3-dashboard :is([data-my-wwz-gps],[data-admin-player-gps]) .wwz-gps-note{
+    margin:8px 12px 0!important;
+  }
+  body.wwz-v3-dashboard [data-my-wwz-gps] .wwz-v32-replay-heading{
+    margin:4px 12px 0;
+  }
+}
+@media(max-width:420px){
+  body.wwz-v3-dashboard [data-view-panel="players"] [data-profile-content] > .metric-grid{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  body.wwz-v3-dashboard :is([data-my-wwz-gps],[data-admin-player-gps]) .wwz-gps-stats{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  body.wwz-v3-dashboard [data-view-panel="players"] .wwz-v32-profile-navigation button {
+    transition:none!important;
+  }
+}
+@media(forced-colors:active){
+  body.wwz-v3-dashboard [data-view-panel="players"] .wwz-v32-profile-navigation,
+  body.wwz-v3-dashboard [data-my-wwz-gps] .wwz-v32-route-legend{
+    border:1px solid CanvasText!important;
+  }
+}

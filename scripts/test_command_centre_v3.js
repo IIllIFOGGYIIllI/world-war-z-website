@@ -103,9 +103,9 @@ assert.ok(memberStyle.includes('my-wwz-group-heading'), 'The member dashboard ha
 assert.ok(!memberScript.includes("overviewPanel.querySelector('.view-heading')?.insertAdjacentElement('afterend', root)"));
 assert.ok(memberStyle.includes('> .my-wwz-shell'));
 assert.ok(memberStyle.includes('overflow-wrap:anywhere'));
-assert.ok(dashboardBootstrap.includes('my-wwz.js?v=1.41.4&rev=v3-overview-organised-1'));
+assert.ok(dashboardBootstrap.includes('my-wwz.js?v=1.41.5&rev=profile-gps-v32-1'));
 assert.ok(dashboardBootstrap.includes('my-wwz.css?v=1.41.4&rev=v3-overview-organised-1'));
-assert.ok(dash.includes('bootstrap.js?v=1.41.4&amp;rev=v3-overview-organised-1'));
+assert.ok(dash.includes('bootstrap.js?v=1.41.5&amp;rev=profile-gps-v32-1'));
 assert.ok(memberScript.includes('data-my-wwz-gps'), 'Member GPS panel preserved');
 assert.ok(memberScript.includes('data-my-wwz-orders'), 'Orders and rentals preserved');
 
@@ -120,6 +120,6 @@ assert.ok(recoveryCss.includes('grid-column:1!important; grid-row:2!important'),
 assert.ok(!recoveryCss.includes('fetch(') && !recoveryCss.includes('XMLHttpRequest') && !recoveryCss.includes('WebSocket'), 'Presentation-only recovery');
 
 assert.ok(sw.includes('./assets/js/command-centre-v3.js?v=3.0.0&rev=command-centre-redesign-1'));
-assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-08-v3-1-navigation-overhaul-1';"));
+assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-08-v3-2-survivor-profile-gps-1';"));
 new vm.Script(js,{filename:'command-centre-v3.js'});
 console.log('PASS: genuine home, dashboard and shop V3 layouts with unchanged protected flows');
