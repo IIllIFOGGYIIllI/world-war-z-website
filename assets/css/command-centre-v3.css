@@ -840,9 +840,98 @@ body.wwz-v3-home .wwz-v3-home-feature{
   gap:24px;justify-content:center;
 }
 body.wwz-v3-home .wwz-v3-home-feature .hero-emblem{
-  align-self:flex-start;margin:0;
+  align-self:flex-start;margin:0;display:flex;align-items:center;
+  justify-content:flex-start;gap:12px;
 }
+body.wwz-v3-home .wwz-v3-home-feature .hero-emblem img{
+  width:72px!important;height:72px!important;aspect-ratio:1!important;
+  border-radius:19px!important;
+}
+body.wwz-v3-home .wwz-v3-home-feature .hero-emblem span{
+  font-size:10px!important;letter-spacing:.12em!important;
+  color:#e8b5a6!important;
+}
+body.wwz-v3-home .wwz-v3-home-feature .hero-copy-block::before{display:none!important}
 @media(max-width:700px){
   body.wwz-v3-dashboard .wwz-v3-hero-live{max-width:100%;flex-wrap:wrap}
   body.wwz-v3-home .wwz-v3-home-feature{gap:18px}
+}
+
+/* Public pages share V3's visual language; map canvas is excluded. */
+body.wwz-v3-public :where(.page-header,.donation-topbar,.companion-header){
+  background:rgba(10,18,29,.97)!important;border-top:0!important;
+  border-bottom:1px solid var(--v3-edge)!important;
+  box-shadow:0 8px 28px rgba(0,0,0,.20)!important;backdrop-filter:blur(16px);
+}
+body.wwz-v3-public :where(.page-brand,.donation-brand,.companion-brand){color:#fff!important}
+body.wwz-v3-public :where(.page-nav,.donation-topnav){
+  border:1px solid rgba(194,218,237,.18)!important;
+  border-radius:13px!important;background:#16283b!important;
+}
+body.wwz-v3-public :where(.page-nav,.donation-topnav) a{
+  border-radius:10px!important;color:#d5e5f2!important;
+}
+body.wwz-v3-public :where(.page-nav,.donation-topnav) a:hover{
+  background:#2c465b!important;color:#fff!important;
+}
+body.wwz-v3-public :where(.page-hero,.donation-hero,.companion-hero){
+  position:relative;isolation:isolate;
+  background:linear-gradient(112deg,#182d40,#0c1928)!important;
+  border-bottom:1px solid var(--v3-edge)!important;
+}
+body.wwz-v3-public .page-hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 87% 20%,rgba(214,109,95,.17),transparent 42%),
+    radial-gradient(circle at 12% 75%,rgba(85,157,177,.13),transparent 48%);
+  pointer-events:none;z-index:-1;
+}
+body.wwz-v3-public :where(.page-hero h1,.donation-hero h1,.companion-hero h1){
+  font:830 clamp(33px,4.5vw,64px)/1.06 Inter,"Segoe UI",system-ui!important;
+  letter-spacing:-.05em!important;color:#f7f9fd!important;text-transform:none!important;
+}
+body.wwz-v3-public :where(.page-hero p,.donation-hero p,.companion-hero p){
+  color:#c1d5e4!important;line-height:1.65!important;
+}
+body.wwz-v3-public :where(.page-content,.companion-content,.donation-store-shell){color:#d8e5ef}
+body.wwz-v3-public :where(.content-card,.companion-panel,.donation-section,
+  .policy-link-card,.flag-toolbar,.notice,.donation-hero-card){
+  border:1px solid var(--v3-edge)!important;
+  border-radius:18px!important;
+  background:linear-gradient(145deg,#1b2d40,#121f2d)!important;
+  box-shadow:0 13px 34px rgba(0,0,0,.15)!important;
+}
+body.wwz-v3-public :where(.content-card,.companion-panel,.donation-section,
+  .donation-hero-card) h2{color:#fff!important;letter-spacing:-.035em!important}
+body.wwz-v3-public :where(.content-card,.companion-panel,.donation-section) :where(p,li,small){
+  color:#bfd0dd!important;line-height:1.65!important;
+}
+body.wwz-v3-public .content-nav{
+  background:#192a3c!important;border:1px solid var(--v3-edge)!important;
+  border-radius:13px!important;gap:6px!important;
+}
+body.wwz-v3-public .content-nav a{border-radius:9px!important;color:#d1e0ed!important}
+body.wwz-v3-public .content-nav a:hover{background:#29445a!important;color:#fff!important}
+body.wwz-v3-public .donation-store-shell{
+  width:min(1560px,calc(100% - clamp(24px,4vw,65px)))!important;
+}
+body.wwz-v3-public .donation-hero{
+  border-radius:23px!important;margin-top:clamp(13px,2vw,28px);
+  box-shadow:var(--v3-shadow);
+}
+body.wwz-v3-public .donation-hero-card{background:rgba(35,53,71,.89)!important}
+body.wwz-v3-public .donation-section .view-heading{
+  background:#203549!important;border:1px solid var(--v3-edge)!important;
+  border-radius:14px!important;
+}
+body.wwz-v3-public .companion-hero-layout{position:relative;z-index:1}
+body.wwz-v3-public :where(.flag-summary-grid,.flag-toolbar,.content-grid){gap:14px!important}
+body.wwz-v3-public :where(.page-footer,.donation-footer,.companion-footer,.wwz-global-footer){
+  background:#0b1724!important;border-top:1px solid var(--v3-edge)!important;
+}
+@media(max-width:720px){
+  body.wwz-v3-public .donation-store-shell{width:calc(100% - 22px)!important}
+  body.wwz-v3-public :where(.content-card,.companion-panel,.donation-section){padding:17px!important}
+  body.wwz-v3-public :where(.page-hero,.donation-hero,.companion-hero) h1{
+    font-size:clamp(31px,8vw,44px)!important;
+  }
 }
