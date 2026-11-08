@@ -30,6 +30,9 @@ jobs:
           node scripts/test_survivor_profile_statistics.js
           node scripts/test_rental_map_and_server_labels.js
           node scripts/test_rental_portfolio_gps_performance.js
+          node scripts/test_ui_polish_consistency.js
+          node scripts/test_v2_navigation.js
+          node scripts/test_site_refinement.js
       - name: Build generated Nasdara map assets for full site check
         run: |
           python3 -m pip install Pillow==12.0.0
