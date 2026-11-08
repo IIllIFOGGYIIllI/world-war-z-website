@@ -255,7 +255,15 @@
           <div class="my-wwz-quick-links" data-my-wwz-quick-links></div>
         </article>
       </div>`;
-    overviewPanel.querySelector('.view-heading')?.insertAdjacentElement('afterend', root);
+    // V3 wraps its static heading inside a two-column intro grid. Attach the
+    // personalised dashboard AFTER that grid, never as an implicit grid child:
+    // the old heading-based insertion collapsed the survivor hero into a narrow
+    // column and left the remaining half of the page empty.
+    const v3Intro = overviewPanel.querySelector(':scope > .wwz-v3-command-intro');
+    const legacyHeading = overviewPanel.querySelector(':scope > .view-heading');
+    if (v3Intro) v3Intro.insertAdjacentElement('afterend', root);
+    else if (legacyHeading) legacyHeading.insertAdjacentElement('afterend', root);
+    else overviewPanel.prepend(root);
 
     root.querySelector('[data-my-wwz-refresh]')?.addEventListener('click', () => refresh({ force: true }));
     root.querySelector('[data-my-wwz-actions-open]')?.addEventListener('click', () => nav('actioncentre', 'inbox'));

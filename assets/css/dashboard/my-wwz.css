@@ -366,3 +366,170 @@ html.pwa-standalone .my-wwz-quick-link { min-height: 48px; }
 @media (forced-colors: active) {
   .my-wwz-hero, .my-wwz-card, .my-wwz-metric, .my-wwz-link-callout, .my-wwz-quick-link { border: 1px solid CanvasText; }
 }
+
+/* WWZ V3 member-home integration – the authenticated profile must span the
+   full overview width, independent from the static two-column command intro. */
+body.wwz-v3-dashboard [data-view-panel="overview"] > .my-wwz-shell {
+  box-sizing:border-box;
+  display:block;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  margin:0 0 22px;
+}
+body.wwz-v3-dashboard .my-wwz-shell *,
+body.wwz-v3-dashboard .my-wwz-shell *::before,
+body.wwz-v3-dashboard .my-wwz-shell *::after {
+  box-sizing:border-box;
+}
+body.wwz-v3-dashboard .my-wwz-hero {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:clamp(14px,2vw,28px);
+  min-width:0;
+  padding:clamp(18px,2.3vw,29px);
+  background:linear-gradient(115deg,#1d3043,#142434 63%,#101b2b)!important;
+  border:1px solid rgba(222,145,130,.27)!important;
+  border-radius:20px;
+  box-shadow:0 16px 40px rgba(0,0,0,.18);
+}
+body.wwz-v3-dashboard .my-wwz-identity {
+  display:flex;
+  align-items:center;
+  gap:15px;
+  min-width:0;
+  max-width:100%;
+}
+body.wwz-v3-dashboard .my-wwz-identity > div:last-child {
+  min-width:0;
+  max-width:100%;
+}
+body.wwz-v3-dashboard .my-wwz-identity h1 {
+  display:block;
+  width:auto;
+  max-width:100%;
+  font:800 clamp(25px,2.6vw,37px)/1.13 Inter,"Segoe UI",system-ui!important;
+  letter-spacing:-.04em!important;
+  text-transform:none!important;
+  overflow-wrap:anywhere;
+  word-break:normal;
+  white-space:normal;
+  text-wrap:wrap;
+}
+body.wwz-v3-dashboard .my-wwz-identity p:not(.panel-kicker){
+  color:#bed0dd!important;
+  max-width:650px;
+  font-size:13px!important;
+  line-height:1.55!important;
+  overflow-wrap:break-word;
+}
+body.wwz-v3-dashboard .my-wwz-hero-actions {
+  display:flex;
+  min-width:0;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  gap:8px;
+}
+body.wwz-v3-dashboard .my-wwz-hero-actions button {
+  min-height:42px;
+  white-space:normal;
+}
+body.wwz-v3-dashboard .my-wwz-metrics,
+body.wwz-v3-dashboard .my-wwz-grid {
+  min-width:0;
+  max-width:100%;
+}
+body.wwz-v3-dashboard .my-wwz-metrics{
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:12px;
+}
+body.wwz-v3-dashboard .my-wwz-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+body.wwz-v3-dashboard .my-wwz-metric {
+  background:#1c3041!important;
+  border:1px solid rgba(187,211,229,.15)!important;
+  border-radius:15px;
+}
+body.wwz-v3-dashboard .my-wwz-metric > span,
+body.wwz-v3-dashboard .my-wwz-metric > small {color:#adc2d3!important}
+body.wwz-v3-dashboard .my-wwz-metric > strong {color:#f6f8fc!important}
+body.wwz-v3-dashboard .my-wwz-card {
+  min-width:0;
+  background:linear-gradient(145deg,#192b3d,#111e2b)!important;
+  border:1px solid rgba(187,211,229,.15)!important;
+  border-radius:17px;
+}
+body.wwz-v3-dashboard .my-wwz-card > header {
+  border-bottom-color:rgba(187,211,229,.12);
+}
+body.wwz-v3-dashboard .my-wwz-card > header h2{
+  color:#f4f7fb!important;
+}
+body.wwz-v3-dashboard .my-wwz-row {
+  min-width:0;
+}
+body.wwz-v3-dashboard .my-wwz-row-copy {
+  min-width:0;
+}
+body.wwz-v3-dashboard .my-wwz-hero-badges span {
+  color:#c5d3df;
+  border-color:rgba(187,211,229,.18);
+}
+@media(max-width:1260px){
+  body.wwz-v3-dashboard .my-wwz-hero {
+    grid-template-columns:minmax(0,1fr);
+  }
+  body.wwz-v3-dashboard .my-wwz-hero-actions {
+    justify-content:flex-start;
+  }
+  body.wwz-v3-dashboard .my-wwz-refresh-state {
+    justify-items:start;
+    margin-right:12px;
+  }
+}
+@media(max-width:1180px){
+  body.wwz-v3-dashboard .my-wwz-metrics {
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+}
+@media(max-width:760px){
+  body.wwz-v3-dashboard .my-wwz-grid {
+    grid-template-columns:minmax(0,1fr);
+  }
+  body.wwz-v3-dashboard .my-wwz-card-wide{
+    grid-column:auto;
+  }
+  body.wwz-v3-dashboard .my-wwz-metrics{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  body.wwz-v3-dashboard .my-wwz-hero{
+    padding:18px;
+  }
+  body.wwz-v3-dashboard .my-wwz-identity{
+    align-items:flex-start;
+    gap:11px;
+  }
+  body.wwz-v3-dashboard .my-wwz-avatar{
+    width:52px;
+    height:52px;
+    flex-basis:52px;
+  }
+  body.wwz-v3-dashboard .my-wwz-identity h1 {
+    font-size:clamp(23px,5.4vw,32px)!important;
+  }
+}
+@media(max-width:380px){
+  body.wwz-v3-dashboard .my-wwz-metrics{
+    grid-template-columns:minmax(0,1fr);
+  }
+  body.wwz-v3-dashboard .my-wwz-hero-actions{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+  }
+  body.wwz-v3-dashboard .my-wwz-refresh-state {
+    grid-column:1;
+  }
+}

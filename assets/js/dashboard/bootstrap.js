@@ -64,7 +64,7 @@
     if (!document.querySelector('link[data-wwz-my-wwz-style]')) {
       const style = document.createElement('link');
       style.rel = 'stylesheet';
-      style.href = 'assets/css/dashboard/my-wwz.css?v=1.41.2&rev=player-gps-1';
+      style.href = 'assets/css/dashboard/my-wwz.css?v=1.41.3&rev=v3-member-home-layout-1';
       style.dataset.wwzMyWwzStyle = '';
       document.head.append(style);
     }
@@ -76,7 +76,7 @@
     if (document.querySelector('script[data-wwz-my-wwz-script]')) return;
 
     const script = document.createElement('script');
-    script.src = 'assets/js/dashboard/my-wwz.js?v=1.41.2&rev=player-gps-1&travel=1&portfolio=1';
+    script.src = 'assets/js/dashboard/my-wwz.js?v=1.41.3&rev=v3-member-home-layout-1&travel=1&portfolio=1';
     script.async = true;
     script.dataset.wwzMyWwzScript = '';
     script.addEventListener('load', () => window.WWZMyWwz?.activate?.(), { once: true });

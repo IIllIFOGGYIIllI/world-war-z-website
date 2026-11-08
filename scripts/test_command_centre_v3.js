@@ -89,6 +89,22 @@ assert.ok(!/\bfetch\s*\(|\bXMLHttpRequest\b|\bWebSocket\b|restartServer|nitrado_
 assert.ok(sw.includes('./assets/css/command-centre-v3.css?v=3.0.0&rev=command-centre-redesign-1'));
 const recovery='assets/css/command-centre-v3-layout-recovery.css?v=3.0.1&amp;rev=v3-layout-recovery-1';
 const recoveryCss=read('assets/css/command-centre-v3-layout-recovery.css');
+const memberScript=read('assets/js/dashboard/my-wwz.js');
+const memberStyle=read('assets/css/dashboard/my-wwz.css');
+const dashboardBootstrap=read('assets/js/dashboard/bootstrap.js');
+// Regression from signed-in recording: personal profile mounted inside V3
+// two-column intro, crushing its width and vertically wrapping usernames.
+assert.ok(memberScript.includes("overviewPanel.querySelector(':scope > .wwz-v3-command-intro')"));
+assert.ok(memberScript.includes("v3Intro.insertAdjacentElement('afterend', root)"));
+assert.ok(!memberScript.includes("overviewPanel.querySelector('.view-heading')?.insertAdjacentElement('afterend', root)"));
+assert.ok(memberStyle.includes('> .my-wwz-shell'));
+assert.ok(memberStyle.includes('overflow-wrap:anywhere'));
+assert.ok(dashboardBootstrap.includes('my-wwz.js?v=1.41.3&rev=v3-member-home-layout-1'));
+assert.ok(dashboardBootstrap.includes('my-wwz.css?v=1.41.3&rev=v3-member-home-layout-1'));
+assert.ok(dash.includes('bootstrap.js?v=1.41.3&amp;rev=v3-member-home-layout-1'));
+assert.ok(memberScript.includes('data-my-wwz-gps'), 'Member GPS panel preserved');
+assert.ok(memberScript.includes('data-my-wwz-orders'), 'Orders and rentals preserved');
+
 for(const [name,page] of [['dashboard',dash],['shop',shop],['home',home]]) {
   assert.equal(page.split(recovery).length-1,1,name+' must load V3 layout recovery once');
   assert.ok(page.indexOf(recovery)>page.indexOf(style),name+' recovery CSS must win the cascade');
@@ -100,6 +116,6 @@ assert.ok(recoveryCss.includes('grid-column:1!important; grid-row:2!important'),
 assert.ok(!recoveryCss.includes('fetch(') && !recoveryCss.includes('XMLHttpRequest') && !recoveryCss.includes('WebSocket'), 'Presentation-only recovery');
 
 assert.ok(sw.includes('./assets/js/command-centre-v3.js?v=3.0.0&rev=command-centre-redesign-1'));
-assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-08-command-centre-v3-layout-recovery-1';"));
+assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-08-v3-member-home-layout-2';"));
 new vm.Script(js,{filename:'command-centre-v3.js'});
 console.log('PASS: genuine home, dashboard and shop V3 layouts with unchanged protected flows');

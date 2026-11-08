@@ -23,7 +23,7 @@ assert.ok(dash.indexOf(sheet)>dash.indexOf('site-refinement.css'),
   'Targeted styles must override existing design foundation');
 assert.ok(sw.includes('./assets/js/dashboard/workspace-phase2.js?v=2.2.0&rev=dashboard-phase2-1'));
 assert.ok(sw.includes('./assets/css/workspace-phase2.css?v=2.2.0&rev=dashboard-phase2-1'));
-assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-08-command-centre-v3-layout-recovery-1';"));
+assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-08-v3-member-home-layout-2';"));
 
 for(const signal of [
   "const groups = $$('details[data-nav-group]', root)",
