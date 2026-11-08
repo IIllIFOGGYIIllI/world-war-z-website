@@ -46,8 +46,10 @@
   const titleOf = (group) => group.querySelector(':scope > summary strong')?.textContent?.trim() || '';
   const links = $$('button.side-link[data-view]', root);
   const routeOf = (link) => link.dataset.view + '/' + (link.dataset.section || '');
+  // The sidebar is intentionally inert and aria-hidden while the mobile drawer
+  // is CLOSED. That must not hide legitimate links from search/pins on open.
   const canShow = (link) => Boolean(link && !link.disabled && !link.hidden &&
-    !link.closest('[hidden], [inert], [aria-hidden="true"]'));
+    !link.closest('[hidden]'));
   const findRoute = (route) => links.find((link) => routeOf(link) === route && canShow(link));
 
   const sortGroups = () => {
@@ -300,7 +302,15 @@
     queueMicrotask(() => {
       event.target.querySelectorAll('[data-wwz-field-touched]').forEach((field) => {
         delete field.dataset.wwzFieldTouched;
-        validate(field);
+        field.classList.remove('wwz-field-invalid');
+        const feedback = field.nextElementSibling?.matches?.('[data-wwz-field-feedback]')
+          ? field.nextElementSibling : null;
+        if (!feedback) return;
+        const remaining = (field.getAttribute('aria-describedby') || '')
+          .split(/\s+/).filter((word) => word && word !== feedback.id);
+        if (remaining.length) field.setAttribute('aria-describedby', remaining.join(' '));
+        else field.removeAttribute('aria-describedby');
+        feedback.remove();
       });
     });
   });
