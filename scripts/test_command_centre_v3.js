@@ -40,6 +40,8 @@ assert.ok(dash.includes('data-view-panel="staff"'), 'Admin workspace remains');
 assert.ok(dash.includes('data-view-panel="shop"'), 'Shop workspace remains');
 assert.ok(dash.includes('data-open-command-search'), 'Original command search still available');
 assert.ok(shop.includes('<div class="wwz-v3-shop-intro">'), 'Shop hero and server selector recompose');
+assert.ok(dash.includes('Survivor Shop'), 'Remove retired Trader sidebar group');
+assert.ok(!dash.includes('Shop &amp; Trader'), 'No obsolete Trader label');
 assert.ok(shop.includes('data-shop-server-buttons'), 'Server switcher stays scoped');
 assert.ok(shop.includes('data-member-shop-catalogue'), 'Live catalogue retained');
 assert.ok(shop.includes('data-member-cart-checkout'), 'Checkout is still wired');
@@ -73,6 +75,6 @@ assert.ok(!/\bfetch\s*\(|\bXMLHttpRequest\b|\bWebSocket\b|restartServer|nitrado_
   'V3 UI is fully presentation-only with zero game-server calls');
 assert.ok(sw.includes('./assets/css/command-centre-v3.css?v=3.0.0&rev=command-centre-redesign-1'));
 assert.ok(sw.includes('./assets/js/command-centre-v3.js?v=3.0.0&rev=command-centre-redesign-1'));
-assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-08-full-command-centre-redesign-v3-1';"));
+assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-08-full-command-centre-redesign-v3-2';"));
 new vm.Script(js,{filename:'command-centre-v3.js'});
 console.log('PASS: genuine home, dashboard and shop V3 layouts with unchanged protected flows');
