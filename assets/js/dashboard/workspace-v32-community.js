@@ -49,7 +49,7 @@
   const destinationNavs = [];
   for(const [name,scopeSelector,anchorSelector] of panels) {
     const panel=document.querySelector('[data-view-panel="'+name+'"]');
-    const scope=panel?.querySelector(scopeSelector);
+    const scope=scopeSelector.startsWith('[data-view-panel') ? panel : panel?.querySelector(scopeSelector);
     const heading=scope?.querySelector(anchorSelector);
     if(!panel || !scope || !heading)continue;
     const nav=create('nav','wwz-v32-community-switcher');
@@ -85,7 +85,16 @@
       buttons.push(button);
       nav.append(button);
     });
-    if(nav.children.length)scope.prepend(nav);
+    if(nav.children.length){
+      // On the Community page the hero comes first, then workspace tabs.
+      // On authenticated member pages the local index belongs at the
+      // beginning of the private content, after the main workspace tabs.
+      if(scope===hub){
+        const switcher=scope.querySelector(':scope > .wwz-v32-community-switcher');
+        if(switcher) switcher.after(nav);
+        else scope.prepend(nav);
+      } else scope.prepend(nav);
+    }
   };
   const community=document.querySelector('[data-view-panel="community"]');
   const hub=community?.querySelector('.community-hub');
