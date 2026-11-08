@@ -48,8 +48,7 @@ html { scroll-padding-top: 115px; }
    file uploads, Leaflet map controls and native textarea resize behaviour intact. */
 :where(.dashboard-view,.login-dialog,.member-shop-shell,.donation-store-shell,.page-content,
   .wwz-gateway,.wwz-server-select,.member-shop-page,.donation-store-page)
-  :where(input:not([type='checkbox']):not([type='radio']):not([type='range'])
-  :not([type='hidden']):not([type='color']):not([type='file']),select,textarea) {
+  :where(input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='hidden']):not([type='color']):not([type='file']),select,textarea) {
   max-width: 100%;
   min-width: 0;
   min-height: var(--wwz-design-control-height);
@@ -65,15 +64,13 @@ html { scroll-padding-top: 115px; }
 }
 :where(.dashboard-view,.login-dialog,.member-shop-shell,.donation-store-shell,.page-content,
   .wwz-gateway,.member-shop-page,.donation-store-page)
-  :where(input:not([type='checkbox']):not([type='radio']):not([type='range'])
-  :not([type='hidden']):not([type='color']):not([type='file']),select,textarea)
+  :where(input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='hidden']):not([type='color']):not([type='file']),select,textarea)
   :hover:not(:disabled):not([readonly]) {
   border-color: var(--wwz-design-stroke-strong) !important;
 }
 :where(.dashboard-view,.login-dialog,.member-shop-shell,.donation-store-shell,.page-content,
   .wwz-gateway,.member-shop-page,.donation-store-page)
-  :where(input:not([type='checkbox']):not([type='radio']):not([type='range'])
-  :not([type='hidden']):not([type='color']):not([type='file']),select,textarea)
+  :where(input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='hidden']):not([type='color']):not([type='file']),select,textarea)
   :focus-visible {
   outline: 2px solid var(--wwz-design-focus) !important;
   outline-offset: 2px;
