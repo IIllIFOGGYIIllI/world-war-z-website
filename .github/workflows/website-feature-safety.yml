@@ -45,6 +45,7 @@ jobs:
           node scripts/test_dashboard_shell_v37.js
           node scripts/test_overview_v38.js
           node scripts/test_dashboard_layout_v39.js
+          node scripts/test_sidebar_v310.js
           node scripts/test_command_centre_v3.js
       - name: Build generated Nasdara map assets for full site check
         run: |

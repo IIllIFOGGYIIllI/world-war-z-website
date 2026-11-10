@@ -31,7 +31,7 @@ assert.match(css,/body\.wwz-v3-dashboard \.dashboard-shell \{\s*padding-top:\s*0
 assert.equal(dash.split('assets/css/dashboard/shell-v37.css?v=3.7.1&amp;rev=top-offset-1').length - 1,1);
 assert.ok(sw.includes('./assets/css/dashboard/shell-v37.css?v=3.7.1&rev=top-offset-1'));
 assert.ok(sw.includes('./assets/js/site-refinement.js?v=2.1.1&rev=breadcrumb-fix-1'));
-assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-11-v3-9-breadcrumb-offset-1';"));
+assert.match(sw, /const WWZ_PWA_UPDATE_REVISION = '[^']+';/, 'Missing PWA revision token');
 for(const hook of ['data-raid-damage-controls','data-server-action="restart"',
   'data-open-command-search','data-sidebar-toggle','data-change-server',
   'data-view-panel="overview"','data-view-panel="map"']){
