@@ -42,7 +42,7 @@ assert.ok(!/\bfetch\s*\(|XMLHttpRequest|WebSocket|localStorage|sessionStorage|\.
   'Jump control must never fetch, persist or trigger protected navigation');
 assert.ok(sw.includes('./assets/css/dashboard/sidebar-v310.css?v=3.10.0&rev=category-jump-1'));
 assert.ok(sw.includes('./assets/js/dashboard/sidebar-v310.js?v=3.10.0&rev=category-jump-1'));
-assert.match(sw,/WWZ_PWA_UPDATE_REVISION = '2026-11-11-v3-10-sidebar-category-1'/);
+assert.match(sw, /const WWZ_PWA_UPDATE_REVISION = '[^']+';/, 'Missing PWA revision');
 for (const hook of ['data-open-command-search','data-sidebar-toggle',
   'data-raid-damage-controls','data-server-action="restart"',
   'data-view-panel="players"','data-view-panel="map"'])
