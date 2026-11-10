@@ -1,0 +1,205 @@
+/* WWZ V3.7 – authenticated command centre shell and responsive hierarchy.
+   Presentation only. Keep route controllers, auth, maps, GPS and game actions intact. */
+body.wwz-v3-dashboard {
+  --wwz-v37-work-width: 1750px;
+  --wwz-v37-card-edge: rgba(179,205,230,.16);
+}
+body.wwz-v3-dashboard .dashboard-topbar {
+  min-width: 0;
+  gap: clamp(7px,.85vw,13px) !important;
+}
+body.wwz-v3-dashboard .dashboard-brand {
+  flex: 0 1 auto;
+  min-width: 0 !important;
+}
+body.wwz-v3-dashboard .dashboard-brand > span:last-child {
+  min-width: 0;
+}
+body.wwz-v3-dashboard .topbar-workspace {
+  flex: 0 1 160px;
+  min-width: 0 !important;
+}
+body.wwz-v3-dashboard .dashboard-search-trigger {
+  flex: 1 1 225px;
+  min-width: 44px;
+  max-width: 400px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+body.wwz-v3-dashboard .dashboard-search-trigger > span:nth-child(2) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+body.wwz-v3-dashboard .account-menu-trigger {
+  flex: 0 1 auto;
+  min-width: 44px;
+  max-width: 230px;
+  overflow: hidden;
+}
+body.wwz-v3-dashboard .account-menu-trigger [data-auth-button-label] {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+body.wwz-v3-dashboard .server-switcher,
+body.wwz-v3-dashboard .dashboard-topbar .pwa-install-button {
+  flex: 0 0 auto;
+}
+body.wwz-v3-dashboard .dashboard-main > :is(.preview-banner,.auth-message,.wwz-location-bar),
+body.wwz-v3-dashboard .dashboard-main > .dashboard-view {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: var(--wwz-v37-work-width) !important;
+  margin-inline: auto !important;
+}
+body.wwz-v3-dashboard .dashboard-view :is(.dashboard-grid,.metric-grid,.panel,.inset-panel) {
+  min-width: 0;
+}
+body.wwz-v3-dashboard .dashboard-view :is(.dashboard-grid,.metric-grid) > * {
+  min-width: 0;
+}
+body.wwz-v3-dashboard .dashboard-view .panel .inset-panel {
+  background: linear-gradient(150deg,#102031,#122638) !important;
+  border: 1px solid var(--wwz-v37-card-edge) !important;
+  box-shadow: none !important;
+}
+body.wwz-v3-dashboard .dashboard-view :is(.panel,.inset-panel) :is(h2,h3) {
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+body.wwz-v3-dashboard .dashboard-view :is(.table-scroll,.wwz-table-scroll,.responsive-table) {
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+@media (max-width: 1380px) {
+  body.wwz-v3-dashboard .topbar-workspace { display: none !important; }
+  body.wwz-v3-dashboard .dashboard-brand { max-width: 205px !important; }
+  body.wwz-v3-dashboard .dashboard-search-trigger {
+    flex: 1 1 180px;
+    width: min(310px,26vw) !important;
+  }
+}
+@media (max-width: 1180px) {
+  body.wwz-v3-dashboard .dashboard-topbar { gap: 8px !important; }
+  body.wwz-v3-dashboard .dashboard-brand { max-width: 175px !important; }
+  body.wwz-v3-dashboard .dashboard-brand strong { font-size: 12px !important; }
+  body.wwz-v3-dashboard .dashboard-view:not([data-view-panel='overview']) > .view-heading {
+    min-height: 0 !important;
+    padding: clamp(18px,2vw,25px) !important;
+  }
+}
+@media (max-width: 980px) {
+  body.wwz-v3-dashboard .dashboard-topbar { gap: 9px !important; }
+  body.wwz-v3-dashboard .dashboard-brand { max-width: 210px !important; }
+  body.wwz-v3-dashboard .dashboard-search-trigger {
+    flex: 0 0 44px;
+    width: 44px !important;
+    height: 44px;
+    margin-left: auto;
+  }
+  body.wwz-v3-dashboard .sidebar-scrim {
+    top: 70px !important;
+    bottom: 0;
+  }
+  body.wwz-v3-dashboard .dashboard-sidebar {
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  body.wwz-v3-dashboard .dashboard-main > :is(.preview-banner,.auth-message,.wwz-location-bar),
+  body.wwz-v3-dashboard .dashboard-main > .dashboard-view {
+    max-width: 100% !important;
+  }
+}
+@media (max-width: 760px) {
+  body.wwz-v3-dashboard .dashboard-topbar .account-menu-trigger [data-auth-button-label] {
+    display: none !important;
+  }
+  body.wwz-v3-dashboard .dashboard-topbar .account-menu-trigger {
+    width: 44px;
+    min-width: 44px !important;
+    height: 44px;
+    padding: 0 !important;
+    justify-content: center;
+  }
+  body.wwz-v3-dashboard .dashboard-topbar .server-switcher > span:last-child {
+    display: none !important;
+  }
+  body.wwz-v3-dashboard .dashboard-topbar .server-switcher {
+    width: 44px;
+    min-width: 44px !important;
+    height: 44px;
+    padding: 0 !important;
+    justify-content: center;
+  }
+  body.wwz-v3-dashboard .dashboard-brand { max-width: 170px !important; }
+  body.wwz-v3-dashboard .dashboard-view :is(.heading-actions,.panel-heading-actions) {
+    min-width: 0;
+    flex-wrap: wrap;
+  }
+  body.wwz-v3-dashboard .dashboard-view:not([data-view-panel='overview']) > .view-heading {
+    margin-bottom: 13px !important;
+  }
+}
+@media (max-width: 600px) {
+  body.wwz-v3-dashboard .dashboard-topbar {
+    gap: 6px !important;
+    padding-inline: 8px !important;
+  }
+  body.wwz-v3-dashboard .dashboard-brand {
+    flex: 0 0 auto;
+    max-width: 44px !important;
+    padding: 0 !important;
+    border-right: 0 !important;
+  }
+  body.wwz-v3-dashboard .dashboard-brand > span:last-child {
+    display: none !important;
+  }
+  body.wwz-v3-dashboard .dashboard-brand-mark {
+    width: 39px !important;
+    height: 39px !important;
+  }
+  body.wwz-v3-dashboard .dashboard-topbar .pwa-install-button:not([hidden]) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px !important;
+    min-width: 44px !important;
+    height: 44px;
+    min-height: 44px;
+    padding: 0 !important;
+    font-size: 0 !important;
+    white-space: nowrap;
+  }
+  body.wwz-v3-dashboard .dashboard-topbar .pwa-install-button:not([hidden])::after {
+    content: '↓';
+    font-size: 21px;
+    font-weight: 800;
+    line-height: 1;
+  }
+  body.wwz-v3-dashboard .dashboard-main { padding: 12px !important; }
+  body.wwz-v3-dashboard .wwz-location-bar {
+    padding: 10px 12px !important;
+  }
+  body.wwz-v3-dashboard .dashboard-view :is(.panel,.inset-panel) :is(h2,h3) {
+    overflow-wrap: anywhere;
+  }
+}
+@media (max-width: 360px) {
+  body.wwz-v3-dashboard .dashboard-topbar { gap: 4px !important; padding-inline: 6px !important; }
+  body.wwz-v3-dashboard .dashboard-brand-mark { width: 35px !important; height: 35px !important; }
+  body.wwz-v3-dashboard .dashboard-search-trigger { width: 42px !important; min-width: 42px; }
+  body.wwz-v3-dashboard .dashboard-main { padding: 10px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.wwz-v3-dashboard .dashboard-sidebar { scroll-behavior: auto; }
+}
+@media (forced-colors: active) {
+  body.wwz-v3-dashboard .dashboard-view .panel .inset-panel {
+    border: 1px solid CanvasText !important;
+  }
+}

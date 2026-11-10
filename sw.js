@@ -8,7 +8,7 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-11-11-v3-6-public-layout-repair-1';
+const WWZ_PWA_UPDATE_REVISION = '2026-11-11-v3-7-dashboard-shell-1';
 const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-ios-safari-tab-bridge-2`;
 const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${APP_CACHE_RELEASE}`;
@@ -73,6 +73,7 @@ const APP_SHELL = [
   './assets/css/dashboard/workspace-v32-community.css?v=3.2.2&rev=v3-2-community-2',
   './assets/js/dashboard/workspace-v32-community.js?v=3.2.2&rev=v3-2-community-2',
   './assets/css/dashboard/workspace-v33-administration.css?v=3.3.0&rev=v33-admin-owner-1',
+  './assets/css/dashboard/shell-v37.css?v=3.7.0&rev=responsive-shell-1',
   './assets/js/dashboard/workspace-v33-administration.js?v=3.3.0&rev=v33-admin-owner-1'
 ].map(scopedUrl);
 
