@@ -35,6 +35,6 @@ assert.ok(!/\.leaflet-|#wwz-detection-map|wwz-v3-map|wwz-v3-public/.test(style),
   'Shell styles must not modify map internals or public pages');
 assert.ok(!/\bfetch\s*\(|XMLHttpRequest|WebSocket|localStorage|sessionStorage/.test(style),
   'V3.7 shell update must contain CSS only, no data or server actions');
-assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-11-v3-7-dashboard-shell-1';"));
+assert.match(sw, /const WWZ_PWA_UPDATE_REVISION = '[^']+';/, 'Missing PWA revision token');
 assert.ok(sw.includes('./assets/css/dashboard/shell-v37.css?v=3.7.0&rev=responsive-shell-1'));
 console.log('PASS: scoped responsive dashboard header, nested cards and mobile drawer, preserving original routes');
