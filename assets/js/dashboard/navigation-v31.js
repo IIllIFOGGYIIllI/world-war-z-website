@@ -63,7 +63,8 @@
     savedCount.textContent = count ? String(count) : '';
   };
   syncSaved();
-  if (!saved.hidden) saved.open = true;
+  // Keep navigation compact on first load. Survivors can expand this at any time.
+  saved.open = false;
   if (typeof MutationObserver === 'function') {
     const observer = new MutationObserver(syncSaved);
     if (pinnedHost) observer.observe(pinnedHost, { childList: true });

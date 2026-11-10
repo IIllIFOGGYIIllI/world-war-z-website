@@ -1,0 +1,189 @@
+/* World War Z V3.8 — signed-in Overview density and sidebar wayfinding.
+   Screenshot-driven, presentation-only. No map, GPS, shop or server-action rules. */
+
+/* Keep the overview compact without truncating status and wallet values. */
+body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready > .wwz-v3-section-heading {
+  margin: 0 2px 9px !important;
+}
+body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready > .metric-grid {
+  grid-template-columns: minmax(305px,1.25fr) repeat(3,minmax(0,1fr)) !important;
+  gap: 10px !important;
+  margin-bottom: 14px !important;
+  align-items: stretch;
+}
+body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready > .metric-grid > .metric-card {
+  box-sizing: border-box;
+  min-height: 149px !important;
+  padding: 14px 16px !important;
+  border-radius: 15px !important;
+  box-shadow: 0 7px 20px rgba(0,0,0,.13) !important;
+  transform: none !important;
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready > .metric-grid > .metric-card > strong {
+  margin: 10px 0 6px !important;
+  font-size: clamp(24px,1.75vw,30px) !important;
+  line-height: 1.08 !important;
+  text-shadow: none !important;
+  overflow-wrap: anywhere;
+}
+body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready > .metric-grid > .metric-card > p {
+  margin-top: 3px !important;
+  line-height: 1.38 !important;
+  font-size: 11px !important;
+}
+body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready > .metric-grid > .metric-card .status-next-refresh {
+  padding-top: 5px;
+  margin-top: 6px !important;
+  border-top: 1px solid rgba(175,206,228,.12);
+  font-size: 10px !important;
+}
+body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready > .metric-grid > .metric-card:hover {
+  border-color: rgba(190,220,239,.32) !important;
+}
+
+/* A personalised welcome, not a second oversized landing-page hero. */
+body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready .my-wwz-hero {
+  min-height: 0 !important;
+  padding: clamp(16px,1.65vw,23px) !important;
+  margin-bottom: 12px !important;
+  gap: 15px !important;
+  border-radius: 17px !important;
+  box-shadow: 0 10px 27px rgba(0,0,0,.15) !important;
+}
+body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready .my-wwz-avatar {
+  width: 58px;
+  height: 58px;
+  flex-basis: 58px;
+  border-radius: 15px;
+}
+body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready .my-wwz-identity {
+  gap: 13px;
+}
+body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready .my-wwz-identity h1 {
+  font-size: clamp(23px,2.25vw,32px) !important;
+  line-height: 1.17 !important;
+  overflow-wrap: anywhere;
+}
+body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready .my-wwz-identity p:not(.panel-kicker) {
+  margin-top: 5px;
+  line-height: 1.48 !important;
+  max-width: 680px;
+}
+body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready .my-wwz-hero-badges {
+  margin-top: 8px;
+  gap: 5px;
+}
+body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready .my-wwz-hero-badges span {
+  padding: 4px 8px;
+  font-size: 10px;
+}
+body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready .my-wwz-refresh-state {
+  max-width: 230px;
+}
+body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready .my-wwz-refresh-state strong {
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready .my-wwz-hero-actions {
+  gap: 7px;
+}
+body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready .my-wwz-metrics {
+  gap: 9px !important;
+  margin-bottom: 13px !important;
+}
+body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready .my-wwz-metric {
+  min-height: 82px;
+  padding: 12px 13px;
+  border-radius: 13px;
+}
+body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready .my-wwz-metric > strong {
+  margin-top: 5px;
+  font-size: 16px;
+}
+body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready .my-wwz-metric > small {
+  margin-top: 3px;
+}
+
+/* Make the all-workspaces list visible sooner, without hiding shortcuts. */
+body.wwz-v3-dashboard .dashboard-sidebar.wwz-v31-ready .service-context-card {
+  padding: 10px !important;
+  margin-bottom: 9px !important;
+  gap: 7px !important;
+}
+body.wwz-v3-dashboard .dashboard-sidebar.wwz-v31-ready .wwz-v31-primary {
+  margin-bottom: 8px;
+}
+body.wwz-v3-dashboard .dashboard-sidebar.wwz-v31-ready .wwz-workspace-discovery {
+  padding: 9px !important;
+  margin-bottom: 8px !important;
+  gap: 6px;
+}
+body.wwz-v3-dashboard .dashboard-sidebar.wwz-v31-ready .wwz-v31-saved > summary {
+  min-height: 42px;
+  padding: 8px 9px;
+  font-size: 12px;
+}
+body.wwz-v3-dashboard .dashboard-sidebar.wwz-v31-ready .wwz-v31-more > summary {
+  min-height: 43px;
+  font-size: 12px;
+}
+body.wwz-v3-dashboard .dashboard-sidebar.wwz-v31-ready .wwz-nav-subheading {
+  margin: 10px 10px 7px !important;
+}
+body.wwz-v3-dashboard .dashboard-sidebar.wwz-v31-ready .wwz-discovery-search input {
+  min-height: 43px !important;
+}
+
+/* Avoid four cramped KPI columns on a narrower desktop/tablet. */
+@media (max-width: 1360px) {
+  body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready > .metric-grid {
+    grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+  }
+}
+@media (max-width: 1180px) {
+  body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready .my-wwz-hero {
+    grid-template-columns: minmax(0,1fr) !important;
+  }
+  body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready .my-wwz-refresh-state strong {
+    text-align: left;
+  }
+}
+@media (max-width: 760px) {
+  body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready .my-wwz-hero {
+    padding: 15px !important;
+  }
+  body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready .my-wwz-avatar {
+    width: 50px;
+    height: 50px;
+    flex-basis: 50px;
+  }
+  body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready .my-wwz-hero-actions {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+  body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready .my-wwz-metrics {
+    grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+  }
+  body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready .my-wwz-identity h1 {
+    font-size: clamp(22px,5vw,28px) !important;
+  }
+}
+@media (max-width: 420px) {
+  body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready > .metric-grid {
+    grid-template-columns: minmax(0,1fr) !important;
+  }
+  body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready .my-wwz-metrics {
+    grid-template-columns: minmax(0,1fr) !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready > .metric-grid > .metric-card {
+    transition: none !important;
+  }
+}
+@media (forced-colors: active) {
+  body.wwz-v3-dashboard [data-view-panel="overview"].member-home-ready > .metric-grid > .metric-card {
+    border: 1px solid CanvasText !important;
+  }
+}

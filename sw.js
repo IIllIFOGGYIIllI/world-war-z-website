@@ -8,7 +8,7 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-11-11-v3-7-dashboard-shell-1';
+const WWZ_PWA_UPDATE_REVISION = '2026-11-11-v3-8-overview-density-1';
 const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-ios-safari-tab-bridge-2`;
 const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${APP_CACHE_RELEASE}`;
@@ -65,7 +65,7 @@ const APP_SHELL = [
   './assets/css/map-hub-v35.css?v=3.5.0&rev=all-pages-1',
   './assets/css/pages/public-v36.css?v=3.6.0&rev=release-layout-1',
   './assets/css/dashboard/navigation-v31.css?v=3.1.0&rev=nav-overhaul-1',
-  './assets/js/dashboard/navigation-v31.js?v=3.1.0&rev=nav-overhaul-1',
+  './assets/js/dashboard/navigation-v31.js?v=3.1.1&rev=sidebar-density-1',
   './assets/css/dashboard/workspace-v32-profile-gps.css?v=3.2.0&rev=profile-gps-v32-1',
   './assets/js/dashboard/workspace-v32-profile-gps.js?v=3.2.0&rev=profile-gps-v32-1',
   './assets/css/dashboard/workspace-v32-economy.css?v=3.2.1&rev=v3-2-finance-1',
@@ -73,6 +73,7 @@ const APP_SHELL = [
   './assets/css/dashboard/workspace-v32-community.css?v=3.2.2&rev=v3-2-community-2',
   './assets/js/dashboard/workspace-v32-community.js?v=3.2.2&rev=v3-2-community-2',
   './assets/css/dashboard/workspace-v33-administration.css?v=3.3.0&rev=v33-admin-owner-1',
+  './assets/css/dashboard/overview-v38.css?v=3.8.0&rev=overview-compact-1',
   './assets/css/dashboard/shell-v37.css?v=3.7.0&rev=responsive-shell-1',
   './assets/js/dashboard/workspace-v33-administration.js?v=3.3.0&rev=v33-admin-owner-1'
 ].map(scopedUrl);

@@ -10,7 +10,7 @@ const map=read('map-link.html');
 const sw=read('sw.js');
 const js=read('assets/js/dashboard/navigation-v31.js');
 const css=read('assets/css/dashboard/navigation-v31.css');
-const script='assets/js/dashboard/navigation-v31.js?v=3.1.0&amp;rev=nav-overhaul-1';
+const script='assets/js/dashboard/navigation-v31.js?v=3.1.1&amp;rev=sidebar-density-1';
 const sheet='assets/css/dashboard/navigation-v31.css?v=3.1.0&amp;rev=nav-overhaul-1';
 
 assert.equal(dashboard.split(script).length-1,1,'V3.1 script loads exactly once');
@@ -19,7 +19,7 @@ assert.ok(dashboard.indexOf(script)>dashboard.indexOf('workspace-phase2.js'),'Ph
 assert.ok(dashboard.indexOf(script)>dashboard.indexOf('command-centre-v3.js'),'V3 presentation must initialise first');
 assert.ok(dashboard.indexOf(sheet)>dashboard.indexOf('command-centre-v3-layout-recovery.css'),'V3.1 styles must win the cascade');
 assert.ok(!shop.includes('navigation-v31.js')&&!map.includes('navigation-v31.js'),'Dashboard-only navigation must not run on other pages');
-assert.ok(sw.includes('./assets/css/dashboard/navigation-v31.css?v=3.1.0&rev=nav-overhaul-1')&&sw.includes('./assets/js/dashboard/navigation-v31.js?v=3.1.0&rev=nav-overhaul-1'),'PWA must cache both new assets');
+assert.ok(sw.includes('./assets/css/dashboard/navigation-v31.css?v=3.1.0&rev=nav-overhaul-1')&&sw.includes('./assets/js/dashboard/navigation-v31.js?v=3.1.1&rev=sidebar-density-1'),'PWA must cache both new assets');
 assert.match(sw, /const WWZ_PWA_UPDATE_REVISION = '[^']+';/, 'Missing PWA revision token');
 
 for(const token of [
