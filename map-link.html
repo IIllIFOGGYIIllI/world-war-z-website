@@ -86,8 +86,10 @@
 <meta name="twitter:image" content="https://iillifoggyiilli.github.io/world-war-z-website/assets/maps/nasdara/preview.jpg?v=wwz-nasdara-1">
 <meta name="twitter:image:alt" content="World War Z Badlands — calibrated satellite terrain and roads">
 <link rel="stylesheet" href="assets/css/site-refinement.css?v=2.1.0&amp;rev=sitewide-ui-1"/>
+<link rel="stylesheet" href="assets/css/command-centre-v3.css?v=3.0.0&amp;rev=command-centre-redesign-1"/>
+<link rel="stylesheet" href="assets/css/map-hub-v35.css?v=3.5.0&amp;rev=all-pages-1"/>
 </head>
-<body>
+<body class="wwz-v3 wwz-v3-map">
   <main class="marker-shell">
     <header class="marker-header">
       <img src="assets/branding/nasdara-community.webp" alt="World War Z">
@@ -96,10 +98,12 @@
         <h1 data-marker-title>WWZ Map Hub</h1>
         <p class="marker-subtitle" data-marker-map>Loading DayZ map…</p>
       </div>
-      <div class="header-actions">
+      <nav class="header-actions" aria-label="Map and website navigation">
+        <a class="hub-link" href="index.html">Home</a>
+        <a class="hub-link" href="shop.html">Survivor Shop</a>
         <button class="copy-link" data-copy-coordinates type="button" disabled>Copy X/Z</button>
         <a class="hub-link" data-dashboard-map-link href="dashboard.html#map">Member Dashboard</a>
-      </div>
+      </nav>
     </header>
 
     <section class="marker-card" aria-label="World War Z interactive server map">

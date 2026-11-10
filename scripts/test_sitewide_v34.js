@@ -32,7 +32,7 @@ for(const token of [
 assert.ok(!/\bfetch\s*\(|XMLHttpRequest|WebSocket|localStorage|sessionStorage|showModal\s*\(/.test(js),
   'Shared UI must not fetch, persist identity, invoke modal actions or mutate data');
 assert.ok(sw.includes("const WWZ_PWA_VERSION = '2.21.12';"));
-assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-09-v3-4-sitewide-consistency-1';"));
+assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-10-v3-5-full-page-coverage-1';"));
 assert.ok(read('dashboard.html').includes('data-raid-damage-controls'));
 assert.ok(read('dashboard.html').includes('data-server-action="restart"'));
 assert.ok(read('shop.html').includes('data-rental-cart-checkout'));

@@ -25,8 +25,10 @@ for(const path of publicPages){
   assert.match(page,/<body[^>]+class="[^"]*wwz-v3-public/,'Missing V3 scope on '+path);
 }
 const map=read('map-link.html');
-assert.ok(!map.includes('command-centre-v3.css'),'Map canvas must preserve its established render CSS');
-assert.ok(!map.includes('wwz-v3-public'),'Map viewport remains isolated from full-site redesign');
+assert.equal(map.split(style).length-1,1,'Map hub loads V3 theme exactly once');
+assert.match(map,/<body[^>]+class="[^"]*wwz-v3-map/,'Map uses a dedicated V3 shell');
+assert.ok(!map.includes('wwz-v3-public'),'Map viewport remains isolated from public-page layout selectors');
+assert.ok(map.includes('assets/css/map-hub-v35.css?v=3.5.0&amp;rev=all-pages-1'),'Dedicated map shell must be loaded');
 assert.ok(!read('dashboard.html').includes('Shop &amp; Trader'),'No retired Trader group');
 assert.ok(read('dashboard.html').includes('<strong>Survivor Shop</strong><small>3</small>'),'Shop group remains reachable');
 assert.ok(dash.includes('class="dashboard-gated wwz-v3 wwz-v3-dashboard"'));
@@ -120,6 +122,6 @@ assert.ok(recoveryCss.includes('grid-column:1!important; grid-row:2!important'),
 assert.ok(!recoveryCss.includes('fetch(') && !recoveryCss.includes('XMLHttpRequest') && !recoveryCss.includes('WebSocket'), 'Presentation-only recovery');
 
 assert.ok(sw.includes('./assets/js/command-centre-v3.js?v=3.0.0&rev=command-centre-redesign-1'));
-assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-09-v3-4-sitewide-consistency-1';"));
+assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-10-v3-5-full-page-coverage-1';"));
 new vm.Script(js,{filename:'command-centre-v3.js'});
 console.log('PASS: genuine home, dashboard and shop V3 layouts with unchanged protected flows');
