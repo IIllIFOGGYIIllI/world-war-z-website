@@ -1,0 +1,266 @@
+/* WWZ V3.11 — final layout polish for Staff, Owner, Economy and Survivor Profile.
+   Strictly presentation-only; no changes to auth/ACL, GPS map internals,
+   banking, checkout, server actions or mission-file controllers. */
+body.wwz-v3-dashboard {
+  --wwz-v311-border: rgba(185,211,230,.17);
+  --wwz-v311-muted: #b9cfdf;
+  --wwz-v311-surface: #15293b;
+}
+body.wwz-v3-dashboard :is(
+  [data-view-panel="staff"],
+  [data-view-panel="serverconfig"],
+  [data-view-panel="shopadmin"],
+  [data-view-panel="configuration"],
+  [data-view-panel="economy"],
+  [data-view-panel="players"]
+) {
+  min-width: 0;
+}
+
+/* Staff and Owner: navigation no longer occupies two or three rows
+   at narrow desktop widths. Original navigation buttons stay in place. */
+body.wwz-v3-dashboard .wwz-v33-workspace-navigation {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  gap: 7px !important;
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+  min-width: 0;
+  padding: 8px !important;
+  scrollbar-width: thin;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+body.wwz-v3-dashboard .wwz-v33-workspace-navigation > button {
+  flex: 1 0 142px;
+  width: auto;
+  max-width: 220px;
+  min-height: 48px !important;
+  padding: 8px 11px !important;
+  flex-direction: row !important;
+  text-align: left !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+  white-space: normal;
+}
+body.wwz-v3-dashboard .wwz-v33-workspace-navigation .wwz-v33-nav-symbol {
+  flex: none;
+}
+body.wwz-v3-dashboard .wwz-v33-more-workspaces {
+  margin-bottom: 12px !important;
+}
+body.wwz-v3-dashboard :is(
+  [data-view-panel="staff"],
+  [data-view-panel="serverconfig"],
+  [data-view-panel="shopadmin"],
+  [data-view-panel="configuration"]
+) > .view-heading {
+  margin-bottom: 13px !important;
+  padding: clamp(17px,2vw,25px) !important;
+}
+body.wwz-v3-dashboard :is(
+  [data-view-panel="staff"],
+  [data-view-panel="serverconfig"],
+  [data-view-panel="shopadmin"],
+  [data-view-panel="configuration"]
+) > .panel {
+  min-width: 0;
+  padding: clamp(16px,1.65vw,25px) !important;
+  margin-bottom: 13px !important;
+}
+body.wwz-v3-dashboard :is(
+  [data-view-panel="staff"],
+  [data-view-panel="serverconfig"],
+  [data-view-panel="shopadmin"],
+  [data-view-panel="configuration"]
+) :is(.panel-heading,.heading-actions) {
+  flex-wrap: wrap;
+  min-width: 0;
+  gap: 9px 14px !important;
+}
+body.wwz-v3-dashboard :is(
+  [data-view-panel="staff"],
+  [data-view-panel="serverconfig"],
+  [data-view-panel="shopadmin"],
+  [data-view-panel="configuration"]
+) .panel .inset-panel {
+  box-shadow: none !important;
+  border-color: var(--wwz-v311-border) !important;
+  background: var(--wwz-v311-surface) !important;
+}
+body.wwz-v3-dashboard :is(
+  [data-view-panel="staff"],
+  [data-view-panel="serverconfig"],
+  [data-view-panel="shopadmin"],
+  [data-view-panel="configuration"]
+) :is(.responsive-table,.table-scroll) {
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+body.wwz-v3-dashboard [data-view-panel="staff"] .wwz-admin-hub {
+  padding: 13px 15px !important;
+  margin-bottom: 12px !important;
+}
+body.wwz-v3-dashboard [data-view-panel="staff"] .wwz-admin-hub-links {
+  gap: 7px !important;
+}
+body.wwz-v3-dashboard [data-view-panel="staff"] .wwz-admin-hub-link {
+  min-height: 58px !important;
+  padding: 10px 12px !important;
+}
+body.wwz-v3-dashboard [data-view-panel="serverconfig"] .service-overview-grid {
+  gap: 10px !important;
+}
+body.wwz-v3-dashboard [data-view-panel="serverconfig"] .config-studio-tabs {
+  gap: 6px !important;
+  padding: 6px !important;
+}
+body.wwz-v3-dashboard [data-view-panel="serverconfig"] .config-studio-tabs button {
+  min-height: 42px;
+  padding: 8px 12px !important;
+}
+body.wwz-v3-dashboard [data-view-panel="shopadmin"] .shop-admin-tabs {
+  gap: 7px !important;
+}
+body.wwz-v3-dashboard [data-view-panel="shopadmin"] .shop-admin-tabs > button {
+  min-height: 50px !important;
+  padding: 9px 12px !important;
+}
+
+/* Economy: one concise summary row, readable amounts, fast access to sections. */
+body.wwz-v3-dashboard [data-view-panel="economy"] .view-heading {
+  padding: clamp(17px,1.9vw,26px) !important;
+  margin-bottom: 13px !important;
+}
+body.wwz-v3-dashboard .wwz-v32-finance-intro {
+  padding: 13px 17px !important;
+  border-radius: 14px !important;
+  gap: 13px !important;
+}
+body.wwz-v3-dashboard .wwz-v32-finance-navigation {
+  display: flex !important;
+  grid-template-columns: none !important;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  min-width: 0;
+  max-width: 100%;
+  scrollbar-width: thin;
+  overscroll-behavior-x: contain;
+  padding: 6px !important;
+}
+body.wwz-v3-dashboard .wwz-v32-finance-navigation > :is(button,a) {
+  flex: 1 0 134px;
+  min-width: 134px;
+  min-height: 43px !important;
+  padding: 8px 11px !important;
+}
+body.wwz-v3-dashboard [data-view-panel="economy"] [data-economy-content]:not([hidden]) {
+  gap: 11px !important;
+}
+body.wwz-v3-dashboard [data-view-panel="economy"] .wwz-v32-wallet-overview {
+  gap: 9px !important;
+}
+body.wwz-v3-dashboard [data-view-panel="economy"] .wwz-v32-wallet-overview > .metric-card,
+body.wwz-v3-dashboard [data-view-panel="economy"] .bank-metric-grid > .metric-card {
+  min-height: 109px !important;
+  padding: 13px 15px !important;
+  overflow-wrap: anywhere;
+}
+body.wwz-v3-dashboard #dashboard-economy-banking > .panel,
+body.wwz-v3-dashboard #dashboard-economy-treasury > .panel,
+body.wwz-v3-dashboard #dashboard-economy-ledger > .panel {
+  padding: clamp(15px,1.55vw,22px) !important;
+}
+body.wwz-v3-dashboard [data-view-panel="economy"] :is(.panel-heading,.heading-actions) {
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 9px 12px !important;
+}
+body.wwz-v3-dashboard [data-view-panel="economy"] :is(input,select) {
+  max-width: 100%;
+  min-width: 0;
+}
+body.wwz-v3-dashboard [data-view-panel="economy"] .panel .inset-panel {
+  box-shadow: none !important;
+  border-color: var(--wwz-v311-border) !important;
+}
+
+/* Survivor Profile: compact identity and stats, preserve GPS sizing/controls. */
+body.wwz-v3-dashboard [data-view-panel="players"] .wwz-v32-profile-navigation {
+  padding: 7px !important;
+  gap: 6px !important;
+  margin-bottom: 1px;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .wwz-v32-profile-navigation button {
+  min-height: 42px;
+  padding: 8px 11px !important;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] [data-profile-content]:not([hidden]) {
+  column-gap: 11px !important;
+  row-gap: 11px !important;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] [data-profile-content] > :is(.discord-profile-card,.survivor-identity) {
+  min-height: 130px !important;
+  padding: 16px !important;
+  box-shadow: 0 6px 17px rgba(0,0,0,.12) !important;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] [data-profile-content] > .metric-grid {
+  gap: 9px !important;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] [data-profile-content] > .metric-grid > .metric-card {
+  min-height: 108px !important;
+  padding: 13px 15px !important;
+  box-shadow: none !important;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .account-data-grid {
+  gap: 11px !important;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] .account-data-grid .panel,
+body.wwz-v3-dashboard [data-view-panel="players"] .survivor-career-panel {
+  padding: clamp(15px,1.65vw,23px) !important;
+}
+body.wwz-v3-dashboard [data-view-panel="players"] :is(.panel-heading,.heading-actions) {
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+/* All four spaces remain usable on narrow screens without clipping actions. */
+@media (max-width: 920px) {
+  body.wwz-v3-dashboard .wwz-v33-workspace-navigation > button {
+    flex: 0 0 152px;
+  }
+  body.wwz-v3-dashboard .wwz-v32-finance-navigation > :is(button,a) {
+    flex: 0 0 142px;
+  }
+}
+@media (max-width: 620px) {
+  body.wwz-v3-dashboard :is(
+    [data-view-panel="staff"],
+    [data-view-panel="serverconfig"],
+    [data-view-panel="shopadmin"],
+    [data-view-panel="configuration"]
+  ) > .panel {
+    padding: 14px !important;
+  }
+  body.wwz-v3-dashboard .wwz-v33-workspace-navigation > button {
+    min-height: 48px !important;
+  }
+  body.wwz-v3-dashboard [data-view-panel="players"] [data-profile-content] > :is(.discord-profile-card,.survivor-identity),
+  body.wwz-v3-dashboard [data-view-panel="players"] .account-data-grid .panel {
+    padding: 14px !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.wwz-v3-dashboard :is(.wwz-v33-workspace-navigation,.wwz-v32-finance-navigation) {
+    scroll-behavior: auto;
+  }
+}
+@media (forced-colors: active) {
+  body.wwz-v3-dashboard :is(.wwz-v33-workspace-navigation,.wwz-v32-finance-navigation) {
+    border: 1px solid CanvasText !important;
+  }
+}
