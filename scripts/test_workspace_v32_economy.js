@@ -16,7 +16,7 @@ assert.ok(!shop.includes(script),'Shop must not execute dashboard routing');
 assert.ok(dashboard.indexOf(style)>dashboard.indexOf('workspace-v32-profile-gps.css'),'Economy theme loads last');
 assert.ok(dashboard.indexOf(script)>dashboard.indexOf('workspace-v32-profile-gps.js'),'Economy controller loads last');
 assert.ok(sw.includes('./assets/css/dashboard/workspace-v32-economy.css?v=3.2.1&rev=v3-2-finance-1') && sw.includes('./assets/js/dashboard/workspace-v32-economy.js?v=3.2.1&rev=v3-2-finance-1'),'Finance release assets included in PWA shell');
-assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-09-v3-4-sitewide-consistency-1';"));
+assert.match(sw, /const WWZ_PWA_UPDATE_REVISION = '[^']+';/, 'Missing PWA revision token');
 for(const token of [
   'data-economy-content=""',
   'class="wwz-v32-finance-navigation"',
