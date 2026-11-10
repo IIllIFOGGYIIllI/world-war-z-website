@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>WWZ | Armband Calibration Lab</title>
+<link rel="icon" href="../assets/branding/nasdara-community.webp">
+<style>
+:root{color-scheme:dark;font:15px/1.55 Inter,"Segoe UI",system-ui,sans-serif;background:#09121e;color:#eaf4fa}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at top left,rgba(202,67,65,.13),transparent 40rem),#09121e;min-height:100svh}
+a{color:#9cdef4}.header,.content,.footer{max-width:1330px;margin:auto;padding-inline:clamp(16px,3vw,30px)}
+.header{display:flex;align-items:center;flex-wrap:wrap;gap:15px;padding-block:25px;border-bottom:1px solid #34495d}
+.header img{width:52px;height:52px;border-radius:13px}
+.header h1{font-size:clamp(22px,2.7vw,35px);letter-spacing:-.04em;margin:0;line-height:1.1}
+.header p{margin:4px 0 0;color:#afc7d9}
+.header .links{margin-left:auto;display:flex;gap:15px;flex-wrap:wrap}
+.kicker{color:#ee9c8f;text-transform:uppercase;letter-spacing:.12em;font-size:11px;font-weight:800}
+.content{padding-block:27px 55px}
+.warning{padding:15px 18px;border:1px solid #796443;border-radius:14px;background:#2b261e;color:#f5dec0;margin-bottom:20px}
+.warning strong{color:#ffe4b8}
+.cols{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);align-items:start;gap:20px}
+.panel{background:linear-gradient(145deg,#172c3e,#111f2e);border:1px solid #30495d;border-radius:19px;padding:clamp(18px,2.5vw,26px);min-width:0}
+h2{font-size:clamp(18px,2vw,24px);margin:0 0 6px;letter-spacing:-.025em}
+.sub{margin:0 0 18px;color:#aec4d5}
+.fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+label{display:grid;gap:5px;font-size:12px;font-weight:700;color:#bed2df}
+label.span{grid-column:1/-1}
+input,select{width:100%;min-width:0;min-height:43px;padding:9px 11px;background:#0c1a29;border:1px solid #426176;border-radius:9px;color:#fff;font:inherit}
+input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid #ffa99d;outline-offset:2px}
+small{color:#a5bece}
+.controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin-top:13px}
+button{font:inherit;border:0;border-radius:10px;min-height:46px;padding:10px 16px;background:#df5a50;color:white;font-weight:800;cursor:pointer}
+button:disabled{background:#425362;color:#a4b3be;cursor:not-allowed}
+.preview{width:100%;display:grid;place-items:center;min-height:340px;background:#091724;border:1px solid #35536a;border-radius:15px;padding:15px}
+canvas{width:min(100%,322px);height:auto;image-rendering:pixelated;border:6px solid #40556a;box-shadow:0 12px 28px #0008}
+.status{min-height:40px;border:1px solid #36566a;background:#0c1d2d;color:#d7edf8;border-radius:10px;padding:11px;margin:16px 0}
+.steps{margin:15px 0 0;padding-left:24px;color:#c4d7e3}
+.steps li+li{margin-top:7px}
+.footer{padding-block:20px 35px;color:#a6bed0;font-size:12px}
+@media(max-width:860px){.cols{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:520px){.fields{grid-template-columns:repeat(2,minmax(0,1fr))}.header .links{margin-left:0}.header img{width:44px;height:44px}}
+@media(max-width:390px){.fields{grid-template-columns:minmax(0,1fr)}}
+</style>
+<script defer src="../assets/js/tools/armband-calibration.js?v=0.1.0&amp;rev=nasdara-lab-1"></script>
+</head>
+<body>
+<header class="header">
+<img src="../assets/branding/nasdara-community.webp" alt="World War Z emblem">
+<div><div class="kicker">World War Z • World Builder research</div><h1>Armband Calibration Lab</h1><p>Console-compatible Object Spawner geometry test</p></div>
+<nav class="links" aria-label="Website"><a href="../dashboard.html">Command Centre</a><a href="../map-link.html">Nasdara map</a></nav>
+</header>
+<main class="content">
+<div class="warning"><strong>Experimental: test on your local DayZ server first.</strong> This produces only a 49-object armband calibration pattern. Its geometry is an unverified starting estimate, not a proven Nasdara preset. Neither live server is modified; sign and QR-code generation will follow a successful in-game test.</div>
+<div class="cols">
+<section class="panel" aria-labelledby="form-title">
+<h2 id="form-title">1. Generate a calibration pattern</h2><p class="sub">X/Y/Z is the <strong>centre of the 7×7 pattern</strong>, not its base. Place it in open space at an appropriate visible height.</p>
+<form id="calibration-form">
+<div class="fields">
+<label class="span">Target server (export filename only)<select name="world"><option value="pve">Nasdara PvE</option><option value="pvp">Nasdara Full PvP</option></select></label>
+<label>X coordinate<input name="x" type="number" inputmode="decimal" step="any" placeholder="X" required></label>
+<label>Y height<input name="y" type="number" inputmode="decimal" step="any" placeholder="Y" required></label>
+<label>Z coordinate<input name="z" type="number" inputmode="decimal" step="any" placeholder="Z" required></label>
+<label>Yaw (degrees)<input name="yaw" type="number" step="any" value="0" required></label>
+<label>Pitch (degrees)<input name="pitch" type="number" step="any" value="-90" required></label>
+<label>Roll (degrees)<input name="roll" type="number" step="any" value="0" required></label>
+<label>Item scale<input name="scale" type="number" step="0.05" min="0.1" max="2" value="0.5" required></label>
+<label>Spacing multiplier<input name="spacing" type="number" step="0.05" min="0.5" max="1.75" value="1" required></label>
+<label>Pattern<select name="mode"><option value="orientation">Orientation + colour test</option><option value="contrast">Black/white contrast test</option></select></label>
+<label class="span"><span><input style="width:auto;min-height:auto" type="checkbox" name="mirror"> Mirror columns (for reversed facing)</span></label>
+</div>
+</form>
+<div class="status" role="status" id="calibration-state" aria-live="polite"></div>
+<button type="button" id="calibration-download" disabled>Download Object Spawner JSON</button>
+<p id="calibration-result" class="sub" aria-live="polite">No upload or restart is possible from this page.</p>
+</section>
+<section class="panel" aria-labelledby="preview-title">
+<h2 id="preview-title">2. Check the pixel layout</h2><p class="sub">Front-facing reference pattern. Pixel colours approximate armband textures, not actual game rendering.</p>
+<div class="preview"><canvas id="calibration-preview" width="322" height="322" role="img" aria-label="7 by 7 armband calibration pattern preview"></canvas></div>
+<ol class="steps">
+<li>Export the JSON and add its filename to a <strong>local test</strong> server's <code>cfgGameplay.json</code> <code>WorldsData.objectSpawnersArr</code>.</li>
+<li>Verify all 49 armbands appear at the intended position, remain vertical and persist as expected after restart.</li>
+<li>From the front, confirm <strong>red is top-left, green top-right, blue bottom-left, orange bottom-right</strong>. If reversed, tick Mirror and re-export.</li>
+<li>Check whether tiles overlap, leave gaps, or produce unreadable colours. Adjust spacing and scale, then re-export.</li>
+<li>Keep your verified geometry settings. QR and billboard generation can reuse these values later.</li>
+</ol>
+</section>
+</div>
+</main>
+<footer class="footer">WWZ experimental tool • 49 objects maximum • No Nitrado API calls • No automatic server changes</footer>
+</body>
+</html>

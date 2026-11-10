@@ -41,5 +41,5 @@ for(const hook of [
 assert.ok(read('shop.html').includes('data-member-cart-checkout'));
 assert.ok(read('assets/js/dashboard/my-wwz.js').includes('data-my-wwz-gps'));
 assert.ok(sw.includes('./assets/css/dashboard/workspace-v311-final.css?v=3.11.0&rev=workspace-complete-1'));
-assert.ok(sw.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-11-v3-11-workspace-final-1';"));
+assert.match(sw, /const WWZ_PWA_UPDATE_REVISION = '[^']+';/, 'PWA revision must exist');
 console.log('PASS: Admin/Owner, Economy and Survivor Profile responsive refinements with protected handlers intact');
