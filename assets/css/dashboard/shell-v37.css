@@ -1,3 +1,9 @@
+/* V3.9: the old fixed header reserved space with shell padding.
+   V3's header is sticky and occupies normal flow: a second offset leaves
+   ~72px of blank space above the dashboard's first status banner. */
+body.wwz-v3-dashboard .dashboard-shell {
+  padding-top: 0 !important;
+}
 /* WWZ V3.7 – authenticated command centre shell and responsive hierarchy.
    Presentation only. Keep route controllers, auth, maps, GPS and game actions intact. */
 body.wwz-v3-dashboard {

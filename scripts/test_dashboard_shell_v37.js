@@ -5,7 +5,7 @@ const fs=require('node:fs');
 const read=p=>fs.readFileSync(p,'utf8');
 const dash=read('dashboard.html'),sw=read('sw.js');
 const style=read('assets/css/dashboard/shell-v37.css');
-const asset='assets/css/dashboard/shell-v37.css?v=3.7.0&amp;rev=responsive-shell-1';
+const asset='assets/css/dashboard/shell-v37.css?v=3.7.1&amp;rev=top-offset-1';
 assert.equal(dash.split(asset).length-1,1,'Dedicated dashboard layout sheet must load exactly once');
 assert.ok(dash.indexOf(asset)>dash.indexOf('workspace-v33-administration.css'),'Scoped sheet must follow all workspace CSS');
 assert.ok(!read('index.html').includes(asset)&&!read('shop.html').includes(asset)
@@ -36,5 +36,5 @@ assert.ok(!/\.leaflet-|#wwz-detection-map|wwz-v3-map|wwz-v3-public/.test(style),
 assert.ok(!/\bfetch\s*\(|XMLHttpRequest|WebSocket|localStorage|sessionStorage/.test(style),
   'V3.7 shell update must contain CSS only, no data or server actions');
 assert.match(sw, /const WWZ_PWA_UPDATE_REVISION = '[^']+';/, 'Missing PWA revision token');
-assert.ok(sw.includes('./assets/css/dashboard/shell-v37.css?v=3.7.0&rev=responsive-shell-1'));
+assert.ok(sw.includes('./assets/css/dashboard/shell-v37.css?v=3.7.1&rev=top-offset-1'));
 console.log('PASS: scoped responsive dashboard header, nested cards and mobile drawer, preserving original routes');

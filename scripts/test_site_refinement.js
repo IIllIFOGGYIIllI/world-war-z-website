@@ -5,6 +5,7 @@ const fs = require('node:fs');
 const { Script } = require('node:vm');
 const read = (path) => fs.readFileSync(path, 'utf8');
 const version = 'v=2.1.0&amp;rev=sitewide-ui-1';
+const scriptVersion = 'v=2.1.1&amp;rev=breadcrumb-fix-1';
 const pages = [
   'index.html', 'dashboard.html', 'shop.html', 'donations.html',
   'companion.html', 'rules.html', 'flags.html', 'legal.html',
@@ -15,7 +16,7 @@ const pages = [
 for (const file of pages) {
   const page = read(file);
   const css = 'assets/css/site-refinement.css?' + version;
-  const js = 'assets/js/site-refinement.js?' + version;
+  const js = 'assets/js/site-refinement.js?' + scriptVersion;
   assert.equal(page.split(css).length - 1, 1, file + ' must load design system once');
   assert.equal(page.split(js).length - 1, 1, file + ' must load enhancement script once');
   assert.ok(page.lastIndexOf(css) < page.indexOf('</head>'), file + ' CSS must be in head');
@@ -58,7 +59,7 @@ for (const token of [
 assert.ok(!js.includes('fetch(') && !js.includes('localStorage'),
   'UI enhancement must not fetch user data or write persistent browser state');
 assert.ok(shell.includes('./assets/css/site-refinement.css?v=2.1.0&rev=sitewide-ui-1'));
-assert.ok(shell.includes('./assets/js/site-refinement.js?v=2.1.0&rev=sitewide-ui-1'));
+assert.ok(shell.includes('./assets/js/site-refinement.js?v=2.1.1&rev=breadcrumb-fix-1'));
 assert.match(shell, /const WWZ_PWA_UPDATE_REVISION = '[^']+';/, 'Missing PWA revision token');
 assert.ok(css.includes("input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='hidden'])"), 'Text input selector must remain a single compound selector');
 assert.ok(!/input:not\([^\n]*\n\s+:not\(/.test(css), 'Whitespace before :not would stop input styles matching');
