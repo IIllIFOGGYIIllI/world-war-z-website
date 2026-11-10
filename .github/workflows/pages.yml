@@ -77,6 +77,7 @@ jobs:
           node scripts/test_overview_v38.js
           node scripts/test_dashboard_layout_v39.js
           node scripts/test_sidebar_v310.js
+          node scripts/test_workspace_v311.js
           node scripts/test_command_centre_v3.js
           node scripts/test_ios_auth_handoff.js
           node scripts/test_mobile_dashboard_reliability.js
