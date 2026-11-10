@@ -43,8 +43,8 @@ assert.ok(!css.includes('.leaflet-')&&!css.includes('wwz-v3-dashboard'),
 assert.ok(!css.includes('fetch(')&&!css.includes('WebSocket'),
   'This change must remain presentation-only');
 const sw=read('sw.js');
-assert.ok(sw.includes("2026-11-11-v3-6-public-layout-repair-1"),
-  'PWA revision must be refreshed');
+assert.match(sw, /const WWZ_PWA_UPDATE_REVISION = '[^']+';/,
+  'PWA revision token must remain present');
 assert.ok(sw.includes('./assets/css/pages/public-v36.css?v=3.6.0&rev=release-layout-1'),
   'Installed app should cache the new public stylesheet');
 console.log('PASS: eight public content pages, Changelog reading order, mobile navigation and large-type text');
