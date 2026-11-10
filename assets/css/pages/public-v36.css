@@ -1,0 +1,269 @@
+/* World War Z V3.6 — policy page and changelog layout repair.
+   Presentation-only. No dashboard, checkout, GPS, or map selectors. */
+body.wwz-v3-public {
+  --wwz-v36-reading: #c8d8e5;
+  --wwz-v36-edge: rgba(176,204,226,.2);
+}
+body.wwz-v3-public .page-header .shell {
+  width: min(calc(100% - 40px),1280px);
+}
+body.wwz-v3-public .page-header .page-brand {
+  flex: none;
+  min-width: 0;
+}
+body.wwz-v3-public .page-nav {
+  align-items: center;
+  gap: 5px;
+  padding: 6px;
+  min-width: 0;
+  max-width: 100%;
+}
+body.wwz-v3-public .page-nav a {
+  display: inline-flex;
+  flex: none;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: .015em;
+  text-transform: none;
+  text-decoration: none;
+  white-space: nowrap;
+}
+body.wwz-v3-public .page-nav a.accent,
+body.wwz-v3-public .page-nav a[aria-current="page"] {
+  background: rgba(235,84,78,.15);
+  border-color: rgba(255,160,147,.24);
+  color: #fff !important;
+}
+body.wwz-v3-public .page-hero {
+  padding-block: clamp(54px,5.6vw,90px) clamp(38px,3.5vw,60px);
+}
+body.wwz-v3-public .page-hero > .shell,
+body.wwz-v3-public .page-content > .shell {
+  width: min(calc(100% - 40px),1280px);
+}
+body.wwz-v3-public .page-hero > .shell > p:last-child {
+  max-width: 780px;
+  font-size: clamp(15px,1.15vw,18px);
+  line-height: 1.7;
+}
+body.wwz-v3-public .page-content {
+  padding-block: 44px 86px;
+}
+body.wwz-v3-public .content-grid {
+  grid-template-columns: minmax(210px,248px) minmax(0,1fr);
+  align-items: start;
+  gap: clamp(22px,3vw,40px) !important;
+}
+body.wwz-v3-public .content-nav {
+  top: 104px;
+  padding: 7px;
+  max-height: calc(100svh - 120px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+body.wwz-v3-public .content-nav a {
+  display: flex;
+  align-items: center;
+  min-height: 43px;
+  padding: 10px 13px;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.4;
+  text-decoration: none;
+}
+body.wwz-v3-public .content-nav a:focus-visible,
+body.wwz-v3-public .page-nav a:focus-visible,
+body.wwz-v3-public .wwz-v36-archive-link:focus-visible {
+  outline: 2px solid #ffa99d;
+  outline-offset: 2px;
+}
+body.wwz-v3-public :where(.content-card,.version) {
+  min-width: 0;
+  padding: clamp(20px,2.2vw,33px);
+}
+body.wwz-v3-public .content-card h2 {
+  font-family: Inter,"Segoe UI",system-ui,sans-serif;
+  font-size: clamp(22px,2.2vw,30px);
+  font-weight: 790;
+  letter-spacing: -.035em;
+  line-height: 1.2;
+  text-transform: none;
+}
+body.wwz-v3-public .content-card h3 {
+  font-size: 16px;
+  line-height: 1.4;
+  letter-spacing: -.015em;
+  text-transform: none;
+}
+body.wwz-v3-public .content-card :where(p,li,dd),
+body.wwz-v3-public .version :where(p,li) {
+  color: var(--wwz-v36-reading) !important;
+  font-size: 15px;
+  line-height: 1.72;
+}
+body.wwz-v3-public .content-card :where(ul,ol),
+body.wwz-v3-public .version :where(ul,ol) {
+  padding-left: 24px;
+}
+body.wwz-v3-public .notice {
+  color: var(--wwz-v36-reading);
+  font-size: 14px;
+  line-height: 1.6;
+}
+body.wwz-v3-public .version-heading h2 {
+  font-family: Inter,"Segoe UI",system-ui,sans-serif;
+  font-size: clamp(23px,2.3vw,32px);
+  font-weight: 800;
+  letter-spacing: -.035em;
+  line-height: 1.2;
+  text-transform: none;
+}
+body.wwz-v3-public .version :where(h3,strong) {
+  font-size: 14px;
+  line-height: 1.45;
+}
+body.wwz-v3-public .page-footer .shell {
+  color: #b4c5d2;
+  font-size: 12px;
+  line-height: 1.6;
+}
+body.wwz-v3-public .wwz-v36-release-highlights {
+  padding: 43px 0 36px;
+}
+body.wwz-v3-public .wwz-v36-release-highlights > .shell {
+  width: min(calc(100% - 40px),1280px);
+}
+body.wwz-v3-public .wwz-v36-release-heading {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+body.wwz-v3-public .wwz-v36-release-heading h2 {
+  margin: 0;
+  color: #f4f7fb;
+  font-size: clamp(24px,2.8vw,38px);
+  font-weight: 820;
+  letter-spacing: -.042em;
+  line-height: 1.1;
+}
+body.wwz-v3-public .wwz-v36-release-heading p:last-child {
+  max-width: 740px;
+  color: #b9cbd9;
+  font-size: 15px;
+  line-height: 1.6;
+}
+body.wwz-v3-public .wwz-v36-archive-link {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 44px;
+  padding: 10px 15px;
+  border: 1px solid rgba(255,163,147,.34);
+  border-radius: 12px;
+  background: rgba(229,80,74,.13);
+  color: #f8e5e0;
+  font-size: 13px;
+  font-weight: 760;
+  text-decoration: none;
+}
+body.wwz-v3-public .wwz-v36-release-grid {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  align-items: stretch;
+  gap: 14px;
+}
+body.wwz-v3-public .wwz-v36-release-grid > .wwz-public-release-note {
+  box-sizing: border-box;
+  width: 100% !important;
+  min-width: 0;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: clamp(18px,2vw,25px) !important;
+  border: 1px solid var(--wwz-v36-edge);
+  border-radius: 17px;
+  background: linear-gradient(150deg,#1b3043,#111e2c);
+  box-shadow: 0 12px 30px rgba(0,0,0,.17);
+}
+body.wwz-v3-public .wwz-v36-release-grid > .wwz-public-release-note :where(strong,h2) {
+  display: block;
+  margin: 0 0 10px;
+  color: #f6f9fc;
+  font-family: Inter,"Segoe UI",system-ui,sans-serif;
+  font-size: clamp(16px,1.4vw,19px);
+  font-weight: 790;
+  letter-spacing: -.02em;
+  line-height: 1.35;
+}
+body.wwz-v3-public .wwz-v36-release-grid > .wwz-public-release-note p {
+  margin: 0;
+  color: var(--wwz-v36-reading);
+  font-size: 14px;
+  line-height: 1.65;
+}
+body.wwz-v3-public #release-archive { scroll-margin-top: 90px; }
+@media (max-width: 1100px) {
+  body.wwz-v3-public .page-header .shell {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-block: 10px;
+  }
+  body.wwz-v3-public .page-nav {
+    width: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start;
+    scrollbar-width: thin;
+    overscroll-behavior-x: contain;
+  }
+  body.wwz-v3-public .page-nav a {
+    min-height: 44px;
+    font-size: 12px;
+  }
+}
+@media (max-width: 860px) {
+  body.wwz-v3-public .content-grid { grid-template-columns: minmax(0,1fr); }
+  body.wwz-v3-public .content-nav {
+    position: static;
+    display: flex;
+    flex-wrap: nowrap;
+    max-height: none;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    overscroll-behavior-x: contain;
+  }
+  body.wwz-v3-public .content-nav a {
+    flex: none;
+    min-height: 44px;
+    white-space: nowrap;
+  }
+  body.wwz-v3-public .wwz-v36-release-grid { grid-template-columns: minmax(0,1fr); }
+}
+@media (max-width: 600px) {
+  body.wwz-v3-public .page-header .shell,
+  body.wwz-v3-public .page-hero > .shell,
+  body.wwz-v3-public .page-content > .shell,
+  body.wwz-v3-public .wwz-v36-release-highlights > .shell {
+    width: calc(100% - 24px);
+  }
+  body.wwz-v3-public .page-header .shell { align-items: stretch; }
+  body.wwz-v3-public .page-hero { padding-block: 46px 34px; }
+  body.wwz-v3-public .page-content { padding-block: 24px 55px; }
+  body.wwz-v3-public :where(.content-card,.version) { padding: 18px; }
+  body.wwz-v3-public .wwz-v36-release-highlights { padding-block: 26px; }
+  body.wwz-v3-public .page-footer .shell { flex-direction: column; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.wwz-v3-public .wwz-v36-archive-link { scroll-behavior: auto; }
+}

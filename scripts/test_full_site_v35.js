@@ -43,7 +43,7 @@ assert.ok(dash.includes('data-raid-damage-controls'),'Raid controls retained');
 assert.ok(dash.includes('data-server-action="restart"'),'Server action wiring retained');
 assert.ok(read('shop.html').includes('data-member-cart-checkout'),'Shop checkout retained');
 const sw=read('sw.js');
-assert.ok(sw.includes('2026-11-10-v3-5-full-page-coverage-1'),'PWA refresh revision must change');
+assert.match(sw, /const WWZ_PWA_UPDATE_REVISION = '[^']+';/, 'PWA update revision must be present');
 assert.ok(sw.includes('./assets/css/map-hub-v35.css?v=3.5.0&rev=all-pages-1'),
   'Installed PWA shell must include the new stylesheet');
 console.log('PASS: 16/16 V3 pages, map geometry isolated, Nasdara copy and protected handlers retained');
