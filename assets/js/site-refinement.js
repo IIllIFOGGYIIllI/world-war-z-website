@@ -139,9 +139,12 @@
         || $('.side-link-copy strong', active)?.textContent?.trim()
         || 'Workspace';
       const group = active.closest('[data-nav-group]');
-      const area = group?.querySelector(':scope > summary')?.textContent?.trim()?.replace(/\s+/g, ' ');
+      // Only use the group name, not its route-count badge or icon text.
+      const area = group?.querySelector(':scope > summary strong')?.textContent?.trim() || '';
       title.replaceChildren();
-      title.append(document.createTextNode('Dashboard / ' + (area ? area + ' / ' : '')));
+      const context = area && area.toLowerCase() !== 'dashboard'
+        ? 'Dashboard / ' + area + ' / ' : 'Dashboard / ';
+      title.append(document.createTextNode(context));
       const strong = document.createElement('strong');
       strong.textContent = label;
       title.append(strong);

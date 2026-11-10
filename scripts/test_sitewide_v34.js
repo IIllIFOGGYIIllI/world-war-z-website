@@ -9,7 +9,7 @@ const pages=['index.html','dashboard.html','shop.html','donations.html','compani
 for(const p of pages){
   const html=read(p);
   assert.ok(html.includes('assets/css/site-refinement.css?v=2.1.0&amp;rev=sitewide-ui-1'),p+' missing shared CSS');
-  assert.ok(html.includes('assets/js/site-refinement.js?v=2.1.0&amp;rev=sitewide-ui-1'),p+' missing shared JS');
+  assert.ok(html.includes('assets/js/site-refinement.js?v=2.1.1&amp;rev=breadcrumb-fix-1'),p+' missing shared JS');
 }
 const css=read('assets/css/site-refinement.css'),js=read('assets/js/site-refinement.js'),sw=read('sw.js');
 for(const token of [

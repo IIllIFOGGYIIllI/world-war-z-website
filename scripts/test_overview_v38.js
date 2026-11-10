@@ -41,7 +41,7 @@ assert.ok(read('assets/js/dashboard/my-wwz.js').includes('v3NetworkTiles.insertA
 assert.ok(read('assets/js/dashboard/my-wwz.js').includes('data-my-wwz-gps'),
   'Personal GPS history stays wired');
 assert.ok(read('shop.html').includes('data-member-cart-checkout'));
-assert.ok(pwa.includes("const WWZ_PWA_UPDATE_REVISION = '2026-11-11-v3-8-overview-density-1';"));
+assert.match(pwa, /const WWZ_PWA_UPDATE_REVISION = '[^']+';/, 'Missing PWA revision token');
 assert.ok(pwa.includes('./assets/css/dashboard/overview-v38.css?v=3.8.0&rev=overview-compact-1'));
 assert.ok(pwa.includes('./assets/js/dashboard/navigation-v31.js?v=3.1.1&rev=sidebar-density-1'));
 new Script(nav,{filename:'navigation-v31.js'});

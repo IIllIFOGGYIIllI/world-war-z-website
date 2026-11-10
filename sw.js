@@ -8,7 +8,7 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-11-11-v3-8-overview-density-1';
+const WWZ_PWA_UPDATE_REVISION = '2026-11-11-v3-9-breadcrumb-offset-1';
 const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-ios-safari-tab-bridge-2`;
 const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${APP_CACHE_RELEASE}`;
@@ -53,7 +53,7 @@ const APP_SHELL = [
   './assets/js/pages/shop-experience.js?v=1.63.0&rev=survivor-ux-1',
   './assets/js/ui-system.js?v=2.0.1&rev=nav-dedupe-1',
   './assets/css/site-refinement.css?v=2.1.0&rev=sitewide-ui-1',
-  './assets/js/site-refinement.js?v=2.1.0&rev=sitewide-ui-1',
+  './assets/js/site-refinement.js?v=2.1.1&rev=breadcrumb-fix-1',
   './assets/js/core/cart-deliveries.js?v=2.1.0',
   './assets/css/components/cart-deliveries.css?v=2.1.0',
   './assets/js/dashboard/modern-navigation.js?v=1.62.0&rev=modern-ui-1',
@@ -74,7 +74,7 @@ const APP_SHELL = [
   './assets/js/dashboard/workspace-v32-community.js?v=3.2.2&rev=v3-2-community-2',
   './assets/css/dashboard/workspace-v33-administration.css?v=3.3.0&rev=v33-admin-owner-1',
   './assets/css/dashboard/overview-v38.css?v=3.8.0&rev=overview-compact-1',
-  './assets/css/dashboard/shell-v37.css?v=3.7.0&rev=responsive-shell-1',
+  './assets/css/dashboard/shell-v37.css?v=3.7.1&rev=top-offset-1',
   './assets/js/dashboard/workspace-v33-administration.js?v=3.3.0&rev=v33-admin-owner-1'
 ].map(scopedUrl);
 
