@@ -8,7 +8,7 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-11-12-billboard-overlay-v03-1';
+const WWZ_PWA_UPDATE_REVISION = '2026-11-12-highway-side-a-fit-v04-1';
 const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-ios-safari-tab-bridge-2`;
 const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${APP_CACHE_RELEASE}`;
@@ -70,8 +70,8 @@ const APP_SHELL = [
   './assets/css/dashboard/workspace-v311-final.css?v=3.11.0&rev=workspace-complete-1',
   './tools/armband-calibration.html',
   './tools/signboard-studio.html',
-  './assets/css/tools/signboard-studio.css?v=0.3.0&rev=billboard-face-1',
-  './assets/js/tools/signboard-studio.js?v=0.3.0&rev=billboard-face-1',
+  './assets/css/tools/signboard-studio.css?v=0.4.0&rev=highway-fit-1',
+  './assets/js/tools/signboard-studio.js?v=0.4.0&rev=highway-fit-1',
   './assets/js/tools/armband-calibration.js?v=0.1.0&rev=nasdara-lab-1',
   './assets/js/dashboard/sidebar-v310.js?v=3.10.0&rev=category-jump-1',
   './assets/css/dashboard/workspace-v32-profile-gps.css?v=3.2.0&rev=profile-gps-v32-1',

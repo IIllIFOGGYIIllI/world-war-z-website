@@ -62,13 +62,13 @@ for(const token of ['id="studio-form"','id="studio-preview"','id="studio-export"
   'name="yaw"','name="pitch"','name="mirror"','name="preset"']){
   assert.ok(html.includes(token),'Missing UI: '+token);
 }
-assert.ok(html.includes('../assets/js/tools/signboard-studio.js?v=0.3.0&amp;rev=billboard-face-1'));
-assert.ok(html.includes('../assets/css/tools/signboard-studio.css?v=0.3.0&amp;rev=billboard-face-1'));
+assert.ok(html.includes('../assets/js/tools/signboard-studio.js?v=0.4.0&amp;rev=highway-fit-1'));
+assert.ok(html.includes('../assets/css/tools/signboard-studio.css?v=0.4.0&amp;rev=highway-fit-1'));
 assert.ok(dash.includes('href="tools/signboard-studio.html"'));
 assert.ok(calib.includes('href="signboard-studio.html"'));
 assert.ok(css.includes('image-rendering:pixelated'));
 assert.match(sw, /const WWZ_PWA_UPDATE_REVISION = '[^']+';/, 'Missing PWA revision');
-for(const f of ['tools/signboard-studio.html','assets/css/tools/signboard-studio.css?v=0.3.0&rev=billboard-face-1','assets/js/tools/signboard-studio.js?v=0.3.0&rev=billboard-face-1'])
+for(const f of ['tools/signboard-studio.html','assets/css/tools/signboard-studio.css?v=0.4.0&rev=highway-fit-1','assets/js/tools/signboard-studio.js?v=0.4.0&rev=highway-fit-1'])
   assert.ok(sw.includes('./'+f),'Uncached studio asset '+f);
 assert.ok(!/\bfetch\s*\(|XMLHttpRequest|WebSocket|localStorage|sessionStorage/.test(script),
   'No server writes, network or browser-side persistence');

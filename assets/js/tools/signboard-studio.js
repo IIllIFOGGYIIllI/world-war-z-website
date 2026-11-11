@@ -1,4 +1,4 @@
-/* WWZ Signboard Studio v0.2 — client-side artwork -> vanilla armband ObjectSpawner JSON.
+/* WWZ Signboard Studio v0.4 — client-side artwork -> vanilla armband ObjectSpawner JSON.
    Based on successful editor-only 7x7 calibration (scale .5, spacing 1, pitch -90).
    No Railway/Nitrado endpoints, no deployments, no automatic server writes. */
 (function (root) {
@@ -193,6 +193,73 @@
     return grid;
   }
   const round=n=>Number(n.toFixed(6));
+
+  // Surveyed Nov 2026 from the owner's four DayZ Editor armband markers.
+  // These are world coordinates on ONE face of ONE existing billboard instance.
+  // Do not silently apply this preset to another billboard or to Side B.
+  const HIGHWAY_SIDE_A=Object.freeze({
+    model:'StaticObj_Billboard_Highway_Blank',
+    width:88,height:44,scale:.85,spacing:1,
+    referenceCenter:[11218.8275,176.9415,11103.36225],
+    topLeft:[11216.668,178.904,11106.653],
+    topRight:[11220.977,178.890,11100.065],
+    bottomRight:[11220.987,174.986,11100.066],
+    bottomLeft:[11216.678,174.986,11106.665],
+    insetHorizontal:.30,insetVertical:.145,clearance:.12,
+    ypr:[0,-89.03,55.56]
+  });
+  function highwayFitGrid(grid,position){
+    const c=HIGHWAY_SIDE_A;
+    const h=grid.length,w=grid[0].length;
+    if(w!==c.width||h!==c.height)
+      throw new Error('Highway Side A fit requires exactly 88 × 44 pixels. Reapply the preset.');
+    const scale=number('Scale',position.scale,.1,2);
+    const spacing=number('Spacing',position.spacing,.5,1.75);
+    if(Math.abs(scale-c.scale)>.00001||Math.abs(spacing-c.spacing)>.00001)
+      throw new Error('Highway fit requires scale 0.85 and spacing 1. Reapply the preset.');
+    const x=number('X coordinate',position.x,-100000,100000);
+    const y=number('Y height',position.y,-100000,100000);
+    const z=number('Z coordinate',position.z,-100000,100000);
+    const yaw=number('Yaw',position.yaw,-360,360);
+    const pitch=number('Pitch',position.pitch,-180,180);
+    const roll=number('Roll',position.roll,-180,180);
+    const clearance=number('Highway face clearance',
+      position.highwayClearance===undefined?c.clearance:position.highwayClearance,-.4,.6);
+    const shift=[x-c.referenceCenter[0],y-c.referenceCenter[1],z-c.referenceCenter[2]];
+    const right=c.topRight.map((v,i)=>v-c.topLeft[i]);
+    const down=c.bottomLeft.map((v,i)=>v-c.topLeft[i]);
+    const norm=[
+      right[1]*down[2]-right[2]*down[1],
+      right[2]*down[0]-right[0]*down[2],
+      right[0]*down[1]-right[1]*down[0]
+    ];
+    const magnitude=Math.hypot(...norm);
+    const unit=norm.map(v=>v/magnitude); // Toward the surveyed camera side.
+    const faceW=Math.hypot(...right),faceH=Math.hypot(...down);
+    const insetU=c.insetHorizontal/faceW,insetV=c.insetVertical/faceH;
+    const point=(u,v,i)=>{
+      const top=c.topLeft[i]*(1-u)+c.topRight[i]*u;
+      const bottom=c.bottomLeft[i]*(1-u)+c.bottomRight[i]*u;
+      return top*(1-v)+bottom*v+shift[i]+clearance*unit[i];
+    };
+    const Objects=[];
+    for(let row=0;row<h;row++)for(let col=0;col<w;col++){
+      const key=grid[row][col];
+      if(!Object.prototype.hasOwnProperty.call(PALETTE,key))
+        throw new Error('Unsupported armband colour at '+col+','+row+'.');
+      const column=position.mirror?w-1-col:col;
+      const u=insetU+(column+.5)/w*(1-2*insetU);
+      const v=insetV+(row+.5)/h*(1-2*insetV);
+      Objects.push({
+        name:PALETTE[key].cls,
+        pos:[round(point(u,v,0)),round(point(u,v,1)),round(point(u,v,2))],
+        ypr:[round(yaw),round(pitch),round(roll)],
+        scale:round(scale)
+      });
+    }
+    return {Objects};
+  }
+
   function toSpawner(grid,position){
     const h=grid?.length,w=grid?.[0]?.length;
     if(!Number.isInteger(h)||!Number.isInteger(w)||h<1||w<1||!grid.every(row=>row.length===w))
@@ -200,6 +267,8 @@
     if(w*h>MAX_OBJECTS)
       throw new Error('This sign uses '+(w*h).toLocaleString()+
         ' armbands, above the '+MAX_OBJECTS.toLocaleString()+'-object export limit. Choose a smaller size.');
+    if(position?.highwayFit===true||position?.highwayFit==='on')
+      return highwayFitGrid(grid,position);
     const x=number('X coordinate',position.x,-100000,100000);
     const y=number('Y height',position.y,-100000,100000);
     const z=number('Z coordinate',position.z,-100000,100000);
@@ -237,7 +306,7 @@
     return {Objects:objects};
   }
   const api=Object.freeze({PALETTE,PRESETS,MAX_OBJECTS,dimensions,normalizedText,
-    wrap,textMatrix,closestColour,quantize,toSpawner});
+    wrap,textMatrix,closestColour,quantize,toSpawner,HIGHWAY_SIDE_A,highwayFitGrid});
   if(typeof module==='object'&&module.exports)module.exports=api;
   if(root)root.WWZSignboardStudio=api;
   if(typeof document==='undefined')return;
@@ -248,6 +317,7 @@
     const issue=document.getElementById('studio-issue');
     const info=document.getElementById('studio-info');
     const billboardNote=document.getElementById('studio-billboard-note');
+    const highwayButton=document.getElementById('studio-highway-auto-fit');
     const exportJson=document.getElementById('studio-export');
     const exportPng=document.getElementById('studio-png');
     const fileInput=document.getElementById('studio-image');
@@ -258,6 +328,7 @@
     const getForm=()=>{const v=values();v.border=form.elements.namedItem('border').checked;
       v.mirror=form.elements.namedItem('mirror').checked;
       v.billboardOverlay=form.elements.namedItem('billboardOverlay')?.checked===true;
+      v.highwayFit=form.elements.namedItem('highwayFit')?.checked===true;
       return v;};
     const displayGrid=(pixels)=>{
       const h=pixels.length,w=pixels[0].length;
@@ -291,11 +362,14 @@
       const v=getForm();
       form.querySelectorAll('[data-mode-text]').forEach(el=>el.hidden=v.mode!=='text');
       form.querySelectorAll('[data-mode-image]').forEach(el=>el.hidden=v.mode!=='image');
-      form.querySelectorAll('[data-custom-size]').forEach(el=>el.hidden=v.preset!=='custom');
-      form.querySelectorAll('[data-billboard-fields]').forEach(el=>el.hidden=!v.billboardOverlay);
-      if(billboardNote)billboardNote.textContent=v.billboardOverlay
-        ? 'Billboard overlay enabled. The X/Y/Z above must be the display-face centre, not the billboard object pivot. Export contains armbands only; fine-tune offsets in Editor.'
-        : 'Standard sign mode: exports artwork only.';
+      form.querySelectorAll('[data-custom-size]').forEach(el=>el.hidden=v.preset!=='custom'||v.highwayFit);
+      form.querySelectorAll('[data-billboard-fields]').forEach(el=>el.hidden=!v.billboardOverlay||v.highwayFit);
+      form.querySelectorAll('[data-highway-fields]').forEach(el=>el.hidden=!v.highwayFit);
+      if(billboardNote)billboardNote.textContent=v.highwayFit
+        ? 'Surveyed Side A · fitted to the existing highway billboard at X 11220.515 / Y 172.661 / Z 11103.675. The artwork includes margins and faces the calibrated camera side. Only armbands are exported. Test front clearance in Editor.'
+        : v.billboardOverlay
+          ? 'Manual billboard alignment: X/Y/Z must be the display-face centre, not the billboard object pivot. Exports armbands only.'
+          : 'Standard sign mode: exports artwork only.';
       issue.textContent='';
       grid=null;exportJson.disabled=true;exportPng.disabled=true;
       try{
@@ -306,7 +380,14 @@
         const dims=(grid[0].length*step).toFixed(2)+' × '+(grid.length*step).toFixed(2)+' m';
         count.textContent=total.toLocaleString()+' armbands · approx. '+dims+
           ' · '+grid[0].length+'×'+grid.length+' pixels';
-        if(v.billboardOverlay) {
+        if(v.highwayFit) {
+          if(grid[0].length!==HIGHWAY_SIDE_A.width||grid.length!==HIGHWAY_SIDE_A.height)
+            throw new Error('Auto-fit needs 88 × 44 pixels. Click Apply Highway Billboard Fit.');
+          if(Math.abs(number('Scale',v.scale,.1,2)-HIGHWAY_SIDE_A.scale)>.00001||
+             Math.abs(number('Spacing',v.spacing,.5,1.75)-1)>.00001)
+            throw new Error('Auto-fit needs scale 0.85 and spacing 1. Reapply the preset.');
+          number('Highway face clearance',v.highwayClearance,-.4,.6);
+        } else if(v.billboardOverlay) {
           // Validate offsets before download becomes enabled, even though
           // they do not change object count or the pixel preview.
           number('Billboard horizontal offset',v.lateralOffset,-5,5);
@@ -336,6 +417,31 @@
       setTimeout(()=>URL.revokeObjectURL(url),1000);
     };
     const filename=()=>String(getForm().title||'Custom_Sign').trim().replace(/[^a-zA-Z0-9]+/g,'_').slice(0,45).replace(/^_+|_+$/g,'')||'Custom_Sign';
+    const applyHighwayFit=()=>{
+      const set=(name,value)=>{const el=form.elements.namedItem(name);if(el)el.value=String(value);};
+      set('preset','custom');set('width',HIGHWAY_SIDE_A.width);set('height',HIGHWAY_SIDE_A.height);
+      set('x',HIGHWAY_SIDE_A.referenceCenter[0]);
+      set('y',HIGHWAY_SIDE_A.referenceCenter[1]);
+      set('z',HIGHWAY_SIDE_A.referenceCenter[2]);
+      set('yaw',HIGHWAY_SIDE_A.ypr[0]);set('pitch',HIGHWAY_SIDE_A.ypr[1]);
+      set('roll',HIGHWAY_SIDE_A.ypr[2]);
+      set('scale',HIGHWAY_SIDE_A.scale);set('spacing',HIGHWAY_SIDE_A.spacing);
+      set('highwayClearance',HIGHWAY_SIDE_A.clearance);
+      form.elements.namedItem('highwayFit').checked=true;
+      form.elements.namedItem('billboardOverlay').checked=false;
+      form.elements.namedItem('mirror').checked=false;
+      update();
+    };
+    highwayButton?.addEventListener('click',applyHighwayFit);
+    form.elements.namedItem('highwayFit')?.addEventListener('change',()=>{
+      if(form.elements.namedItem('highwayFit').checked)applyHighwayFit();
+      else update();
+    });
+    form.elements.namedItem('billboardOverlay')?.addEventListener('change',()=>{
+      if(form.elements.namedItem('billboardOverlay').checked)
+        form.elements.namedItem('highwayFit').checked=false;
+      update();
+    });
     form.addEventListener('input',update);
     form.addEventListener('change',update);
     fileInput.addEventListener('change',()=>{
@@ -360,7 +466,8 @@
       if(!grid)return;
       try{
         const options=getForm(),spawner=toSpawner(grid,options);
-        download('WWZ_'+filename()+'_Armbands.json',JSON.stringify(spawner,null,2)+'\n','application/json');
+        download('WWZ_'+filename()+(options.highwayFit?'_Highway_Side_A':'')+'_Armbands.json',
+          JSON.stringify(spawner,null,2)+'\n','application/json');
         info.textContent='Downloaded '+spawner.Objects.length+' armbands for DayZ Editor. No server was changed.';
       }catch(error){issue.textContent=error.message;}
     });
@@ -384,7 +491,8 @@
         const preset=examples[name];if(!preset)return;
         Object.entries(preset).forEach(([key,value])=>{const field=form.elements.namedItem(key);if(field)field.value=value;});
         form.elements.namedItem('mode').value='text';
-        form.elements.namedItem('preset').value='medium';
+        if(!form.elements.namedItem('highwayFit')?.checked)
+          form.elements.namedItem('preset').value='medium';
         update();
       })
     );
