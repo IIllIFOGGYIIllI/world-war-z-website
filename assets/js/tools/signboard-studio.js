@@ -211,6 +211,15 @@
     const step=.097*scale*spacing; // Editor-tested baseline, not precise model measurement.
     const rad=yaw*Math.PI/180;
     const cos=Math.cos(rad),sin=Math.sin(rad);
+    // Optional mounting offset, expressed in the sign's LOCAL axes.
+    // The backing billboard is a separately placed DayZ Editor object.
+    const overlay=position.billboardOverlay===true||position.billboardOverlay==='on';
+    const lateral=overlay?number('Billboard horizontal offset',position.lateralOffset,-5,5):0;
+    const vertical=overlay?number('Billboard vertical offset',position.verticalOffset,-5,5):0;
+    const forward=overlay?number('Billboard face offset',position.faceOffset,-3,3):0;
+    const centreX=x+lateral*cos+forward*sin;
+    const centreY=y+vertical;
+    const centreZ=z-lateral*sin+forward*cos;
     const objects=[];
     for(let row=0;row<h;row++)for(let col=0;col<w;col++){
       const key=grid[row][col];
@@ -220,7 +229,7 @@
       const yOffset=((h-1)/2-row)*step;
       objects.push({
         name:PALETTE[key].cls,
-        pos:[round(x+xOffset*cos),round(y+yOffset),round(z-xOffset*sin)],
+        pos:[round(centreX+xOffset*cos),round(centreY+yOffset),round(centreZ-xOffset*sin)],
         ypr:[round(yaw),round(pitch),round(roll)],
         scale:round(scale)
       });
@@ -238,6 +247,7 @@
     const count=document.getElementById('studio-count');
     const issue=document.getElementById('studio-issue');
     const info=document.getElementById('studio-info');
+    const billboardNote=document.getElementById('studio-billboard-note');
     const exportJson=document.getElementById('studio-export');
     const exportPng=document.getElementById('studio-png');
     const fileInput=document.getElementById('studio-image');
@@ -246,7 +256,9 @@
     const ctx=preview.getContext('2d',{alpha:false});
     const values=()=>Object.fromEntries(new FormData(form));
     const getForm=()=>{const v=values();v.border=form.elements.namedItem('border').checked;
-      v.mirror=form.elements.namedItem('mirror').checked;return v;};
+      v.mirror=form.elements.namedItem('mirror').checked;
+      v.billboardOverlay=form.elements.namedItem('billboardOverlay')?.checked===true;
+      return v;};
     const displayGrid=(pixels)=>{
       const h=pixels.length,w=pixels[0].length;
       preview.width=w;preview.height=h;
@@ -280,6 +292,10 @@
       form.querySelectorAll('[data-mode-text]').forEach(el=>el.hidden=v.mode!=='text');
       form.querySelectorAll('[data-mode-image]').forEach(el=>el.hidden=v.mode!=='image');
       form.querySelectorAll('[data-custom-size]').forEach(el=>el.hidden=v.preset!=='custom');
+      form.querySelectorAll('[data-billboard-fields]').forEach(el=>el.hidden=!v.billboardOverlay);
+      if(billboardNote)billboardNote.textContent=v.billboardOverlay
+        ? 'Billboard overlay enabled. The X/Y/Z above must be the display-face centre, not the billboard object pivot. Export contains armbands only; fine-tune offsets in Editor.'
+        : 'Standard sign mode: exports artwork only.';
       issue.textContent='';
       grid=null;exportJson.disabled=true;exportPng.disabled=true;
       try{
@@ -290,6 +306,13 @@
         const dims=(grid[0].length*step).toFixed(2)+' × '+(grid.length*step).toFixed(2)+' m';
         count.textContent=total.toLocaleString()+' armbands · approx. '+dims+
           ' · '+grid[0].length+'×'+grid.length+' pixels';
+        if(v.billboardOverlay) {
+          // Validate offsets before download becomes enabled, even though
+          // they do not change object count or the pixel preview.
+          number('Billboard horizontal offset',v.lateralOffset,-5,5);
+          number('Billboard vertical offset',v.verticalOffset,-5,5);
+          number('Billboard face offset',v.faceOffset,-3,3);
+        }
         if(total>MAX_OBJECTS){
           issue.textContent='Preview only: over '+MAX_OBJECTS.toLocaleString()+
             ' objects. Reduce the board size to export.';
