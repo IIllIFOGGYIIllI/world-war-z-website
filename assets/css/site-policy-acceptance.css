@@ -1,0 +1,34 @@
+/* Versioned WWZ community policies acknowledgement. */
+body.wwz-policy-pending {overflow:hidden}
+dialog.wwz-policy-gate {
+  position:fixed;inset:0;margin:auto;max-width:min(93vw,610px);max-height:min(92vh,790px);
+  border:1px solid #4e6a83;border-radius:18px;
+  background:linear-gradient(145deg,#182e42,#0c192a);color:#f2f7fd;
+  padding:0;box-shadow:0 24px 90px rgba(0,0,0,.78);z-index:2147483600;
+  overflow-y:auto;color-scheme:dark;font:15px/1.5 Inter,"Segoe UI",system-ui,sans-serif;
+}
+dialog.wwz-policy-gate::backdrop {background:rgba(1,5,12,.83);backdrop-filter:blur(5px)}
+body.wwz-policy-pending dialog.wwz-policy-gate:not([open]) {display:block}
+.wwz-policy-content {padding:clamp(19px,4vw,30px)}
+.wwz-policy-eyebrow {color:#ff9d88;font-size:10px;font-weight:850;letter-spacing:.13em;margin:0 0 8px}
+.wwz-policy-gate h2 {color:#fff;font-size:clamp(21px,4vw,30px);line-height:1.2;letter-spacing:-.03em;margin:0 0 11px;text-transform:none;font-family:Inter,"Segoe UI",system-ui,sans-serif}
+.wwz-policy-gate p {color:#c4d7e6;font-size:13px;line-height:1.65;margin:0 0 14px}
+.wwz-policy-links {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:15px 0}
+.wwz-policy-links a {
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  min-height:39px;padding:8px 10px;border:1px solid #4b7088;border-radius:9px;
+  background:#1a374c;color:#cdecff;font-size:12px;text-decoration:none;font-weight:750
+}
+.wwz-policy-links a:hover {border-color:#f4a38e;background:#2a495c}
+.wwz-policy-notice {padding:10px 12px;border-left:3px solid #e18c71;background:#12263a;border-radius:6px}
+.wwz-policy-check {display:flex;gap:11px;align-items:flex-start;min-height:42px;margin:10px 0;padding:11px 12px;border:1px solid #3d5970;border-radius:9px;background:#10263a;color:#e2eaf4;font-size:13px;line-height:1.5;cursor:pointer}
+.wwz-policy-check input {width:19px;height:19px;flex:none;accent-color:#d96e5d;margin:1px 0 0}
+.wwz-policy-actions {display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:17px 0 0}
+.wwz-policy-decline {font-size:13px;color:#b9d7ea;padding:8px 2px}
+.wwz-policy-accept {min-height:44px;padding:10px 18px;border:0;border-radius:10px;background:#dc6957;color:white;font:inherit;font-weight:780;cursor:pointer}
+.wwz-policy-accept:disabled {cursor:not-allowed;opacity:.45}
+.wwz-policy-gate :is(button,a,input):focus-visible {outline:2px solid #ffb89e;outline-offset:2px}
+.wwz-policy-status:not(:empty) {margin-top:10px}
+@media(max-width:480px){.wwz-policy-links {grid-template-columns:minmax(0,1fr)}.wwz-policy-actions {align-items:stretch;flex-direction:column}.wwz-policy-accept{width:100%}}
+@media(prefers-reduced-motion:reduce){dialog.wwz-policy-gate::backdrop{backdrop-filter:none}}
+@media(forced-colors:active){dialog.wwz-policy-gate,.wwz-policy-check,.wwz-policy-links a{border:1px solid CanvasText}}
