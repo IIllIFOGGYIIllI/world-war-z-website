@@ -82,6 +82,7 @@ jobs:
           node scripts/test_pvp_paused_ui.js
           node scripts/test_signboard_studio.js
           node scripts/test_billboard_overlay_v03.js
+          node scripts/test_highway_billboard_fit_v04.js
           node scripts/test_command_centre_v3.js
           node scripts/test_ios_auth_handoff.js
           node scripts/test_mobile_dashboard_reliability.js
