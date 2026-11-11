@@ -5,11 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
-<title>WWZ | Signboard &amp; Billboard Studio V0.4</title>
+<title>WWZ | Signboard &amp; Billboard Studio V0.5</title>
 <meta name="description" content="Design pixel signs from vanilla DayZ armbands and export an Object Spawner JSON to test in DayZ Editor.">
 <link rel="icon" href="../assets/branding/nasdara-community.webp">
-<link rel="stylesheet" href="../assets/css/tools/signboard-studio.css?v=0.4.0&amp;rev=highway-fit-1">
-<script defer src="../assets/js/tools/signboard-studio.js?v=0.4.0&amp;rev=highway-fit-1"></script>
+<link rel="stylesheet" href="../assets/css/tools/signboard-studio.css?v=0.5.0&amp;rev=portable-billboard-1">
+<script defer src="../assets/js/tools/signboard-studio.js?v=0.5.0&amp;rev=portable-billboard-1"></script>
+<script defer src="../assets/js/tools/portable-billboard.js?v=0.5.0&amp;rev=portable-billboard-1"></script>
 </head>
 <body>
 <header class="top">
@@ -107,6 +108,30 @@
               <button type="button" id="studio-highway-auto-fit">Apply Highway Billboard Fit</button>
               <label class="checkline"><input name="highwayFit" type="checkbox"><span>Use measured Side A geometry</span></label>
               <label data-highway-fields hidden>Face clearance (metres)<input type="number" name="highwayClearance" min="-0.4" max="0.6" step="0.01" value="0.12"><small>Positive moves artwork toward the surveyed viewing side. Adjust slightly only if it clips or floats.</small></label>
+              <div class="portable-options">
+                <div><strong>Portable billboard · V0.5</strong><p class="hint">Move the complete measured billboard and its artwork to any Nasdara location, maintaining the Side A fit. No extra marker placements.</p></div>
+                <button type="button" id="studio-portable-apply">Make Billboard Portable</button>
+                <label class="checkline"><input name="portableBillboard" type="checkbox"><span>Enable portable billboard export</span></label>
+                <div class="portable-fields" data-portable-fields hidden>
+                  <p class="hint"><strong>Destination is the BILLBOARD MODEL PIVOT, not the sign face centre.</strong> Enter coordinates from DayZ Editor. Frame rotation is Yaw only; keep model pitch/roll at zero for this first test.</p>
+                  <div class="three">
+                    <label>Billboard X<input name="frameX" type="number" step="any" value="11220.515"></label>
+                    <label>Billboard Y<input name="frameY" type="number" step="any" value="172.661"></label>
+                    <label>Billboard Z<input name="frameZ" type="number" step="any" value="11103.675"></label>
+                  </div>
+                  <div class="two">
+                    <label>Billboard yaw<input name="frameYaw" type="number" step="any" min="-360" max="360" value="72"></label>
+                    <label>Detail level<select name="highwayQuality">
+                      <option value="full" selected>Full · 88×44 · 3,872 armbands</option>
+                      <option value="balanced">Balanced · 80×40 · 3,200 armbands</option>
+                      <option value="light">Light · 64×32 · 2,048 armbands</option>
+                      <option value="minimal">Minimal · 48×24 · 1,152 armbands</option>
+                    </select></label>
+                  </div>
+                  <label class="checkline"><input name="includeBillboard" type="checkbox" checked><span>Include the highway billboard model in the JSON (one combined import)</span></label>
+                  <p class="hint"><strong>Important:</strong> if importing at the original location, remove the previously placed billboard first to avoid duplicates. Reduced detail may require shorter sign text. Side B is not calibrated. Rendering range remains limited by DayZ's armband behaviour.</p>
+                </div>
+              </div>
             </div>
             <label class="checkline billboard-check"><input name="billboardOverlay" type="checkbox"><span>Mount artwork onto an existing DayZ billboard</span></label>
             <p class="hint">For a different billboard, use this manual mode: place the model in Editor first, enter its <strong>front face centre</strong> as X/Y/Z, and adjust the offsets. For your surveyed Side A, click the one-button preset instead. The billboard itself is not exported or modified.</p>
@@ -136,6 +161,10 @@
           <button type="button" id="studio-export" disabled>Download DayZ Object Spawner JSON</button>
           <button type="button" id="studio-png" class="secondary" disabled>Download PNG preview</button>
         </div>
+        <div class="design-buttons">
+          <button type="button" class="secondary" id="studio-save-settings">Save design settings (.json)</button>
+          <label>Load saved settings (.json)<input type="file" id="studio-load-settings" accept=".json,application/json"></label>
+        </div>
         <p class="hint" id="studio-info" aria-live="polite">Files are generated on this device. No uploads, API calls or server restarts.</p>
       </section>
       <section class="panel instructions">
@@ -144,7 +173,7 @@
           <li>Design the sign and enter the intended Nasdara X, Y, Z and facing.</li>
           <li>Download <strong>Object Spawner JSON</strong> and import it using DayZ Editor’s Object Spawner import option.</li>
           <li>Check the text, loose armband tails, front/back direction and ground clearance from nearby and far away.</li>
-          <li>To use a pre-existing billboard, position that model in DayZ Editor first, activate <strong>Mount artwork onto an existing billboard</strong>, then adjust the face offsets until the pixels sit just in front of it. This export contains only the armbands.</li>
+          <li>For <strong>portable billboard mode</strong>, click Make Billboard Portable, enter the new billboard model pivot X/Y/Z and yaw, then export <strong>the billboard plus its Side A artwork together</strong>. For a pre-existing model, you can still use manual overlay mode.</li>
           <li>Test object count, console performance and persistence on the local server before considering the live PvE environment.</li>
         </ol>
         <p class="hint">A few thousand individual armbands may still be too heavy on a PlayStation server. There is a hard 5,000-object export ceiling and no performance guarantee.</p>
@@ -153,6 +182,6 @@
     </div>
   </div>
 </main>
-<footer class="footer">World War Z • Signboard &amp; Billboard Studio V0.4 • Measured Highway Billboard Side A preset • QR generation is a later milestone</footer>
+<footer class="footer">World War Z • Signboard &amp; Billboard Studio V0.5 • Portable Highway Billboard Side A • QR generation is a later milestone</footer>
 </body>
 </html>

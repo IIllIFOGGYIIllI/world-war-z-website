@@ -52,6 +52,7 @@ jobs:
           node scripts/test_signboard_studio.js
           node scripts/test_billboard_overlay_v03.js
           node scripts/test_highway_billboard_fit_v04.js
+          node scripts/test_portable_billboard_v05.js
           node scripts/test_command_centre_v3.js
       - name: Build generated Nasdara map assets for full site check
         run: |
