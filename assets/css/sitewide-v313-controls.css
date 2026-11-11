@@ -1,0 +1,102 @@
+/* WWZ V3.13 — form and toolbar consistency.
+   Presentation-only. No routing, ACL, map, checkout or server-control changes. */
+body.wwz-v3{
+  --wwz-v313-control:#122434;
+  --wwz-v313-raised:#233a4d;
+  --wwz-v313-line:rgba(192,216,236,.29);
+  --wwz-v313-text:#f3f8fc;
+  --wwz-v313-muted:#bdcfe0;
+  --wwz-v313-focus:#ffac9d;
+  --wwz-v313-touch:44px;
+}
+/* Work within existing forms, never map or external-widget controls. */
+body.wwz-v3 :where(.dashboard-view,.member-shop-shell,.donation-store-shell,
+  .page-content,.wwz-gateway,.wwz-server-select,.member-shop-page,
+  .donation-store-page,.flag-toolbar) :is(input,select,textarea):focus-visible{
+  outline:2px solid var(--wwz-v313-focus)!important;
+  outline-offset:3px!important;
+  border-color:var(--wwz-v313-focus)!important;
+}
+body.wwz-v3 :where(.dashboard-view,.member-shop-shell,.donation-store-shell,
+  .page-content,.wwz-gateway,.wwz-server-select,.member-shop-page,
+  .donation-store-page,.flag-toolbar) :is(input[type="checkbox"],input[type="radio"]){
+  accent-color:#ee7568;
+}
+body.wwz-v3 :where(.dashboard-view,.member-shop-shell,.donation-store-shell,
+  .page-content,.wwz-gateway,.member-shop-page,.donation-store-page)
+  input[type="file"]{
+  max-width:100%;min-width:0;color:var(--wwz-v313-muted);font:inherit;
+}
+body.wwz-v3 :where(.dashboard-view,.member-shop-shell,.donation-store-shell,
+  .page-content,.wwz-gateway,.member-shop-page,.donation-store-page)
+  input[type="file"]::file-selector-button{
+  min-height:36px;margin-inline-end:12px;padding:7px 12px;
+  border-radius:10px;border:1px solid var(--wwz-v313-line);
+  background:var(--wwz-v313-raised);color:var(--wwz-v313-text);
+  font:inherit;font-weight:650;cursor:pointer;
+}
+body.wwz-v3 :where(.dashboard-view,.member-shop-shell,.donation-store-shell,
+  .page-content,.wwz-gateway,.member-shop-page,.donation-store-page)
+  input[type="file"]:disabled::file-selector-button{cursor:not-allowed}
+body.wwz-v3 :where(.dialog-field,.community-field,.zone-field,.progression-setting,
+  .form-group,.field-group) :where(small,.field-hint,.hint){
+  max-width:100%;color:var(--wwz-v313-muted);
+  line-height:1.55;overflow-wrap:anywhere;
+}
+body.wwz-v3 :where(.dashboard-view,.member-shop-shell,.donation-store-shell,
+  .page-content,.wwz-gateway) :is(input,select,textarea)[aria-invalid="true"]{
+  border-color:#ff978a!important;
+  box-shadow:0 0 0 3px rgba(244,119,106,.16)!important;
+}
+body.wwz-v3 :where(.dashboard-view,.member-shop-shell,.donation-store-shell,
+  .page-content,.wwz-gateway) :is(input,select,textarea):disabled{
+  cursor:not-allowed;opacity:.65;
+}
+/* Search and filter controls remain usable on narrow screens. */
+body.wwz-v3 :where(.member-catalogue-toolbar,.member-orders-toolbar,
+  .action-centre-toolbar,.flag-toolbar,.shop-toolbar){
+  min-width:0;max-width:100%;
+}
+body.wwz-v3 :where(.member-catalogue-toolbar,.member-orders-toolbar,
+  .action-centre-toolbar,.flag-toolbar,.shop-toolbar) :is(input,select,button){
+  min-width:0;max-width:100%;
+}
+body.wwz-v3 :where(.dashboard-view,.member-shop-shell,.donation-store-shell,
+  .page-content,.wwz-gateway) :is(button,a[role="button"]):focus-visible{
+  outline:2px solid var(--wwz-v313-focus)!important;
+  outline-offset:3px!important;
+}
+/* A specialised policy modal must not inherit the generic dashboard dialog skin. */
+body.wwz-v3 dialog.wwz-policy-gate{
+  max-width:min(93vw,610px)!important;
+  max-height:min(92dvh,790px)!important;
+  border:1px solid #4e6a83!important;
+  background:linear-gradient(145deg,#182e42,#0c192a)!important;
+  color:#f2f7fd!important;
+}
+@media(max-width:650px){
+  body.wwz-v3 :where(.member-catalogue-toolbar,.member-orders-toolbar,
+    .action-centre-toolbar,.flag-toolbar,.shop-toolbar)
+    :is(input:not([type="checkbox"]):not([type="radio"]),select){
+    min-height:var(--wwz-v313-touch);font-size:16px;
+  }
+  body.wwz-v3 :where(.dashboard-view,.member-shop-shell,.donation-store-shell,
+    .page-content,.wwz-gateway,.member-shop-page,.donation-store-page)
+    input[type="file"]::file-selector-button{min-height:var(--wwz-v313-touch)}
+}
+@media(prefers-reduced-motion:reduce){
+  body.wwz-v3 :where(.dashboard-view,.member-shop-shell,.donation-store-shell,
+    .page-content,.wwz-gateway) :is(input,select,textarea,button){
+    transition:none!important;
+  }
+}
+@media(forced-colors:active){
+  body.wwz-v3 :where(.dashboard-view,.member-shop-shell,.donation-store-shell,
+    .page-content,.wwz-gateway) :is(input,select,textarea,button):focus-visible{
+    outline:2px solid Highlight!important;
+  }
+  body.wwz-v3 dialog.wwz-policy-gate{
+    border-color:CanvasText!important;
+    background:Canvas!important;color:CanvasText!important;
+  }
+}
