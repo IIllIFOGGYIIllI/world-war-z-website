@@ -11,6 +11,14 @@ for(const page of ['index.html','dashboard.html','shop.html','donations.html','f
 const html=read(page);
 assert.ok(html.includes('site-policy-acceptance.js?v=1.0.0&amp;rev=policy-20261112-1'),page);
 }
+for(const page of ['tools/signboard-studio.html','tools/armband-calibration.html']){
+  const html=read(page);
+  assert.ok(html.includes('../assets/css/site-policy-acceptance.css?v=1.0.0&amp;rev=policy-20261112-1'),page);
+  assert.ok(html.includes('../assets/js/site-policy-acceptance.js?v=1.0.1&amp;rev=policy-tools-1'),page);
+}
+const nestedScript='https://example.com/world-war-z-website/assets/js/site-policy-acceptance.js?v=1.0.1';
+assert.equal(api.policyUrl('terms.html',nestedScript),'https://example.com/world-war-z-website/terms.html');
+assert.equal(api.policyUrl('legal.html',nestedScript),'https://example.com/world-war-z-website/legal.html');
 for(const page of ['terms.html','privacy.html','legal.html','rules.html','community-guidelines.html','moderation-policy.html']){
 assert.ok(api.EXEMPT.has(page));
 assert.ok(!read(page).includes('site-policy-acceptance.js?v='),page);
@@ -20,5 +28,5 @@ assert.ok(read('terms.html').includes('not linked to their Discord account'));
 assert.ok(js.includes('dialog.showModal')&&js.includes('agreeInput.checked&&privacyInput.checked'));
 assert.ok(js.includes('root.localStorage.setItem')&&js.includes('root.sessionStorage.setItem'));
 assert.ok(!js.includes('fetch(')&&!js.includes('document.cookie'));
-assert.ok(read('sw.js').includes('2026-11-12-workspaces-policy-review-v312-1'));
+assert.ok(read('sw.js').includes('2026-11-12-policy-tool-coverage-v312-2'));
 new vm.Script(js);console.log('PASS: policy acknowledgement, local-only, accessible policy links and reacceptance');
