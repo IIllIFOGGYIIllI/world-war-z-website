@@ -78,6 +78,8 @@ jobs:
           node scripts/test_dashboard_layout_v39.js
           node scripts/test_sidebar_v310.js
           node scripts/test_workspace_v311.js
+          node scripts/test_workspace_directory_v312.js
+          node scripts/test_policy_acknowledgement.js
           node scripts/test_armband_calibration.js
           node scripts/test_pvp_paused_ui.js
           node scripts/test_signboard_studio.js

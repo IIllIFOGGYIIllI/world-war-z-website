@@ -49,6 +49,8 @@
 <link rel="stylesheet" href="assets/css/dashboard/overview-v38.css?v=3.8.0&amp;rev=overview-compact-1"/>
 <link rel="stylesheet" href="assets/css/dashboard/sidebar-v310.css?v=3.10.0&amp;rev=category-jump-1"/>
 <link rel="stylesheet" href="assets/css/dashboard/workspace-v311-final.css?v=3.11.0&amp;rev=workspace-complete-1"/>
+<link rel="stylesheet" href="assets/css/dashboard/workspace-directory-v312.css?v=3.12.0&amp;rev=overview-directory-1"/>
+<link rel="stylesheet" href="assets/css/site-policy-acceptance.css?v=1.0.0&amp;rev=policy-20261112-1"/>
 </head>
 <body class="dashboard-gated wwz-v3 wwz-v3-dashboard">
 <a class="skip-link" href="#dashboard-content">Skip to dashboard content</a>
@@ -263,6 +265,21 @@
 <button type="button" data-jump="players" data-jump-section="account"><span class="wwz-start-icon" aria-hidden="true">◎</span><strong>My Survivor</strong><small>Profile and progression</small></button>
 </div></section>
 </div>
+<details class="wwz-v312-workspaces" data-v312-directory>
+  <summary>
+    <span class="wwz-v312-directory-heading"><strong>Explore all workspaces</strong><small>Find survivor tools, servers, community features and authorised administration in one place.</small></span>
+    <span class="wwz-v312-directory-count" data-v312-count>Loading tools…</span>
+  </summary>
+  <div class="wwz-v312-directory-body">
+    <div class="wwz-v312-directory-controls">
+      <label>Search workspaces<input data-v312-search type="search" autocomplete="off" placeholder="Search maps, GPS, shops, events, administration…"></label>
+      <label>Category<select data-v312-category><option value="">All categories</option></select></label>
+    </div>
+    <p data-v312-feedback role="status" aria-live="polite">Loading accessible tools…</p>
+    <div data-v312-results class="wwz-v312-results" aria-label="Available dashboard workspaces"></div>
+    <button data-v312-more class="secondary-action" type="button" hidden>Show all tools</button>
+  </div>
+</details>
 <div class="wwz-v3-section-heading"><h2>Network at a glance</h2><p>Live server information and your survivor account</p></div>
 <div class="metric-grid">
 <article class="metric-card"><div><span aria-hidden="true" class="metric-icon" data-live-status-class="">◉</span><small>DayZ server</small></div><strong data-server-status="">Loading</strong><p data-server-status-note="">Contacting the server-status API</p><p class="status-next-refresh" data-status-next-check="" aria-live="off">Select a server to start website status checks.</p></article>
@@ -1921,9 +1938,11 @@ CarBattery,1" rows="6"></textarea></label>
 <script defer src="assets/js/command-centre-v3.js?v=3.0.0&amp;rev=command-centre-redesign-1"></script>
 <script defer src="assets/js/dashboard/navigation-v31.js?v=3.1.1&amp;rev=sidebar-density-1"></script>
 <script defer src="assets/js/dashboard/sidebar-v310.js?v=3.10.0&amp;rev=category-jump-1"></script>
+<script defer src="assets/js/dashboard/workspace-directory-v312.js?v=3.12.0&amp;rev=overview-directory-1"></script>
 <script defer src="assets/js/dashboard/workspace-v32-profile-gps.js?v=3.2.0&amp;rev=profile-gps-v32-1"></script>
 <script defer src="assets/js/dashboard/workspace-v32-economy.js?v=3.2.1&amp;rev=v3-2-finance-1"></script>
 <script defer src="assets/js/dashboard/workspace-v32-community.js?v=3.2.2&amp;rev=v3-2-community-2"></script>
 <script defer src="assets/js/dashboard/workspace-v33-administration.js?v=3.3.0&amp;rev=v33-admin-owner-1"></script>
+<script defer src="assets/js/site-policy-acceptance.js?v=1.0.0&amp;rev=policy-20261112-1"></script>
 </body>
 </html>
