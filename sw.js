@@ -8,7 +8,7 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-11-11-armband-calibration-lab-1';
+const WWZ_PWA_UPDATE_REVISION = '2026-11-11-pvp-unavailable-1';
 const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-ios-safari-tab-bridge-2`;
 const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${APP_CACHE_RELEASE}`;
@@ -36,7 +36,7 @@ const APP_SHELL = [
   './assets/branding/nasdara-community.webp',
   './assets/branding/nasdara-pve.webp',
   './assets/branding/nasdara-pvp.webp',
-  './assets/css/pages/home.css?v=1.22.93',
+  './assets/css/pages/home.css?v=1.22.94&rev=pvp-availability-1',
   './assets/css/pages/companion.css?v=1.53.0&rev=companion-download-repair-1',
   './assets/css/site-polish.css?v=1.22.93',
   './assets/css/pwa.css?v=1.22.93',

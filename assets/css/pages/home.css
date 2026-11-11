@@ -766,3 +766,7 @@ h1 span {
   .roadmap-card h3 { font-size: 23px; }
   .roadmap-status-key span { width: 100%; }
 }
+
+/* Temporary Nasdara PvP service notice; PvE remains accessible. */
+.hero .wwz-pvp-availability{max-width:760px;margin:12px 0 18px;padding:11px 15px;border:1px solid rgba(245,177,102,.45);border-radius:12px;background:rgba(49,34,21,.82);color:#ffe2bc;font-size:14px;line-height:1.5}
+.hero .wwz-pvp-availability strong{color:#fff0d9}

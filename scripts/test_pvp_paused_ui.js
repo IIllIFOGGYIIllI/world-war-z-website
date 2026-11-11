@@ -1,0 +1,26 @@
+/* PvP pause must be visible publicly and respected by the authenticated selector. */
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const {Script}=require('node:vm');
+const read=p=>fs.readFileSync(p,'utf8');
+const index=read('index.html'),dash=read('dashboard.html');
+const js=read('assets/js/dashboard/server-context.js'),sw=read('sw.js');
+assert.match(index,/Secondary server · temporarily unavailable/);
+assert.match(index,/Nasdara PvE is available\. Nasdara Full PvP is temporarily unavailable\./);
+assert.ok(!index.includes('Secondary server · active'));
+assert.ok(!index.includes('24/7 PvP with spawn loadouts'));
+assert.ok(index.includes('assets/css/pages/home.css?v=1.22.94&amp;rev=pvp-availability-1'));
+assert.ok(dash.includes('assets/js/dashboard/server-context.js?v=3.0.2&amp;rev=pvp-pause-1'));
+assert.ok(js.includes('paused: value.paused === true'));
+assert.ok(js.includes('available: value.available !== false && value.paused !== true'));
+assert.ok(js.includes("state.textContent = server.paused ? 'Temporarily unavailable'"));
+assert.ok(js.includes('card.disabled = !server.available'));
+assert.ok(js.includes('if (requested?.available)'));
+assert.ok(js.includes('if (eventTarget?.available)'));
+assert.ok(js.includes('if (restored?.available)'));
+assert.ok(js.includes('if (!normalized || !normalized.available) return false'));
+assert.ok(sw.includes('2026-11-11-pvp-unavailable-1'));
+assert.ok(sw.includes('./assets/css/pages/home.css?v=1.22.94&rev=pvp-availability-1'));
+new Script(js,{filename:'server-context.js'});
+console.log('PASS: PvP temporary unavailability in homepage and protected selector; PvE remains selectable');

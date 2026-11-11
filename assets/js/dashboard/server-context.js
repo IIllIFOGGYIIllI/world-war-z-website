@@ -132,7 +132,8 @@
       platform: String(value.platform || 'PlayStation 4 & 5'),
       player_capacity: Math.max(1, Math.trunc(Number(value.player_capacity) || 26)),
       access_level: String(value.access_level || 'member'),
-      available: value.available !== false
+      paused: value.paused === true,
+      available: value.available !== false && value.paused !== true
     };
   };
 
@@ -258,7 +259,9 @@
     card.type = 'button';
     card.className = 'wwz-server-card';
     card.disabled = !server.available;
-    card.setAttribute('aria-label', `Open Nasdara ${server.selector_label} server`);
+    card.setAttribute('aria-label', server.paused
+      ? `Nasdara ${server.selector_label} is temporarily unavailable`
+      : `Open Nasdara ${server.selector_label} server`);
 
     const heading = document.createElement('div');
     heading.className = 'wwz-server-card-heading';
@@ -298,10 +301,10 @@
     footer.className = 'wwz-server-card-footer';
     const state = document.createElement('span');
     state.className = 'wwz-server-live';
-    state.textContent = server.available ? '● Available' : 'Unavailable';
+    state.textContent = server.paused ? 'Temporarily unavailable' : (server.available ? '● Available' : 'Unavailable');
     const enter = document.createElement('span');
     enter.className = 'wwz-server-enter';
-    enter.textContent = 'Select server →';
+    enter.textContent = server.paused ? 'Service paused' : (server.available ? 'Select server →' : 'Unavailable');
     footer.append(state, enter);
     card.append(heading, body, footer);
     card.addEventListener('click', () => selectServer(server));
@@ -313,10 +316,10 @@
     serverGrid?.replaceChildren(...availableServers.map(renderServerCard));
     setNotice(
       selectionNotice,
-      availableServers.length
-        ? 'Your selected server controls the map across the dashboard, rentals and saved locations.'
-        : 'No eligible World War Z Discord servers are available for this account.',
-      availableServers.length ? 'info' : 'error'
+      availableServers.some((server) => server.available)
+        ? 'Select an available server. Paused servers remain listed but cannot be opened.'
+        : 'All of your eligible World War Z servers are temporarily unavailable.',
+      availableServers.some((server) => server.available) ? 'info' : 'error'
     );
     setGatewayView('servers');
   };
@@ -333,7 +336,7 @@
           (!deepLink.server_key || server.key === deepLink.server_key))
       : [];
     const requested = matchingDeepLinks.length === 1 ? matchingDeepLinks[0] : null;
-    if (requested) {
+    if (requested?.available) {
       selectServer(requested, { restored: true });
       return;
     }
@@ -343,7 +346,7 @@
     const eventServer = eventParams.get('event_server');
     const eventCandidates = availableServers.filter(server => server.map_key===eventMap && (!eventServer || server.key===eventServer));
     const eventTarget = eventCandidates.length === 1 ? eventCandidates[0] : null;
-    if (eventTarget) { selectServer(eventTarget, {restored:true}); return; }
+    if (eventTarget?.available) { selectServer(eventTarget, {restored:true}); return; }
     const restored = stored
       ? availableServers.find((server) => server.key === stored.key && server.map_key === stored.map_key)
       : null;
@@ -352,7 +355,7 @@
     // Only restore a key that the live /api/auth/me or /complete response
     // proves belongs to the authenticated member; stale/unauthorised keys
     // still fall through to the server picker.
-    if (restored) {
+    if (restored?.available) {
       selectServer(restored, { restored: true });
       return;
     }
@@ -386,7 +389,8 @@
       key: server.key || 'world-war-z',
       map_key: server.map_key || String(server.map || '').toLowerCase(),
       map_name: server.map,
-      available: true
+      paused: payload?.paused === true || server.paused === true,
+      available: server.available !== false && payload?.paused !== true
     });
   };
 
