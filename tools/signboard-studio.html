@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
-<title>WWZ | Signboard Studio</title>
+<title>WWZ | Signboard &amp; Billboard Studio</title>
 <meta name="description" content="Design pixel signs from vanilla DayZ armbands and export an Object Spawner JSON to test in DayZ Editor.">
 <link rel="icon" href="../assets/branding/nasdara-community.webp">
-<link rel="stylesheet" href="../assets/css/tools/signboard-studio.css?v=0.2.0&amp;rev=first-designer-1">
-<script defer src="../assets/js/tools/signboard-studio.js?v=0.2.0&amp;rev=first-designer-1"></script>
+<link rel="stylesheet" href="../assets/css/tools/signboard-studio.css?v=0.3.0&amp;rev=billboard-face-1">
+<script defer src="../assets/js/tools/signboard-studio.js?v=0.3.0&amp;rev=billboard-face-1"></script>
 </head>
 <body>
 <header class="top">
@@ -20,10 +20,10 @@
 </header>
 <main class="main">
   <div class="intro">
-    <div><p class="eyebrow">WORLD BUILDER / V0.2</p><h1>Signboard Studio</h1><p>Create text signs, directional boards and pixel artwork using the vanilla DayZ armband colours, then export a DayZ Editor-compatible Object Spawner JSON.</p></div>
+    <div><p class="eyebrow">WORLD BUILDER / V0.2</p><h1>Signboard &amp; Billboard Studio</h1><p>Create text signs, directional boards and pixel artwork using the vanilla DayZ armband colours, then export a DayZ Editor-compatible Object Spawner JSON.</p></div>
     <span class="local-tag">Local preview &amp; export only</span>
   </div>
-  <p class="notice" role="note"><strong>Calibrated in DayZ Editor:</strong> scale 0.5, spacing 1 and pitch -90° produced a readable upright test board on Nasdara. Larger signboards have <strong>not</strong> been performance-tested on console. This tool cannot change either live server or restart anything. The pixel grid does not include a physical support frame.</p>
+  <p class="notice" role="note"><strong>Calibrated in DayZ Editor:</strong> scale 0.5, spacing 1 and pitch -90° produced a readable upright test board on Nasdara. Larger signboards have <strong>not</strong> been performance-tested on console. This tool cannot change either live server or restart anything. You can now position artwork over an existing billboard. This studio does not generate, modify or spawn that billboard model.</p>
   <div class="layout">
     <div class="panel controls-panel">
       <div class="section-heading"><span class="step">01</span><div><h2>Design your sign</h2><p>Start with a template or create anything you like.</p></div></div>
@@ -101,6 +101,16 @@
             <label>Spacing multiplier<input name="spacing" type="number" min="0.5" max="1.75" step="0.05" value="1" required></label>
           </div>
           <label class="checkline"><input name="mirror" type="checkbox"><span>Mirror columns if facing is reversed</span></label>
+          <div class="billboard-options">
+            <label class="checkline billboard-check"><input name="billboardOverlay" type="checkbox"><span>Mount artwork onto an existing DayZ billboard</span></label>
+            <p class="hint">Place the billboard model in DayZ Editor first. Use its <strong>front face centre</strong> as the X/Y/Z above and the same yaw. Then adjust the artwork offsets below. The billboard itself is not exported or modified.</p>
+            <div class="three billboard-fields" data-billboard-fields hidden>
+              <label>Move left / right (m)<input name="lateralOffset" type="number" step="0.01" min="-5" max="5" value="0"></label>
+              <label>Move up / down (m)<input name="verticalOffset" type="number" step="0.01" min="-5" max="5" value="0"></label>
+              <label>Move toward viewer (m)<input name="faceOffset" type="number" step="0.01" min="-3" max="3" value="0.10"></label>
+            </div>
+            <p class="billboard-note" id="studio-billboard-note" aria-live="polite">Standard sign mode: exports artwork only.</p>
+          </div>
         </div>
       </form>
     </div>
@@ -128,7 +138,7 @@
           <li>Design the sign and enter the intended Nasdara X, Y, Z and facing.</li>
           <li>Download <strong>Object Spawner JSON</strong> and import it using DayZ Editor’s Object Spawner import option.</li>
           <li>Check the text, loose armband tails, front/back direction and ground clearance from nearby and far away.</li>
-          <li>Use DayZ Editor to add a suitable <strong>vanilla sign frame or support</strong> separately. This exporter only makes the coloured pixels.</li>
+          <li>To use a pre-existing billboard, position that model in DayZ Editor first, activate <strong>Mount artwork onto an existing billboard</strong>, then adjust the face offsets until the pixels sit just in front of it. This export contains only the armbands.</li>
           <li>Test object count, console performance and persistence on the local server before considering the live PvE environment.</li>
         </ol>
         <p class="hint">A few thousand individual armbands may still be too heavy on a PlayStation server. There is a hard 5,000-object export ceiling and no performance guarantee.</p>
@@ -137,6 +147,6 @@
     </div>
   </div>
 </main>
-<footer class="footer">World War Z • Signs &amp; QR Studio foundation • Signboards only in v0.2 • QR generation is a separate later milestone</footer>
+<footer class="footer">World War Z • Signboard &amp; Billboard Studio v0.3 • Optional overlay alignment for existing billboard models • QR generation is a later milestone</footer>
 </body>
 </html>
