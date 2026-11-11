@@ -16,7 +16,15 @@
     }catch(_){return false;}
   };
   const pages=()=>String(root?.location?.pathname||'').split('/').pop().toLowerCase()||'index.html';
-  const helpers=Object.freeze({POLICY_REVISION,STORAGE_KEY,EXEMPT,read});
+  // Resolve legal links from the script location so nested /tools/ pages work
+  // even when the website is hosted in a GitHub Pages project subdirectory.
+  const scriptUrl=typeof document!=='undefined'?document.currentScript?.src:'';
+  const policyUrl=(page,source=scriptUrl)=>{
+    try{if(source)return new URL(page,new URL('../../',source)).href;}
+    catch(_){}
+    return String(root?.location?.pathname||'').includes('/tools/')?'../'+page:page;
+  };
+  const helpers=Object.freeze({POLICY_REVISION,STORAGE_KEY,EXEMPT,read,policyUrl});
   if(typeof module==='object'&&module.exports)module.exports=helpers;
   if(typeof document==='undefined'||!root||EXEMPT.has(pages()))return;
   const init=()=>{
@@ -53,7 +61,7 @@
       ['Moderation & Appeals','moderation-policy.html']
     ]){
       const a=document.createElement('a');
-      a.href=url;a.target='_blank';a.rel='noopener noreferrer';
+      a.href=policyUrl(url);a.target='_blank';a.rel='noopener noreferrer';
       a.textContent=title;links.append(a);
     }
     const agreement=document.createElement('label');
@@ -72,7 +80,7 @@
     privacy.append(privacyInput,privacyText);
 
     const actions=document.createElement('div');actions.className='wwz-policy-actions';
-    const decline=document.createElement('a');decline.href='legal.html';
+    const decline=document.createElement('a');decline.href=policyUrl('legal.html');
     decline.className='wwz-policy-decline';decline.textContent='Not now · view policies';
     const accept=document.createElement('button');accept.type='button';
     accept.className='wwz-policy-accept';accept.disabled=true;accept.textContent='Accept and continue';
