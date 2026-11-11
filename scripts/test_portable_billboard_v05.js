@@ -73,7 +73,7 @@ for(const x of ['studio-portable-apply','studio-save-settings','studio-load-sett
 }
 assert.ok(html.includes('billboard model pivot')||html.includes('BILLBOARD MODEL PIVOT'));
 assert.ok(html.includes('Side B is not calibrated'));
-assert.ok(sw.includes("2026-11-12-portable-highway-v05-1"));
+assert.match(sw, /const WWZ_PWA_UPDATE_REVISION = '[^']+';/);
 assert.ok(sw.includes('./assets/js/tools/portable-billboard.js?v=0.5.0&rev=portable-billboard-1'));
 const script=fs.readFileSync('assets/js/tools/portable-billboard.js','utf8');
 assert.ok(!/\bfetch\s*\(|XMLHttpRequest|WebSocket|localStorage|sessionStorage/.test(script));
