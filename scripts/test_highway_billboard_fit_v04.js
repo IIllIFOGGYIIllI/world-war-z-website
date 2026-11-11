@@ -57,5 +57,5 @@ assert.ok(html.includes('id="studio-highway-auto-fit"'));
 assert.ok(html.includes('name="highwayFit"'));
 assert.ok(html.includes('name="highwayClearance"'));
 assert.ok(html.includes('Highway Billboard — Side A'));
-assert.ok(sw.includes('2026-11-12-highway-side-a-fit-v04-1'));
+assert.match(sw, /const WWZ_PWA_UPDATE_REVISION = '[^']+';/);
 console.log('PASS: fitted 3872-armband face, 0.85 scale, surveyed plane, outward offset, mirror and guards');

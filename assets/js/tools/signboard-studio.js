@@ -194,6 +194,13 @@
   }
   const round=n=>Number(n.toFixed(6));
 
+  const HIGHWAY_QUALITY=Object.freeze({
+    full:Object.freeze({width:88,height:44,scale:.85}),
+    balanced:Object.freeze({width:80,height:40,scale:.94}),
+    light:Object.freeze({width:64,height:32,scale:1.17}),
+    minimal:Object.freeze({width:48,height:24,scale:1.56})
+  });
+
   // Surveyed Nov 2026 from the owner's four DayZ Editor armband markers.
   // These are world coordinates on ONE face of ONE existing billboard instance.
   // Do not silently apply this preset to another billboard or to Side B.
@@ -211,12 +218,15 @@
   function highwayFitGrid(grid,position){
     const c=HIGHWAY_SIDE_A;
     const h=grid.length,w=grid[0].length;
-    if(w!==c.width||h!==c.height)
-      throw new Error('Highway Side A fit requires exactly 88 × 44 pixels. Reapply the preset.');
+    const qualityName=position.highwayQuality||'full';
+    const quality=HIGHWAY_QUALITY[qualityName];
+    if(!quality)throw new Error('Unknown highway billboard detail level.');
+    if(w!==quality.width||h!==quality.height)
+      throw new Error('Highway Side A fit requires exactly '+quality.width+' × '+quality.height+' pixels. Reapply the preset.');
     const scale=number('Scale',position.scale,.1,2);
     const spacing=number('Spacing',position.spacing,.5,1.75);
-    if(Math.abs(scale-c.scale)>.00001||Math.abs(spacing-c.spacing)>.00001)
-      throw new Error('Highway fit requires scale 0.85 and spacing 1. Reapply the preset.');
+    if(Math.abs(scale-quality.scale)>.00001||Math.abs(spacing-1)>.00001)
+      throw new Error('Highway fit requires scale '+quality.scale+' and spacing 1. Reapply the preset.');
     const x=number('X coordinate',position.x,-100000,100000);
     const y=number('Y height',position.y,-100000,100000);
     const z=number('Z coordinate',position.z,-100000,100000);
@@ -306,7 +316,7 @@
     return {Objects:objects};
   }
   const api=Object.freeze({PALETTE,PRESETS,MAX_OBJECTS,dimensions,normalizedText,
-    wrap,textMatrix,closestColour,quantize,toSpawner,HIGHWAY_SIDE_A,highwayFitGrid});
+    wrap,textMatrix,closestColour,quantize,toSpawner,HIGHWAY_SIDE_A,HIGHWAY_QUALITY,highwayFitGrid});
   if(typeof module==='object'&&module.exports)module.exports=api;
   if(root)root.WWZSignboardStudio=api;
   if(typeof document==='undefined')return;
@@ -318,6 +328,9 @@
     const info=document.getElementById('studio-info');
     const billboardNote=document.getElementById('studio-billboard-note');
     const highwayButton=document.getElementById('studio-highway-auto-fit');
+    const portableButton=document.getElementById('studio-portable-apply');
+    const portableSave=document.getElementById('studio-save-settings');
+    const portableLoad=document.getElementById('studio-load-settings');
     const exportJson=document.getElementById('studio-export');
     const exportPng=document.getElementById('studio-png');
     const fileInput=document.getElementById('studio-image');
@@ -329,6 +342,8 @@
       v.mirror=form.elements.namedItem('mirror').checked;
       v.billboardOverlay=form.elements.namedItem('billboardOverlay')?.checked===true;
       v.highwayFit=form.elements.namedItem('highwayFit')?.checked===true;
+      v.portableBillboard=form.elements.namedItem('portableBillboard')?.checked===true;
+      v.includeBillboard=form.elements.namedItem('includeBillboard')?.checked===true;
       return v;};
     const displayGrid=(pixels)=>{
       const h=pixels.length,w=pixels[0].length;
@@ -365,7 +380,10 @@
       form.querySelectorAll('[data-custom-size]').forEach(el=>el.hidden=v.preset!=='custom'||v.highwayFit);
       form.querySelectorAll('[data-billboard-fields]').forEach(el=>el.hidden=!v.billboardOverlay||v.highwayFit);
       form.querySelectorAll('[data-highway-fields]').forEach(el=>el.hidden=!v.highwayFit);
-      if(billboardNote)billboardNote.textContent=v.highwayFit
+      form.querySelectorAll('[data-portable-fields]').forEach(el=>el.hidden=!v.portableBillboard);
+      if(billboardNote)billboardNote.textContent=v.portableBillboard
+        ? 'Portable mode: X/Y/Z under Billboard destination are the actual MODEL pivot. The billboard and the calibrated artwork will be moved and rotated together. For a new position, verify height and facing in DayZ Editor. Side A only.'
+        : v.highwayFit
         ? 'Surveyed Side A · fitted to the existing highway billboard at X 11220.515 / Y 172.661 / Z 11103.675. The artwork includes margins and faces the calibrated camera side. Only armbands are exported. Test front clearance in Editor.'
         : v.billboardOverlay
           ? 'Manual billboard alignment: X/Y/Z must be the display-face centre, not the billboard object pivot. Exports armbands only.'
@@ -381,11 +399,13 @@
         count.textContent=total.toLocaleString()+' armbands · approx. '+dims+
           ' · '+grid[0].length+'×'+grid.length+' pixels';
         if(v.highwayFit) {
-          if(grid[0].length!==HIGHWAY_SIDE_A.width||grid.length!==HIGHWAY_SIDE_A.height)
-            throw new Error('Auto-fit needs 88 × 44 pixels. Click Apply Highway Billboard Fit.');
-          if(Math.abs(number('Scale',v.scale,.1,2)-HIGHWAY_SIDE_A.scale)>.00001||
+          const level=v.highwayQuality||'full',quality=HIGHWAY_QUALITY[level];
+          if(!quality)throw new Error('Choose a valid billboard detail level.');
+          if(grid[0].length!==quality.width||grid.length!==quality.height)
+            throw new Error('Fit needs '+quality.width+' × '+quality.height+' pixels. Apply the selected billboard detail level.');
+          if(Math.abs(number('Scale',v.scale,.1,2)-quality.scale)>.00001||
              Math.abs(number('Spacing',v.spacing,.5,1.75)-1)>.00001)
-            throw new Error('Auto-fit needs scale 0.85 and spacing 1. Reapply the preset.');
+            throw new Error('Fit needs scale '+quality.scale+' and spacing 1. Reapply the detail level.');
           number('Highway face clearance',v.highwayClearance,-.4,.6);
         } else if(v.billboardOverlay) {
           // Validate offsets before download becomes enabled, even though
@@ -393,6 +413,15 @@
           number('Billboard horizontal offset',v.lateralOffset,-5,5);
           number('Billboard vertical offset',v.verticalOffset,-5,5);
           number('Billboard face offset',v.faceOffset,-3,3);
+        }
+        if(v.portableBillboard) {
+          if(!v.highwayFit)throw new Error('Portable mode requires Highway Side A fit. Click Make Billboard Portable.');
+          const portable=root.WWZPortableBillboard;
+          if(!portable)throw new Error('Portable billboard generator did not load. Refresh this page.');
+          portable.destination(v);
+          if(!portable.QUALITY[v.highwayQuality||'full'])
+            throw new Error('Choose a valid billboard detail level.');
+          count.textContent+=' · '+(v.includeBillboard?1:0)+' billboard model';
         }
         if(total>MAX_OBJECTS){
           issue.textContent='Preview only: over '+MAX_OBJECTS.toLocaleString()+
@@ -426,21 +455,88 @@
       set('yaw',HIGHWAY_SIDE_A.ypr[0]);set('pitch',HIGHWAY_SIDE_A.ypr[1]);
       set('roll',HIGHWAY_SIDE_A.ypr[2]);
       set('scale',HIGHWAY_SIDE_A.scale);set('spacing',HIGHWAY_SIDE_A.spacing);
+      set('highwayQuality','full');
       set('highwayClearance',HIGHWAY_SIDE_A.clearance);
       form.elements.namedItem('highwayFit').checked=true;
       form.elements.namedItem('billboardOverlay').checked=false;
       form.elements.namedItem('mirror').checked=false;
       update();
     };
+    const applyPortableQuality=()=>{
+      const qualityName=form.elements.namedItem('highwayQuality')?.value||'full';
+      const q=HIGHWAY_QUALITY[qualityName];
+      if(!q)return;
+      const set=(name,val)=>{const el=form.elements.namedItem(name);if(el)el.value=String(val);};
+      set('preset','custom');set('width',q.width);set('height',q.height);
+      set('scale',q.scale);set('spacing',1);
+      update();
+    };
+    portableButton?.addEventListener('click',()=>{
+      applyHighwayFit();
+      const fields=form.elements;
+      fields.namedItem('portableBillboard').checked=true;
+      fields.namedItem('includeBillboard').checked=true;
+      const portable=root.WWZPortableBillboard?.REFERENCE;
+      if(portable){
+        fields.namedItem('frameX').value=String(portable.pivot[0]);
+        fields.namedItem('frameY').value=String(portable.pivot[1]);
+        fields.namedItem('frameZ').value=String(portable.pivot[2]);
+        fields.namedItem('frameYaw').value=String(portable.yaw);
+      }
+      update();
+    });
+    form.elements.namedItem('highwayQuality')?.addEventListener('change',applyPortableQuality);
+    form.elements.namedItem('portableBillboard')?.addEventListener('change',()=>{
+      if(form.elements.namedItem('portableBillboard').checked){
+        form.elements.namedItem('highwayFit').checked=true;
+        form.elements.namedItem('billboardOverlay').checked=false;
+        applyPortableQuality();
+      }else update();
+    });
     highwayButton?.addEventListener('click',applyHighwayFit);
     form.elements.namedItem('highwayFit')?.addEventListener('change',()=>{
       if(form.elements.namedItem('highwayFit').checked)applyHighwayFit();
-      else update();
+      else {
+        form.elements.namedItem('portableBillboard').checked=false;
+        update();
+      }
     });
     form.elements.namedItem('billboardOverlay')?.addEventListener('change',()=>{
-      if(form.elements.namedItem('billboardOverlay').checked)
+      if(form.elements.namedItem('billboardOverlay').checked){
         form.elements.namedItem('highwayFit').checked=false;
+        form.elements.namedItem('portableBillboard').checked=false;
+      }
       update();
+    });
+    // Portable design settings are downloadable JSON, not browser storage.
+    // Image bytes are not included; users can reselect their source image.
+    portableSave?.addEventListener('click',()=>{
+      const v=getForm();
+      const {image,...settings}=v;
+      download('WWZ_'+filename()+'_Design_Settings.json',
+        JSON.stringify({format:'WWZSignboardSettings',version:1,settings},null,2)+'\n',
+        'application/json');
+      info.textContent='Design settings downloaded. Image uploads are not embedded in this settings file.';
+    });
+    portableLoad?.addEventListener('change',async()=>{
+      const file=portableLoad.files?.[0];
+      if(!file)return;
+      try{
+        if(file.size>16000)throw new Error('Settings file is too large.');
+        const documentData=JSON.parse(await file.text());
+        if(documentData?.format!=='WWZSignboardSettings'||documentData.version!==1||
+           !documentData.settings||typeof documentData.settings!=='object')
+          throw new Error('Not a WWZ Signboard Studio settings file.');
+        for(const [key,value] of Object.entries(documentData.settings)){
+          const field=form.elements.namedItem(key);
+          if(!field||!['string','number','boolean'].includes(typeof value))continue;
+          if(field.type==='checkbox')field.checked=value===true||value==='on';
+          else if(field.type!=='file')field.value=String(value).slice(0,120);
+        }
+        info.textContent='Settings loaded. Image-based signs need the source image selected again.';
+        update();
+      }catch(error){issue.textContent='Could not load settings: '+error.message;}
+      finally{portableLoad.value='';}
     });
     form.addEventListener('input',update);
     form.addEventListener('change',update);
@@ -465,10 +561,15 @@
     exportJson.addEventListener('click',()=>{
       if(!grid)return;
       try{
-        const options=getForm(),spawner=toSpawner(grid,options);
-        download('WWZ_'+filename()+(options.highwayFit?'_Highway_Side_A':'')+'_Armbands.json',
+        const options=getForm();
+        const spawner=options.portableBillboard
+          ? root.WWZPortableBillboard.generate(grid,options)
+          : toSpawner(grid,options);
+        const suffix=options.portableBillboard?'_Portable_Highway_Billboard':
+          (options.highwayFit?'_Highway_Side_A':'')+'_Armbands';
+        download('WWZ_'+filename()+suffix+'.json',
           JSON.stringify(spawner,null,2)+'\n','application/json');
-        info.textContent='Downloaded '+spawner.Objects.length+' armbands for DayZ Editor. No server was changed.';
+        info.textContent='Downloaded '+spawner.Objects.length+' objects for DayZ Editor. No server was changed.';
       }catch(error){issue.textContent=error.message;}
     });
     exportPng.addEventListener('click',()=>{

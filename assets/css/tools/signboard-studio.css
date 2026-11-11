@@ -82,3 +82,14 @@ button.secondary{background:#21384a;border-color:#4b6a7f}
 .fit-preset button{justify-self:start;max-width:100%;background:#d75a4e}
 .fit-preset label[data-highway-fields]{max-width:270px}
 .fit-preset .hint{margin-top:5px}
+
+/* V0.5 portable billboard destination, quality and re-usable design settings. */
+.portable-options{display:grid;gap:9px;padding:12px;border:1px solid rgba(153,188,209,.35);border-radius:12px;background:rgba(13,29,45,.8)}
+.portable-options strong{font-size:13px;color:#f3d7ba}
+.portable-options button{justify-self:start}
+.portable-fields{display:grid;gap:11px;padding-top:9px;border-top:1px solid rgba(160,190,209,.25)}
+.portable-fields .hint{margin:0}
+.design-buttons{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;align-items:end}
+.design-buttons button{font-size:12px;padding:9px 11px}
+.design-buttons input[type=file]{font-size:11px}
+@media(max-width:560px){.portable-fields .three,.design-buttons{grid-template-columns:1fr}}
