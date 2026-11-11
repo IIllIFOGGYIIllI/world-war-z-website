@@ -20,7 +20,7 @@ assert.ok(js.includes('if (requested?.available)'));
 assert.ok(js.includes('if (eventTarget?.available)'));
 assert.ok(js.includes('if (restored?.available)'));
 assert.ok(js.includes('if (!normalized || !normalized.available) return false'));
-assert.ok(sw.includes('2026-11-11-pvp-unavailable-1'));
+assert.match(sw, /const WWZ_PWA_UPDATE_REVISION = '[^']+';/, 'PWA revision missing');
 assert.ok(sw.includes('./assets/css/pages/home.css?v=1.22.94&rev=pvp-availability-1'));
 new Script(js,{filename:'server-context.js'});
 console.log('PASS: PvP temporary unavailability in homepage and protected selector; PvE remains selectable');

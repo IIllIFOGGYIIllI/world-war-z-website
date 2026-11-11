@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex,nofollow">
+<title>WWZ | Signboard Studio</title>
+<meta name="description" content="Design pixel signs from vanilla DayZ armbands and export an Object Spawner JSON to test in DayZ Editor.">
+<link rel="icon" href="../assets/branding/nasdara-community.webp">
+<link rel="stylesheet" href="../assets/css/tools/signboard-studio.css?v=0.2.0&amp;rev=first-designer-1">
+<script defer src="../assets/js/tools/signboard-studio.js?v=0.2.0&amp;rev=first-designer-1"></script>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="../dashboard.html"><img src="../assets/branding/nasdara-community.webp" alt="" width="52" height="52"><span><strong>WORLD WAR Z</strong><small>Creative tools / Nasdara</small></span></a>
+    <nav class="top-links" aria-label="Tool navigation"><a href="armband-calibration.html">Calibration Lab</a><a href="../dashboard.html">Command Centre</a></nav>
+  </div>
+</header>
+<main class="main">
+  <div class="intro">
+    <div><p class="eyebrow">WORLD BUILDER / V0.2</p><h1>Signboard Studio</h1><p>Create text signs, directional boards and pixel artwork using the vanilla DayZ armband colours, then export a DayZ Editor-compatible Object Spawner JSON.</p></div>
+    <span class="local-tag">Local preview &amp; export only</span>
+  </div>
+  <p class="notice" role="note"><strong>Calibrated in DayZ Editor:</strong> scale 0.5, spacing 1 and pitch -90° produced a readable upright test board on Nasdara. Larger signboards have <strong>not</strong> been performance-tested on console. This tool cannot change either live server or restart anything. The pixel grid does not include a physical support frame.</p>
+  <div class="layout">
+    <div class="panel controls-panel">
+      <div class="section-heading"><span class="step">01</span><div><h2>Design your sign</h2><p>Start with a template or create anything you like.</p></div></div>
+      <div class="templates" aria-label="Sign templates">
+        <button type="button" data-studio-template="blackmarket">Black Market</button>
+        <button type="button" data-studio-template="direction">Direction</button>
+        <button type="button" data-studio-template="trader">Trader</button>
+        <button type="button" data-studio-template="rules">Rules</button>
+      </div>
+      <form id="studio-form" novalidate>
+        <div class="form-group">
+          <label>Design type<select name="mode"><option value="text">Text sign</option><option value="image">Image / logo to pixel sign</option></select></label>
+          <label>Board size<select name="preset">
+            <option value="compact">Compact · 48 × 20 (960 objects)</option>
+            <option value="small">Small · 64 × 24 (1,536 objects)</option>
+            <option value="standard" selected>Standard · 80 × 30 (2,400 objects)</option>
+            <option value="medium">Medium · 96 × 36 (3,456 objects)</option>
+            <option value="busstop">Bus stop format · 107 × 30 (3,210 objects)</option>
+            <option value="stump">Stump format · 32 × 35 (1,120 objects)</option>
+            <option value="custom">Custom dimensions</option>
+          </select></label>
+          <div class="two" data-custom-size hidden>
+            <label>Width (20–200)<input name="width" type="number" min="20" max="200" value="80" inputmode="numeric"></label>
+            <label>Height (12–140)<input name="height" type="number" min="12" max="140" value="30" inputmode="numeric"></label>
+          </div>
+          <div class="two" data-mode-text>
+            <label class="full">Headline<input type="text" name="title" value="BLACK MARKET" maxlength="100" placeholder="Enter main text"></label>
+            <label class="full">Secondary text<input type="text" name="subtitle" value="BUY SELL TRADE" maxlength="100" placeholder="Optional subtitle"></label>
+          </div>
+          <label data-mode-image hidden>Upload an image (processed only in this browser)
+            <input type="file" id="studio-image" name="image" accept="image/png,image/jpeg,image/webp">
+            <small>PNG, JPEG or WebP, under 8 MB. Colours are converted to the eight supported armbands; small details will be lost.</small>
+          </label>
+        </div>
+        <div class="section-heading nested"><span class="step">02</span><div><h2>Colours &amp; details</h2><p>The eight standard armband variants.</p></div></div>
+        <div class="form-group">
+          <div class="two">
+            <label>Background<select name="background">
+              <option value="K" selected>Black</option><option value="W">White</option><option value="R">Red</option><option value="G">Green</option>
+              <option value="B">Blue</option><option value="O">Orange</option><option value="Y">Yellow</option><option value="P">Pink</option>
+            </select></label>
+            <label data-mode-text>Headline colour<select name="titleColour">
+              <option value="W" selected>White</option><option value="Y">Yellow</option><option value="R">Red</option><option value="G">Green</option>
+              <option value="B">Blue</option><option value="O">Orange</option><option value="P">Pink</option><option value="K">Black</option>
+            </select></label>
+            <label data-mode-text>Subtitle colour<select name="subtitleColour">
+              <option value="O" selected>Orange</option><option value="W">White</option><option value="Y">Yellow</option><option value="R">Red</option>
+              <option value="G">Green</option><option value="B">Blue</option><option value="P">Pink</option><option value="K">Black</option>
+            </select></label>
+            <label data-mode-text>Arrow<select name="arrow">
+              <option value="none" selected>No arrow</option><option value="left">Left</option><option value="right">Right</option><option value="both">Both directions</option>
+            </select></label>
+            <label>Accent / border colour<select name="borderColour">
+              <option value="R" selected>Red</option><option value="W">White</option><option value="Y">Yellow</option><option value="O">Orange</option>
+              <option value="G">Green</option><option value="B">Blue</option><option value="P">Pink</option><option value="K">Black</option>
+            </select></label>
+            <label class="checkline"><input type="checkbox" name="border" checked><span>Draw one-pixel border</span></label>
+          </div>
+        </div>
+        <div class="section-heading nested"><span class="step">03</span><div><h2>Position in Nasdara</h2><p>Set the centre of the sign before exporting to DayZ Editor.</p></div></div>
+        <div class="form-group">
+          <div class="three">
+            <label>X<input name="x" type="number" step="any" value="14828.189" required></label>
+            <label>Y (centre height)<input name="y" type="number" step="any" value="205.4" required></label>
+            <label>Z<input name="z" type="number" step="any" value="13253.759" required></label>
+          </div>
+          <p class="hint">These are the earlier calibration-location coordinates, not a permanent Black Market location. Change them for your intended placement.</p>
+          <div class="three">
+            <label>Yaw<input name="yaw" type="number" step="any" value="0" required></label>
+            <label>Pitch<input name="pitch" type="number" step="any" value="-90" required></label>
+            <label>Roll<input name="roll" type="number" step="any" value="0" required></label>
+          </div>
+          <div class="two">
+            <label>Item scale<input name="scale" type="number" min="0.1" max="2" step="0.05" value="0.5" required></label>
+            <label>Spacing multiplier<input name="spacing" type="number" min="0.5" max="1.75" step="0.05" value="1" required></label>
+          </div>
+          <label class="checkline"><input name="mirror" type="checkbox"><span>Mirror columns if facing is reversed</span></label>
+        </div>
+      </form>
+    </div>
+    <div class="preview-column">
+      <section class="panel preview-panel" aria-labelledby="preview-heading">
+        <div class="section-heading"><span class="step">04</span><div><h2 id="preview-heading">Live sign preview</h2><p>Each square is one placed armband; this is not a photo of the game rendering.</p></div></div>
+        <div class="preview-stage"><canvas id="studio-preview" width="80" height="30" aria-label="Generated armband pixel sign preview" role="img"></canvas></div>
+        <div class="palette" aria-label="Vanilla DayZ armband colours">
+          <span><b style="--swatch:#17191e"></b>Black</span><span><b style="--swatch:#e7e8ea"></b>White</span>
+          <span><b style="--swatch:#d53e46"></b>Red</span><span><b style="--swatch:#319955"></b>Green</span>
+          <span><b style="--swatch:#2a6dc8"></b>Blue</span><span><b style="--swatch:#e49228"></b>Orange</span>
+          <span><b style="--swatch:#e8d13c"></b>Yellow</span><span><b style="--swatch:#d76ba8"></b>Pink</span>
+        </div>
+        <div class="count" id="studio-count" aria-live="polite">Creating sign…</div>
+        <p class="issue" id="studio-issue" role="status" aria-live="polite"></p>
+        <div class="export-buttons">
+          <button type="button" id="studio-export" disabled>Download DayZ Object Spawner JSON</button>
+          <button type="button" id="studio-png" class="secondary" disabled>Download PNG preview</button>
+        </div>
+        <p class="hint" id="studio-info" aria-live="polite">Files are generated on this device. No uploads, API calls or server restarts.</p>
+      </section>
+      <section class="panel instructions">
+        <h2>Import into DayZ Editor</h2>
+        <ol>
+          <li>Design the sign and enter the intended Nasdara X, Y, Z and facing.</li>
+          <li>Download <strong>Object Spawner JSON</strong> and import it using DayZ Editor’s Object Spawner import option.</li>
+          <li>Check the text, loose armband tails, front/back direction and ground clearance from nearby and far away.</li>
+          <li>Use DayZ Editor to add a suitable <strong>vanilla sign frame or support</strong> separately. This exporter only makes the coloured pixels.</li>
+          <li>Test object count, console performance and persistence on the local server before considering the live PvE environment.</li>
+        </ol>
+        <p class="hint">A few thousand individual armbands may still be too heavy on a PlayStation server. There is a hard 5,000-object export ceiling and no performance guarantee.</p>
+        <a class="text-link" href="armband-calibration.html">Need to recalibrate? Open the 49-armband test tool</a>
+      </section>
+    </div>
+  </div>
+</main>
+<footer class="footer">World War Z • Signs &amp; QR Studio foundation • Signboards only in v0.2 • QR generation is a separate later milestone</footer>
+</body>
+</html>
