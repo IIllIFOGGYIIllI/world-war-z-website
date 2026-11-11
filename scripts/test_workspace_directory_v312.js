@@ -16,5 +16,5 @@ assert.ok(dash.indexOf('data-v312-directory')<dash.indexOf('Network at a glance'
 assert.ok(dash.includes('workspace-directory-v312.js?v=3.12.0&amp;rev=overview-directory-1'));
 assert.ok(sw.includes('workspace-directory-v312.js?v=3.12.0&rev=overview-directory-1'));
 assert.ok(js.includes('item.link.click()')&&js.includes('wwz:accesschange'));
-assert.ok(!/\\bfetch\\s*\\(|XMLHttpRequest/.test(js));
+assert.ok(!js.includes('fetch(') && !js.includes('XMLHttpRequest'));
 new vm.Script(js);console.log('PASS: V3.12 workspace directory and permission-aware links');
