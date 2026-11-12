@@ -186,6 +186,16 @@ document.querySelectorAll('[data-jump]').forEach((button) => button.addEventList
 let commandPaletteIndex = 0;
 let commandPaletteMatches = [];
 
+// Keep result DOM nodes stable: mobile browsers may fire a synthetic mouseenter
+// before click. Rebuilding a hovered result cancels the intended tap.
+const setCommandPaletteSelection = (index, scroll = false) => {
+  if (!commandPaletteMatches.length || !commandPaletteResults) return;
+  commandPaletteIndex = Math.max(0, Math.min(index, commandPaletteMatches.length - 1));
+  const rows = commandPaletteResults.querySelectorAll('.command-search-result');
+  rows.forEach((row, position) => row.classList.toggle('selected', position === commandPaletteIndex));
+  if (scroll) rows[commandPaletteIndex]?.scrollIntoView({ block: 'nearest' });
+};
+
 const isDashboardDestinationVisible = (button) => {
   if (!button || button.hidden || button.closest('[hidden]')) return false;
   return canAccessElement(button);
@@ -224,22 +234,44 @@ const renderCommandPalette = (query = '') => {
     const group = button.closest('[data-nav-group]')?.querySelector('summary strong')?.textContent || 'Dashboard';
     const label = button.dataset.navLabel || button.querySelector('strong')?.textContent || 'Dashboard tool';
     const description = button.querySelector('small')?.textContent || `${button.dataset.view || 'dashboard'} workspace`;
-    const groupLabel = document.createElement('span');
+    result.setAttribute('aria-label', `Open ${label}`);
+
+    // Reuse the sidebar's original icon rather than showing a squeezed group
+    // abbreviation. SVGs are cloned, never moved out of sidebar navigation.
+    const icon = document.createElement('span');
+    icon.className = 'command-result-icon';
+    icon.setAttribute('aria-hidden', 'true');
+    const sourceIcon = button.querySelector('.side-link-icon');
+    const svg = sourceIcon?.querySelector('svg');
+    if (svg) icon.append(svg.cloneNode(true));
+    else icon.textContent = sourceIcon?.textContent?.trim() || '⌘';
+
+    const copy = document.createElement('span');
+    copy.className = 'command-result-copy';
+    const groupLabel = document.createElement('small');
+    groupLabel.className = 'command-result-group';
     groupLabel.textContent = group;
-    const copy = document.createElement('div');
     const strong = document.createElement('strong');
     strong.textContent = label;
     const small = document.createElement('small');
+    small.className = 'command-result-description';
     small.textContent = description;
-    copy.append(strong, small);
-    const key = document.createElement('kbd');
-    key.textContent = index === commandPaletteIndex ? 'Enter' : '↵';
-    result.append(groupLabel, copy, key);
-    result.addEventListener('mouseenter', () => {
-      commandPaletteIndex = index;
-      renderCommandPalette(commandPaletteInput?.value || '');
-    });
+    copy.append(groupLabel, strong, small);
+    const arrow = document.createElement('span');
+    arrow.className = 'command-result-arrow';
+    arrow.textContent = '›';
+    arrow.setAttribute('aria-hidden', 'true');
+    result.append(icon, copy, arrow);
+
+    // Never rerender on mouseenter: a synthetic hover precedes tap on Android.
+    result.addEventListener('mouseenter', () => setCommandPaletteSelection(index));
+    result.addEventListener('focus', () => setCommandPaletteSelection(index));
     result.addEventListener('click', () => {
+      // Recheck access if a session or role changed while the dialog was open.
+      if (!isDashboardDestinationVisible(button)) {
+        renderCommandPalette(commandPaletteInput?.value || '');
+        return;
+      }
       commandPalette?.close?.();
       showView(button.dataset.view, true, button.dataset.section || '');
     });
@@ -271,7 +303,7 @@ commandPaletteInput?.addEventListener('keydown', (event) => {
     event.preventDefault();
     const direction = event.key === 'ArrowDown' ? 1 : -1;
     commandPaletteIndex = (commandPaletteIndex + direction + commandPaletteMatches.length) % commandPaletteMatches.length;
-    renderCommandPalette(commandPaletteInput.value);
+    setCommandPaletteSelection(commandPaletteIndex, true);
   } else if (event.key === 'Enter') {
     event.preventDefault();
     const button = commandPaletteMatches[commandPaletteIndex];
