@@ -1,5 +1,5 @@
 'use strict';
-// V3.18: public first-visit notice + verified, server-scoped account records.
+// V3.18.1: public policy access without a blocking modal + verified server-scoped records.
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
@@ -45,16 +45,16 @@ assert.equal(dash.split(style).length-1, 1);
 assert.equal(dash.split(asset).length-1, 1);
 assert.ok(dash.indexOf(asset) > dash.indexOf('assets/js/dashboard/account.js'),
  'The policy controller must subscribe after existing account setup');
-assert.ok(!read('index.html').includes(asset), 'Guest landing page stays browser-local');
+assert.ok(!read('index.html').includes(asset), 'Guest landing page must not load authenticated policy gate');
 assert.ok(!read('shop.html').includes(asset), 'Existing standalone Shop flow stays untouched');
-assert.ok(sw.includes('2026-11-13-discord-policy-v318-1'));
+assert.ok(sw.includes('2026-11-13-single-policy-gate-v3181-1'));
 assert.ok(sw.includes('./assets/js/dashboard/policy-account-v318.js?v=3.18.0&rev=discord-policy-1'));
 assert.ok(sw.includes('./assets/css/dashboard/policy-account-v318.css?v=3.18.0&rev=discord-policy-1'));
-assert.ok(sw.includes('./assets/js/site-policy-acceptance.js?v=1.1.0&rev=policy-account-20261113-1'));
+assert.ok(sw.includes('./assets/js/site-policy-acceptance.js?v=1.1.1&rev=single-account-prompt-1'));
 for (const doc of [terms, privacy, legal])
   assert.ok(doc.includes('13 November 2026'), 'Policy revision date must be visible');
 assert.ok(terms.includes('account-linked acceptance') && privacy.includes('Discord account ID'));
 assert.ok(privacy.includes('No automatic') || privacy.includes('no automatic deletion period') ||
           privacy.includes('no automatic deletion'), 'Privacy retention must remain explicit');
 assert.ok(legal.includes('server-scoped staff audit'));
-console.log('PASS: versioned public notice, Railway policy API, Discord account gate, staff audit and disclosures');
+console.log('PASS: nonblocking public policy references, Railway account gate, staff audit and disclosures');
