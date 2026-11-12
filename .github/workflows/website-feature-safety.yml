@@ -49,8 +49,10 @@ jobs:
           node scripts/test_workspace_v311.js
           node scripts/test_workspace_directory_v312.js
           node scripts/test_command_palette_touch_v314.js
+          node scripts/test_ios_auth_handoff.js
           node scripts/test_policy_acknowledgement.js
           node scripts/test_sitewide_v313.js
+          node scripts/test_mobile_v315.js
           node scripts/test_armband_calibration.js
           node scripts/test_pvp_paused_ui.js
           node scripts/test_signboard_studio.js

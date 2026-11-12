@@ -1,0 +1,230 @@
+/* WWZ V3.15 — Command Centre mobile usability.
+   Styling only. Preserve authentication, role boundaries, navigation handlers,
+   checkout, map canvases and DayZ service controls. */
+body.wwz-v3-dashboard {
+  --wwz-v315-hit: 44px;
+  --wwz-v315-focus: #ffab96;
+  --wwz-v315-mobile-edge: rgba(177, 204, 227, .24);
+}
+
+/* Touch targets match across the sidebar, grouped destinations and topbar. */
+@media (hover: none) and (pointer: coarse) {
+  body.wwz-v3-dashboard .dashboard-sidebar
+    :is(button.side-link, a.side-link, .nav-group > summary) {
+    min-height: var(--wwz-v315-hit);
+    touch-action: manipulation;
+  }
+  body.wwz-v3-dashboard
+    :is(.dashboard-topbar, .dashboard-sidebar)
+    :is(button, a, summary):focus-visible {
+    outline: 2px solid var(--wwz-v315-focus) !important;
+    outline-offset: 2px;
+  }
+  body.wwz-v3-dashboard .dashboard-view
+    :is(.heading-actions, .panel-heading-actions) > :is(button, a) {
+    min-height: var(--wwz-v315-hit);
+    touch-action: manipulation;
+  }
+}
+
+/* Don't allow lengthy settings/filter labels to push a whole page sideways. */
+@media (max-width: 760px) {
+  body.wwz-v3-dashboard .dashboard-view,
+  body.wwz-v3-dashboard .dashboard-view :is(.panel, .inset-panel, .view-heading),
+  body.wwz-v3-dashboard .dashboard-view
+    :is(.heading-actions, .panel-heading-actions, .community-form-actions) {
+    min-width: 0;
+    max-width: 100%;
+  }
+  body.wwz-v3-dashboard .dashboard-view
+    :is(.heading-actions, .panel-heading-actions, .community-form-actions) {
+    flex-wrap: wrap;
+    gap: 9px;
+  }
+  body.wwz-v3-dashboard .dashboard-view
+    :is(.heading-actions, .panel-heading-actions) > :is(button, a) {
+    min-width: 0;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  /* Existing workspace tabs remain swipeable instead of clipping at edges. */
+  body.wwz-v3-dashboard :is(
+    .wwz-v32-finance-navigation, .wwz-v33-workspace-navigation,
+    .wwz-v32-community-navigation, .workspace-subnav,
+    .admin-player-leaderboard-tabs, .moderation-centre-tabs
+  ) {
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+  body.wwz-v3-dashboard :is(
+    .wwz-v32-finance-navigation, .wwz-v33-workspace-navigation,
+    .wwz-v32-community-navigation, .workspace-subnav,
+    .admin-player-leaderboard-tabs, .moderation-centre-tabs
+  ) > :is(button, a) {
+    min-height: var(--wwz-v315-hit);
+    max-width: 100%;
+    padding-block: 10px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    touch-action: manipulation;
+  }
+
+  /* Filter bars may be flex or grid: respect their existing display modes. */
+  body.wwz-v3-dashboard :is(
+    .action-centre-toolbar, .zone-toolbar, .server-feed-toolbar,
+    .command-toolbar, .shop-management-toolbar, .ticket-admin-toolbar,
+    .donation-orders-toolbar, .discord-log-toolbar,
+    .wwz-v312-directory-controls
+  ) {
+    min-width: 0;
+    max-width: 100%;
+    grid-template-columns: minmax(0, 1fr) !important;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 10px;
+  }
+  body.wwz-v3-dashboard :is(
+    .action-centre-toolbar, .zone-toolbar, .server-feed-toolbar,
+    .command-toolbar, .shop-management-toolbar, .ticket-admin-toolbar,
+    .donation-orders-toolbar, .discord-log-toolbar,
+    .wwz-v312-directory-controls
+  ) > :is(label, .command-search, input, select) {
+    box-sizing: border-box;
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+  body.wwz-v3-dashboard :is(
+    .action-centre-toolbar, .zone-toolbar, .server-feed-toolbar,
+    .command-toolbar, .shop-management-toolbar, .ticket-admin-toolbar,
+    .donation-orders-toolbar, .discord-log-toolbar,
+    .wwz-v312-directory-controls
+  ) :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+    box-sizing: border-box;
+    min-width: 0;
+    max-width: 100%;
+    min-height: var(--wwz-v315-hit);
+    font-size: 16px !important;
+  }
+  body.wwz-v3-dashboard :is(
+    .action-centre-toolbar, .zone-toolbar, .server-feed-toolbar,
+    .command-toolbar, .shop-management-toolbar, .ticket-admin-toolbar,
+    .donation-orders-toolbar, .discord-log-toolbar
+  ) > :is(button, a[role="button"]) {
+    min-height: var(--wwz-v315-hit);
+    touch-action: manipulation;
+  }
+
+  /* Bank and other protected data tables scroll inside their own panels. */
+  body.wwz-v3-dashboard .dashboard-view
+    :is(.responsive-table, .wwz-table-scroll, .table-scroll) {
+    box-sizing: border-box;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Keep the iPhone Safari ↔ Home Screen transfer steps readable and tappable. */
+  body.wwz-v3-dashboard .wwz-ios-auth-panel {
+    box-sizing: border-box;
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+  body.wwz-v3-dashboard .wwz-ios-auth-panel summary {
+    min-height: var(--wwz-v315-hit);
+    padding-block: 10px;
+    touch-action: manipulation;
+  }
+  body.wwz-v3-dashboard .wwz-ios-auth-panel input {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    min-height: var(--wwz-v315-hit);
+    font-size: 16px !important;
+  }
+  body.wwz-v3-dashboard .wwz-ios-auth-actions {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  body.wwz-v3-dashboard .wwz-ios-auth-actions > button {
+    flex: 1 1 160px;
+    min-height: var(--wwz-v315-hit);
+    touch-action: manipulation;
+  }
+}
+
+/* Limit only conventional forms; the search palette, policy notice and map
+   pickers have their own verified sizing and gesture handling. */
+@media (max-width: 620px) {
+  body.wwz-v3-dashboard dialog[open]:not(
+    .command-palette, .wwz-policy-gate, .wwz-rental-map-dialog
+  ) {
+    box-sizing: border-box;
+    max-width: calc(100vw - 16px) !important;
+    max-height: min(92dvh,
+      calc(100dvh - env(safe-area-inset-top, 0px)
+        - env(safe-area-inset-bottom, 0px) - 16px)) !important;
+    overscroll-behavior: contain;
+  }
+  body.wwz-v3-dashboard dialog[open]:not(
+    .command-palette, .wwz-policy-gate, .wwz-rental-map-dialog
+  ) > form {
+    box-sizing: border-box;
+    max-width: 100%;
+    max-height: min(88dvh,
+      calc(100dvh - env(safe-area-inset-top, 0px)
+        - env(safe-area-inset-bottom, 0px) - 24px)) !important;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: max(18px, env(safe-area-inset-bottom, 0px)) !important;
+  }
+  body.wwz-v3-dashboard dialog[open] :is(
+    .dialog-actions, .form-actions, .community-form-actions,
+    .faction-editor-actions
+  ) {
+    min-width: 0;
+    max-width: 100%;
+    flex-wrap: wrap;
+    gap: 9px;
+  }
+  body.wwz-v3-dashboard dialog[open] :is(
+    .dialog-actions, .form-actions, .community-form-actions,
+    .faction-editor-actions
+  ) > :is(button, a) {
+    flex: 1 1 145px;
+    min-width: 0;
+    min-height: var(--wwz-v315-hit);
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
+@media (max-width: 420px) {
+  body.wwz-v3-dashboard dialog[open] :is(
+    .dialog-actions, .form-actions, .community-form-actions,
+    .faction-editor-actions
+  ) > :is(button, a) { flex-basis: 100%; }
+  body.wwz-v3-dashboard .wwz-ios-auth-actions > button { flex-basis: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.wwz-v3-dashboard :is(
+    .wwz-v32-finance-navigation, .wwz-v33-workspace-navigation,
+    .workspace-subnav, .wwz-v32-community-navigation
+  ) { scroll-behavior: auto; }
+}
+@media (forced-colors: active) {
+  body.wwz-v3-dashboard .wwz-ios-auth-panel summary:focus-visible,
+  body.wwz-v3-dashboard dialog[open] button:focus-visible {
+    outline: 2px solid Highlight !important;
+  }
+}

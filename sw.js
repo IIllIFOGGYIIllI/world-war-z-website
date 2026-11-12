@@ -8,7 +8,7 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-11-13-mobile-palette-tap-v314-1';
+const WWZ_PWA_UPDATE_REVISION = '2026-11-13-mobile-usability-v315-1';
 const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-ios-safari-tab-bridge-2`;
 const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${APP_CACHE_RELEASE}`;
@@ -55,6 +55,7 @@ const APP_SHELL = [
   './assets/css/site-refinement.css?v=2.1.0&rev=sitewide-ui-1',
   './assets/css/sitewide-v313-controls.css?v=3.13.0&rev=forms-navigation-1',
   './assets/css/dashboard/command-palette-v314.css?v=3.14.0&rev=touch-search-1',
+  './assets/css/dashboard/mobile-v315.css?v=3.15.0&rev=mobile-usability-1',
   './assets/js/dashboard/shell.js?v=1.25.2&rev=palette-touch-1',
   './assets/js/site-refinement.js?v=2.1.1&rev=breadcrumb-fix-1',
   './assets/js/core/cart-deliveries.js?v=2.1.0',
