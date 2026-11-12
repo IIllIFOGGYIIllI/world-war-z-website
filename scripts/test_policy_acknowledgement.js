@@ -20,5 +20,5 @@ assert.ok(read('terms.html').includes('not linked to their Discord account'));
 assert.ok(js.includes('dialog.showModal')&&js.includes('agreeInput.checked&&privacyInput.checked'));
 assert.ok(js.includes('root.localStorage.setItem')&&js.includes('root.sessionStorage.setItem'));
 assert.ok(!js.includes('fetch(')&&!js.includes('document.cookie'));
-assert.ok(read('sw.js').includes('2026-11-13-mobile-usability-v315-1'));
+assert.ok(read('sw.js').includes('2026-11-13-topbar-v316-1'));
 new vm.Script(js);console.log('PASS: policy acknowledgement, local-only, accessible policy links and reacceptance');

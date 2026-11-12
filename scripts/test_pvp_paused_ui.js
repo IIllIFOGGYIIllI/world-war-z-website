@@ -11,7 +11,7 @@ assert.match(index,/Nasdara PvE is available\. Nasdara Full PvP is temporarily u
 assert.ok(!index.includes('Secondary server · active'));
 assert.ok(!index.includes('24/7 PvP with spawn loadouts'));
 assert.ok(index.includes('assets/css/pages/home.css?v=1.22.94&amp;rev=pvp-availability-1'));
-assert.ok(dash.includes('assets/js/dashboard/server-context.js?v=3.0.2&amp;rev=pvp-pause-1'));
+assert.ok(dash.includes('assets/js/dashboard/server-context.js?v=3.0.3&amp;rev=topbar-mode-1'));
 assert.ok(js.includes('paused: value.paused === true'));
 assert.ok(js.includes('available: value.available !== false && value.paused !== true'));
 assert.ok(js.includes("state.textContent = server.paused ? 'Temporarily unavailable'"));
