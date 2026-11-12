@@ -225,6 +225,15 @@
       mapNavigation.dataset.navLabel = server.world_size > 0 ? `${server.map_name} Map` : 'Badlands Map Unavailable';
       mapNavigation.setAttribute('aria-disabled', String(server.world_size === 0));
     }
+    // Keep the compact mobile server switcher accurate for both Nasdara worlds.
+    // The same authenticated server selection and its original click handler remain.
+    const topbarMode = changeServerButton?.querySelector('[data-topbar-server-mode]');
+    if (topbarMode) topbarMode.textContent = server.selector_label;
+    if (changeServerButton) {
+      const description = `Change server. Currently Nasdara ${server.selector_label}`;
+      changeServerButton.setAttribute('aria-label', description);
+      changeServerButton.title = description;
+    }
     changeServerButton?.removeAttribute('hidden');
   };
 
