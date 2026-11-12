@@ -30,7 +30,7 @@ assert.ok(!/display\s*:\s*none\s*!important|pointer-events\s*:\s*none/i.test(css
 assert.ok(!/\.leaflet-|maplibregl|\bfetch\s*\(|XMLHttpRequest|WebSocket|localStorage|sessionStorage/i.test(css),
   'No GPS/map, network or account side effects');
 assert.ok(sw.includes('./assets/css/dashboard/workspace-v317.css?v=3.17.0&rev=workspace-polish-1'));
-assert.ok(sw.includes('2026-11-13-discord-policy-v318-1'));
+assert.ok(sw.includes('2026-11-13-single-policy-gate-v3181-1'));
 for(const hook of [
   'data-open-command-search', 'data-change-server',
   'data-v32-profile-tab="identity"', 'data-v32-finance-target="banking"',
