@@ -25,10 +25,10 @@ for (const url of ['/api/account/policy', '/api/account/policy/accept', '/api/ad
 for (const token of [
   'wwz:authchange', 'wwz:serverchange', 'wwz:accesschange',
   'wwz-account-policy-dialog', 'agree', 'acknowledged_privacy',
-  'agreed_to_terms', 'showModal', 'if (!response.ok)',
+  'agreed_to_terms', 'showModal', '!response.ok',
   'VERSION', 'member','wwz_dashboard_session',
   'getSelectedServer',
-  'requires_acceptance', 'data.staffOnly', 'staff',
+  'requires_acceptance', 'dataset.staffOnly', 'staff',
   'owner', 'dialog.close', 'textContent',
   'Retry policy check', 'showNotice', 'safeRequest'
 ].filter(x => x !== 'member'))
