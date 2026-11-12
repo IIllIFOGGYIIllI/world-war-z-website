@@ -1,0 +1,211 @@
+/* V3.18: Discord-linked, server-scoped account acceptance and staff audit. */
+body.wwz-account-policy-pending { overflow: hidden; }
+body.wwz-v3-dashboard dialog.wwz-account-policy-dialog {
+  box-sizing: border-box;
+  position: fixed;
+  inset: 0;
+  width: min(620px, calc(100vw - 22px));
+  max-width: min(620px, calc(100vw - 22px)) !important;
+  max-height: min(90dvh, 760px) !important;
+  margin: auto;
+  padding: 0;
+  overflow-y: auto;
+  border: 1px solid #53758e !important;
+  border-radius: 18px;
+  background: linear-gradient(145deg, #1b3145, #0c1a2b) !important;
+  color: #f3f8fe !important;
+  box-shadow: 0 24px 80px rgba(0,0,0,.76);
+  z-index: 2147483600;
+  color-scheme: dark;
+}
+body.wwz-v3-dashboard dialog.wwz-account-policy-dialog::backdrop {
+  background: rgba(2,7,13,.87);
+  backdrop-filter: blur(5px);
+}
+body.wwz-v3-dashboard .wwz-account-policy-inner {
+  display: grid;
+  gap: 13px;
+  padding: clamp(18px, 4vw, 30px);
+}
+body.wwz-v3-dashboard .wwz-account-policy-inner .wwz-account-policy-kicker {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 800;
+  color: #ffad98;
+  letter-spacing: .11em;
+}
+body.wwz-v3-dashboard .wwz-account-policy-inner h2 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(21px, 5vw, 30px);
+  line-height: 1.22;
+}
+body.wwz-v3-dashboard .wwz-account-policy-inner > p {
+  margin: 0;
+  line-height: 1.6;
+  color: #c5d9e8;
+  font-size: 14px;
+}
+body.wwz-v3-dashboard .wwz-account-policy-links {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+body.wwz-v3-dashboard .wwz-account-policy-links a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid #53778f;
+  border-radius: 10px;
+  background: #1d3a50;
+  color: #e3f1fc;
+  font-size: 12px;
+  font-weight: 750;
+  text-align: center;
+  text-decoration: none;
+}
+body.wwz-v3-dashboard .wwz-account-policy-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 12px;
+  min-height: 44px;
+  border: 1px solid #496880;
+  border-radius: 11px;
+  color: #e8f0f6;
+  background: #142c40;
+  cursor: pointer;
+}
+body.wwz-v3-dashboard .wwz-account-policy-check input {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  margin: 1px 0 0;
+  accent-color: #f08f7d;
+}
+body.wwz-v3-dashboard .wwz-account-policy-check span {
+  min-width: 0;
+  line-height: 1.4;
+  font-size: 13px;
+}
+body.wwz-v3-dashboard .wwz-account-policy-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+body.wwz-v3-dashboard .wwz-account-policy-actions a {
+  color: #b7d9ee;
+  padding: 10px 4px;
+}
+body.wwz-v3-dashboard .wwz-account-policy-actions button {
+  min-height: 46px;
+  max-width: 100%;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 10px;
+  background: #dd725f;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 760;
+  cursor: pointer;
+}
+body.wwz-v3-dashboard .wwz-account-policy-actions button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+body.wwz-v3-dashboard .wwz-account-policy-message {
+  min-height: 18px;
+  overflow-wrap: anywhere;
+}
+body.wwz-v3-dashboard .wwz-account-policy-dialog :is(a, button, input):focus-visible,
+body.wwz-v3-dashboard .wwz-account-policy-audit button:focus-visible {
+  outline: 2px solid #ffbfa8 !important;
+  outline-offset: 3px !important;
+}
+body.wwz-v3-dashboard .wwz-account-policy-notice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 16px;
+  border: 1px solid #d1a277;
+  border-radius: 12px;
+  background: #2b303b;
+  color: #f7dfc8;
+  margin-bottom: 14px;
+  font-size: 13px;
+}
+body.wwz-v3-dashboard .wwz-account-policy-notice[hidden] { display: none !important; }
+body.wwz-v3-dashboard .wwz-account-policy-notice button {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid #e7b994;
+  border-radius: 9px;
+  background: #293b50;
+  color: #fff;
+  cursor: pointer;
+}
+body.wwz-v3-dashboard .wwz-account-policy-audit {
+  margin-block: 18px;
+  padding: clamp(16px, 3vw, 24px);
+  border: 1px solid rgba(180,210,231,.28);
+  border-radius: 17px;
+}
+body.wwz-v3-dashboard .wwz-account-policy-audit[hidden] { display: none !important; }
+body.wwz-v3-dashboard .wwz-account-policy-audit h2 {
+  font-size: clamp(17px, 3vw, 22px);
+}
+body.wwz-v3-dashboard .wwz-account-policy-audit > p {
+  color: #bcd0de;
+  line-height: 1.6;
+  font-size: 12px;
+}
+body.wwz-v3-dashboard .wwz-account-policy-audit-actions {
+  margin: 12px 0;
+}
+body.wwz-v3-dashboard .wwz-account-policy-audit-actions button {
+  min-height: 44px;
+}
+body.wwz-v3-dashboard .wwz-account-policy-audit-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+body.wwz-v3-dashboard .wwz-account-policy-audit-table {
+  width: 100%;
+  min-width: 480px;
+  border-collapse: collapse;
+  color: #e2eef7;
+  font-size: 12px;
+}
+body.wwz-v3-dashboard .wwz-account-policy-audit-table th,
+body.wwz-v3-dashboard .wwz-account-policy-audit-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(178,208,229,.2);
+  text-align: left;
+  white-space: nowrap;
+}
+body.wwz-v3-dashboard .wwz-account-policy-audit-table th {
+  color: #b9d0e1;
+  font-weight: 800;
+}
+@media (max-width: 500px) {
+  body.wwz-v3-dashboard .wwz-account-policy-links { grid-template-columns: minmax(0, 1fr); }
+  body.wwz-v3-dashboard .wwz-account-policy-actions { flex-direction: column; align-items: stretch; }
+  body.wwz-v3-dashboard .wwz-account-policy-actions button { width: 100%; }
+  body.wwz-v3-dashboard dialog.wwz-account-policy-dialog { max-height: min(88dvh, 700px) !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.wwz-v3-dashboard dialog.wwz-account-policy-dialog::backdrop { backdrop-filter: none; }
+}
+@media (forced-colors: active) {
+  body.wwz-v3-dashboard .wwz-account-policy-check,
+  body.wwz-v3-dashboard dialog.wwz-account-policy-dialog,
+  body.wwz-v3-dashboard .wwz-account-policy-audit { border: 1px solid CanvasText !important; }
+}

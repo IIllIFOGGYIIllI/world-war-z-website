@@ -1,10 +1,11 @@
-/* WWZ public policy acknowledgement, 2026-11-12.
- * A versioned browser preference, not a backend identity/audit record,
- * tracking consent, OAuth authorisation, or permission to disclose data.
+/* WWZ public first-visit acknowledgement, 2026-11-13.
+ * Visitor acknowledgement remains local; authenticated Discord members also
+ * receive a separate server-verified acceptance prompt in the Command Centre.
+ * Neither acceptance represents blanket consent for unrelated data uses.
  */
 (function (root) {
   'use strict';
-  const POLICY_REVISION='2026-11-12.1';
+  const POLICY_REVISION='2026-11-13.1';
   const STORAGE_KEY='wwz:website:policy-ack:v1';
   const EXEMPT=new Set(['legal.html','terms.html','privacy.html',
     'rules.html','community-guidelines.html','moderation-policy.html','404.html','offline.html']);
@@ -40,7 +41,7 @@
     description.textContent='Before using the World War Z website, please read our current rules and terms. The privacy notice explains Discord account data, shop activity and DayZ GPS/route history.';
     const notice=document.createElement('p');
     notice.className='wwz-policy-notice';
-    notice.textContent='This agreement is saved only in this browser, not linked to your Discord account. You may be asked again after a policy update or on another device.';
+    notice.textContent='This first-visit acknowledgement is saved in your browser. After Discord sign-in and server selection, a separate account-linked acceptance is stored by Railway for that server.';
 
     const links=document.createElement('nav');
     links.setAttribute('aria-label','Read community policies');

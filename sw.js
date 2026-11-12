@@ -8,7 +8,7 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-11-13-workspace-polish-v317-1';
+const WWZ_PWA_UPDATE_REVISION = '2026-11-13-discord-policy-v318-1';
 const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-ios-safari-tab-bridge-2`;
 const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${APP_CACHE_RELEASE}`;
@@ -58,6 +58,8 @@ const APP_SHELL = [
   './assets/css/dashboard/mobile-v315.css?v=3.15.0&rev=mobile-usability-1',
   './assets/css/dashboard/topbar-v316.css?v=3.16.0&rev=mobile-header-1',
   './assets/css/dashboard/workspace-v317.css?v=3.17.0&rev=workspace-polish-1',
+  './assets/css/dashboard/policy-account-v318.css?v=3.18.0&rev=discord-policy-1',
+  './assets/js/dashboard/policy-account-v318.js?v=3.18.0&rev=discord-policy-1',
   './assets/js/dashboard/server-context.js?v=3.0.3&rev=topbar-mode-1',
   './assets/js/dashboard/shell.js?v=1.25.2&rev=palette-touch-1',
   './assets/js/site-refinement.js?v=2.1.1&rev=breadcrumb-fix-1',
@@ -85,7 +87,7 @@ const APP_SHELL = [
   './assets/css/dashboard/workspace-directory-v312.css?v=3.12.0&rev=overview-directory-1',
   './assets/js/dashboard/workspace-directory-v312.js?v=3.12.0&rev=overview-directory-1',
   './assets/css/site-policy-acceptance.css?v=1.0.0&rev=policy-20261112-1',
-  './assets/js/site-policy-acceptance.js?v=1.0.0&rev=policy-20261112-1',
+  './assets/js/site-policy-acceptance.js?v=1.1.0&rev=policy-account-20261113-1',
   './assets/css/dashboard/workspace-v32-profile-gps.css?v=3.2.0&rev=profile-gps-v32-1',
   './assets/js/dashboard/workspace-v32-profile-gps.js?v=3.2.0&rev=profile-gps-v32-1',
   './assets/css/dashboard/workspace-v32-economy.css?v=3.2.1&rev=v3-2-finance-1',
