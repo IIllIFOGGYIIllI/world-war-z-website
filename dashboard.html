@@ -54,6 +54,7 @@
 <link rel="stylesheet" href="assets/css/sitewide-v313-controls.css?v=3.13.0&amp;rev=forms-navigation-1"/>
 <link rel="stylesheet" href="assets/css/dashboard/command-palette-v314.css?v=3.14.0&amp;rev=touch-search-1"/>
 <link rel="stylesheet" href="assets/css/dashboard/mobile-v315.css?v=3.15.0&amp;rev=mobile-usability-1"/>
+<link rel="stylesheet" href="assets/css/dashboard/topbar-v316.css?v=3.16.0&amp;rev=mobile-header-1"/>
 </head>
 <body class="dashboard-gated wwz-v3 wwz-v3-dashboard">
 <a class="skip-link" href="#dashboard-content">Skip to dashboard content</a>
@@ -119,11 +120,11 @@
 <small>Current Workspace</small>
 <strong data-workspace-label="">Overview</strong>
 </div>
-<button aria-haspopup="dialog" class="dashboard-search-trigger" data-open-command-search="" type="button">
-<span aria-hidden="true">⌕</span><span>Search pages, tools and settings…</span><kbd>Ctrl K</kbd>
+<button aria-haspopup="dialog" aria-label="Search dashboard tools" title="Search dashboard tools" class="dashboard-search-trigger" data-open-command-search="" type="button">
+<svg class="wwz-topbar-search-icon" aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.7"></circle><path d="m16 16 5 5"></path></svg><span class="wwz-topbar-search-label">Search tools</span><kbd>Ctrl K</kbd>
 </button>
 <div class="topbar-spacer"></div>
-<button class="server-switcher" data-change-server="" aria-label="Change World War Z server" hidden="" type="button"><span aria-hidden="true">⇄</span><span>Change server</span></button>
+<button class="server-switcher wwz-topbar-server-chip" data-change-server="" aria-label="Change World War Z server" title="Change World War Z server" hidden="" type="button"><svg class="wwz-topbar-switch-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h15m0 0-3.5-3.5M19 7l-3.5 3.5M20 17H5m0 0 3.5-3.5M5 17l3.5 3.5"></path></svg><span class="wwz-topbar-server-copy"><small>Nasdara</small><strong data-topbar-server-mode>Server</strong></span></button>
 <button class="pwa-install-button" data-pwa-install="" aria-label="Install or update World War Z app" hidden="" type="button">Install App</button>
 <div class="connection-state" data-api-connection="" data-state="loading"><span></span><span data-api-connection-label="">Connecting to bot API…</span></div>
 <button class="discord-button account-menu-trigger" data-open-login="" aria-label="Discord account and sign-in" type="button"><span aria-hidden="true" class="topbar-user-avatar" data-topbar-avatar=""><img alt="" aria-hidden="true" class="discord-avatar-fallback" src="assets/icons/discord.svg"/></span><span data-auth-button-label="">Sign In With Discord</span></button>
