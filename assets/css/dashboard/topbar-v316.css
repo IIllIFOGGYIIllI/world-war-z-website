@@ -29,7 +29,8 @@ body.wwz-v3-dashboard .wwz-topbar-server-chip:focus-visible {
   outline: 2px solid #ffab96 !important;
   outline-offset: 2px;
 }
-body.wwz-v3-dashboard .wwz-topbar-server-chip[hidden] {
+/* Hidden is security-critical during guest and server-selection states. */
+body.wwz-v3-dashboard .dashboard-topbar .wwz-topbar-server-chip[hidden] {
   display: none !important;
 }
 body.wwz-v3-dashboard .dashboard-topbar .wwz-topbar-server-chip {
@@ -56,7 +57,7 @@ body.wwz-v3-dashboard .dashboard-topbar .wwz-topbar-server-chip:hover {
 body.wwz-v3-dashboard .wwz-topbar-server-chip .wwz-topbar-switch-icon {
   color: #b2d9f2;
 }
-body.wwz-v3-dashboard .dashboard-topbar .wwz-topbar-server-chip > .wwz-topbar-server-copy {
+body.wwz-v3-dashboard .dashboard-topbar .wwz-topbar-server-chip > span.wwz-topbar-server-copy:last-child {
   min-width: 0;
   display: grid !important;
   align-content: center;
