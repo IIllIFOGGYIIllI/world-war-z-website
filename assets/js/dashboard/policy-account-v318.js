@@ -4,7 +4,7 @@
    preference. Existing public visitor notice remains unchanged. */
 (function (root) {
   'use strict';
-  const VERSION = '2026-11-12.1';
+  const VERSION = '2026-11-13.1';
   const BASE = 'https://world-war-z.up.railway.app';
   const STATUS_URL = BASE + '/api/account/policy';
   const ACCEPT_URL = BASE + '/api/account/policy/accept';
@@ -270,6 +270,12 @@
     }
     if (authenticated) check();
   });
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', buildAuditPanel, { once: true });
-  else buildAuditPanel();
+  const boot = () => {
+    buildAuditPanel();
+    // Restore a saved session after reload even if an earlier auth event raced
+    // script loading. Railway still authenticates the bearer token before read.
+    if (getToken() && getServer()) { authenticated = true; check(); }
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
+  else boot();
 })(typeof window !== 'undefined' ? window : null);
