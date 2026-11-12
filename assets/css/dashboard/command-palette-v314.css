@@ -1,0 +1,233 @@
+/* WWZ V3.14 — touch-safe command search and sidebar-icon parity.
+   Strictly scoped to the existing dashboard search dialog. */
+body.wwz-v3-dashboard dialog.command-palette {
+  box-sizing: border-box;
+  width: min(680px, calc(100vw - 24px)) !important;
+  max-width: min(680px, calc(100vw - 24px)) !important;
+  max-height: min(88dvh, 760px) !important;
+  padding: 0 !important;
+  overflow: hidden;
+  border-radius: 18px !important;
+  border: 1px solid rgba(166, 198, 222, .35) !important;
+  background: #172b3f !important;
+  color: #f3f8fc !important;
+}
+body.wwz-v3-dashboard .command-palette-shell {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  width: 100%;
+  min-width: 0;
+  max-height: min(88dvh, 760px);
+  overflow: hidden;
+}
+body.wwz-v3-dashboard .command-palette-heading {
+  grid-template-columns: 42px minmax(0, 1fr) 44px;
+  gap: 12px;
+  padding: 17px 18px;
+  border-bottom: 1px solid rgba(185, 214, 236, .18);
+}
+body.wwz-v3-dashboard .command-palette-heading > span {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #214262;
+  color: #91d5ff;
+  font-size: 24px;
+}
+body.wwz-v3-dashboard .command-palette-heading h2 {
+  line-height: 1.25;
+  font-size: clamp(16px, 3.6vw, 20px);
+}
+body.wwz-v3-dashboard .command-palette-heading small {
+  color: #b0c6d8;
+  font-size: 10px;
+}
+body.wwz-v3-dashboard .command-palette-heading button {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  color: #f7f9fc;
+  font-size: 26px;
+}
+body.wwz-v3-dashboard .command-palette-input {
+  min-width: 0;
+  padding: 14px 16px 9px;
+}
+body.wwz-v3-dashboard .command-palette-input input {
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+  min-height: 50px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: #071522;
+  color: #f5f9fc;
+  font-size: 16px;
+}
+body.wwz-v3-dashboard .command-palette-results {
+  display: grid;
+  grid-auto-rows: min-content;
+  align-content: start;
+  gap: 7px;
+  max-height: none;
+  min-height: 0;
+  padding: 9px 14px 15px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+body.wwz-v3-dashboard .command-search-result {
+  box-sizing: border-box;
+  position: relative;
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) 26px;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  min-height: 68px;
+  padding: 12px;
+  text-align: left;
+  border: 1px solid rgba(174, 207, 233, .20);
+  border-radius: 13px;
+  background: #1b344a;
+  color: #f5f8fc;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(129, 206, 246, .16);
+}
+body.wwz-v3-dashboard .command-search-result:active {
+  background: #2c4d66;
+  border-color: #9bd8fc;
+}
+body.wwz-v3-dashboard .command-search-result:focus-visible {
+  outline: 3px solid #ffad99 !important;
+  outline-offset: 2px;
+}
+body.wwz-v3-dashboard .command-search-result:hover,
+body.wwz-v3-dashboard .command-search-result.selected {
+  background: #254660;
+  border-color: rgba(117, 198, 247, .7);
+}
+body.wwz-v3-dashboard .command-search-result .command-result-icon {
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 11px;
+  background: #143048;
+  color: #c1e3f9;
+  font-size: 24px;
+  line-height: 1;
+}
+body.wwz-v3-dashboard .command-result-icon svg {
+  display: block;
+  width: 25px;
+  height: 25px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+body.wwz-v3-dashboard .command-result-icon svg [fill="currentColor"] {
+  fill: currentColor;
+}
+body.wwz-v3-dashboard .command-result-icon svg [stroke="none"] {
+  stroke: none;
+}
+body.wwz-v3-dashboard .command-search-result .command-result-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+body.wwz-v3-dashboard .command-result-copy .command-result-group {
+  font-size: 10px;
+  line-height: 1.25;
+  color: #bed1de;
+  font-weight: 700;
+  letter-spacing: .025em;
+}
+body.wwz-v3-dashboard .command-result-copy strong {
+  font-size: 15px;
+  line-height: 1.32;
+  color: #f8fbff;
+}
+body.wwz-v3-dashboard .command-result-copy .command-result-description {
+  font-size: 12px;
+  line-height: 1.35;
+  color: #b6ccdd;
+}
+body.wwz-v3-dashboard .command-search-result .command-result-arrow {
+  display: block;
+  width: auto;
+  height: auto;
+  color: #b1dcf5;
+  background: none;
+  font: 700 27px/1 system-ui, sans-serif;
+  text-align: center;
+}
+body.wwz-v3-dashboard .command-palette-hint {
+  border-top: 1px solid rgba(185, 214, 236, .18);
+  padding: 11px 14px;
+  min-height: 40px;
+  font-size: 12px;
+  color: #b7cbdc;
+}
+body.wwz-v3-dashboard .command-palette-hint .command-touch-help {
+  display: none;
+}
+@media (hover: none), (pointer: coarse) {
+  body.wwz-v3-dashboard .command-palette-hint .command-keyboard-help {
+    display: none;
+  }
+  body.wwz-v3-dashboard .command-palette-hint .command-touch-help {
+    display: inline;
+  }
+}
+@media (max-width: 600px) {
+  body.wwz-v3-dashboard dialog.command-palette {
+    width: calc(100vw - 18px) !important;
+    max-width: calc(100vw - 18px) !important;
+    max-height: min(84dvh, 700px) !important;
+  }
+  body.wwz-v3-dashboard .command-palette-shell {
+    max-height: min(84dvh, 700px);
+  }
+  body.wwz-v3-dashboard .command-palette-heading {
+    padding: 13px 12px;
+    gap: 9px;
+  }
+  body.wwz-v3-dashboard .command-palette-input {
+    padding: 12px 12px 7px;
+  }
+  body.wwz-v3-dashboard .command-palette-results {
+    padding: 8px 11px 12px;
+  }
+  body.wwz-v3-dashboard .command-search-result {
+    grid-template-columns: 44px minmax(0, 1fr) 22px;
+    min-height: 70px;
+    padding: 10px;
+    gap: 10px;
+  }
+  body.wwz-v3-dashboard .command-search-result .command-result-icon {
+    width: 44px;
+    height: 44px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.wwz-v3-dashboard .command-search-result {
+    transition: none !important;
+  }
+}
+@media (forced-colors: active) {
+  body.wwz-v3-dashboard .command-search-result {
+    border-color: CanvasText !important;
+  }
+}
