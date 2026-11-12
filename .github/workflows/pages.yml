@@ -83,6 +83,7 @@ jobs:
           node scripts/test_sitewide_v313.js
           node scripts/test_mobile_v315.js
           node scripts/test_topbar_v316.js
+          node scripts/test_workspace_v317.js
           node scripts/test_armband_calibration.js
           node scripts/test_pvp_paused_ui.js
           node scripts/test_signboard_studio.js
