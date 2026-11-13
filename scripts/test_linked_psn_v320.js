@@ -8,7 +8,7 @@ const html=read('dashboard.html');
 const js=read('assets/js/dashboard/linked-psn-v320.js');
 const css=read('assets/css/dashboard/linked-psn-v320.css');
 const sw=read('sw.js');
-const asset='assets/js/dashboard/linked-psn-v320.js?v=3.20.1&amp;rev=psn-alts-2';
+const asset='assets/js/dashboard/linked-psn-v320.js?v=3.20.2&amp;rev=psn-alts-3';
 const style='assets/css/dashboard/linked-psn-v320.css?v=3.20.0&amp;rev=psn-alts-1';
 assert.equal(html.split(asset).length-1,1,'Script linked once');
 assert.equal(html.split(style).length-1,1,'Styles linked once');
