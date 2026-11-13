@@ -45,7 +45,7 @@ assert.ok(accountJs.includes('wwz-account-policy-dialog'));
 assert.ok(read('terms.html').includes('without a blocking acceptance popup'));
 assert.ok(read('privacy.html').includes('without a blocking acceptance popup'));
 assert.ok(read('legal.html').includes('without a blocking acknowledgement'));
-assert.ok(sw.includes('2026-11-13-single-policy-gate-v3181-1'));
+assert.ok(sw.includes('2026-11-14-policy-audit-v319-1'));
 assert.ok(sw.includes('./assets/js/site-policy-acceptance.js?v=1.1.1&rev=single-account-prompt-1'));
 new vm.Script(js);
 console.log('PASS: no duplicate public modal; one verified Discord policy gate after server selection');
