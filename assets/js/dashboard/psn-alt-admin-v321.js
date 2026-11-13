@@ -123,6 +123,7 @@
       if (turn !== epoch || serverKey() !== server || token() !== capturedToken || !active) return;
       setMessage(payload.message + (payload.dm_delivered ? ' Discord notice delivered.' :
         ' Discord DM could not be delivered; action remains logged.'), 'success');
+      setBusy(false);
       await search(lastQuery, { preserveMessage: true });
     } catch (error) {
       if (turn === epoch) setMessage(error.message || 'Unable to update PSN link.', 'error');
