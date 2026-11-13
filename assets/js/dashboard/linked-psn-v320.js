@@ -220,4 +220,16 @@
   submit.disabled = true;
   if (getToken() && getServer()?.key) authenticated = true;
   show();
+  // When a bookmark opens directly at #linked-psns/overview, account.js or
+  // the shell might have dispatched viewchange before this script subscribed.
+  const restoreDeepLink = () => {
+    active = Boolean(document.querySelector(
+      '.sidebar-navigation .side-link.active[data-view="linked-psns"]'
+    )) || String(root.location?.hash || '').startsWith('#linked-psns/');
+    show();
+    if (active && validContext()) load();
+  };
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', restoreDeepLink, { once: true });
+  } else restoreDeepLink();
 })(typeof window !== 'undefined' ? window : null);
