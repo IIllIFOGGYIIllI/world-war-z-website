@@ -23,6 +23,13 @@ for (const token of [
 assert.ok(!script.includes('innerHTML'), 'Audit must use text nodes, never raw HTML');
 assert.ok(script.includes('safeRequest(ACCEPT_URL'), 'Existing policy acceptance must remain active');
 assert.ok(script.includes('data-view-panel="staff"'));
+assert.ok(css.includes('> #wwz-policy-acceptance-audit:not([hidden]) ~ .wwz-admin-hub'),
+  'The generic Admin Workspace must hide beneath the visible policy audit only');
+assert.ok(html.indexOf('id="wwz-policy-acceptance-audit"') <
+          html.indexOf('<section class="wwz-admin-hub"'),
+  'Audit must precede the generic admin shortcuts as a direct sibling');
+assert.ok(css.includes('display: none !important;'),
+  'The audit-only sibling rule must override the default Admin Hub display');
 assert.ok(html.includes('data-nav-label="Policy Acceptance Audit" data-section="policy-audit" data-staff-only="" data-view="staff" hidden=""'),
   'Staff-only policy audit is discoverable in sidebar and search');
 assert.ok(html.includes('id="wwz-policy-acceptance-audit" class="panel wwz-account-policy-audit" data-dashboard-section="policy-audit" data-staff-only="" hidden=""'),
@@ -41,10 +48,10 @@ for (const selector of [
 ]) assert.ok(css.includes(selector), 'Missing mobile styling: ' + selector);
 assert.ok(!/pointer-events\s*:\s*none/i.test(css));
 assert.ok(html.includes('policy-account-v318.js?v=3.19.1&amp;rev=audit-route-1'));
-assert.ok(html.includes('policy-account-v318.css?v=3.19.1&amp;rev=audit-route-1'));
-assert.ok(sw.includes('2026-11-14-policy-audit-route-v3191-1'));
+assert.ok(html.includes('policy-account-v318.css?v=3.19.2&amp;rev=audit-isolation-1'));
+assert.ok(sw.includes('2026-11-14-policy-audit-isolation-v3192-1'));
 assert.ok(sw.includes('./assets/js/dashboard/policy-account-v318.js?v=3.19.1&rev=audit-route-1'));
-assert.ok(sw.includes('./assets/css/dashboard/policy-account-v318.css?v=3.19.1&rev=audit-route-1'));
+assert.ok(sw.includes('./assets/css/dashboard/policy-account-v318.css?v=3.19.2&rev=audit-isolation-1'));
 new vm.Script(script);
 
 // Exercise the real audit builder, form, and API requests without dependencies.
