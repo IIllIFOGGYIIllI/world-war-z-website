@@ -39,7 +39,7 @@ assert.ok(!script.includes('innerHTML'), 'Audit rows must not interpolate untrus
 assert.ok(script.includes('accepted !== true'), 'API response must confirm acceptance');
 assert.ok(script.includes("const getToken = () =>"), 'Never embed bearer tokens');
 new vm.Script(script);
-const style = 'assets/css/dashboard/policy-account-v318.css?v=3.19.1&amp;rev=audit-route-1';
+const style = 'assets/css/dashboard/policy-account-v318.css?v=3.19.2&amp;rev=audit-isolation-1';
 const asset = 'assets/js/dashboard/policy-account-v318.js?v=3.19.1&amp;rev=audit-route-1';
 assert.equal(dash.split(style).length-1, 1);
 assert.equal(dash.split(asset).length-1, 1);
@@ -47,9 +47,9 @@ assert.ok(dash.indexOf(asset) > dash.indexOf('assets/js/dashboard/account.js'),
  'The policy controller must subscribe after existing account setup');
 assert.ok(!read('index.html').includes(asset), 'Guest landing page must not load authenticated policy gate');
 assert.ok(!read('shop.html').includes(asset), 'Existing standalone Shop flow stays untouched');
-assert.ok(sw.includes('2026-11-14-policy-audit-route-v3191-1'));
+assert.ok(sw.includes('2026-11-14-policy-audit-isolation-v3192-1'));
 assert.ok(sw.includes('./assets/js/dashboard/policy-account-v318.js?v=3.19.1&rev=audit-route-1'));
-assert.ok(sw.includes('./assets/css/dashboard/policy-account-v318.css?v=3.19.1&rev=audit-route-1'));
+assert.ok(sw.includes('./assets/css/dashboard/policy-account-v318.css?v=3.19.2&rev=audit-isolation-1'));
 assert.ok(sw.includes('./assets/js/site-policy-acceptance.js?v=1.1.1&rev=single-account-prompt-1'));
 for (const doc of [terms, privacy, legal])
   assert.ok(doc.includes('13 November 2026'), 'Policy revision date must be visible');
