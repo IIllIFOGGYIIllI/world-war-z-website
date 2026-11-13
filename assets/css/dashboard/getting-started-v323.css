@@ -1,0 +1,39 @@
+/* World War Z V3.23 · Accessible member onboarding. */
+.wwz-v323-view { min-width: 0; }
+.wwz-v323-progress { display: grid; gap: 17px; }
+.wwz-v323-progress-top { display: flex; justify-content: space-between; gap: 12px; align-items: center; flex-wrap: wrap; }
+.wwz-v323-progress-top strong { font-size: 1.05rem; }
+.wwz-v323-progress-top button { min-height: 44px; }
+.wwz-v323-track { height: 11px; overflow: hidden; border-radius: 999px; background: rgba(125,151,180,.2); }
+.wwz-v323-track > span { display: block; background: var(--success-color,#5ac38f); height: 100%; width: 0; border-radius: inherit; transition: width .18s ease; }
+.wwz-v323-status { margin: 0; line-height: 1.5; }
+.wwz-v323-status[data-tone="error"] { color: var(--danger-color,#ff8585); }
+.wwz-v323-checklist { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.wwz-v323-step { min-width: 0; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; border-radius: 13px; border: 1px solid rgba(125,151,180,.22); padding: 14px; background: rgba(125,151,180,.055); }
+.wwz-v323-step[data-complete="true"] { border-color: rgba(87,174,122,.27); }
+.wwz-v323-step-icon { width: 35px; height: 35px; flex: 0 0 35px; border-radius: 50%; display: grid; place-items: center; background: rgba(125,151,180,.18); font-weight: 750; }
+.wwz-v323-step[data-complete="true"] .wwz-v323-step-icon { background: rgba(87,174,122,.16); }
+.wwz-v323-step-content { flex: 1 1 220px; min-width: 0; }
+.wwz-v323-step-content strong { display: block; margin-bottom: 4px; }
+.wwz-v323-step-content p { margin: 0; line-height: 1.5; }
+.wwz-v323-step-content small { display: block; margin-top: 5px; opacity: .78; }
+.wwz-v323-step-action { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; white-space: normal; text-align: center; }
+.wwz-v323-privacy { margin: 0; opacity: .76; font-size: .88rem; line-height: 1.5; }
+.wwz-v323-next { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; margin-top: 17px; }
+.wwz-v323-next > .panel { min-width: 0; display: grid; gap: 12px; align-content: start; }
+.wwz-v323-next h2,.wwz-v323-next p { margin: 0; }
+.wwz-v323-links { display: flex; align-items: stretch; flex-wrap: wrap; gap: 10px; }
+.wwz-v323-links > * { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; text-align: center; }
+.wwz-v323-faq { display: grid; gap: 9px; }
+.wwz-v323-faq details { border: 1px solid rgba(125,151,180,.22); border-radius: 11px; padding: 10px 12px; }
+.wwz-v323-faq summary { cursor: pointer; font-weight: 650; padding: 4px 0; }
+.wwz-v323-faq details p { margin: 8px 0 4px; line-height: 1.55; }
+.wwz-v323-view :is(a,button,summary):focus-visible { outline: 3px solid var(--accent-color,#67a8ef); outline-offset: 3px; }
+@media (max-width: 760px) { .wwz-v323-next { grid-template-columns: 1fr; } }
+@media (max-width: 480px) {
+  .wwz-v323-progress { gap: 13px; }
+  .wwz-v323-step { padding: 11px; }
+  .wwz-v323-step-action { width: 100%; }
+  .wwz-v323-links > * { flex: 1 1 100%; width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { .wwz-v323-track > span { transition: none; } }
