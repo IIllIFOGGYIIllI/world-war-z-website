@@ -23,6 +23,15 @@ for (const token of [
 assert.ok(!script.includes('innerHTML'), 'Audit must use text nodes, never raw HTML');
 assert.ok(script.includes('safeRequest(ACCEPT_URL'), 'Existing policy acceptance must remain active');
 assert.ok(script.includes('data-view-panel="staff"'));
+assert.ok(html.includes('data-nav-label="Policy Acceptance Audit" data-section="policy-audit" data-staff-only="" data-view="staff" hidden=""'),
+  'Staff-only policy audit is discoverable in sidebar and search');
+assert.ok(html.includes('id="wwz-policy-acceptance-audit" class="panel wwz-account-policy-audit" data-dashboard-section="policy-audit" data-staff-only="" hidden=""'),
+  'Protected section target is static, so deep links can resolve on first sign-in');
+assert.ok(script.includes("panel.dataset.dashboardSection = 'policy-audit'"));
+assert.ok(script.includes('panel.hidden = !(allowed && auditActive)'));
+assert.ok(script.includes("root.addEventListener('wwz:viewchange'"));
+assert.ok(read('assets/js/dashboard/shell.js').includes('sectionTargetFor(selectedView, requested.section)'));
+
 assert.ok(script.includes('aria-live'));
 for (const selector of [
  '.wwz-account-policy-audit-stats', '.wwz-account-policy-audit-stat',
@@ -31,11 +40,11 @@ for (const selector of [
  'min-height: 44px', 'font-size: 16px', 'focus-visible'
 ]) assert.ok(css.includes(selector), 'Missing mobile styling: ' + selector);
 assert.ok(!/pointer-events\s*:\s*none/i.test(css));
-assert.ok(html.includes('policy-account-v318.js?v=3.19.0&amp;rev=audit-filter-1'));
-assert.ok(html.includes('policy-account-v318.css?v=3.19.0&amp;rev=audit-filter-1'));
-assert.ok(sw.includes('2026-11-14-policy-audit-v319-1'));
-assert.ok(sw.includes('./assets/js/dashboard/policy-account-v318.js?v=3.19.0&rev=audit-filter-1'));
-assert.ok(sw.includes('./assets/css/dashboard/policy-account-v318.css?v=3.19.0&rev=audit-filter-1'));
+assert.ok(html.includes('policy-account-v318.js?v=3.19.1&amp;rev=audit-route-1'));
+assert.ok(html.includes('policy-account-v318.css?v=3.19.1&amp;rev=audit-route-1'));
+assert.ok(sw.includes('2026-11-14-policy-audit-route-v3191-1'));
+assert.ok(sw.includes('./assets/js/dashboard/policy-account-v318.js?v=3.19.1&rev=audit-route-1'));
+assert.ok(sw.includes('./assets/css/dashboard/policy-account-v318.css?v=3.19.1&rev=audit-route-1'));
 new vm.Script(script);
 
 // Exercise the real audit builder, form, and API requests without dependencies.
@@ -104,6 +113,7 @@ const CustomEvent=class {constructor(type,{detail}={}){this.type=type;this.detai
 vm.runInNewContext(script,{window:root,document,URLSearchParams,CustomEvent,console});
 const settle=async()=>{for(let i=0;i<5;i++)await Promise.resolve();};
 (async()=>{
+  listeners['wwz:viewchange']({detail:{view:'staff',section:'policy-audit'}});
   listeners['wwz:authchange']({detail:{authenticated:true,accessLevel:'staff'}});
   await settle();
   const panel=find(staff,el=>el.className.includes('wwz-account-policy-audit'));
@@ -113,8 +123,20 @@ const settle=async()=>{for(let i=0;i<5;i++)await Promise.resolve();};
   load.listeners.click();
   await settle();
   assert.ok(apiCalls.some(url=>url.includes('limit=25')&&url.includes('version=all')));
+  listeners['wwz:viewchange']({detail:{view:'staff',section:'moderation-centre'}});
+  assert.equal(panel.hidden,true,'Audit must be hidden while viewing another admin tool');
+  listeners['wwz:viewchange']({detail:{view:'staff',section:'policy-audit'}});
+  assert.equal(panel.hidden,false,'Audit is visible on its own staff route');
+  // Core uses {detail:{level}}, not {detail:{accessLevel}}.
+  listeners['wwz:accesschange']({detail:{level:'member'}});
+  assert.equal(panel.hidden,true,'Revoking staff access must hide audit immediately');
   const stats=find(panel,el=>el.className==='wwz-account-policy-audit-stats');
-  assert.equal(stats.hidden,false);
+  assert.equal(stats.hidden,true,'Losing staff access must clear previously loaded statistics');
+  listeners['wwz:accesschange']({detail:{level:'staff'}});
+  assert.equal(panel.hidden,false,'Restoring staff access permits the selected route');
+  load.listeners.click();
+  await settle();
+  assert.equal(stats.hidden,false,'Restored staff must reload records from the protected API');
   const search=find(panel,el=>el.tagName==='input'&&el.type==='search');
   const form=find(panel,el=>el.tagName==='form');
   assert.ok(search&&form);

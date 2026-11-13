@@ -192,6 +192,9 @@
   // server. The API enforces staff permissions and binds the verified guild.
   let auditPanel = null;
   let auditElements = null;
+  // Match the dashboard shell's real staff/policy-audit workspace. Do not
+  // expose this panel merely because the user is browsing another admin tool.
+  let auditActive = false;
   let auditOffset = 0;
   let auditRequestId = 0;
   const AUDIT_PAGE_SIZE = 25;
@@ -320,10 +323,15 @@
     if (auditPanel) return auditPanel;
     const staffView = document.querySelector('[data-view-panel="staff"]');
     if (!staffView) return null;
-    const panel = make('section', 'panel wwz-account-policy-audit');
+    // A static, protected route target must exist before the dashboard shell
+    // resolves bookmarked hashes. Populate that target rather than appending
+    // an unlinked section at the bottom of the Administration workspace.
+    const panel = document.querySelector('#wwz-policy-acceptance-audit') ||
+      make('section', 'panel wwz-account-policy-audit');
     panel.id = 'wwz-policy-acceptance-audit';
-    panel.hidden = true;
+    panel.dataset.dashboardSection = 'policy-audit';
     panel.dataset.staffOnly = '';
+    panel.hidden = true;
     const title = make('h2', '', 'Policy acceptance audit');
     const note = make('p', '', 'Staff-only · records belong to your selected Nasdara server. Use the top-bar server switcher to inspect PvE or PvP separately.');
     const serverName = make('p', 'wwz-account-policy-audit-server', 'Selected Nasdara server');
@@ -402,7 +410,7 @@
     next.type = 'button'; next.disabled = true;
     paging.append(previous, pageInfo, next);
     panel.append(title, note, serverName, stats, form, summary, tableWrap, paging);
-    staffView.append(panel);
+    if (!panel.parentNode) staffView.append(panel);
     auditPanel = panel;
     auditElements = { body, summary, stats, figures, pageInfo,
       previous, next, refresh, search, version, serverName };
@@ -435,7 +443,7 @@
     if (!panel) return;
     const allowed = authenticated && ['staff', 'owner'].includes(accessLevel);
     if (!allowed) clearAuditResults();
-    panel.hidden = !allowed;
+    panel.hidden = !(allowed && auditActive);
   };
   root.addEventListener('wwz:authchange', event => {
     authenticated = event.detail?.authenticated === true;
@@ -445,7 +453,15 @@
     if (authenticated) check();
   });
   root.addEventListener('wwz:accesschange', event => {
-    if (authenticated && event.detail?.accessLevel) accessLevel = String(event.detail.accessLevel);
+    // Core dashboard emits {level}; accept the older {accessLevel} shape too.
+    // A downgrade must immediately hide the audit and clear private rows.
+    const nextLevel = event.detail?.level || event.detail?.accessLevel;
+    if (authenticated && nextLevel) accessLevel = String(nextLevel);
+    updateAuditVisibility();
+  });
+  root.addEventListener('wwz:viewchange', event => {
+    auditActive = event.detail?.view === 'staff' &&
+      event.detail?.section === 'policy-audit';
     updateAuditVisibility();
   });
   root.addEventListener('wwz:serverchange', () => {
@@ -457,6 +473,11 @@
   });
   const boot = () => {
     buildAuditPanel();
+    // The shell may restore the deep link on session reload after this boot.
+    // Until its viewchange event confirms the route, keep records hidden.
+    auditActive = Boolean(document.querySelector(
+      '.sidebar-navigation .side-link.active[data-view="staff"][data-section="policy-audit"]'
+    ));
     updateAuditVisibility();
     // Restore a saved session after reload even if an earlier auth event raced
     // script loading. Railway still authenticates the bearer token before read.

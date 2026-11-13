@@ -29,7 +29,7 @@ assert.ok(!/\bfetch\s*\(|XMLHttpRequest|localStorage|sessionStorage/i.test(css))
 assert.ok(!/\.leaflet-|maplibregl|#wwz-detection-map/i.test(css),'No map gesture changes');
 assert.ok(sw.includes('./assets/css/dashboard/mobile-v315.css?v=3.15.0&rev=mobile-usability-1'),
  'PWA precaches V3.15');
-assert.ok(sw.includes('2026-11-14-policy-audit-v319-1'),'PWA revision bumped');
+assert.ok(sw.includes('2026-11-14-policy-audit-route-v3191-1'),'PWA revision bumped');
 for(const hook of [
  'data-ios-auth-transfer-submit','data-ios-auth-copy-link',
  'data-open-command-search','data-v312-directory',
