@@ -211,7 +211,7 @@
     );
     for (const item of Array.isArray(versions) ? versions : []) {
       const version = String(item?.version || '');
-      if (!/^\\d{4}-\\d{2}-\\d{2}\\.\\d{1,3}$/.test(version)) continue;
+      if (!/^\d{4}-\d{2}-\d{2}\.\d{1,3}$/.test(version)) continue;
       select.append(auditOption(version, version + ' (' + Number(item.records || 0) + ')'));
     }
     if ([...select.options].some(option => option.value === selected)) select.value = selected;
@@ -231,7 +231,7 @@
     refresh.disabled = false;
     refresh.textContent = 'Load records';
     search.value = '';
-    version.value = 'all';
+    refreshAuditVersions([], 'all');
   };
 
   const loadPolicyAudit = async ({ resetOffset = false } = {}) => {
@@ -457,6 +457,7 @@
   });
   const boot = () => {
     buildAuditPanel();
+    updateAuditVisibility();
     // Restore a saved session after reload even if an earlier auth event raced
     // script loading. Railway still authenticates the bearer token before read.
     if (getToken() && getServer()) { authenticated = true; check(); }
