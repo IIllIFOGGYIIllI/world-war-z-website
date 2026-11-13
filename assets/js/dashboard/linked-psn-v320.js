@@ -100,6 +100,7 @@
     const alts = Array.isArray(data.alts) ? data.alts : [];
     const justVerified = Boolean(lastPendingPsn && !data.pending &&
       alts.some(alt => String(alt.psn_id || '').toLowerCase() === lastPendingPsn.toLowerCase()));
+    const justExpired = Boolean(lastPendingPsn && !data.pending && !justVerified);
     primary.textContent = String(data.primary_psn || 'Not yet verified');
     const max = Math.max(0, Number(data.max_alts) || 2);
     count.textContent = alts.length + ' / ' + max;
@@ -155,7 +156,7 @@
     } else if (alts.length >= max) {
       status('Two verified alts are linked. Deactivate an alt before adding another.');
     }
-    return justVerified;
+    return justVerified ? 'verified' : justExpired ? 'expired' : '';
   };
 
   const load = async () => {
@@ -172,9 +173,11 @@
       if (turn !== requestId || getToken() !== token || getServer()?.key !== serverKey || !active) return;
       const data = await response.json();
       if (!response.ok || data.status !== 'ok') throw new Error('Unable to verify account');
-      const justVerified = render(data);
-      if (justVerified) {
+      const outcome = render(data);
+      if (outcome === 'verified') {
         status('Secondary PlayStation account verified and linked successfully.');
+      } else if (outcome === 'expired') {
+        status('Secondary PSN verification has expired or was cancelled. Start a new request if needed.');
       } else if (data.primary_psn && (data.alts || []).length < (data.max_alts || 2)) {
         status('');
       }

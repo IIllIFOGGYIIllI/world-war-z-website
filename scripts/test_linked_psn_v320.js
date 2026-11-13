@@ -8,7 +8,7 @@ const html=read('dashboard.html');
 const js=read('assets/js/dashboard/linked-psn-v320.js');
 const css=read('assets/css/dashboard/linked-psn-v320.css');
 const sw=read('sw.js');
-const asset='assets/js/dashboard/linked-psn-v320.js?v=3.20.1&amp;rev=psn-alts-2';
+const asset='assets/js/dashboard/linked-psn-v320.js?v=3.20.2&amp;rev=psn-alts-3';
 const style='assets/css/dashboard/linked-psn-v320.css?v=3.20.0&amp;rev=psn-alts-1';
 assert.equal(html.split(asset).length-1,1,'Script linked once');
 assert.equal(html.split(style).length-1,1,'Styles linked once');
@@ -28,8 +28,8 @@ assert.ok(!js.includes('localStorage') && !js.includes('innerHTML') &&
 for(const token of ['.wwz-psn-alt-summary','.wwz-psn-alt-manager',
  '.wwz-psn-alt-form','min-height: 44px','@media (max-width: 460px)',
  'focus-visible','prefers-reduced-motion','forced-colors'])assert.ok(css.includes(token));
-assert.ok(sw.includes('2026-11-14-linked-psn-v320-2'));
-assert.ok(sw.includes('./assets/js/dashboard/linked-psn-v320.js?v=3.20.1&rev=psn-alts-2'));
+assert.ok(sw.includes('2026-11-14-alt-admin-v321-1'));
+assert.ok(sw.includes('./assets/js/dashboard/linked-psn-v320.js?v=3.20.2&rev=psn-alts-3'));
 assert.ok(sw.includes('./assets/css/dashboard/linked-psn-v320.css?v=3.20.0&rev=psn-alts-1'));
 assert.ok(html.includes('data-server-action="restart"'),'Game controls left intact');
 assert.ok(html.includes('data-change-server'),'Server isolation remains');
@@ -107,6 +107,16 @@ const settle=async()=>{for(let i=0;i<8;i++)await Promise.resolve();};
  assert.ok(fields['data-psn-alt-list'].children.some(
    item=>item.children?.[0]?.children?.[0]?.textContent==='ALT_123'
  ));
+ // Expiry should not silently vanish after the pending PSN disappears.
+ verified=false;
+ fields['data-psn-alt-input'].value='ALT_456';
+ fields['data-psn-alt-form'].listeners.submit({preventDefault(){}});
+ await settle();
+ assert.equal(intervals.size,1);
+ [...intervals.values()][0]();
+ await settle();
+ assert.ok(fields['data-psn-alt-message'].textContent.includes('expired or was cancelled'));
+ assert.equal(intervals.size,0);
  selected={key:'nasdara-pvp',name:'Nasdara PvP'};
  handlers['wwz:serverchange']();
  await settle();

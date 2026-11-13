@@ -49,7 +49,7 @@ for (const selector of [
 assert.ok(!/pointer-events\s*:\s*none/i.test(css));
 assert.ok(html.includes('policy-account-v318.js?v=3.19.1&amp;rev=audit-route-1'));
 assert.ok(html.includes('policy-account-v318.css?v=3.19.2&amp;rev=audit-isolation-1'));
-assert.ok(sw.includes('2026-11-14-linked-psn-v320-2'));
+assert.ok(sw.includes('2026-11-14-alt-admin-v321-1'));
 assert.ok(sw.includes('./assets/js/dashboard/policy-account-v318.js?v=3.19.1&rev=audit-route-1'));
 assert.ok(sw.includes('./assets/css/dashboard/policy-account-v318.css?v=3.19.2&rev=audit-isolation-1'));
 new vm.Script(script);

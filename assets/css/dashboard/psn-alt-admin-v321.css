@@ -1,0 +1,40 @@
+/* V3.21 · Linked PSN admin, touch-safe and responsive. */
+.wwz-alt-admin-panel { display: grid; gap: 18px; }
+.wwz-alt-admin-panel[hidden] { display: none !important; }
+.wwz-alt-admin-search { display: grid; grid-template-columns: minmax(220px,1fr) auto; gap: 12px; align-items: end; }
+.wwz-alt-admin-search .dialog-field { margin: 0; min-width: 0; }
+.wwz-alt-admin-search :is(button,input) { min-height: 44px; }
+.wwz-alt-admin-results { display: grid; gap: 12px; }
+.wwz-alt-admin-record { border: 1px solid var(--border-color,rgba(130,149,170,.3)); border-radius: 14px; padding: 16px; display: grid; gap: 11px; min-width: 0; background: var(--panel-background, transparent); }
+.wwz-alt-admin-record-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; justify-content: space-between; overflow-wrap: anywhere; }
+.wwz-alt-admin-record-heading strong { font-size: 1.05rem; }
+.wwz-alt-admin-record-heading small { opacity: .8; }
+.wwz-alt-admin-psn { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; padding: 9px 0; border-top: 1px solid rgba(130,149,170,.16); }
+.wwz-alt-admin-psn span { font-weight: 650; overflow-wrap: anywhere; }
+.wwz-alt-admin-psn small { margin-right: auto; opacity: .8; }
+.wwz-alt-admin-manage { min-height: 44px; }
+.wwz-alt-admin-reason { width: 100%; min-height: 44px; border-radius: 10px; padding: 10px 12px; }
+.wwz-alt-admin-history, .wwz-alt-admin-audit { display: grid; gap: 9px; }
+.wwz-alt-admin-history h3, .wwz-alt-admin-audit h3 { margin: 0; }
+.wwz-alt-admin-conflict { display: grid; gap: 4px; padding: 12px; border-left: 3px solid #ca9c55; background: rgba(196,151,74,.08); border-radius: 8px; overflow-wrap: anywhere; }
+.wwz-alt-admin-conflict small { opacity: .8; }
+.wwz-alt-admin-audit ol { padding-left: 20px; }
+.wwz-alt-admin-audit-item { padding: 9px 0; display: grid; gap: 3px; overflow-wrap: anywhere; }
+.wwz-alt-admin-audit-item small { opacity: .7; }
+.wwz-alt-admin-empty { margin: 0; opacity: .74; }
+.wwz-alt-admin-status { min-height: 1.4em; margin: 0; }
+.wwz-alt-admin-status[data-tone="error"] { color: var(--danger-color,#ff8b8b); }
+.wwz-alt-admin-status[data-tone="success"] { color: var(--success-color,#8dd8aa); }
+.wwz-alt-admin-panel :is(button,input):focus-visible { outline: 3px solid var(--accent-color,#67a8ef); outline-offset: 2px; }
+@media (max-width: 640px) {
+  .wwz-alt-admin-panel { gap: 14px; }
+  .wwz-alt-admin-search { grid-template-columns: 1fr; }
+  .wwz-alt-admin-search button { width: 100%; }
+  .wwz-alt-admin-record { padding: 12px; }
+  .wwz-alt-admin-psn { align-items: stretch; flex-direction: column; }
+  .wwz-alt-admin-psn small { margin-right: 0; }
+  .wwz-alt-admin-manage { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wwz-alt-admin-panel * { scroll-behavior: auto !important; }
+}
