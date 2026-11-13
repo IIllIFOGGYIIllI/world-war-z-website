@@ -60,7 +60,7 @@ const APP_SHELL = [
   './assets/css/dashboard/workspace-v317.css?v=3.17.0&rev=workspace-polish-1',
   './assets/css/dashboard/policy-account-v318.css?v=3.19.2&rev=audit-isolation-1',
   './assets/css/dashboard/linked-psn-v320.css?v=3.20.0&rev=psn-alts-1',
-  './assets/js/dashboard/linked-psn-v320.js?v=3.20.1&rev=psn-alts-2',
+  './assets/js/dashboard/linked-psn-v320.js?v=3.20.2&rev=psn-alts-3',
   './assets/css/dashboard/psn-alt-admin-v321.css?v=3.21.0&rev=psn-admin-1',
   './assets/js/dashboard/psn-alt-admin-v321.js?v=3.21.0&rev=psn-admin-1',
   './assets/js/dashboard/policy-account-v318.js?v=3.19.1&rev=audit-route-1',
