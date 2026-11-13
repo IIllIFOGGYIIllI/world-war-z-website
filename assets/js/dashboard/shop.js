@@ -602,7 +602,7 @@ const appendDashboardOrderProgress = (card, order) => {
 const appendDashboardRestartBanner = (card, order) => {
   if (dashboardOrderDeliveryState(order)!=='restart_pending') return;
   const banner=document.createElement('div'); banner.className='shop-order-restart-banner'; const icon=document.createElement('span'); icon.textContent='↻'; const copy=document.createElement('div'); const small=document.createElement('small'); small.textContent='Waiting for next DayZ restart'; const strong=document.createElement('strong'); const em=document.createElement('em');
-  if(shopRestartOperations?.next_scheduled_restart){ strong.textContent=`${dashboardShopDuration(shopRestartOperations.restart_countdown_seconds)} remaining`; em.textContent=`Next restart ${formatAccountDate(shopRestartOperations.next_scheduled_restart)} · ${shopRestartOperations.restart_source || 'messages.xml + ADM'}`; }
+  if(shopRestartOperations?.next_scheduled_restart){ strong.textContent=`${dashboardShopDuration(shopRestartOperations.restart_countdown_seconds)} remaining`; em.textContent=`Next restart ${formatAccountDate(shopRestartOperations.next_scheduled_restart)} · ${'server schedule'}`; }
   else if(shopRestartOperations?.restart_schedule_configured){ strong.textContent='Restart sync pending'; em.textContent='Countdown anchors on the next observed DayZ restart.'; }
   else { strong.textContent='Automatic restart tracking'; em.textContent='Railway will continue monitoring the order.'; }
   copy.append(small,strong,em); banner.append(icon,copy); card.append(banner);

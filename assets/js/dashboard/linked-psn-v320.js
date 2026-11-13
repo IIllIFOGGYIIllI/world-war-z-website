@@ -106,20 +106,20 @@
     count.textContent = alts.length + ' / ' + max;
     list.replaceChildren();
     if (!alts.length) {
-      list.append(make('p', 'wwz-psn-alt-empty', 'No secondary PSN accounts have been verified yet.'));
+      list.append(make('p', 'wwz-psn-alt-empty', 'No additional PlayStation accounts have been confirmed yet.'));
     }
     for (const alt of alts) {
       const psn = String(alt.psn_id || '');
       const card = make('div', 'wwz-psn-alt-item');
       const copy = make('div', 'wwz-psn-alt-copy');
-      copy.append(make('strong', '', psn), make('small', '', 'Verified secondary PlayStation account'));
-      const deactivate = make('button', 'secondary-action wwz-psn-alt-remove', 'Deactivate');
+      copy.append(make('strong', '', psn), make('small', '', 'Confirmed additional PlayStation account'));
+      const deactivate = make('button', 'secondary-action wwz-psn-alt-remove', 'Remove account');
       deactivate.type = 'button';
-      deactivate.setAttribute('aria-label', 'Deactivate secondary PSN ' + psn);
+      deactivate.setAttribute('aria-label', 'Remove additional PlayStation account ' + psn);
       deactivate.addEventListener('click', () => {
         if (working) return;
         if (!root.confirm || root.confirm(
-          'Deactivate ' + psn + '? This will stop it resolving to your Discord account. Historical ownership and balances are retained.'
+          'Remove ' + psn + ' from your linked accounts? This will not delete any saved balance, purchases or history.'
         )) {
           mutate({ action: 'deactivate', psn_id: psn, confirm: true });
         }
@@ -140,8 +140,8 @@
         : 'soon';
       const details = make('div', '');
       details.append(
-        make('strong', '', 'Waiting for DayZ verification: ' + psn),
-        make('small', '', 'Join the selected Nasdara server before ' + expiry + '.')
+        make('strong', '', 'Waiting for you to join DayZ with ' + psn),
+        make('small', '', 'Join the selected Nasdara server with this account before ' + expiry + '.')
       );
       const cancel = make('button', 'secondary-action', 'Cancel request');
       cancel.type = 'button';
@@ -152,9 +152,9 @@
     input.disabled = !canAdd;
     submit.disabled = !canAdd || working;
     if (!data.primary_psn) {
-      status('First link and verify a primary PlayStation ID using /account link in Discord.');
+      status('Start by confirming your main PlayStation account using /account link in Discord.');
     } else if (alts.length >= max) {
-      status('Two verified alts are linked. Deactivate an alt before adding another.');
+      status('You have linked two additional accounts. Remove one before adding another.');
     }
     return justVerified ? 'verified' : justExpired ? 'expired' : '';
   };
@@ -175,9 +175,9 @@
       if (!response.ok || data.status !== 'ok') throw new Error('Unable to verify account');
       const outcome = render(data);
       if (outcome === 'verified') {
-        status('Secondary PlayStation account verified and linked successfully.');
+        status('Your additional PlayStation account was confirmed and linked successfully.');
       } else if (outcome === 'expired') {
-        status('Secondary PSN verification has expired or was cancelled. Start a new request if needed.');
+        status('Your account confirmation request expired or was cancelled. Start a new request to try again.');
       } else if (data.primary_psn && (data.alts || []).length < (data.max_alts || 2)) {
         status('');
       }
@@ -194,7 +194,7 @@
     const serverKey = getServer()?.key;
     const turn = ++requestId;
     setWorking(true);
-    status(payload.action === 'link' ? 'Creating your live PSN verification request…' : 'Updating linked PSN accounts…');
+    status(payload.action === 'link' ? 'Preparing your account confirmation…' : 'Updating your linked PlayStation accounts…');
     try {
       const response = await request(ACTION_URL, {
         method: 'POST',

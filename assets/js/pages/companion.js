@@ -101,12 +101,12 @@
     all('[data-signing-fingerprint]').forEach((element) => { element.textContent = release.signing_cert_sha256; });
     all('[data-apk-download]').forEach((link) => {
       setDownloadLink(link, release.apk_url, 'World-War-Z-Companion.apk');
-      link.textContent = `Download APK · ${formatBytes(release.apk_size_bytes)}`;
+      link.textContent = `Download Android App · ${formatBytes(release.apk_size_bytes)}`;
     });
     all('[data-zip-download]').forEach((link) => {
       if (release.zip_url) {
         setDownloadLink(link, release.zip_url, 'World-War-Z-Companion.zip');
-        link.textContent = `ZIP fallback · ${formatBytes(release.zip_size_bytes)}`;
+        link.textContent = `Alternate Download (ZIP) · ${formatBytes(release.zip_size_bytes)}`;
         link.hidden = false;
       } else {
         link.hidden = true;
@@ -137,7 +137,7 @@
 
   const applyUnavailableRelease = (release, reason) => {
     all('[data-release-version]').forEach((element) => { element.textContent = `v${release?.version || '—'}`; });
-    all('[data-release-size]').forEach((element) => { element.textContent = 'Signed APK not currently verified'; });
+    all('[data-release-size]').forEach((element) => { element.textContent = 'Official Android download is not currently verified'; });
     all('[data-apk-download]').forEach((link) => linkToReleaseDirectory(link, 'View Android releases'));
     all('[data-zip-download]').forEach((link) => {
       link.hidden = true;
@@ -145,7 +145,7 @@
     });
     const messages = {
       'release-not-published': 'Signed Android release not published yet',
-      'apk-asset-missing': 'Release exists but its APK is missing',
+      'apk-asset-missing': 'The Android installation file is not available in this release',
       'release-check-unavailable': 'GitHub download verification unavailable',
       'missing-release-reference': 'Android release reference is missing',
       'metadata-fetch-failed': 'Android release information is unavailable'
@@ -156,7 +156,7 @@
     if (state) state.dataset.releaseState = 'error';
     if (label) label.textContent = message;
     const note = $('[data-download-note]');
-    if (note) note.textContent = 'The signed Android APK has not been verified. Open GitHub Releases to check publication; the WWZ browser and PWA dashboard remain available.';
+    if (note) note.textContent = 'The official Android download could not be verified. Check the release page, or continue using the World War Z website or Home Screen app.';
     const status = $('[data-installed-status]');
     if (status) status.textContent = message;
   };
