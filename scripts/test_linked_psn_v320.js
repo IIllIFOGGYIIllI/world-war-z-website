@@ -8,7 +8,7 @@ const html=read('dashboard.html');
 const js=read('assets/js/dashboard/linked-psn-v320.js');
 const css=read('assets/css/dashboard/linked-psn-v320.css');
 const sw=read('sw.js');
-const asset='assets/js/dashboard/linked-psn-v320.js?v=3.20.0&amp;rev=psn-alts-1';
+const asset='assets/js/dashboard/linked-psn-v320.js?v=3.20.1&amp;rev=psn-alts-2';
 const style='assets/css/dashboard/linked-psn-v320.css?v=3.20.0&amp;rev=psn-alts-1';
 assert.equal(html.split(asset).length-1,1,'Script linked once');
 assert.equal(html.split(style).length-1,1,'Styles linked once');
@@ -28,8 +28,8 @@ assert.ok(!js.includes('localStorage') && !js.includes('innerHTML') &&
 for(const token of ['.wwz-psn-alt-summary','.wwz-psn-alt-manager',
  '.wwz-psn-alt-form','min-height: 44px','@media (max-width: 460px)',
  'focus-visible','prefers-reduced-motion','forced-colors'])assert.ok(css.includes(token));
-assert.ok(sw.includes('2026-11-14-linked-psn-v320-1'));
-assert.ok(sw.includes('./assets/js/dashboard/linked-psn-v320.js?v=3.20.0&rev=psn-alts-1'));
+assert.ok(sw.includes('2026-11-14-linked-psn-v320-2'));
+assert.ok(sw.includes('./assets/js/dashboard/linked-psn-v320.js?v=3.20.1&rev=psn-alts-2'));
 assert.ok(sw.includes('./assets/css/dashboard/linked-psn-v320.css?v=3.20.0&rev=psn-alts-1'));
 assert.ok(html.includes('data-server-action="restart"'),'Game controls left intact');
 assert.ok(html.includes('data-change-server'),'Server isolation remains');
@@ -59,6 +59,9 @@ let selected={key:'world-war-z',name:'Nasdara PvE'};
 const handlers={};
 const calls=[];
 const base={status:'ok',primary_psn:'Main_123',alts:[],max_alts:2,pending:null};
+let verified=false;
+const intervals=new Map();
+let nextInterval=1;
 const root={
  sessionStorage:{getItem:name=>name==='wwz_dashboard_session'?'a'.repeat(64):null},
  WWZServerContext:{getSelectedServer:()=>selected},
@@ -67,10 +70,13 @@ const root={
   const body=options.body?JSON.parse(options.body):null;
   return {ok:true,json:async()=>body?.action==='link'?{...base,pending:{
    psn_id:body.psn_id,guild_id:'1410680659126784074',
-   expires_at:'2026-11-14T01:00:00+00:00'}}:base};
+   expires_at:'2026-11-14T01:00:00+00:00'}}:
+   verified?{...base,alts:[{psn_id:'ALT_123',verified_at:'2026-11-14T01:00:00+00:00'}]}:base};
  }},
  addEventListener:(event,fn)=>{handlers[event]=fn;},
  confirm:()=>true,
+ setInterval:(fn,delay)=>{assert.equal(delay,20000);const id=nextInterval++;intervals.set(id,fn);return id;},
+ clearInterval:id=>intervals.delete(id),
 };
 vm.runInNewContext(js,{window:root,document,console});
 const settle=async()=>{for(let i=0;i<8;i++)await Promise.resolve();};
@@ -91,6 +97,16 @@ const settle=async()=>{for(let i=0;i<8;i++)await Promise.resolve();};
  assert.deepEqual(JSON.parse(JSON.stringify(JSON.parse(writes[0].options.body))),
                   {action:'link',psn_id:'ALT_123'});
  assert.ok(fields['data-psn-alt-pending'].children.length>0);
+ assert.equal(intervals.size,1,'Pending verification should poll while visible');
+ verified=true;
+ [...intervals.values()][0]();
+ await settle();
+ assert.equal(intervals.size,0,'Auto polling stops once DayZ verifies the PSN');
+ assert.equal(fields['data-psn-alt-pending'].hidden,true);
+ assert.ok(fields['data-psn-alt-message'].textContent.includes('verified and linked'));
+ assert.ok(fields['data-psn-alt-list'].children.some(
+   item=>item.children?.[0]?.children?.[0]?.textContent==='ALT_123'
+ ));
  selected={key:'nasdara-pvp',name:'Nasdara PvP'};
  handlers['wwz:serverchange']();
  await settle();

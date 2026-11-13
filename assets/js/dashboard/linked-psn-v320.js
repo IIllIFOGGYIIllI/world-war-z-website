@@ -29,6 +29,8 @@
   let requestId = 0;
   let working = false;
   let canAdd = false;
+  let pendingPollTimer = null;
+  let lastPendingPsn = '';
   const psnValid = value => /^[A-Za-z][A-Za-z0-9_-]{2,15}$/.test(String(value || '').trim());
   const getToken = () => {
     try { return root.sessionStorage.getItem(SESSION_KEY) || ''; } catch (_) { return ''; }
@@ -54,7 +56,24 @@
     if (submit) submit.disabled = working || !canAdd;
     if (refresh) refresh.disabled = working;
   };
+  const stopPendingPoll = () => {
+    if (pendingPollTimer !== null) {
+      if (typeof root.clearInterval === 'function') root.clearInterval(pendingPollTimer);
+      pendingPollTimer = null;
+    }
+  };
+  const syncPendingPoll = waiting => {
+    if (!waiting || !active || !validContext()) { stopPendingPoll(); return; }
+    if (pendingPollTimer !== null || typeof root.setInterval !== 'function') return;
+    // Verify automatically while this account view is visible; don't poll on
+    // unrelated pages, after logout, or while a protected request is active.
+    pendingPollTimer = root.setInterval(() => {
+      if (active && validContext() && !working) load();
+    }, 20000);
+  };
   const clearPrivate = () => {
+    stopPendingPoll();
+    lastPendingPsn = '';
     ++requestId;
     canAdd = false;
     setWorking(false);
@@ -78,8 +97,10 @@
   };
 
   const render = data => {
-    primary.textContent = String(data.primary_psn || 'Not yet verified');
     const alts = Array.isArray(data.alts) ? data.alts : [];
+    const justVerified = Boolean(lastPendingPsn && !data.pending &&
+      alts.some(alt => String(alt.psn_id || '').toLowerCase() === lastPendingPsn.toLowerCase()));
+    primary.textContent = String(data.primary_psn || 'Not yet verified');
     const max = Math.max(0, Number(data.max_alts) || 2);
     count.textContent = alts.length + ' / ' + max;
     list.replaceChildren();
@@ -108,6 +129,8 @@
     pending.replaceChildren();
     const waiting = data.pending && typeof data.pending === 'object' ? data.pending : null;
     pending.hidden = !waiting;
+    syncPendingPoll(Boolean(waiting));
+    lastPendingPsn = waiting ? String(waiting.psn_id || '') : '';
     if (waiting) {
       const psn = String(waiting.psn_id || '');
       const expires = Date.parse(String(waiting.expires_at || ''));
@@ -132,6 +155,7 @@
     } else if (alts.length >= max) {
       status('Two verified alts are linked. Deactivate an alt before adding another.');
     }
+    return justVerified;
   };
 
   const load = async () => {
@@ -148,8 +172,12 @@
       if (turn !== requestId || getToken() !== token || getServer()?.key !== serverKey || !active) return;
       const data = await response.json();
       if (!response.ok || data.status !== 'ok') throw new Error('Unable to verify account');
-      render(data);
-      if (data.primary_psn && (data.alts || []).length < (data.max_alts || 2)) status('');
+      const justVerified = render(data);
+      if (justVerified) {
+        status('Secondary PlayStation account verified and linked successfully.');
+      } else if (data.primary_psn && (data.alts || []).length < (data.max_alts || 2)) {
+        status('');
+      }
     } catch (_) {
       if (turn === requestId) status('Unable to load your linked accounts. Check your connection and retry.');
     } finally {

@@ -45,7 +45,7 @@ assert.ok(server.includes("changeServerButton?.addEventListener('click', () => s
 assert.ok(server.includes("changeServerButton?.removeAttribute('hidden')"));
 assert.ok(server.includes('const STORAGE_KEY = \'wwz_dashboard_server\''));
 assert.ok(shell.includes("commandPaletteOpeners.forEach((button) => button.addEventListener('click', openCommandPalette))"));
-assert.ok(sw.includes('2026-11-14-linked-psn-v320-1'));
+assert.ok(sw.includes('2026-11-14-linked-psn-v320-2'));
 assert.ok(sw.includes('./assets/css/dashboard/topbar-v316.css?v=3.16.0&rev=mobile-header-1'));
 assert.ok(sw.includes('./assets/js/dashboard/server-context.js?v=3.0.3&rev=topbar-mode-1'));
 new vm.Script(server);

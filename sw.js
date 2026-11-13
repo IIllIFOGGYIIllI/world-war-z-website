@@ -8,7 +8,7 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-11-14-linked-psn-v320-1';
+const WWZ_PWA_UPDATE_REVISION = '2026-11-14-linked-psn-v320-2';
 const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-ios-safari-tab-bridge-2`;
 const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${APP_CACHE_RELEASE}`;
@@ -60,7 +60,7 @@ const APP_SHELL = [
   './assets/css/dashboard/workspace-v317.css?v=3.17.0&rev=workspace-polish-1',
   './assets/css/dashboard/policy-account-v318.css?v=3.19.2&rev=audit-isolation-1',
   './assets/css/dashboard/linked-psn-v320.css?v=3.20.0&rev=psn-alts-1',
-  './assets/js/dashboard/linked-psn-v320.js?v=3.20.0&rev=psn-alts-1',
+  './assets/js/dashboard/linked-psn-v320.js?v=3.20.1&rev=psn-alts-2',
   './assets/js/dashboard/policy-account-v318.js?v=3.19.1&rev=audit-route-1',
   './assets/js/dashboard/server-context.js?v=3.0.3&rev=topbar-mode-1',
   './assets/js/dashboard/shell.js?v=1.25.2&rev=palette-touch-1',
