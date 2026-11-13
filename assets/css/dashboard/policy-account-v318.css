@@ -381,3 +381,11 @@ body.wwz-v3-dashboard .wwz-account-policy-audit-table td {
     border: 1px solid CanvasText !important;
   }
 }
+
+/* V3.19.2: the generic Administration shortcuts must not bleed beneath
+   the dedicated policy audit. The selector matches only while this
+   real, staff-protected workspace is visible. No other admin tools change. */
+body.wwz-v3-dashboard [data-view-panel="staff"]
+  > #wwz-policy-acceptance-audit:not([hidden]) ~ .wwz-admin-hub {
+  display: none !important;
+}
