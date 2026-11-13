@@ -28,7 +28,7 @@ assert.ok(!js.includes('localStorage') && !js.includes('innerHTML') &&
 for(const token of ['.wwz-psn-alt-summary','.wwz-psn-alt-manager',
  '.wwz-psn-alt-form','min-height: 44px','@media (max-width: 460px)',
  'focus-visible','prefers-reduced-motion','forced-colors'])assert.ok(css.includes(token));
-assert.ok(sw.includes('2026-11-14-linked-psn-v320-2'));
+assert.ok(sw.includes('2026-11-14-alt-admin-v321-1'));
 assert.ok(sw.includes('./assets/js/dashboard/linked-psn-v320.js?v=3.20.1&rev=psn-alts-2'));
 assert.ok(sw.includes('./assets/css/dashboard/linked-psn-v320.css?v=3.20.0&rev=psn-alts-1'));
 assert.ok(html.includes('data-server-action="restart"'),'Game controls left intact');
