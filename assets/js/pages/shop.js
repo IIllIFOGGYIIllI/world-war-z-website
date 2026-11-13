@@ -912,7 +912,7 @@ const appendRestartBanner = (card, order) => {
   const detail = document.createElement('em');
   if (state.restart?.next_scheduled_restart) {
     strong.textContent = `${durationText(state.restart.restart_countdown_seconds)} remaining`;
-    detail.textContent = `Next restart ${dateText(state.restart.next_scheduled_restart)} · ${state.restart.restart_source || 'messages.xml + ADM'}`;
+    detail.textContent = `Next restart ${dateText(state.restart.next_scheduled_restart)} · ${'server schedule'}`;
   } else if (state.restart?.restart_schedule_configured) {
     strong.textContent = 'Restart sync pending'; detail.textContent = 'The countdown will anchor on the next observed DayZ restart.';
   } else {
@@ -1140,7 +1140,7 @@ const applyPayload = (payload, member = false) => {
       elements.noticeTitle.textContent = `The ${roleName} role is required`;
       elements.noticeCopy.textContent = 'Your Discord roles are checked by Railway. Contact staff if you believe your access is incorrect.';
     } else if (!payload.linked) {
-      elements.access.textContent = 'PSN link required'; elements.accessNote.textContent = 'Use /link in Discord';
+      elements.access.textContent = 'PlayStation account required'; elements.accessNote.textContent = 'Link your PlayStation account with /account link in Discord';
     } else {
       elements.access.textContent = state.settings.enabled ? 'Ready to purchase' : 'Browse only';
       elements.accessNote.textContent = state.settings.enabled ? 'Identity and wallet verified' : 'Purchases are paused';
@@ -1173,7 +1173,7 @@ const applyRestartStatus = (payload) => {
   if (elements.restartCountdown) {
     const interval = Math.max(0, Math.trunc(Number(operations.restart_interval_minutes) || 0));
     elements.restartCountdown.textContent = synchronised && operations.restart_countdown_seconds != null
-      ? `${durationText(operations.restart_countdown_seconds)} remaining · ${operations.restart_source || 'messages.xml + ADM'}`
+      ? `${durationText(operations.restart_countdown_seconds)} remaining · ${'server schedule'}`
       : configured
         ? `Every ${durationText(interval * 60)} · syncs after the next observed restart`
         : 'No automatic shutdown message found';
