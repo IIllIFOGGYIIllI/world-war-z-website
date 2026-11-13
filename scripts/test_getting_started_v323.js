@@ -93,7 +93,8 @@ const settle=async()=>{for(let i=0;i<12;i++)await Promise.resolve();};
  current={key:'nasdara-pvp',name:'Nasdara PvP'};
  events['wwz:serverchange']();
  await settle();
- assert.equal(els['data-v323-checklist'].children.length,4);
+ assert.equal(els['data-v323-checklist'].children.length,0,
+   'Never keep PvE onboarding status when PvP is selected');
  assert.ok(els['data-v323-status'].textContent.includes('selected server changed'));
  access='';
  events['wwz:authchange']({detail:{authenticated:false}});
