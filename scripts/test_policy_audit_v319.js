@@ -127,6 +127,11 @@ const settle=async()=>{for(let i=0;i<5;i++)await Promise.resolve();};
   assert.equal(panel.hidden,true,'Audit must be hidden while viewing another admin tool');
   listeners['wwz:viewchange']({detail:{view:'staff',section:'policy-audit'}});
   assert.equal(panel.hidden,false,'Audit is visible on its own staff route');
+  // Core uses {detail:{level}}, not {detail:{accessLevel}}.
+  listeners['wwz:accesschange']({detail:{level:'member'}});
+  assert.equal(panel.hidden,true,'Revoking staff access must hide audit immediately');
+  listeners['wwz:accesschange']({detail:{level:'staff'}});
+  assert.equal(panel.hidden,false,'Restoring staff access permits the selected route');
   const stats=find(panel,el=>el.className==='wwz-account-policy-audit-stats');
   assert.equal(stats.hidden,false);
   const search=find(panel,el=>el.tagName==='input'&&el.type==='search');
