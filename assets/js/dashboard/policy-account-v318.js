@@ -453,7 +453,10 @@
     if (authenticated) check();
   });
   root.addEventListener('wwz:accesschange', event => {
-    if (authenticated && event.detail?.accessLevel) accessLevel = String(event.detail.accessLevel);
+    // Core dashboard emits {level}; accept the older {accessLevel} shape too.
+    // A downgrade must immediately hide the audit and clear private rows.
+    const nextLevel = event.detail?.level || event.detail?.accessLevel;
+    if (authenticated && nextLevel) accessLevel = String(nextLevel);
     updateAuditVisibility();
   });
   root.addEventListener('wwz:viewchange', event => {
