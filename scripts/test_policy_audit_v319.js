@@ -130,10 +130,13 @@ const settle=async()=>{for(let i=0;i<5;i++)await Promise.resolve();};
   // Core uses {detail:{level}}, not {detail:{accessLevel}}.
   listeners['wwz:accesschange']({detail:{level:'member'}});
   assert.equal(panel.hidden,true,'Revoking staff access must hide audit immediately');
+  const stats=find(panel,el=>el.className==='wwz-account-policy-audit-stats');
+  assert.equal(stats.hidden,true,'Losing staff access must clear previously loaded statistics');
   listeners['wwz:accesschange']({detail:{level:'staff'}});
   assert.equal(panel.hidden,false,'Restoring staff access permits the selected route');
-  const stats=find(panel,el=>el.className==='wwz-account-policy-audit-stats');
-  assert.equal(stats.hidden,false);
+  load.listeners.click();
+  await settle();
+  assert.equal(stats.hidden,false,'Restored staff must reload records from the protected API');
   const search=find(panel,el=>el.tagName==='input'&&el.type==='search');
   const form=find(panel,el=>el.tagName==='form');
   assert.ok(search&&form);
