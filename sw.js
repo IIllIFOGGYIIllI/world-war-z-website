@@ -8,7 +8,7 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-11-14-alt-admin-v321-1';
+const WWZ_PWA_UPDATE_REVISION = '2026-11-14-player-language-v322-1';
 const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-ios-safari-tab-bridge-2`;
 const MAP_CACHE_RELEASE = `${WWZ_PWA_CACHE_RELEASE_VERSION}-${WWZ_PWA_CACHE_REVISION}`;
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${APP_CACHE_RELEASE}`;
@@ -42,7 +42,7 @@ const APP_SHELL = [
   './assets/css/pwa.css?v=1.22.93',
   './assets/css/ui-system.css?v=1.24.0&rev=ops-ui-1',
   './assets/js/pages/home.js?v=1.53.1&rev=companion-nav-1',
-  './assets/js/pages/companion.js?v=1.53.0&rev=companion-download-repair-1',
+  './assets/js/pages/companion.js?v=1.53.0&rev=companion-download-repair-1&copy=plain-1',
   './assets/data/companion-release.json',
   './assets/js/pwa.js?v=1.61.1&rev=companion-nav-1',
   './assets/css/modern-foundation.css?v=1.62.0&rev=modern-ui-1',
@@ -60,7 +60,7 @@ const APP_SHELL = [
   './assets/css/dashboard/workspace-v317.css?v=3.17.0&rev=workspace-polish-1',
   './assets/css/dashboard/policy-account-v318.css?v=3.19.2&rev=audit-isolation-1',
   './assets/css/dashboard/linked-psn-v320.css?v=3.20.0&rev=psn-alts-1',
-  './assets/js/dashboard/linked-psn-v320.js?v=3.20.2&rev=psn-alts-3',
+  './assets/js/dashboard/linked-psn-v320.js?v=3.20.3&rev=psn-alts-4',
   './assets/css/dashboard/psn-alt-admin-v321.css?v=3.21.0&rev=psn-admin-1',
   './assets/js/dashboard/psn-alt-admin-v321.js?v=3.21.0&rev=psn-admin-1',
   './assets/js/dashboard/policy-account-v318.js?v=3.19.1&rev=audit-route-1',
