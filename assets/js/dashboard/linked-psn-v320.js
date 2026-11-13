@@ -56,6 +56,7 @@
   };
   const clearPrivate = () => {
     ++requestId;
+    canAdd = false;
     setWorking(false);
     primary.textContent = '—';
     count.textContent = '0 / 2';
