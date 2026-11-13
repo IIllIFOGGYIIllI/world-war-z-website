@@ -22,7 +22,7 @@ for(const token of [
 assert.ok(!css.includes('display:none!important'),'V3.13 must not hide functional controls');
 assert.ok(!css.includes('pointer-events:none'),'V3.13 must not disable functional controls');
 assert.ok(sw.includes('./assets/css/sitewide-v313-controls.css?v=3.13.0&rev=forms-navigation-1'));
-assert.ok(sw.includes('2026-11-13-single-policy-gate-v3181-1'));
+assert.ok(sw.includes('2026-11-14-policy-audit-v319-1'));
 assert.ok(read('dashboard.html').includes('data-server-action="restart"'));
 assert.ok(read('shop.html').includes('data-member-cart-checkout'));
 console.log('PASS: V3.13 on 16 pages, consistent form states, toolbars and policy dialog');
