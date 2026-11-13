@@ -107,6 +107,16 @@ const settle=async()=>{for(let i=0;i<8;i++)await Promise.resolve();};
  assert.ok(fields['data-psn-alt-list'].children.some(
    item=>item.children?.[0]?.children?.[0]?.textContent==='ALT_123'
  ));
+ // Expiry should not silently vanish after the pending PSN disappears.
+ verified=false;
+ fields['data-psn-alt-input'].value='ALT_456';
+ fields['data-psn-alt-form'].listeners.submit({preventDefault(){}});
+ await settle();
+ assert.equal(intervals.size,1);
+ [...intervals.values()][0]();
+ await settle();
+ assert.ok(fields['data-psn-alt-message'].textContent.includes('expired or was cancelled'));
+ assert.equal(intervals.size,0);
  selected={key:'nasdara-pvp',name:'Nasdara PvP'};
  handlers['wwz:serverchange']();
  await settle();
