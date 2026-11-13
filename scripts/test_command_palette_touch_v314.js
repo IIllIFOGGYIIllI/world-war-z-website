@@ -63,7 +63,7 @@ for(const token of [
  'hover: none','pointer: coarse','max-height: min(84dvh',
  'prefers-reduced-motion','forced-colors'
 ])assert.ok(css.includes(token),'Missing V3.14 mobile treatment: '+token);
-assert.ok(sw.includes('2026-11-14-player-language-v322-1'));
+assert.ok(sw.includes('2026-11-14-getting-started-v323-1'));
 assert.ok(sw.includes('./assets/css/dashboard/command-palette-v314.css?v=3.14.0&rev=touch-search-1'));
 assert.ok(sw.includes('./assets/js/dashboard/shell.js?v=1.25.2&rev=palette-touch-1'));
 assert.ok(html.includes('data-server-action="restart"'),'Server controls preserved');
