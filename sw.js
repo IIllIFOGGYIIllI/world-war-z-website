@@ -42,7 +42,7 @@ const APP_SHELL = [
   './assets/css/pwa.css?v=1.22.93',
   './assets/css/ui-system.css?v=1.24.0&rev=ops-ui-1',
   './assets/js/pages/home.js?v=1.53.1&rev=companion-nav-1',
-  './assets/js/pages/companion.js?v=1.53.0&rev=companion-download-repair-1&copy=plain-1',
+  './assets/js/pages/companion.js?v=1.53.2&rev=android7-compat-1&copy=plain-1',
   './assets/data/companion-release.json',
   './assets/js/pwa.js?v=1.61.1&rev=companion-nav-1',
   './assets/css/modern-foundation.css?v=1.62.0&rev=modern-ui-1',
