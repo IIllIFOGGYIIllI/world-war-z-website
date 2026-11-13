@@ -916,7 +916,7 @@ const applyLiveStatus = (payload) => {
   const restartSource = String(operations.restart_source || 'unavailable');
   const restartWarning = String(operations.restart_warning_text || '').trim() || 'No restart warning text available';
 
-  setConnectionState('online', 'Bot API connected');
+  setConnectionState('online', 'World War Z connected');
   if (dashboardMode) dashboardMode.textContent = 'Live status';
   liveBanner?.classList.remove('degraded');
   liveBanner?.classList.add('live');
@@ -938,7 +938,7 @@ const applyLiveStatus = (payload) => {
   setText('[data-detail-players]', `${currentPlayers} / ${maximumPlayers}`);
   setText('[data-detail-platform]', platform);
   setText('[data-detail-map]', serverMap);
-  setText('[data-information-source]', 'Railway dashboard API · live');
+  setText('[data-information-source]', 'World War Z live server data');
   setText('[data-operations-uptime]', formatDuration(operations.api_uptime_seconds));
   setText('[data-operations-discord]', discordHealthy ? 'Connected and ready' : 'Connection degraded');
   setText('[data-operations-nitrado]', nitradoState);
@@ -965,7 +965,7 @@ const applyLiveStatus = (payload) => {
   setText('[data-overview-activity-server-note]', `Nitrado ${nitradoState} · updated ${updatedAt}`);
   setText('[data-overview-activity-restart]', restartSynchronised ? `Next restart in ${restartCountdown}` : nextRestart);
   setText('[data-overview-activity-restart-note]', `${restartInterval} · source ${restartSource}`);
-  setText('[data-overview-activity-health]', discordHealthy ? 'Discord gateway ready · Railway API online' : 'Connected-service health degraded');
+  setText('[data-overview-activity-health]', discordHealthy ? 'Discord and World War Z services connected' : 'Some server services are temporarily unavailable');
   setText('[data-overview-activity-health-note]', `API uptime ${formatDuration(operations.api_uptime_seconds)} · last success ${operationUpdatedAt}`);
 
   const restartCycleSeconds = restartIntervalMinutes * 60;
@@ -1002,22 +1002,22 @@ const showStatusUnavailable = () => {
   currentServerStatus = 'unavailable';
   window.WWZShopRestartOperations = null;
   window.dispatchEvent(new CustomEvent('wwz:restartstatus', { detail: null }));
-  setConnectionState('unavailable', 'Bot API unavailable');
+  setConnectionState('unavailable', 'World War Z connection unavailable');
   if (dashboardMode) dashboardMode.textContent = 'Status unavailable';
   liveBanner?.classList.remove('live');
   liveBanner?.classList.add('degraded');
   if (liveBannerTitle) liveBannerTitle.textContent = 'Live status is temporarily unavailable.';
   if (liveBannerMessage) {
-    liveBannerMessage.textContent = 'The website could not reach the public bot API. Try the refresh button shortly; no protected account or server controls are affected.';
+    liveBannerMessage.textContent = 'The website could not connect to World War Z right now. Try refreshing shortly. Your account and server settings have not been changed.';
   }
 
   setText('[data-server-status]', 'Unavailable');
-  setText('[data-server-status-note]', 'Unable to reach the Railway API');
+  setText('[data-server-status-note]', 'Unable to retrieve live server information');
   setText('[data-status-label]', 'Status unavailable');
   setText('[data-live-updated-short]', 'Unavailable');
   setText('[data-live-updated]', 'Unable to refresh');
   setText('[data-detail-status]', 'Unavailable');
-  setText('[data-information-source]', 'Railway API · connection unavailable');
+  setText('[data-information-source]', 'Server information is temporarily unavailable');
   setText('[data-operations-uptime]', 'Unavailable');
   setText('[data-operations-discord]', 'Unavailable');
   setText('[data-operations-nitrado]', 'Unavailable');
@@ -1028,13 +1028,13 @@ const showStatusUnavailable = () => {
   setText('[data-operations-restart-source]', 'Unavailable');
   setText('[data-operations-restart-warning]', 'Unavailable');
   setText('[data-overview-restart-countdown]', 'Unavailable');
-  setText('[data-overview-restart-note]', 'Unable to reach the Railway API');
+  setText('[data-overview-restart-note]', 'Unable to retrieve live server information');
   setText('[data-overview-activity-server]', 'DayZ server status unavailable');
   setText('[data-overview-activity-server-note]', 'Railway could not refresh the public server state');
   setText('[data-overview-activity-restart]', 'Restart intelligence unavailable');
-  setText('[data-overview-activity-restart-note]', 'Retry after the Railway API connection recovers');
+  setText('[data-overview-activity-restart-note]', 'Try again once the connection is restored');
   setText('[data-overview-activity-health]', 'Connected-service health unavailable');
-  setText('[data-overview-activity-health-note]', 'Discord, Nitrado and API state could not be refreshed');
+  setText('[data-overview-activity-health-note]', 'Server and Discord information could not be updated');
   document.querySelectorAll('[data-restart-progress]').forEach((element) => {
     element.style.setProperty('--progress', '0%');
   });
