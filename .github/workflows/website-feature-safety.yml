@@ -55,6 +55,7 @@ jobs:
           node scripts/test_policy_audit_v319.js
           node scripts/test_linked_psn_v320.js
           node scripts/test_psn_alt_admin_v321.js
+          node scripts/test_player_language_v322.js
           node scripts/test_sitewide_v313.js
           node scripts/test_mobile_v315.js
           node scripts/test_topbar_v316.js
