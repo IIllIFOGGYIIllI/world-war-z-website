@@ -28,6 +28,7 @@
   let active = false;
   let requestId = 0;
   let working = false;
+  let canAdd = false;
   const psnValid = value => /^[A-Za-z][A-Za-z0-9_-]{2,15}$/.test(String(value || '').trim());
   const getToken = () => {
     try { return root.sessionStorage.getItem(SESSION_KEY) || ''; } catch (_) { return ''; }
@@ -50,7 +51,7 @@
   const status = text => { message.textContent = String(text || ''); };
   const setWorking = value => {
     working = Boolean(value);
-    if (submit) submit.disabled = working;
+    if (submit) submit.disabled = working || !canAdd;
     if (refresh) refresh.disabled = working;
   };
   const clearPrivate = () => {
@@ -61,6 +62,8 @@
     list.replaceChildren();
     pending.replaceChildren();
     pending.hidden = true;
+    canAdd = false;
+    input.disabled = true;
     input.value = '';
     status('');
   };
@@ -120,9 +123,9 @@
       cancel.addEventListener('click', () => mutate({ action: 'cancel' }));
       pending.append(details, cancel);
     }
-    const available = Boolean(data.primary_psn) && alts.length < max;
-    input.disabled = !available;
-    submit.disabled = !available || working;
+    canAdd = Boolean(data.primary_psn) && alts.length < max;
+    input.disabled = !canAdd;
+    submit.disabled = !canAdd || working;
     if (!data.primary_psn) {
       status('First link and verify a primary PlayStation ID using /account link in Discord.');
     } else if (alts.length >= max) {
@@ -212,6 +215,8 @@
     if (active && validContext()) load();
   });
   // A returning PWA session may already exist before this deferred module loads.
+  input.disabled = true;
+  submit.disabled = true;
   if (getToken() && getServer()?.key) authenticated = true;
   show();
 })(typeof window !== 'undefined' ? window : null);
