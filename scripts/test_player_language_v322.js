@@ -44,7 +44,7 @@ assert(!account.includes('Bot API connected'));
 assert(alts.includes('confirmed and linked successfully'));
 assert(!alts.includes('Creating your live PSN verification request'));
 for(const s of [memberShop,dashboardShop])assert(!s.includes('messages.xml + ADM'));
-assert(sw.includes('2026-11-14-player-language-v322-1'));
+assert(sw.includes('2026-11-14-getting-started-v323-1'));
 assert(html.includes('data-psn-alt-form'));
 assert(html.includes('data-psn-alt-list'));
 console.log('PASS: V3.22 public DayZ account, server, shop and Companion copy is clear and routes preserved');
