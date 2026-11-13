@@ -82,6 +82,7 @@ jobs:
           node scripts/test_policy_acknowledgement.js
           node scripts/test_policy_account_v318.js
           node scripts/test_policy_audit_v319.js
+          node scripts/test_linked_psn_v320.js
           node scripts/test_sitewide_v313.js
           node scripts/test_mobile_v315.js
           node scripts/test_topbar_v316.js
