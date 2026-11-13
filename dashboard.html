@@ -59,6 +59,7 @@
 <link rel="stylesheet" href="assets/css/dashboard/policy-account-v318.css?v=3.19.2&amp;rev=audit-isolation-1"/>
 <link rel="stylesheet" href="assets/css/dashboard/linked-psn-v320.css?v=3.20.0&amp;rev=psn-alts-1"/>
 <link rel="stylesheet" href="assets/css/dashboard/psn-alt-admin-v321.css?v=3.21.0&amp;rev=psn-admin-1"/>
+<link rel="stylesheet" href="assets/css/dashboard/getting-started-v323.css?v=3.23.0&amp;rev=player-guide-1"/>
 </head>
 <body class="dashboard-gated wwz-v3 wwz-v3-dashboard">
 <a class="skip-link" href="#dashboard-content">Skip to dashboard content</a>
@@ -186,8 +187,9 @@
 </div>
 </details>
 <details class="nav-group" data-nav-group="">
-<summary><span class="nav-group-icon" data-icon="user"><svg aria-hidden="true" viewbox="0 0 24 24"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg></span><strong>My Account</strong><small>14</small></summary>
+<summary><span class="nav-group-icon" data-icon="user"><svg aria-hidden="true" viewbox="0 0 24 24"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg></span><strong>My Account</strong><small>15</small></summary>
 <div class="nav-group-links">
+<button class="side-link" data-nav-label="Getting Started" data-section="overview" data-view="getting-started" type="button"><span aria-hidden="true" class="side-link-icon" data-icon="list-checks">✓</span><span class="side-link-copy"><strong>Getting Started</strong><small>Account Setup &amp; Help</small></span></button>
 <button class="side-link" data-nav-label="Linked PSN Accounts" data-section="overview" data-view="linked-psns" type="button"><span aria-hidden="true" class="side-link-icon" data-icon="gamepad-2"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6.5 9h11a5 5 0 0 1 4.8 3.6l.8 3.8a2.5 2.5 0 0 1-3.7 2.7l-3.7-2.4H8.3l-3.7 2.4A2.5 2.5 0 0 1 .9 16.4l.8-3.8A5 5 0 0 1 6.5 9Z"></path><path d="M7 12v4M5 14h4M16.5 12.5h.01M19 14.5h.01"></path></svg></span><span class="side-link-copy"><strong>Linked PSN Accounts</strong><small>Primary &amp; Verified Alts</small></span></button>
 <button class="side-link" data-nav-label="Account Centre" data-section="account" data-view="players" type="button"><span aria-hidden="true" class="side-link-icon" data-icon="user"><svg aria-hidden="true" viewbox="0 0 24 24"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg></span><span class="side-link-copy"><strong>Account Centre</strong><small>Discord And Survivor Identity</small></span></button>
 <button class="side-link" data-nav-label="Wallet &amp; Economy" data-section="wallet" data-view="economy" type="button"><span aria-hidden="true" class="side-link-icon" data-icon="wallet"><svg aria-hidden="true" viewbox="0 0 24 24"><path d="M4 6h15a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12"></path><path d="M16 11h5v4h-5a2 2 0 0 1 0-4Z"></path></svg></span><span class="side-link-copy"><strong>Wallet &amp; Economy</strong><small>Balance And Statistics</small></span></button>
@@ -982,6 +984,39 @@ Participation | 50000 | 0"></textarea><small>One line per prize: Prize name | Cu
 </article>
 <article class="panel mission-file-panel" data-dashboard-section="files" id="dashboard-serverconfig-files"><div class="panel-heading"><div><p class="panel-kicker">Live Nitrado mission files</p><h2>Mission File Editor</h2></div><div class="heading-actions"><select aria-label="Managed mission file" class="config-file-select" data-config-file-select=""><option value="">Select managed file…</option></select><button class="secondary-action compact-action" data-load-config-file="" type="button">Load File</button></div></div><div class="file-editor-meta"><span data-config-file-path="">No file loaded</span><span data-config-file-sha="">—</span><span data-config-file-size="">—</span></div><textarea aria-label="Mission file contents" class="mission-file-editor" data-config-file-content="" placeholder="Select a managed XML, JSON or text file." spellcheck="false"></textarea><label class="dialog-field"><span>Deployment reason <small>Required when applying</small></span><input data-config-file-reason="" maxlength="500" placeholder="Describe the intended server change" type="text"/></label><div class="heading-actions"><button class="secondary-action" data-validate-config-file="" type="button">Validate &amp; Diff</button><button class="primary-action danger-action" data-apply-config-file="" type="button">Backup &amp; Apply</button></div><div class="restart-dialog-message" data-config-file-message="" hidden="" role="status"></div><pre class="config-diff-output" data-config-file-diff="">No diff generated.</pre></article>
 <article class="panel events-zone-panel" data-dashboard-section="events" id="dashboard-serverconfig-events"><div class="panel-heading"><div><p class="panel-kicker">Central Economy</p><h2>Events &amp; Zones</h2></div><button class="secondary-action compact-action" data-refresh-server-events="" type="button">Refresh Events</button></div><div class="operations-summary-grid"><div><span>Events</span><strong data-server-event-count="">—</strong></div><div><span>Active</span><strong data-server-active-count="">—</strong></div><div><span>Positions</span><strong data-server-position-count="">—</strong></div><div><span>Zones</span><strong data-server-zone-count="">—</strong></div></div><label class="command-search"><span aria-hidden="true">⌕</span><span class="sr-only">Search events</span><input data-server-event-search="" placeholder="Search event, classname or group…" type="search"/></label><div class="responsive-table"><table><thead><tr><th>Event</th><th>Children</th><th>Population</th><th>Positions</th><th>State</th></tr></thead><tbody data-server-event-list=""></tbody></table></div><p class="table-note" data-server-event-empty="" hidden="">No events match this search.</p><p class="table-note history-error" data-server-event-error="" hidden="">Event configuration is temporarily unavailable.</p></article>
+</section>
+<section aria-labelledby="wwz-getting-started-title" class="dashboard-view wwz-v323-view" data-view-panel="getting-started" hidden="">
+  <div class="view-heading" data-dashboard-section="overview" id="dashboard-getting-started">
+    <div><p class="breadcrumb">Dashboard / My Account / Getting Started</p><h1 id="wwz-getting-started-title">Your World War Z Setup</h1>
+    <p>See what is already complete and find the next step for your PlayStation survivor. Your progress is checked automatically.</p></div>
+  </div>
+  <article class="panel wwz-v323-progress" data-v323-progress="">
+    <div class="panel-heading"><div><p class="panel-kicker">Account Setup</p><h2 data-v323-heading="">Your checklist</h2></div><span class="muted-label" data-v323-server="">Choose a server</span></div>
+    <div class="wwz-v323-progress-top"><strong data-v323-count="">Checking your account…</strong><button class="secondary-action compact-action" type="button" data-v323-refresh="">Refresh</button></div>
+    <div class="wwz-v323-track" role="progressbar" aria-label="Setup progress" aria-valuemin="0" aria-valuemax="4" aria-valuenow="0" data-v323-track=""><span data-v323-fill=""></span></div>
+    <p class="wwz-v323-status" data-v323-status="" aria-live="polite">Sign in with Discord and select a Nasdara server to see your progress.</p>
+    <ol class="wwz-v323-checklist" data-v323-checklist=""></ol>
+    <p class="wwz-v323-privacy">Setup progress is read directly from your existing account. It does not issue rewards, move money, link accounts automatically, or reset anything.</p>
+  </article>
+  <div class="wwz-v323-next">
+    <article class="panel"><h2>Once you're set up</h2><p>Explore Nasdara, view your balance and browse the Survivor Shop. Adding a second PlayStation account is optional.</p>
+      <div class="wwz-v323-links">
+        <button type="button" class="secondary-action" data-v323-route="map">Explore Nasdara</button>
+        <a class="secondary-action" href="shop.html">Browse Survivor Shop</a>
+        <button type="button" class="secondary-action" data-v323-route="linked-psns">Manage PlayStation Accounts</button>
+      </div>
+    </article>
+    <article class="panel"><h2>Common questions</h2>
+      <div class="wwz-v323-faq">
+        <details><summary>How do I confirm my PlayStation account?</summary><p>Enter your PlayStation ID on the Linked PlayStation Accounts page or through the Discord linking panel. Join the selected DayZ server with that account within 15 minutes. We'll confirm it when you join.</p></details>
+        <details><summary>Can I use more than one PlayStation account?</summary><p>Yes. You can link up to two additional PlayStation IDs after confirming your main account. If another account already has saved progress, contact an administrator before linking it.</p></details>
+        <details><summary>Why are my PvE and PvP balances different?</summary><p>Each Nasdara server has its own balance, bank savings, purchases and progression. Your confirmed PlayStation IDs share the relevant balance within a server, not across both servers.</p></details>
+        <details><summary>When will my item or vehicle arrive?</summary><p>Delivery depends on the order type and may require a normal server restart. Check My Orders for the current status. If an order has not arrived when expected, open a support ticket with the order number.</p></details>
+        <details><summary>What if I need help?</summary><p>Use Support Tickets in the Companion dashboard or Discord. Please include your selected server, PlayStation ID and relevant order number, if applicable. Never share passwords or sign-in codes.</p></details>
+      </div>
+      <div class="wwz-v323-links"><button type="button" class="secondary-action" data-v323-route="tickets">Open Support Tickets</button><a class="secondary-action" href="rules.html">Read Server Rules</a></div>
+    </article>
+  </div>
 </section>
 <section aria-labelledby="wwz-psn-alts-title" class="dashboard-view" data-view-panel="linked-psns" hidden="">
   <div class="view-heading" data-dashboard-section="overview" id="dashboard-linked-psn-overview">
@@ -2004,6 +2039,7 @@ CarBattery,1" rows="6"></textarea></label>
 <script defer src="assets/js/site-policy-acceptance.js?v=1.1.1&amp;rev=single-account-prompt-1"></script>
 <script defer src="assets/js/dashboard/policy-account-v318.js?v=3.19.1&amp;rev=audit-route-1"></script>
 <script defer src="assets/js/dashboard/linked-psn-v320.js?v=3.20.3&amp;rev=psn-alts-4"></script>
+<script defer src="assets/js/dashboard/getting-started-v323.js?v=3.23.0&amp;rev=player-guide-1"></script>
 <script defer src="assets/js/dashboard/psn-alt-admin-v321.js?v=3.21.0&amp;rev=psn-admin-1"></script>
 </body>
 </html>
