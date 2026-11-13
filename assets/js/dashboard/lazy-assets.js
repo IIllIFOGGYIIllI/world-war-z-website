@@ -243,7 +243,7 @@
 
   const ensureShopController = () => Promise.all([ensureShopHelpers(), ensureCheckoutIdempotency()]).then(() => loadScriptOnce(
     'shop-controller',
-    'assets/js/dashboard/shop.js?v=2.1.1&rev=phase2-reliability-1&portfolio=1',
+    'assets/js/dashboard/shop.js?v=2.1.1&rev=phase2-reliability-1&portfolio=1&copy=plain-1',
     () => window.__wwzShopControllerReady === true
   ));
 
