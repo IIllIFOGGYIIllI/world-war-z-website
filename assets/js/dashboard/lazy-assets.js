@@ -369,11 +369,11 @@
   ));
 
   const ensureCommunity = () => Promise.all([
-    loadStylesheetOnce('community-css', 'assets/css/dashboard/community.css?v=2.4.2&rev=badlands-release-1'),
+    loadStylesheetOnce('community-css', 'assets/css/dashboard/community.css?v=2.4.2&rev=calendar-dialog-polish-1'),
     loadStylesheetOnce('vehicle-bounties-css', 'assets/css/dashboard/vehicle-bounties.css?v=2'),
     ensureRaidWeekendCalendar().then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
       'community',
-      'assets/js/dashboard/community.js?v=2.4.3&rev=nasdara-eventdesk-1&stage6=raid-damage-1&lifecycle=2&preflight=1&events=2&recovery=3&ownerreview=1&pvemode=1&wipenotice=1',
+      'assets/js/dashboard/community.js?v=2.4.3&rev=nasdara-eventdesk-1&stage6=raid-damage-1&lifecycle=2&preflight=1&events=2&recovery=3&ownerreview=1&pvemode=1&wipenotice=1&dialogpolish=1',
       () => window.__wwzCommunityReady === true
     ))),
     loadAfterDashboardRuntime(() => loadScriptOnce(
