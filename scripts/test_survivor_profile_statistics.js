@@ -27,6 +27,10 @@ for (const selector of [
 
 assert.ok(account.includes('profile.distance_travelled_metres'), 'Account Profile must render validated travel distance');
 assert.ok(account.includes('profile.distance_tracked_since'), 'Account Profile must show the travel tracking baseline');
+assert.ok(account.includes('profile.travel_psn_accounts_included'), 'Account Profile must show the verified PSN contribution count');
+assert.ok(page.includes('data-profile-travel-account-scope'), 'Account Profile needs an accessible PSN travel-scope label');
+assert.ok(home.includes('profile.travel_psn_accounts_included') && home.includes('scopedTravelNote'), 'Member Home must label combined verified PSN travel');
+assert.ok(page.includes('account.js?v=1.60.0&amp;rev=career-records-1&amp;iosreturn=5&amp;copy=plain-1&amp;psntravel=2'), 'Account Profile must use a fresh asset URL');
 for (const selector of ['data-admin-player-distance-travelled', 'data-admin-player-distance-tracked-since']) {
   assert.ok(page.includes(selector), 'Admin dossier is missing ' + selector);
   assert.ok(adminPlayers.includes(selector), 'Admin dossier renderer is missing ' + selector);
@@ -93,7 +97,7 @@ for (const label of [
 assert.ok(homeCss.includes('.my-wwz-stat-grid'), 'Survivor stat grid styling is missing');
 assert.ok(homeCss.includes('@media (max-width: 720px)'), 'Tablet/mobile stat layout is missing');
 assert.ok(homeCss.includes('@media (max-width: 520px)'), 'Small-screen stat layout is missing');
-assert.ok(bootstrap.includes('my-wwz.js?v=1.41.5&rev=profile-gps-v32-1'));
+assert.ok(bootstrap.includes('my-wwz.js?v=1.41.5&rev=profile-gps-v32-1&travel=1&portfolio=1&psntravel=2'));
 assert.ok(bootstrap.includes('my-wwz.css?v=1.41.4&rev=v3-overview-organised-1'));
 assert.ok(page.includes('assets/js/dashboard/account.js?'), 'Account renderer must be loaded by the dashboard');
 assert.ok(/const WWZ_PWA_UPDATE_REVISION = '[A-Za-z0-9][A-Za-z0-9._-]*';/.test(serviceWorker), 'PWA update revision must be present');
