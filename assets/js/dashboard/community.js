@@ -323,6 +323,38 @@
     }
   };
 
+  // Owner-only maintenance status. This screen has no activation, restart or
+  // upload control; the two REST actions are read-only by server-side contract.
+  const renderVehicleWipePanel=(state=null)=>{
+    const server=window.WWZServerContext?.getSelectedServer?.();
+    const eligible=dashboardAccessLevel==='owner'&&server?.map_key==='badlands'&&
+      ['pve','pvp'].includes(server?.gameplay_mode);
+    const panel=qs('[data-vehicle-wipe-owner]');
+    if(panel)panel.hidden=!eligible;
+    if(!eligible)return;
+    const next=state?.next_proposed_window||
+      window.WWZRaidWeekends?.vehicleWipesForServer?.(server,Date.now(),1)?.[0]?.starts_at;
+    const nextOut=qs('[data-vehicle-wipe-next]');
+    if(nextOut)nextOut.textContent=next?fmtSydney(next):'Schedule unavailable';
+    const phase=String(state?.phase||'idle').replaceAll('_',' ');
+    const phaseOut=qs('[data-vehicle-wipe-phase]');
+    if(phaseOut)phaseOut.textContent=phase==='idle'?'No Active Cycle':
+      phase.replace(/^./,letter=>letter.toUpperCase());
+    const stateOut=qs('[data-vehicle-wipe-state]');
+    if(stateOut)stateOut.textContent='Automation Disabled';
+    const summary=qs('[data-vehicle-wipe-summary]');
+    if(summary)summary.textContent=state?.attention_required
+      ? 'Owner review is required: '+String(state.error_reason||'a previous maintenance cycle is unresolved')+
+        '. No further wipe will be attempted.'
+      :state?.paused
+        ? 'This server is paused. Live Nitrado file inspection is unavailable; no changes are permitted.'
+        :'Execution is disabled. Read-only checks are available to inspect the existing 28-class vehicle exclusions and recovery state.';
+    const out=qs('[data-vehicle-wipe-result]');
+    if(out&&out.dataset.serverScope!==selectedScope()){
+      out.textContent='';out.hidden=true;out.dataset.serverScope=selectedScope();
+    }
+  };
+
   const renderPlanner = (payload={}) => {
     const owner=dashboardAccessLevel==='owner'; const canPlan=['staff','owner'].includes(dashboardAccessLevel);
     const ownerEditor=qs('[data-community-owner-editor]');if(ownerEditor)ownerEditor.hidden=!canPlan;
@@ -336,6 +368,7 @@
     const templateChannel=qs('[data-community-template-channel]');if(templateChannel)templateChannel.innerHTML='<option value="">No Discord announcement</option>'+channelOptions;
     const calendarChannel=qs('[data-community-calendar-channel]');if(calendarChannel){const selected=String(payload.calendar_panel?.channel_id||'');calendarChannel.innerHTML='<option value="">Choose Discord channel…</option>'+channelOptions;if(selected)calendarChannel.value=selected;}
     renderRaidPanel(payload.raid_damage_automation || null);
+    renderVehicleWipePanel(payload.vehicle_wipe_maintenance || null);
     const panelState=qs('[data-community-calendar-panel-state]');if(panelState)panelState.textContent=payload.calendar_panel?.message_id?`Published · channel ${payload.calendar_panel.channel_id}`:'No panel published yet.';
     const locationSelect=qs('[data-community-template-location]');if(locationSelect)locationSelect.innerHTML='<option value="">Choose reusable location…</option>'+optionList(payload.locations||[],'label');
     const loadoutSelect=qs('[data-community-template-loadout]');if(loadoutSelect)loadoutSelect.innerHTML='<option value="">No preset</option>'+optionList(payload.loadouts||[]);
@@ -419,6 +452,65 @@
   qs('[data-community-schedule]')?.addEventListener('click',async()=>{const id=Number(qs('[data-community-template-select]')?.value||0);const local=qs('[data-community-starts]')?.value;if(!id||!local){setStatus('Choose an event plan and start time.','error');return;}const repeating=Boolean(qs('[data-community-repeat-toggle]')?.checked);const occurrences=repeating?Math.max(2,Number(qs('[data-community-occurrences]')?.value||2)):1;const repeatDays=Math.max(1,Number(qs('[data-community-repeat-days]')?.value||7));try{await adminAction({action:repeating?'schedule_series':'schedule',template_id:id,starts_at:new Date(local).toISOString(),occurrences,repeat_days:repeatDays,overrides:{discord_channel_id:qs('[data-community-channel]')?.value||''}});}catch(e){setStatus(e.message,'error');}});
   qs('[data-community-start-now]')?.addEventListener('click',async()=>{const id=Number(qs('[data-community-template-select]')?.value||0);if(!id){setStatus('Choose an event plan first.','error');return;}try{await adminAction({action:'start_now',template_id:id,overrides:{discord_channel_id:qs('[data-community-channel]')?.value||''}});}catch(e){setStatus(e.message,'error');}});
   root.querySelectorAll('[data-event-preset]').forEach(btn=>btn.addEventListener('click',()=>applyPreset(btn.dataset.eventPreset)));
+  const inspectVehicleWipe=async(action,buttonSelector)=>{
+    if(dashboardAccessLevel!=='owner')return;
+    const server=window.WWZServerContext?.getSelectedServer?.();
+    if(server?.map_key!=='badlands'||!['pve','pvp'].includes(server.gameplay_mode))return;
+    const scope=selectedScope();
+    const button=qs(buttonSelector),output=qs('[data-vehicle-wipe-result]');
+    if(button)button.disabled=true;
+    if(output){
+      output.hidden=false;output.dataset.kind='checking';
+      output.dataset.serverScope=scope;
+      output.textContent='Inspecting the selected Nasdara server (read only)…';
+    }
+    try{
+      const reply=await request(API.adminAction,{
+        method:'POST',body:JSON.stringify({action})
+      },true);
+      if(scope!==selectedScope())return;
+      const report=reply.result||{};
+      if(output&&action==='vehicle_wipe_preflight'){
+        const issues=Array.isArray(report.blockers)?report.blockers:[];
+        const manual=Array.isArray(report.manual_checks)?report.manual_checks:[];
+        output.dataset.kind=report.technical_ready?'ready':'blocked';
+        output.textContent=(report.technical_ready
+          ?'Configuration checks passed — live wipe automation is still disabled.'
+          :'Inspection found blockers — do not start maintenance.')
+          +'\nVehicle exclusions: '+(report.comment_block_verified
+            ?String(report.vehicle_classes||0)+' reviewed classes verified':'Not verified')
+          +'\nMission folder: '+(report.mission_verified?'Verified':'Not verified')
+          +'\nPvE protection: '+(report.raid_protection?.applicable
+            ?report.raid_protection.policy_verified?'Verified':'Not verified'
+            :'Not applicable for PvP')
+          +'\nNext planned window: '+(report.next_proposed_window?fmtSydney(report.next_proposed_window):'Unavailable')
+          +(issues.length?'\nBlockers: '+issues.join(' | '):'')
+          +(manual.length?'\nOwner checks: '+manual.join(' | '):'')
+          +'\nNo files were changed and no restart was requested.';
+      }else if(output){
+        output.dataset.kind=report.attention_required?'blocked':'ready';
+        output.textContent=(report.active?'Previous Maintenance Needs Review':'No Unfinished Maintenance')
+          +'\nFile state: '+String(report.file_state||'Unavailable').replaceAll('_',' ')
+          +'\nSaved phase: '+String(report.phase||'Idle').replaceAll('_',' ')
+          +'\nGuidance: '+String(report.guidance||'Inspect the selected server before attempting maintenance.')
+          +'\nNo file upload, recovery write or restart occurred.';
+      }
+    }catch(error){
+      if(scope!==selectedScope())return;
+      if(output){
+        output.dataset.kind='blocked';
+        output.textContent='Read-only vehicle maintenance inspection failed: '+
+          String(error.message||'Unavailable')+'. No server changes were requested.';
+      }
+    }finally{
+      if(button)button.disabled=false;
+    }
+  };
+  qs('[data-vehicle-wipe-preflight]')?.addEventListener('click',()=>
+    inspectVehicleWipe('vehicle_wipe_preflight','[data-vehicle-wipe-preflight]'));
+  qs('[data-vehicle-wipe-recovery]')?.addEventListener('click',()=>
+    inspectVehicleWipe('vehicle_wipe_recovery_check','[data-vehicle-wipe-recovery]'));
+
   qs('[data-raid-preflight]')?.addEventListener('click', async () => {
     if (dashboardAccessLevel !== 'owner') return;
     const server = window.WWZServerContext?.getSelectedServer?.();
@@ -673,9 +765,9 @@
     else if (loud) setStatus('Community data refreshed.', 'success');
     else setStatus();
   };
-  const activate=({section=''}={})=>{active=true;renderRaidPanel(adminPayload?.raid_damage_automation || null);refresh();clearInterval(refreshTimer);refreshTimer=setInterval(()=>{if(active)loadOverview().catch(()=>{});},60000);if(section==='planner'&&!['staff','owner'].includes(dashboardAccessLevel))setStatus('Staff access is required for Event Planner.','error');};
+  const activate=({section=''}={})=>{active=true;renderRaidPanel(adminPayload?.raid_damage_automation || null);renderVehicleWipePanel(adminPayload?.vehicle_wipe_maintenance || null);refresh();clearInterval(refreshTimer);refreshTimer=setInterval(()=>{if(active)loadOverview().catch(()=>{});},60000);if(section==='planner'&&!['staff','owner'].includes(dashboardAccessLevel))setStatus('Staff access is required for Event Planner.','error');};
   window.addEventListener('wwz:viewchange',(event)=>{if(event.detail?.view==='community')activate(event.detail);else active=false;});
-  window.addEventListener('wwz:accesschange',()=>renderRaidPanel(adminPayload?.raid_damage_automation || null));
+  window.addEventListener('wwz:accesschange',()=>{renderRaidPanel(adminPayload?.raid_damage_automation || null);renderVehicleWipePanel(adminPayload?.vehicle_wipe_maintenance || null);});
   window.addEventListener('wwz:serverchange',()=>{selectedRunId=null;adminPayload=null;accountPayload=null;overview=null;clearTemplate();renderPlanner({});document.querySelector('[data-event-dialog]')?.remove();renderEvents([]);if(active)refresh();});
   window.addEventListener('wwz:authchange',()=>{accountPayload=null;adminPayload=null;clearTemplate();renderPlanner({});document.querySelector('[data-event-dialog]')?.remove();renderEvents(overview?.events||[]);if(active)refresh();});
   window.__wwzCommunityReady=true;
