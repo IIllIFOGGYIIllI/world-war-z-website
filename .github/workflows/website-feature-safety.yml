@@ -29,6 +29,7 @@ jobs:
           node scripts/test_shop_checkout_retries.js
           node scripts/test_survivor_profile_statistics.js
           node scripts/test_stage6_raid_calendar.js
+          node scripts/test_calendar_detail_polish.js
           node scripts/test_rental_map_and_server_labels.js
           node scripts/test_rental_portfolio_gps_performance.js
           node scripts/test_ui_polish_consistency.js
