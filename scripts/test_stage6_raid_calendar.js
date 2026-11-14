@@ -35,6 +35,12 @@ assert.equal(vehicleWipesForServer({key:'other',map_key:'chernarus',gameplay_mod
 assert.equal(mergeEvents([],pve,now).filter(x=>x.event_type==='vehicle_wipe').length,12);
 assert.equal(mergeEvents(wipes,pve,now).filter(x=>x.event_type==='vehicle_wipe').length,12,
   'Bot-fed maintenance entries must not duplicate client fallback');
+const realMonday={...wipes[0],id:77,starts_at:'2026-11-23T05:00:00+11:00',virtual_vehicle_wipe:false};
+const mergedMonday=mergeEvents([realMonday],pve,now);
+assert.equal(mergedMonday.filter(x=>x.event_type==='vehicle_wipe').length,12,
+  'An actual Monday maintenance entry with Sydney offset replaces the virtual one');
+assert.ok(mergedMonday.some(x=>x.id===77));
+assert.ok(!mergedMonday.some(x=>x.id===-200001));
 assert.equal(mergeEvents([],pvp,now).filter(x=>x.event_type==='raid_weekend').length,0);
 assert.equal(mergeEvents([],pvp,now).filter(x=>x.event_type==='vehicle_wipe').length,12);
 const after=vehicleWipesForServer(pve,Date.parse('2026-11-24T00:00:00Z'),1)[0];
