@@ -364,7 +364,7 @@
 
   const ensureRaidWeekendCalendar = () => loadAfterDashboardRuntime(() => loadScriptOnce(
     'raid-weekend-calendar',
-    'assets/js/dashboard/raid-weekends.js?v=1.0.0&rev=stage6-fortnightly-1',
+    'assets/js/dashboard/raid-weekends.js?v=1.0.1&rev=post-raid-maintenance-1',
     () => Boolean(window.WWZRaidWeekends?.mergeEvents)
   ));
 
@@ -373,7 +373,7 @@
     loadStylesheetOnce('vehicle-bounties-css', 'assets/css/dashboard/vehicle-bounties.css?v=2'),
     ensureRaidWeekendCalendar().then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
       'community',
-      'assets/js/dashboard/community.js?v=2.4.3&rev=nasdara-eventdesk-1&stage6=raid-damage-1&lifecycle=2&preflight=1&events=2&recovery=3&ownerreview=1&pvemode=1',
+      'assets/js/dashboard/community.js?v=2.4.3&rev=nasdara-eventdesk-1&stage6=raid-damage-1&lifecycle=2&preflight=1&events=2&recovery=3&ownerreview=1&pvemode=1&wipenotice=1',
       () => window.__wwzCommunityReady === true
     ))),
     loadAfterDashboardRuntime(() => loadScriptOnce(
