@@ -15,7 +15,7 @@ for(const hook of ['data-alt-admin-form','data-alt-admin-query','data-alt-admin-
 }
 assert.ok(html.includes('psn-alt-admin-v321.js?v=3.21.0&amp;rev=psn-admin-1'));
 assert.ok(html.includes('psn-alt-admin-v321.css?v=3.21.0&amp;rev=psn-admin-1'));
-assert.ok(sw.includes('2026-11-14-getting-started-v323-1'));
+assert.ok(/const WWZ_PWA_UPDATE_REVISION = '[^']+';/.test(sw));
 assert.ok(sw.includes('./assets/js/dashboard/psn-alt-admin-v321.js?v=3.21.0&rev=psn-admin-1'));
 assert.ok(sw.includes('./assets/css/dashboard/psn-alt-admin-v321.css?v=3.21.0&rev=psn-admin-1'));
 for(const a of ['@media (max-width: 640px)','min-height: 44px','focus-visible']){

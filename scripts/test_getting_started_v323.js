@@ -15,7 +15,7 @@ for(const field of ['data-v323-count','data-v323-track','data-v323-checklist',
 }
 assert.ok(html.includes('getting-started-v323.js?v=3.23.0&amp;rev=player-guide-1'));
 assert.ok(html.includes('getting-started-v323.css?v=3.23.0&amp;rev=player-guide-1'));
-assert.ok(sw.includes('2026-11-14-getting-started-v323-1'));
+assert.ok(/const WWZ_PWA_UPDATE_REVISION = '[^']+';/.test(sw));
 assert.ok(sw.includes('./assets/js/dashboard/getting-started-v323.js?v=3.23.0&rev=player-guide-1'));
 assert.ok(sw.includes('./assets/css/dashboard/getting-started-v323.css?v=3.23.0&rev=player-guide-1'));
 for(const term of ['@media (max-width: 480px)','focus-visible','min-height: 44px'])

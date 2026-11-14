@@ -455,6 +455,10 @@
     const travelNote = trackedSinceDate && Number.isFinite(trackedSinceDate.getTime())
       ? 'Validated movement since ' + trackedSinceDate.toLocaleDateString('en-AU')
       : 'Validated ADM movement';
+    const travelPsnCount = Math.max(0, Math.floor(Number(profile.travel_psn_accounts_included) || 0));
+    const scopedTravelNote = travelPsnCount > 1
+      ? `${travelNote} · ${travelPsnCount} verified PlayStation accounts`
+      : travelNote;
     const recentTravel = profile.travel_summary || {};
     const formatRecentTravel = (metres) => {
       const number = Math.max(0, Number(metres) || 0);
@@ -469,7 +473,7 @@
 
     grid.replaceChildren(
       metric('Playtime', duration(profile.playtime_seconds), 'Tracked server time'),
-      metric('Distance travelled', travelDisplay, travelNote),
+      metric('Distance travelled', travelDisplay, scopedTravelNote),
       metric('Last 24h travel', formatRecentTravel(recentTravel.last_24h_metres), 'Validated ADM movement'),
       metric('Last 7 days', formatRecentTravel(recentTravel.last_7d_metres), 'Recorded movement only'),
       metric('Best recorded session', formatRecentTravel(recentTravel.best_recorded_session_7d_metres), 'Within last 7 days'),

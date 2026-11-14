@@ -271,6 +271,13 @@ const applyAccountSummary = (payload) => {
     : Math.round(travelMetres).toLocaleString('en-AU') + ' m';
   setText('[data-profile-distance-travelled]', travelDisplay);
   setText('[data-profile-distance-tracked-since]', formatAccountDate(profile.distance_tracked_since));
+  const travelPsnCount = Math.max(0, Math.floor(Number(profile.travel_psn_accounts_included) || 0));
+  setText(
+    '[data-profile-travel-account-scope]',
+    travelPsnCount > 1
+      ? `Includes ${travelPsnCount} currently verified PlayStation accounts on this server.`
+      : 'Movement is recorded for the selected server only.'
+  );
   const recentTravel = profile.travel_summary || {};
   const formatValidatedMetres = (raw) => {
     const metres = Math.max(0, Number(raw) || 0);
