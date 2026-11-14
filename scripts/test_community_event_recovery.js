@@ -12,7 +12,7 @@ const planner=page.indexOf('data-dashboard-section="planner"');
 assert.ok(readiness>0 && readiness<analytics && analytics<planner,'Raid readiness must be before analytics, not buried in Planner');
 assert.equal(page.match(/data-raid-damage-controls hidden/g)?.length,1);
 assert.ok(app.includes('const renderRaidPanel = (state = null) =>'));
-assert.ok(app.includes('renderRaidPanel(adminPayload?.raid_damage_automation || null);refresh()'),'Controls visible even if workspace API fails');
+assert.ok(app.includes('renderRaidPanel(adminPayload?.raid_damage_automation || null);renderVehicleWipePanel(adminPayload?.vehicle_wipe_maintenance || null);refresh()'),'Raid and owner maintenance controls visible even if workspace API fails');
 assert.ok(app.includes("window.addEventListener('wwz:accesschange'"),'Owner permission updates independently');
 assert.ok(app.includes('raidToggle.disabled = !live ||'), 'Cannot arm without verified state');
 assert.ok(app.includes('const fallbackWindow = window.WWZRaidWeekends?.forServer?.'));
