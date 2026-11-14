@@ -590,7 +590,52 @@
   qs('[data-community-clear-template]')?.addEventListener('click',clearTemplate);qs('[data-community-clear-location]')?.addEventListener('click',clearLocation);qs('[data-community-clear-loadout]')?.addEventListener('click',clearLoadout);
   qs('[data-community-test-push]')?.addEventListener('click',async()=>{try{await adminAction({action:'test_push'});}catch(e){setStatus(e.message,'error');}});
   const showDialog=(title,body)=>{document.querySelector('[data-event-dialog]')?.remove();const d=document.createElement('dialog');d.dataset.eventDialog='';d.className='community-detail-dialog';d.innerHTML=`<form method="dialog"><button class="secondary-action">Close</button></form><h3>${esc(title)}</h3>${body}`;document.body.append(d);d.showModal();return d;};
-  const showEvent=(e)=>{if(!e)return;const d=showDialog(e.title,`<p>${esc(e.map_key||overview?.map_key)} · ${esc(e.lifecycle_state||e.status)} · ${esc(eventLabel(e))}</p><p>${esc(fmtDate(e.starts_at))} – ${e.ongoing?esc(eventEnding(e)):esc(fmtDate(e.ends_at))}</p><p>${esc(e.location_label||'Server-wide')}</p><p>${esc(e.description)}</p><h4>Rules</h4><p class="community-preserve-lines">${esc(e.rules_text)}</p><h4>Setup / Objective</h4><p class="community-preserve-lines">${esc(e.setup_text)}</p>${eventHasRewards(e)?`<h4>Rewards</h4><p>${esc(rewardsText(e))}</p>`:''}${eventMapUrl(e)?`<a class="secondary-action" href="${esc(eventMapUrl(e))}">View on WWZ Map</a>`:''}<h4>Activity timeline</h4>${(e.activity||[]).map(a=>`<article><strong>${esc(a.action.replaceAll('_',' '))}</strong><small> ${esc(fmtDate(a.created_at))}</small><p>${esc(a.detail)}</p></article>`).join('')||'<p>No updates yet.</p>'}${['staff','owner'].includes(dashboardAccessLevel)&&Number(e.id)>0?`<button data-dialog-edit class="secondary-action">Edit / Reschedule</button>`:''}${e.signup_enabled&&['scheduled','active'].includes(e.status)&&(e.visibility!=='hidden'||e.published_at)?'<button data-dialog-register class="primary-action">Register</button>':''}`);d.querySelector('[data-dialog-edit]')?.addEventListener('click',()=>{d.close();editRun(e.id);});d.querySelector('[data-dialog-register]')?.addEventListener('click',async()=>{try{await memberEventAction('signup',e.id);d.close();}catch(error){setStatus(error.message,'error');}});};
+  // Presentation-only calendar details: virtual raid/wipe dates are notices,
+  // not editable community runs, registrations or Nitrado operations.
+  const showEvent=(e)=>{
+    if(!e)return;
+    const isWipe=Boolean(e.virtual_vehicle_wipe||e.event_type==='vehicle_wipe');
+    const isRaid=Boolean(e.virtual_raid_weekend||e.event_type==='raid_weekend');
+    const virtual=Boolean(isWipe||e.virtual_raid_weekend);
+    const title=isWipe?'Planned Vehicle Wipe — Post-Raid':isRaid?'Fortnightly Raid Weekend':String(e.title||'Community Event');
+    const category=isWipe?'Server Maintenance':isRaid?'Raid Weekend':String(e.category||eventLabel(e)||'Community Event');
+    const state=isWipe?'Planned — Automation Not Enabled':
+      isRaid?(e.status==='active'?'Live — Verify Server Rules':'Scheduled — Confirm Activation In Discord'):
+      String(e.lifecycle_state||e.status||'Scheduled').replaceAll('_',' ');
+    const summary=isWipe
+      ? 'Vehicle maintenance is proposed for the Monday after each raid weekend. All vehicles, including rentals, are included. The two-restart automation is not enabled yet.'
+      :isRaid
+        ? 'Fortnightly full-map PvP and base raiding on Nasdara PvE. Check Discord to confirm the raid is active and to review the current rules.'
+        :String(e.description||'Event details and schedule.');
+    const fact=(label,value)=>`<div class='wwz-event-detail-fact'><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`;
+    const starts=fmtDate(e.starts_at);
+    const ends=e.ongoing?eventEnding(e):fmtDate(e.ends_at);
+    const schedule=`<dl class='wwz-event-detail-facts'>${fact(isWipe?'Planned Start':'Starts',starts)}${!isWipe?fact('Ends',ends):''}${fact('Status',state)}</dl>`;
+    const alert=isWipe
+      ? `<aside class='wwz-event-detail-notice' role='note'><strong>Planned Maintenance Only</strong><p>Automated vehicle wipes and the two maintenance restarts are not active. Vehicles and stored cargo may be lost when maintenance is eventually enabled; rental orders will remain.</p></aside>`
+      :isRaid?`<aside class='wwz-event-detail-notice' role='note'><strong>Raid Activation Notice</strong><p>The calendar lists published dates only. Verify that PvP, base damage and container damage are active before participating.</p></aside>`:'';
+    const rules=String(e.rules_text||'').trim();
+    const setup=virtual?'':String(e.setup_text||'').trim();
+    const collapsible=(label,content)=>content?`<details class='wwz-event-detail-more'><summary>${esc(label)}</summary><div class='community-preserve-lines'>${esc(content)}</div></details>`:'';
+    const customLocation=!virtual&&e.location_label&&!/^(server-wide|nasdara pve — full map|nasdara pvp — server-wide)$/i.test(String(e.location_label).trim())
+      ? `<div class='wwz-event-detail-location'><strong>Location</strong><span>${esc(e.location_label)}</span></div>`:'';
+    const activity=Array.isArray(e.activity)?e.activity:[];
+    const timeline=!virtual&&activity.length
+      ? `<details class='wwz-event-detail-more'><summary>Activity Timeline (${activity.length})</summary><div class='wwz-event-detail-timeline'>${activity.map(a=>`<article><strong>${esc(String(a.action||'Update').replaceAll('_',' '))}</strong><small>${esc(fmtDate(a.created_at))}</small><p>${esc(a.detail||'')}</p></article>`).join('')}</div></details>`:'';
+    const rewards=eventHasRewards(e)?`<section class='wwz-event-detail-rewards'><strong>Event Rewards</strong><p>${esc(rewardsText(e))}</p></section>`:'';
+    const actions=`<div class='wwz-event-detail-actions'>${eventMapUrl(e)?`<a class='secondary-action' href='${esc(eventMapUrl(e))}'>View Event On WWZ Map</a>`:''}${['staff','owner'].includes(dashboardAccessLevel)&&Number(e.id)>0?`<button data-dialog-edit class='secondary-action' type='button'>Edit / Reschedule</button>`:''}${e.signup_enabled&&Number(e.id)>0&&['scheduled','active'].includes(e.status)&&(e.visibility!=='hidden'||e.published_at)?`<button data-dialog-register class='primary-action' type='button'>Register For Event</button>`:''}</div>`;
+    const body=`<div class='wwz-event-detail'>
+      <div class='wwz-event-detail-eyebrow'>${esc(category)}</div>
+      <p class='wwz-event-detail-summary'>${esc(summary)}</p>
+      ${schedule}${alert}${customLocation}${rewards}
+      ${collapsible('Event Rules',rules)}${collapsible('Additional Information',setup)}${timeline}${actions}
+      <p class='wwz-event-detail-timezone'>Event times are shown in your device's local time zone.</p>
+    </div>`;
+    const d=showDialog(title,body);
+    d.classList.add('community-event-detail-modal');
+    d.querySelector('[data-dialog-edit]')?.addEventListener('click',()=>{d.close();editRun(e.id);});
+    d.querySelector('[data-dialog-register]')?.addEventListener('click',async()=>{try{await memberEventAction('signup',e.id);d.close();}catch(error){setStatus(error.message,'error');}});
+  };
   const editRun=(id,copy=false)=>{const r=(adminPayload?.runs||[]).find(e=>Number(e.id)===Number(id));if(!r)return;clearTemplate();const E=plannerForm.elements;for(const [key,value] of Object.entries(r)){if(E[key]){if(E[key].type==='checkbox')E[key].checked=Boolean(value);else setFriendlyValue(E[key],value??'');}}E.name.value=r.title;E.run_id.value=copy?'':r.id;E.template_id.value='';E.reward_categories.value=rewardLines(r.reward_categories);E.reward_money.value=r.attendance_money||0;E.winner_reward_money.value=r.winner_money||0;E.reward_xp.value=r.attendance_xp||0;E.winner_reward_xp.value=r.winner_xp||0;
     E.restart_enabled.checked=Number(r.restart_minutes_before||0)>0;
     E.rewards_enabled.checked=eventHasRewards(r);
