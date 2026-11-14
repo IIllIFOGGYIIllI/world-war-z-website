@@ -215,3 +215,46 @@
   .wwz-event-detail-facts{grid-template-columns:1fr;}
   .wwz-event-detail-actions :is(a,button){width:100%;flex:1 1 100%;}
 }
+
+/* Nasdara Owner Maintenance Centre — inspection only, no execution controls. */
+.community-vehicle-wipe{
+  display:grid;gap:14px;
+  padding:clamp(16px,2.5vw,24px);
+  border:1px solid rgba(177,211,234,.24);
+  border-radius:17px;
+  background:linear-gradient(140deg,#20394b,#142839);
+  color:#edf5fc;
+}
+.community-vehicle-wipe[hidden]{display:none!important}
+.community-vehicle-wipe .community-panel-heading{margin:0;align-items:center}
+.community-vehicle-wipe .community-panel-heading h3{
+  margin:4px 0;font:750 clamp(18px,2.2vw,23px)/1.25 Inter,"Segoe UI",system-ui,sans-serif;
+  color:#f4f9fc;
+}
+.community-vehicle-wipe>p{margin:0;color:#c3d6e3;line-height:1.6}
+.wwz-maintenance-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.wwz-maintenance-facts>div{
+  display:grid;gap:7px;min-width:0;
+  padding:13px 15px;border-radius:12px;
+  border:1px solid rgba(177,211,234,.16);
+  background:rgba(10,24,37,.3);
+}
+.wwz-maintenance-facts span{font-size:.77rem;text-transform:uppercase;letter-spacing:.07em;color:#acc7d8}
+.wwz-maintenance-facts strong{color:#f4f9fc;font-size:.94rem;line-height:1.45;overflow-wrap:anywhere}
+.community-vehicle-wipe .community-actions{gap:10px}
+.community-vehicle-wipe .community-actions button{min-height:44px}
+.community-vehicle-wipe .wwz-maintenance-result{
+  display:block;max-width:100%;margin:0;padding:14px;
+  background:rgba(9,24,35,.6);
+  border:1px solid rgba(177,211,234,.25);
+  border-radius:12px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6;
+  color:#dfeefa;
+}
+.community-vehicle-wipe .wwz-maintenance-result[hidden]{display:none!important}
+.community-vehicle-wipe .wwz-maintenance-result[data-kind="blocked"]{border-color:rgba(240,151,111,.6);color:#ffe5d3}
+.community-vehicle-wipe .wwz-maintenance-result[data-kind="ready"]{border-color:rgba(131,211,172,.45)}
+@media(max-width:620px){
+  .wwz-maintenance-facts{grid-template-columns:1fr}
+  .community-vehicle-wipe .community-actions{display:grid;grid-template-columns:1fr}
+  .community-vehicle-wipe .community-actions button{width:100%}
+}
