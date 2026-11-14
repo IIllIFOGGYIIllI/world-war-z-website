@@ -62,7 +62,13 @@ const mergeEvents=(events,server,now=Date.now())=>{
   const existing=Array.isArray(events)?events:[];
   const planned=[...forServer(server,now),...vehicleWipesForServer(server,now)];
   if(!planned.length)return existing;
-  const uniqueDay=e=>String(e.event_type||'')+':'+String(e.starts_at||'').slice(0,10);
+  const localDay=e=>{
+    const stamp=new Date(e.starts_at||'');
+    if(Number.isNaN(stamp.getTime()))return String(e.starts_at||'').slice(0,10);
+    const p=Object.fromEntries(dtf.formatToParts(stamp).map(x=>[x.type,x.value]));
+    return `${p.year}-${p.month}-${p.day}`;
+  };
+  const uniqueDay=e=>String(e.event_type||'')+':'+localDay(e);
   const existingDays=new Set(existing
     .filter(e=>['raid_weekend','vehicle_wipe'].includes(e.event_type)).map(uniqueDay));
   return [...existing,...planned.filter(e=>!existingDays.has(uniqueDay(e)))]
