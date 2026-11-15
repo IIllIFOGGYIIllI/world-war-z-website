@@ -486,7 +486,14 @@
           `<div class="wwz-maintenance-check" data-check="${passed===null?'neutral':passed?'passed':'blocked'}">
              <span>${esc(label)}</span><strong>${esc(value)}</strong>
            </div>`).join('');
-        const ownerList=manual.map(item=>`<li>${esc(item)}</li>`).join('');
+        // Server-side manual_checks describe future operator responsibilities,
+        // NOT checks verified or acknowledged by the user.
+        const pendingOwnerChecks=manual.filter(item=>
+          !/live two-restart execution is not installed or armed/i.test(item)
+          && !/after each restart/i.test(item));
+        const duringMaintenanceChecks=manual.filter(item=>/after each restart/i.test(item));
+        const ownerList=pendingOwnerChecks.map(item=>`<li>${esc(item)}</li>`).join('');
+        const restartList=duringMaintenanceChecks.map(item=>`<li>${esc(item)}</li>`).join('');
         const blockers=issues.length?`<section class="wwz-maintenance-issues">
           <h4>Items Requiring Attention</h4><ul>${issues.map(item=>`<li>${esc(item)}</li>`).join('')}</ul>
         </section>`:'';
@@ -501,7 +508,13 @@
             <strong>${esc(report.next_proposed_window?fmtSydney(report.next_proposed_window):'Unavailable')}</strong></div>
           ${blockers}
           ${ownerList?`<section class="wwz-maintenance-owner-checks">
-            <h4>Owner Checklist</h4><ul>${ownerList}</ul>
+            <h4>Owner Review — Not Yet Confirmed</h4>
+            <p class="wwz-maintenance-review-note">These steps require confirmation before a future live maintenance run. None have been marked complete.</p>
+            <ul>${ownerList}</ul>
+          </section>`:''}
+          ${restartList?`<section class="wwz-maintenance-owner-checks wwz-maintenance-during">
+            <h4>During Maintenance (When Enabled)</h4>
+            <ul>${restartList}</ul>
           </section>`:''}
           <footer>No Files Were Changed. No Restarts Were Requested.</footer>
         </div>`;

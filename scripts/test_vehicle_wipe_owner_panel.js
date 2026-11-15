@@ -63,13 +63,19 @@ assert.equal(el('[data-vehicle-wipe-owner]').hidden,true,'Retired worlds exclude
 
 assert.ok(css.includes('.community-vehicle-wipe[hidden]{display:none!important}'));
 assert.ok(css.includes('@media(max-width:620px)'));
-assert.ok(lazy.includes('vehicle-wipe-readiness-1'));
-assert.ok(lazy.includes('ownerwipe=1'));
-assert.ok(sw.includes('2026-11-16-pwa-auto-updates-1'));
+assert.ok(lazy.includes('wipe-owner-review-2'));
+assert.ok(lazy.includes('ownerwipe=1&reviewpending=2'));
+assert.ok(sw.includes('2026-11-16-owner-review-not-confirmed-1'));
 assert.ok(js.includes('wwz-maintenance-report-header'),'Structured readiness report should be used');
 assert.ok(js.includes('wwz-maintenance-owner-checks'),'Owner checks should render individually');
-assert.ok(js.includes('manual.map(item=>'),'Owner manual checks must be separate bullet items');
+assert.ok(js.includes('pendingOwnerChecks.map(item=>'),'Owner manual checks must be separate bullet items');
 assert.ok(js.includes('esc(item)'),'Remote checklist copy must be HTML escaped');
+assert.ok(js.includes('Owner Review — Not Yet Confirmed'),'Manual responsibilities must not imply completion');
+assert.ok(js.includes('During Maintenance (When Enabled)'),'Post-restart instructions should not be preflight passes');
+assert.ok(css.includes(".wwz-maintenance-owner-checks li:before{") || css.includes(".wwz-maintenance-owner-checks li:before{"),
+  'Owner checklist must use neutral pending markers');
+assert.ok(!css.includes(".wwz-maintenance-report li:before{content:'✓'"),
+  'Manual tasks must not appear as verified green ticks');
 assert.ok(css.includes('.wwz-maintenance-report ul'));
 assert.ok(css.includes('.wwz-maintenance-checks{grid-template-columns:1fr}'));
 console.log('PASS: owner-only PvE/PvP readiness UI, structured mobile checks, disabled execution and PWA assets');
