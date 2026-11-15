@@ -18,8 +18,8 @@ assert.ok(page.includes('data-zone-save-status=""'), 'Footer status target missi
 assert.ok(!page.includes('checked="" data-zone-ping-on-detection=""'), 'Unsafe radar default in HTML');
 assert.ok(!page.includes('checked="" data-zone-alert-enter=""'), 'Unsafe entry alert default in HTML');
 assert.ok(css.includes('.zone-save-status[data-kind="error"]'), 'Footer error style missing');
-assert.ok(lazy.includes('zones.js?v=1.59.5&rev=manual-coords-1'), 'Updated module not cache-busted');
-assert.ok(lazy.includes('zones.css?v=1.59.5&rev=manual-coords-1'), 'Updated stylesheet not cache-busted');
+assert.ok(lazy.includes('zones.js?v=1.59.5&rev=nasdara-policy-cleanup-1'), 'Updated module not cache-busted');
+assert.ok(lazy.includes('zones.css?v=1.59.5&rev=nasdara-policy-cleanup-1'), 'Updated stylesheet not cache-busted');
 assert.ok(page.includes('lazy-assets.js?v=2.8.6&amp;rev=player-gps-1&amp;leaderboardfix=1'), 'Updated loader not cache-busted');
 assert.match(sw, /WWZ_PWA_UPDATE_REVISION = '\d{4}-\d{2}-\d{2}-[a-z0-9-]+';/, 'PWA refresh token missing');
 console.log('Nasdara zone-save frontend checks passed.');
