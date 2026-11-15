@@ -298,3 +298,28 @@
   .wwz-maintenance-report{gap:13px}
   .wwz-maintenance-check{padding:11px 12px}
 }
+
+/* Owner-only vehicle maintenance arming; read-only checks stay separate. */
+.wwz-wipe-activation{
+  display:grid;gap:14px;padding:16px;border:1px solid rgba(164,199,223,.23);
+  border-radius:14px;background:rgba(9,23,36,.34);
+}
+.wwz-wipe-activation-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.wwz-wipe-activation-header h4{margin:0;font-size:1rem;color:#f4f9fc}
+.wwz-wipe-activation-header>span{font-size:.76rem;font-weight:750;color:#f5c6a8;letter-spacing:.01em}
+.wwz-wipe-activation>p{margin:0;color:#c6d8e5;line-height:1.55}
+.wwz-wipe-ack{
+  display:flex;align-items:flex-start;gap:12px;padding:12px;
+  border:1px solid rgba(164,199,223,.17);border-radius:10px;
+  background:rgba(26,52,70,.46);line-height:1.5;color:#e0edf6;
+}
+.wwz-wipe-ack input{flex:0 0 auto;width:20px;height:20px;margin:1px 0 0;accent-color:#dc7764}
+.wwz-wipe-ack span{min-width:0;overflow-wrap:anywhere}
+.wwz-wipe-activation-actions{display:flex;gap:10px;flex-wrap:wrap}
+.wwz-wipe-activation-actions button{min-height:44px;flex:1 1 190px}
+.wwz-wipe-activation-actions button:disabled{opacity:.5;cursor:not-allowed}
+@media(max-width:560px){
+  .wwz-wipe-activation{padding:13px}
+  .wwz-wipe-activation-actions{display:grid;grid-template-columns:1fr}
+  .wwz-wipe-activation-actions button{width:100%}
+}
