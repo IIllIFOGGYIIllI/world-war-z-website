@@ -82,3 +82,50 @@
 }
 .community-raid-controls .raid-restore-review[hidden],
 .community-raid-controls [data-raid-restoration-confirm][hidden] { display: none !important; }
+
+
+/* Readable owner overview after raid automation has been armed. */
+.community-raid-controls .raid-armed-overview {
+  display: grid;
+  gap: 13px;
+  min-width: 0;
+  margin: 14px 0 18px;
+  padding: 17px;
+  background: rgba(22,60,51,.22);
+  border: 1px solid rgba(107,202,154,.30);
+  border-radius: 12px;
+}
+.community-raid-controls .raid-armed-overview[hidden] { display: none !important; }
+.community-raid-controls .raid-armed-overview-title {
+  display: flex; align-items: center; gap: 10px; min-width: 0;
+}
+.community-raid-controls .raid-armed-overview-title strong {
+  margin: 0; font-size: 1rem; color: #b7e9cc;
+}
+.community-raid-controls .raid-armed-indicator {
+  flex: 0 0 9px; width: 9px; height: 9px; border-radius: 50%;
+  background: #69d8a0; box-shadow: 0 0 0 5px rgba(105,216,160,.12);
+}
+.community-raid-controls .raid-armed-overview > p {
+  margin: 0; color: #d2e2df; line-height: 1.6;
+}
+.community-raid-controls .raid-armed-steps {
+  display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px;
+}
+.community-raid-controls .raid-armed-steps > div {
+  display: grid; align-content: start; gap: 6px; min-width: 0;
+  padding: 12px; border-radius: 10px; border: 1px solid rgba(157,204,190,.18);
+  background: rgba(7,28,33,.45);
+}
+.community-raid-controls .raid-armed-steps span {
+  color: #a6c7cc; font-size: .75rem; letter-spacing: .04em; text-transform: uppercase;
+}
+.community-raid-controls .raid-armed-steps strong {
+  margin: 0; font-size: .96rem; line-height: 1.3; color: #eefbf6;
+}
+.community-raid-controls .raid-armed-steps small {
+  color: #bfd1d6; font-size: .82rem; line-height: 1.45;
+}
+@media (max-width: 850px) {
+  .community-raid-controls .raid-armed-steps { grid-template-columns: 1fr; }
+}
