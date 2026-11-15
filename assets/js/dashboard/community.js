@@ -307,6 +307,15 @@
         raidAlert.textContent += ' Nitrado restart cycle was not verified within 20 minutes; do not assume the game loaded the changes.';
       }
     }
+    // Replace setup instructions with a concise live overview once the
+    // server itself confirms that the Owner has armed future raid openings.
+    const armedOverview = qs('[data-raid-armed-overview]');
+    const armConfirmed = live && raid.enabled === true;
+    if (armedOverview) armedOverview.hidden = !armConfirmed;
+    for (const selector of ['[data-raid-introduction]', '[data-raid-setup-guidance]']) {
+      const guidance = qs(selector);
+      if (guidance) guidance.hidden = armConfirmed;
+    }
     const raidStatus = qs('[data-raid-damage-status]');
     if (raidStatus) {
       raidStatus.textContent = !live
