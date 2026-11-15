@@ -2040,8 +2040,10 @@ def validate_pwa(errors: list[str], info: list[str]) -> None:
     # commit as any deployable website-content change.
     if not re.search(r"^const WWZ_PWA_UPDATE_REVISION = '[A-Za-z0-9][A-Za-z0-9._-]*';$", service_worker, re.MULTILINE):
         errors.append("sw.js: missing or malformed WWZ_PWA_UPDATE_REVISION")
-    if not re.search(r'^const APP_CACHE_RELEASE = `\$\{WWZ_PWA_VERSION\}-[A-Za-z0-9][A-Za-z0-9._-]*`;$', service_worker, re.MULTILINE):
-        errors.append("sw.js: missing or malformed versioned APP_CACHE_RELEASE")
+    # The shell/static cache must rotate WITH every deployed revision.
+    # Map cache revisions remain independent, preserving large satellite tiles.
+    if "const APP_CACHE_RELEASE = `${WWZ_PWA_VERSION}-${WWZ_PWA_UPDATE_REVISION}`;" not in service_worker:
+        errors.append("sw.js: APP_CACHE_RELEASE must use the current update revision")
     app_shell_start = service_worker.find("const APP_SHELL = [")
     app_shell_end = service_worker.find("].map(scopedUrl);", app_shell_start)
     app_shell = service_worker[app_shell_start:app_shell_end] if app_shell_start >= 0 and app_shell_end >= 0 else ""
