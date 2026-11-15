@@ -337,3 +337,24 @@
   .zone-point-row-actions { grid-column: 2 / -1; justify-content: flex-end; }
   .zone-coordinate-entry { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+
+/* Override the legacy Impact display face only for the Zones header.
+   In Windows/Opera this oversized condensed face can render overlapping glyphs. */
+.zones-view-heading > div { flex: 1 1 auto; min-width: 0; }
+.zones-view-heading h1 {
+  font-family: "Segoe UI", Inter, Arial, sans-serif;
+  font-size: clamp(2rem, 3.4vw, 3.15rem);
+  font-weight: 800;
+  font-stretch: normal;
+  letter-spacing: -.02em;
+  line-height: 1.15;
+  text-transform: none;
+  text-shadow: none;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+@media (max-width: 980px) {
+  .zones-view-heading { align-items: flex-start; flex-direction: column; }
+  .zones-view-heading h1 { font-size: clamp(1.85rem, 6vw, 2.65rem); }
+}
