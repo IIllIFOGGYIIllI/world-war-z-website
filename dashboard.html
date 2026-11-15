@@ -33,7 +33,7 @@
 <link href="assets/css/dashboard/ios-auth.css?v=1.22.93&amp;iosreturn=5" rel="stylesheet"/>
 <link href="assets/css/dashboard/mobile-reliability.css?v=1.22.93&rev=tablet-1" rel="stylesheet"/>
 <link href="assets/css/dashboard/status-timing.css?v=1.22.93&rev=stage5-1" rel="stylesheet"/>
-<link href="assets/css/dashboard/raid-controls.css?v=1.0&rev=stage6-damage-1&amp;lifecycle=2&amp;preflight=1&amp;ownerreview=1&amp;pvemode=1" rel="stylesheet"/>
+<link href="assets/css/dashboard/raid-controls.css?v=1.0&rev=stage6-damage-1&amp;lifecycle=2&amp;preflight=1&amp;ownerreview=1&amp;pvemode=1&amp;previewtest=1" rel="stylesheet"/>
 <link href="assets/css/dashboard/shop-phase2.css?v=1.22.93&rev=phase2-1" rel="stylesheet"/>
 <meta name="twitter:image:alt" content="World War Z Badlands — calibrated Nasdara satellite terrain and roads">
 <link rel="stylesheet" href="assets/css/site-refinement.css?v=2.1.0&amp;rev=sitewide-ui-1"/>
@@ -511,6 +511,19 @@
           </div>
         </div>
         <button class="secondary-action" data-raid-damage-toggle type="button">Enable raid automation</button>
+      </section>
+      <section class="wwz-automation-preview" data-automation-preview-owner hidden>
+        <div>
+          <span class="community-kicker">Owner Notification Testing</span>
+          <h3>Raid &amp; Vehicle Wipe Announcement Previews</h3>
+          <p>Send four clearly marked test messages to the approved private testing channel: Raid Opening, Raid Closing, 24-Hour Vehicle Wipe Warning and One-Hour Warning. No player pings, Nitrado requests, wipes or schedule changes.</p>
+          <p class="wwz-automation-preview-destination">Test destination: <strong>#1571670011234226277</strong> · Real announcements remain separate.</p>
+        </div>
+        <div class="community-actions">
+          <button class="secondary-action" data-automation-send-test type="button">Send Four Test Previews</button>
+          <a class="secondary-action" href="https://discord.com/channels/1410680659126784074/1571670011234226277" target="_blank" rel="noopener noreferrer">Open Test Channel</a>
+        </div>
+        <p class="community-inline-note" role="status" data-automation-test-result hidden></p>
       </section>
 
 
