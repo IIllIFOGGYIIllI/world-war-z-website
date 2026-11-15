@@ -1,0 +1,18 @@
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const html=fs.readFileSync('dashboard.html','utf8');
+const js=fs.readFileSync('assets/js/dashboard/community.js','utf8');
+const lazy=fs.readFileSync('assets/js/dashboard/lazy-assets.js','utf8');
+const sw=fs.readFileSync('sw.js','utf8');
+assert.ok(html.includes('The named Full Map PvE player-kill-ban zone is suspended after the raid-opening restart is observed'));
+assert.ok(html.includes('unrelated zones are left unchanged'));
+assert.ok(html.includes('Confirm the named Full Map PvE zone is active with player-kill bans enabled'));
+assert.ok(js.includes('Raid automation armed · manages base/container damage, the named Full Map PvE player-kill-ban zone'));
+assert.ok(js.includes('in-game notices and Nitrado restarts at raid boundaries'));
+assert.ok(js.includes('The separate map-wide kill-ban zone is untouched.'),'Read-only inspection must remain safe');
+assert.ok(!js.includes('The separate map-wide kill-ban zone will remain untouched.'),'Activation consent must accurately describe the named-zone effect');
+assert.ok(!html.includes('The separate map-wide kill-ban zone is not modified.'));
+assert.ok(lazy.includes('&raidzonecopy=1'),'Browser cache invalidation needed');
+assert.ok(sw.includes('2026-11-16-raid-zone-copy-1'),'Installed PWA update needed');
+console.log('PASS: accurate raid zone consent copy and read-only safeguards');
