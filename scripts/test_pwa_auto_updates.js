@@ -35,6 +35,7 @@ const controls={textContent:'',dataset:{},disabled:false,
 const state={textContent:'',dataset:{}};
 const nodes={};
 const doc={
+  baseURI:'https://iillifoggyiilli.github.io/world-war-z-website/',
   body:{append(node){if(node.dataset?.pwaUpdateBanner!==undefined)nodes.banner=node;}},
   querySelector(selector){
     if(selector==='[data-pwa-update-banner]')return nodes.banner||null;
@@ -49,6 +50,7 @@ const doc={
   },
   createElement(tag){
     const node={tag,dataset:{},hidden:false,events:{},children:[],
+      setAttribute(name,value){this[name]=value;},
       addEventListener(type,fn){this.events[type]=fn;},
       append(...children){this.children.push(...children);},
     };
