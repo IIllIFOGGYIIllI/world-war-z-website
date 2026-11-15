@@ -27,7 +27,9 @@ assert.deepEqual(Array.from(wipes,x=>x.starts_at),[
   '2026-12-20T18:00:00.000Z'
 ]);
 assert.ok(wipes.every(x=>x.event_type==='vehicle_wipe'&&x.virtual_vehicle_wipe&&x.signup_enabled===false));
-assert.ok(wipes.every(x=>x.description.includes('not yet enabled')));
+assert.ok(wipes.every(x=>x.description.includes('Check Discord for the current maintenance activation status.')));
+assert.ok(wipes.every(x=>x.wipe_automation_enabled===null),
+  'Offline calendar cannot know a live server activation state');
 const pvp={key:'nasdara-pvp',map_key:'badlands',gameplay_mode:'pvp'};
 assert.equal(forServer(pvp,now).length,0,'PvP has no PvE raid events');
 assert.equal(vehicleWipesForServer(pvp,now,1)[0].starts_at,wipes[0].starts_at);
