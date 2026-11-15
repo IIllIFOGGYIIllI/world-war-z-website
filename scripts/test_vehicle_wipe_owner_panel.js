@@ -65,5 +65,11 @@ assert.ok(css.includes('.community-vehicle-wipe[hidden]{display:none!important}'
 assert.ok(css.includes('@media(max-width:620px)'));
 assert.ok(lazy.includes('vehicle-wipe-readiness-1'));
 assert.ok(lazy.includes('ownerwipe=1'));
-assert.ok(sw.includes('2026-11-15-vehicle-wipe-readiness-1'));
-console.log('PASS: owner-only PvE/PvP readiness UI, retired-map scope, disabled execution and PWA assets');
+assert.ok(sw.includes('2026-11-16-pwa-auto-updates-1'));
+assert.ok(js.includes('wwz-maintenance-report-header'),'Structured readiness report should be used');
+assert.ok(js.includes('wwz-maintenance-owner-checks'),'Owner checks should render individually');
+assert.ok(js.includes('manual.map(item=>'),'Owner manual checks must be separate bullet items');
+assert.ok(js.includes('esc(item)'),'Remote checklist copy must be HTML escaped');
+assert.ok(css.includes('.wwz-maintenance-report ul'));
+assert.ok(css.includes('.wwz-maintenance-checks{grid-template-columns:1fr}'));
+console.log('PASS: owner-only PvE/PvP readiness UI, structured mobile checks, disabled execution and PWA assets');
