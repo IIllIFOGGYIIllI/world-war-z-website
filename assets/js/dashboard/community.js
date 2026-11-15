@@ -253,6 +253,8 @@
     const raidServer = window.WWZServerContext?.getSelectedServer?.();
     const raidEligible = raidServer?.map_key === 'badlands' && raidServer?.gameplay_mode === 'pve';
     if (raidControls) raidControls.hidden = !(owner && raidEligible);
+    const previews = qs('[data-automation-preview-owner]');
+    if (previews) previews.hidden = !(owner && raidEligible);
     for (const selector of ['[data-raid-preflight-result]', '[data-raid-recovery-result]', '[data-raid-restoration-result]']) {
       const output = qs(selector);
       if (output && output.dataset.serverScope !== selectedScope()) {
@@ -813,6 +815,29 @@
     } finally {
       if (toggle) toggle.disabled = false;
     }
+  });
+  qs('[data-automation-send-test]')?.addEventListener('click', async () => {
+    if (dashboardAccessLevel !== 'owner') return;
+    const server = window.WWZServerContext?.getSelectedServer?.();
+    if (server?.map_key !== 'badlands' || server?.gameplay_mode !== 'pve') return;
+    const scope = selectedScope();
+    if (!confirm('Send four TEST-ONLY raid and vehicle-wipe announcement previews to the private test channel? No players will be pinged and no DayZ actions will run.')) return;
+    const button = qs('[data-automation-send-test]');
+    const output = qs('[data-automation-test-result]');
+    if (button) button.disabled = true;
+    if (output) { output.hidden = false; output.textContent = 'Sending four test-only Discord previews…'; }
+    try {
+      // Do not use adminAction: this is a Discord-only delivery, not a saved
+      // schedule edit; there is no reason to reload or touch live DayZ data.
+      const response = await request(API.adminAction, {
+        method: 'POST',
+        body: JSON.stringify({action:'automation_notification_test',confirm:'SEND_TEST_ONLY_NO_PINGS'})
+      }, true);
+      if (scope !== selectedScope()) return;
+      if (output) output.textContent = response.message || 'Test previews delivered.';
+    } catch (error) {
+      if (scope === selectedScope() && output) output.textContent = 'Test delivery failed: ' + (error.message || 'Unknown Discord error');
+    } finally { if (button) button.disabled = false; }
   });
   qs('[data-community-calendar-publish]')?.addEventListener('click',async()=>{const channelId=qs('[data-community-calendar-channel]')?.value||'';if(!channelId){setStatus('Choose a Discord channel for the Event Calendar panel.','error');return;}try{await adminAction({action:'calendar_panel_publish',channel_id:channelId});}catch(e){setStatus(e.message,'error');}});
   root.querySelectorAll('[data-calendar-view]').forEach(btn=>btn.addEventListener('click',()=>{calendarView=btn.dataset.calendarView;renderCalendar(calendarRows());}));

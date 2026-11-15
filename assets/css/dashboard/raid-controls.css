@@ -129,3 +129,27 @@
 @media (max-width: 850px) {
   .community-raid-controls .raid-armed-steps { grid-template-columns: 1fr; }
 }
+
+
+/* Owner-only Discord preview surface; no DayZ maintenance action is exposed. */
+.wwz-automation-preview {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  padding: 19px;
+  margin: 14px 0 24px;
+  border: 1px solid rgba(148,183,206,.28);
+  border-radius: 13px;
+  background: rgba(19,39,57,.55);
+}
+.wwz-automation-preview[hidden] { display: none !important; }
+.wwz-automation-preview h3 { margin: 6px 0 10px; line-height: 1.25; font-size: 1.13rem; }
+.wwz-automation-preview p { margin: 0; color: #c8d8e6; line-height: 1.6; }
+.wwz-automation-preview .wwz-automation-preview-destination { color: #c7cfdb; font-size: .87rem; }
+.wwz-automation-preview .community-actions { flex-wrap: wrap; gap: 9px; }
+.wwz-automation-preview .community-actions > * { min-height: 44px; }
+.wwz-automation-preview [data-automation-test-result] { overflow-wrap: anywhere; }
+@media (max-width: 560px) {
+  .wwz-automation-preview { padding: 14px; }
+  .wwz-automation-preview .community-actions > * { width: 100%; text-align: center; }
+}
