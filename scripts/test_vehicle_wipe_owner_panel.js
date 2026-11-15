@@ -13,8 +13,14 @@ for(const text of [
   'data-vehicle-wipe-owner','data-vehicle-wipe-next','data-vehicle-wipe-phase',
   'data-vehicle-wipe-preflight','data-vehicle-wipe-recovery','data-vehicle-wipe-result'
 ])assert.ok(html.includes(text),'Missing owner maintenance field '+text);
-assert.ok(html.includes('Neither button uploads files'));
-assert.ok(!html.includes('data-vehicle-wipe-enable'), 'Never expose live activation');
+assert.ok(html.includes('The inspection buttons are always read-only'));
+assert.ok(html.includes('data-wipe-enable') && html.includes('data-wipe-disable'),
+  'Owner-only automation controls are visible when authorised');
+assert.ok(html.includes('data-wipe-ack-vehicles') && html.includes('data-wipe-ack-restarts'));
+assert.ok(js.includes("action:'vehicle_wipe_configure'"));
+assert.ok(js.includes('!state?.release_verified'),'Release gate must disable activation');
+assert.ok(js.includes('!ackVehicles?.checked||!ackRestarts?.checked'),
+  'Both owner acknowledgements are required before enabling');
 assert.ok(js.includes("vehicle_wipe_preflight"));
 assert.ok(js.includes("vehicle_wipe_recovery_check"));
 assert.ok(js.includes("body:JSON.stringify({action})"),'Read-only owner action should use protected API');
@@ -63,9 +69,9 @@ assert.equal(el('[data-vehicle-wipe-owner]').hidden,true,'Retired worlds exclude
 
 assert.ok(css.includes('.community-vehicle-wipe[hidden]{display:none!important}'));
 assert.ok(css.includes('@media(max-width:620px)'));
-assert.ok(lazy.includes('wipe-owner-review-2'));
-assert.ok(lazy.includes('ownerwipe=1&reviewpending=2'));
-assert.ok(sw.includes('2026-11-16-owner-review-not-confirmed-1'));
+assert.ok(lazy.includes('wipe-owner-controls-1'));
+assert.ok(lazy.includes('ownerwipe=1&reviewpending=2&wipecontrols=1'));
+assert.ok(sw.includes('2026-11-16-wipe-owner-controls-1'));
 assert.ok(js.includes('wwz-maintenance-report-header'),'Structured readiness report should be used');
 assert.ok(js.includes('wwz-maintenance-owner-checks'),'Owner checks should render individually');
 assert.ok(js.includes('pendingOwnerChecks.map(item=>'),'Owner manual checks must be separate bullet items');

@@ -341,14 +341,35 @@
     if(phaseOut)phaseOut.textContent=phase==='idle'?'No Active Cycle':
       phase.replace(/^./,letter=>letter.toUpperCase());
     const stateOut=qs('[data-vehicle-wipe-state]');
-    if(stateOut)stateOut.textContent='Automation Disabled';
+    if(stateOut)stateOut.textContent=state?.enabled?'Automatic Wipes Enabled':
+      state?.owner_armed?'Owner Armed — Release Gate Locked':'Automation Disabled';
     const summary=qs('[data-vehicle-wipe-summary]');
     if(summary)summary.textContent=state?.attention_required
-      ? 'Owner review is required: '+String(state.error_reason||'a previous maintenance cycle is unresolved')+
-        '. No further wipe will be attempted.'
+      ? 'Owner review required: '+String(state.error_reason||'a previous maintenance cycle is unresolved')+
+        '. Do not retry the wipe or restart without reviewing the saved file.'
       :state?.paused
-        ? 'This server is paused. Live Nitrado file inspection is unavailable; no changes are permitted.'
-        :'Execution is disabled. Read-only checks are available to inspect the existing 28-class vehicle exclusions and recovery state.';
+        ? 'This server is paused. Live file inspection and maintenance are disabled.'
+        :state?.enabled
+          ? 'Scheduled maintenance is armed for this server. Both Discord warnings and the verified post-raid safety checks must pass before the first restart.'
+          :'Read-only checks are available. Live maintenance remains disabled until Owner approval and the Railway release gate.';
+    const release=qs('[data-wipe-release-state]');
+    if(release)release.textContent=state?.release_verified?'Release Gate Approved':'Release Gate Not Approved';
+    const enable=qs('[data-wipe-enable]'),disable=qs('[data-wipe-disable]');
+    const ackVehicles=qs('[data-wipe-ack-vehicles]'),ackRestarts=qs('[data-wipe-ack-restarts]');
+    if(enable)enable.disabled=!state?.release_verified||state?.paused||
+      state?.owner_armed||state?.attention_required||
+      !ackVehicles?.checked||!ackRestarts?.checked;
+    if(disable)disable.disabled=!state?.owner_armed;
+    const activation=qs('[data-wipe-activation-status]');
+    if(activation)activation.textContent=state?.enabled
+      ? 'Armed for the selected server. Players will receive 24-hour and one-hour Discord notices.'
+      :state?.owner_armed
+        ? 'Owner approval is saved but the Railway release gate is disabled. No new wipe can start.'
+        :state?.paused
+          ? 'This server is paused and cannot be armed.'
+          :state?.release_verified
+            ? 'Release gate approved. Confirm both acknowledgements to enable scheduled maintenance.'
+            :'Live restart automation is locked until the separate Railway release gate is approved.';
     const out=qs('[data-vehicle-wipe-result]');
     if(out&&out.dataset.serverScope!==selectedScope()){
       out.textContent='';out.hidden=true;out.dataset.serverScope=selectedScope();
@@ -546,6 +567,45 @@
       if(button)button.disabled=false;
     }
   };
+  const syncWipeAcknowledgements=()=>{
+    renderVehicleWipePanel(adminPayload?.vehicle_wipe_maintenance||null);
+  };
+  qs('[data-wipe-ack-vehicles]')?.addEventListener('change',syncWipeAcknowledgements);
+  qs('[data-wipe-ack-restarts]')?.addEventListener('change',syncWipeAcknowledgements);
+  const configureVehicleWipe=async(enabled)=>{
+    if(dashboardAccessLevel!=='owner')return;
+    const server=window.WWZServerContext?.getSelectedServer?.();
+    if(server?.map_key!=='badlands'||!['pve','pvp'].includes(server.gameplay_mode))return;
+    const scope=selectedScope(),ackVehicles=Boolean(qs('[data-wipe-ack-vehicles]')?.checked),
+      ackRestarts=Boolean(qs('[data-wipe-ack-restarts]')?.checked);
+    if(enabled&&(!ackVehicles||!ackRestarts)){
+      setStatus('Confirm vehicle/cargo loss and the two DayZ restarts.','error');return;
+    }
+    const prompt=enabled
+      ?'Enable automatic full vehicle wipes for this Nasdara server after every fortnightly raid weekend? All vehicles (including rentals) and their cargo will be removed. There will be two DayZ restarts after the scheduled warnings.'
+      :'Disable future automatic vehicle wipes for this server? An already started maintenance cycle must still be safely completed.';
+    if(!window.confirm(prompt))return;
+    const button=qs(enabled?'[data-wipe-enable]':'[data-wipe-disable]');
+    if(button)button.disabled=true;
+    try{
+      await adminAction({
+        action:'vehicle_wipe_configure',enabled,
+        acknowledged_vehicle_loss:enabled&&ackVehicles,
+        acknowledged_two_restarts:enabled&&ackRestarts
+      });
+      if(scope!==selectedScope())return;
+      const first=qs('[data-wipe-ack-vehicles]'),second=qs('[data-wipe-ack-restarts]');
+      if(first)first.checked=false;
+      if(second)second.checked=false;
+      renderVehicleWipePanel(adminPayload?.vehicle_wipe_maintenance||null);
+    }catch(error){
+      if(scope===selectedScope())setStatus(error.message||'Unable to change vehicle maintenance settings.','error');
+      renderVehicleWipePanel(adminPayload?.vehicle_wipe_maintenance||null);
+    }
+  };
+  qs('[data-wipe-enable]')?.addEventListener('click',()=>configureVehicleWipe(true));
+  qs('[data-wipe-disable]')?.addEventListener('click',()=>configureVehicleWipe(false));
+
   qs('[data-vehicle-wipe-preflight]')?.addEventListener('click',()=>
     inspectVehicleWipe('vehicle_wipe_preflight','[data-vehicle-wipe-preflight]'));
   qs('[data-vehicle-wipe-recovery]')?.addEventListener('click',()=>
@@ -727,15 +787,21 @@
   const showEvent=(e)=>{
     if(!e)return;
     const isWipe=Boolean(e.virtual_vehicle_wipe||e.event_type==='vehicle_wipe');
+    const wipeArmed=e.wipe_automation_enabled===true;
+    const wipeUnverified=e.wipe_automation_enabled==null;
     const isRaid=Boolean(e.virtual_raid_weekend||e.event_type==='raid_weekend');
     const virtual=Boolean(isWipe||e.virtual_raid_weekend);
     const title=isWipe?'Planned Vehicle Wipe — Post-Raid':isRaid?'Fortnightly Raid Weekend':String(e.title||'Community Event');
     const category=isWipe?'Server Maintenance':isRaid?'Raid Weekend':String(e.category||eventLabel(e)||'Community Event');
-    const state=isWipe?'Planned — Automation Not Enabled':
+    const state=isWipe
+      ?(wipeArmed?'Scheduled — Automatic Wipe Armed':
+        wipeUnverified?'Planned — Confirm Activation In Discord':'Planned — Not Armed'):
       isRaid?(e.status==='active'?'Live — Verify Server Rules':'Scheduled — Confirm Activation In Discord'):
       String(e.lifecycle_state||e.status||'Scheduled').replaceAll('_',' ');
     const summary=isWipe
-      ? 'Vehicle maintenance is proposed for the Monday after each raid weekend. All vehicles, including rentals, are included. The two-restart automation is not enabled yet.'
+      ? (wipeArmed
+         ?'Automatic maintenance is armed for this server for the Monday after the raid weekend. All vehicles, including rentals, are included. Player warnings and preflight checks are required.'
+         :'Vehicle maintenance is planned for the Monday after each raid weekend. All vehicles, including rentals, are included. Check Discord for current activation status.')
       :isRaid
         ? 'Fortnightly full-map PvP and base raiding on Nasdara PvE. Check Discord to confirm the raid is active and to review the current rules.'
         :String(e.description||'Event details and schedule.');
@@ -744,7 +810,9 @@
     const ends=e.ongoing?eventEnding(e):fmtDate(e.ends_at);
     const schedule=`<dl class='wwz-event-detail-facts'>${fact(isWipe?'Planned Start':'Starts',starts)}${!isWipe?fact('Ends',ends):''}${fact('Status',state)}</dl>`;
     const alert=isWipe
-      ? `<aside class='wwz-event-detail-notice' role='note'><strong>Planned Maintenance Only</strong><p>Automated vehicle wipes and the two maintenance restarts are not active. Vehicles and stored cargo may be lost when maintenance is eventually enabled; rental orders will remain.</p></aside>`
+      ? `<aside class='wwz-event-detail-notice' role='note'><strong>${wipeArmed?'Automatic Maintenance Scheduled':'Planned Maintenance'}</strong><p>${wipeArmed
+          ?'Two DayZ restarts will be requested after the required player warnings and preflight checks. Vehicles, stored cargo and rental vehicles are included; rental order records remain.'
+          :'Activation is not confirmed for this event. The maintenance procedure removes vehicles, including rentals and their cargo, with two DayZ restarts. Check Discord for the latest status.'}</p></aside>`
       :isRaid?`<aside class='wwz-event-detail-notice' role='note'><strong>Raid Activation Notice</strong><p>The calendar lists published dates only. Verify that PvP, base damage and container damage are active before participating.</p></aside>`:'';
     const rules=String(e.rules_text||'').trim();
     const setup=virtual?'':String(e.setup_text||'').trim();

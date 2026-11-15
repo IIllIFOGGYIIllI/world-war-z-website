@@ -59,8 +59,14 @@ ctx.showEventForTest({...base,id:-200001,virtual_vehicle_wipe:true,event_type:'v
   title:'🚗 PLANNED VEHICLE WIPE — POST-RAID'});
 const wipe=details.at(-1);
 assert.equal(wipe.title,'Planned Vehicle Wipe — Post-Raid');
-assert.ok(wipe.html.includes('Planned — Automation Not Enabled'));
-assert.ok(wipe.html.includes('Automated vehicle wipes and the two maintenance restarts are not active'));
+assert.ok(wipe.html.includes('Planned — Confirm Activation In Discord'));
+assert.ok(wipe.html.includes('Activation is not confirmed for this event'));
+ctx.showEventForTest({...base,id:-200001,virtual_vehicle_wipe:true,event_type:'vehicle_wipe',
+  wipe_automation_enabled:true,title:'🚗 PLANNED VEHICLE WIPE — POST-RAID'});
+const armedWipe=details.at(-1);
+assert.ok(armedWipe.html.includes('Scheduled — Automatic Wipe Armed'));
+assert.ok(armedWipe.html.includes('Automatic Maintenance Scheduled'));
+assert.ok(armedWipe.html.includes('Two DayZ restarts will be requested'));
 assert.ok(!wipe.html.includes('Edit / Reschedule'));
 assert.ok(!wipe.html.includes('Register For Event'));
 assert.ok(!wipe.html.includes('No updates yet.'));
@@ -83,7 +89,7 @@ const lazy=fs.readFileSync('assets/js/dashboard/lazy-assets.js','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
 assert.ok(css.includes('.community-detail-dialog.community-event-detail-modal'));
 assert.ok(css.includes('@media(max-width:520px)'));
-assert.ok(lazy.includes('wipe-owner-review-2'));
+assert.ok(lazy.includes('wipe-owner-controls-1'));
 assert.ok(lazy.includes('dialogpolish=1'));
-assert.ok(sw.includes('2026-11-16-owner-review-not-confirmed-1'));
+assert.ok(sw.includes('2026-11-16-wipe-owner-controls-1'));
 console.log('PASS: polished raid/wipe/custom event dialogs, XSS escaping, mobile CSS and PWA assets');
