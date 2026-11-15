@@ -265,34 +265,117 @@
     syncInstallButtons();
   };
 
+  let activeServiceWorkerRegistration = null;
+  let lastForegroundCheckAt = 0;
+  let updateCheckPromise = null;
+  const FOREGROUND_UPDATE_CHECK_MS = 15 * 60_000;
+
+  const updateButtons = () => [...document.querySelectorAll('[data-pwa-check-updates]')];
+  const updateStatus = (message, tone = '') => {
+    document.querySelectorAll('[data-pwa-update-status]').forEach((label) => {
+      label.textContent = message;
+      label.dataset.tone = tone;
+    });
+  };
+
+  const ensureUpdateControls = () => {
+    // The dashboard has a dedicated Settings card and sidebar shortcut.
+    // For other pages, expose an unobtrusive manual check in site navigation.
+    if (!updateButtons().length) {
+      const navigation = document.querySelector('.site-navigation');
+      if (navigation) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.dataset.pwaCheckUpdates = '';
+        button.className = 'pwa-check-updates';
+        button.textContent = 'Check for Updates';
+        navigation.append(button);
+      }
+    }
+    updateButtons().forEach(button => {
+      if (button.dataset.pwaUpdateBound === '1') return;
+      button.dataset.pwaUpdateBound = '1';
+      button.addEventListener('click', () => { void checkForPwaUpdates({ manual: true }); });
+    });
+  };
+
+  const ensureUpdateConfirmation = () => {
+    let dialog = document.querySelector('[data-pwa-update-confirm]');
+    if (dialog) return dialog;
+    dialog = document.createElement('dialog');
+    dialog.className = 'pwa-dialog pwa-update-dialog';
+    dialog.dataset.pwaUpdateConfirm = '';
+    dialog.innerHTML = `
+      <form method="dialog">
+        <p class="pwa-dialog-kicker">WWZ Companion Update</p>
+        <h2>Install the New Version?</h2>
+        <p>The update has downloaded. The app will reload once to activate it. Save unfinished forms or edits before continuing.</p>
+        <div class="pwa-update-dialog-actions">
+          <button type="submit" value="later" class="pwa-update-cancel">Not Now</button>
+          <button type="submit" value="install" class="pwa-dialog-action">Update &amp; Reload</button>
+        </div>
+      </form>`;
+    document.body.append(dialog);
+    return dialog;
+  };
+
+  const confirmUpdate = async () => {
+    const dialog = ensureUpdateConfirmation();
+    if (typeof dialog.showModal !== 'function') {
+      return window.confirm('Install the new WWZ app update and reload now? Save unfinished changes first.');
+    }
+    if (dialog.open) return false;
+    return new Promise(resolve => {
+      dialog.addEventListener('close', () => resolve(dialog.returnValue === 'install'), { once: true });
+      dialog.showModal();
+    });
+  };
+
+  const applyWaitingUpdate = async () => {
+    const registration = activeServiceWorkerRegistration ||
+      await navigator.serviceWorker?.getRegistration?.();
+    if (!registration?.waiting || !navigator.serviceWorker?.controller) {
+      updateStatus('No downloaded update is waiting. Check again.', 'neutral');
+      return;
+    }
+    if (!await confirmUpdate()) return;
+    if (!registration.waiting) {
+      updateStatus('The update is no longer waiting. Check again.', 'neutral');
+      return;
+    }
+    try { sessionStorage.setItem(UPDATE_RELOAD_KEY, '1'); } catch {}
+    updateStatus('Activating update and reloading…', 'checking');
+    registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+  };
+
   const ensureUpdateBanner = () => {
     let banner = document.querySelector('[data-pwa-update-banner]');
     if (banner) return banner;
-
     banner = document.createElement('div');
     banner.className = 'pwa-update-banner';
     banner.dataset.pwaUpdateBanner = '';
+    banner.setAttribute('role', 'status');
+    banner.setAttribute('aria-live', 'polite');
     banner.hidden = true;
-
     const copy = document.createElement('span');
-    copy.textContent = 'A new WWZ app version is ready.';
+    copy.textContent = 'A WWZ Companion update has downloaded and is ready.';
     const button = document.createElement('button');
     button.type = 'button';
-    button.textContent = 'Update Now';
-    button.addEventListener('click', () => {
-      try { sessionStorage.setItem(UPDATE_RELOAD_KEY, '1'); } catch {}
-      navigator.serviceWorker?.getRegistration()?.then((registration) => {
-        registration?.waiting?.postMessage({ type: 'SKIP_WAITING' });
-      });
-    });
-    banner.append(copy, button);
+    button.textContent = 'Review Update';
+    button.addEventListener('click', () => { void applyWaitingUpdate(); });
+    const later = document.createElement('button');
+    later.type = 'button';
+    later.className = 'pwa-update-later';
+    later.textContent = 'Later';
+    later.addEventListener('click', () => { banner.hidden = true; });
+    banner.append(copy, button, later);
     document.body.append(banner);
     return banner;
   };
 
   const showUpdateReady = () => {
-    const banner = ensureUpdateBanner();
-    banner.hidden = false;
+    ensureUpdateBanner().hidden = false;
+    updateStatus('New version ready — choose Review Update to install.', 'ready');
   };
 
   const watchRegistration = (registration) => {
@@ -300,17 +383,21 @@
     registration.addEventListener('updatefound', () => {
       const worker = registration.installing;
       if (!worker) return;
+      updateStatus('Downloading an app update…', 'checking');
       worker.addEventListener('statechange', () => {
         if (worker.state === 'installed' && navigator.serviceWorker.controller) showUpdateReady();
+        if (worker.state === 'redundant' && !registration.waiting) {
+          updateStatus('Update installation was interrupted. Check again.', 'error');
+        }
       });
     });
   };
 
-  let activeServiceWorkerRegistration = null;
-  let lastForegroundCheckAt = 0;
-  const FOREGROUND_UPDATE_CHECK_MS = 15 * 60_000;
   const registerServiceWorker = async () => {
-    if (!('serviceWorker' in navigator) || !window.isSecureContext) return;
+    if (!('serviceWorker' in navigator) || !window.isSecureContext) {
+      updateStatus('Automatic updates are not supported in this browser.', 'error');
+      return null;
+    }
     try {
       const serviceWorkerUrl = new URL('sw.js', document.baseURI);
       const scopeUrl = new URL('./', document.baseURI);
@@ -320,20 +407,77 @@
       });
       activeServiceWorkerRegistration = registration;
       watchRegistration(registration);
-      lastForegroundCheckAt = Date.now();
-      registration.update().catch(() => null);
+      return registration;
     } catch (error) {
+      updateStatus('Unable to register app updates. Try again online.', 'error');
       console.warn('WWZ PWA service worker registration failed.', error);
+      return null;
     }
+  };
+
+  const checkForPwaUpdates = async ({ manual = false } = {}) => {
+    if (updateCheckPromise) return updateCheckPromise;
+    if (!('serviceWorker' in navigator) || !window.isSecureContext) {
+      updateStatus('This browser cannot check installed-app updates.', 'error');
+      return false;
+    }
+    if (navigator.onLine === false) {
+      updateStatus('You are offline. Connect to the internet to check for updates.', 'error');
+      return false;
+    }
+    updateButtons().forEach(button => { button.disabled = true; });
+    if (manual) updateStatus('Checking for the latest WWZ Companion version…', 'checking');
+    updateCheckPromise = (async () => {
+      try {
+        const registration = activeServiceWorkerRegistration || await registerServiceWorker();
+        if (!registration) return false;
+        // An already installed worker needs no network request before offering it.
+        if (registration.waiting && navigator.serviceWorker.controller) {
+          showUpdateReady();
+          return true;
+        }
+        lastForegroundCheckAt = Date.now();
+        await registration.update();
+        // A new worker may still be installing when update() resolves. Do not
+        // report "up to date" before its state has settled.
+        if (registration.installing && registration.installing.state !== 'installed') {
+          await new Promise(resolve => {
+            const worker = registration.installing;
+            const finish = () => {
+              if (['installed', 'activated', 'redundant'].includes(worker.state)) resolve();
+            };
+            worker.addEventListener('statechange', finish);
+            setTimeout(resolve, 6000);
+            finish();
+          });
+        }
+        if (registration.waiting && navigator.serviceWorker.controller) {
+          showUpdateReady();
+          return true;
+        }
+        const installed = captureNativeRelease();
+        if (installed) await checkNativeRelease(installed);
+        if (manual) updateStatus(
+          registration.installing ? 'Update is still downloading. You will be notified when ready.' :
+          'You are up to date. Automatic checks are enabled.', 'ready'
+        );
+        return false;
+      } catch (error) {
+        if (manual) updateStatus('Update check failed. Check your connection and try again.', 'error');
+        console.warn('WWZ PWA update check failed.', error);
+        return false;
+      } finally {
+        updateCheckPromise = null;
+        updateButtons().forEach(button => { button.disabled = false; });
+      }
+    })();
+    return updateCheckPromise;
   };
 
   const checkForegroundUpdates = () => {
     if (document.hidden || navigator.onLine === false || !activeServiceWorkerRegistration) return;
     if (Date.now() - lastForegroundCheckAt < FOREGROUND_UPDATE_CHECK_MS) return;
-    lastForegroundCheckAt = Date.now();
-    void activeServiceWorkerRegistration.update().catch(() => null);
-    const installed = captureNativeRelease();
-    if (installed) void checkNativeRelease(installed);
+    void checkForPwaUpdates();
   };
 
   window.addEventListener('beforeinstallprompt', (event) => {
@@ -347,7 +491,10 @@
     syncInstallButtons();
   });
 
-  window.addEventListener('online', syncNetworkState);
+  window.addEventListener('online', () => {
+    syncNetworkState();
+    checkForegroundUpdates();
+  });
   window.addEventListener('offline', syncNetworkState);
   window.addEventListener('pageshow', checkForegroundUpdates);
   document.addEventListener('visibilitychange', checkForegroundUpdates);
@@ -366,13 +513,18 @@
     const installedRelease = captureNativeRelease();
     ensureCompanionNavigation();
     wireInstallButtons();
+    ensureUpdateControls();
     syncNetworkState();
-    registerServiceWorker();
+    void registerServiceWorker().then((registration) => {
+      if (registration) void checkForPwaUpdates();
+    });
+    setInterval(checkForegroundUpdates, FOREGROUND_UPDATE_CHECK_MS);
     void checkNativeRelease(installedRelease);
   }, { once: true });
 
   window.WWZCompanion = Object.freeze({
     checkForNativeUpdate: checkNativeRelease,
+    checkForPwaUpdates: () => checkForPwaUpdates({ manual: true }),
     getInstalledRelease: captureNativeRelease,
     isReleaseNewer
   });
