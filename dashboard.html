@@ -510,18 +510,32 @@
           <div><span class="community-kicker">Owner Maintenance Centre</span><h3>Fortnightly Vehicle Wipe — Readiness &amp; Recovery</h3></div>
           <span class="community-tag scheduled" data-vehicle-wipe-state>Automation Disabled</span>
         </div>
-        <p>Vehicle wipes are planned for the Monday after each raid weekend at 5:00 AM Sydney time. Both Nasdara servers have separate maintenance records. When enabled in a future release, each full wipe will remove existing vehicles (including rentals) and require two DayZ restarts; existing rental orders will remain.</p>
+        <p>Vehicle wipes are planned for the Monday after each raid weekend at 5:00 AM Sydney time. Both Nasdara servers have separate maintenance records. Once explicitly enabled, maintenance will remove vehicles (including rentals) and require two DayZ restarts. Existing rental orders and entitlements remain in the bot; both restarts count normally.</p>
         <div class="wwz-maintenance-facts">
           <div><span>Next Planned Maintenance</span><strong data-vehicle-wipe-next>Checking Schedule…</strong></div>
           <div><span>Recorded Operation</span><strong data-vehicle-wipe-phase>No Active Cycle</strong></div>
         </div>
-        <p class="community-inline-note" data-vehicle-wipe-summary>All vehicle-wipe execution remains locked. These controls only inspect the live configuration and previously recorded recovery state.</p>
+        <p class="community-inline-note" data-vehicle-wipe-summary>Automation is off until the Owner approves the release and enables this server. The inspection buttons do not change live files.</p>
         <div class="community-actions">
           <button class="secondary-action" type="button" data-vehicle-wipe-preflight>Inspect Wipe Readiness (Read Only)</button>
           <button class="secondary-action" type="button" data-vehicle-wipe-recovery>Inspect Recovery Status (Read Only)</button>
         </div>
         <p class="raid-preflight-result wwz-maintenance-result" data-vehicle-wipe-result role="status" hidden></p>
-        <small class="community-inline-note">Neither button uploads files, changes rental records, performs a wipe or requests a restart. Live automation is not enabled.</small>
+        <small class="community-inline-note">The inspection buttons are always read-only and never restart DayZ.</small>
+        <div class="wwz-wipe-activation" data-wipe-activation>
+          <div class="wwz-wipe-activation-header"><h4>Automatic Maintenance Controls</h4>
+            <span data-wipe-release-state>Release Gate Not Approved</span></div>
+          <p>The Owner can schedule this server's fortnightly wipes after separately approving the Railway release gate. The first real wipe will occur only after the required Discord warnings and safety checks.</p>
+          <label class="wwz-wipe-ack"><input type="checkbox" data-wipe-ack-vehicles>
+            <span>I understand this removes all vehicles, rentals and their stored cargo.</span></label>
+          <label class="wwz-wipe-ack"><input type="checkbox" data-wipe-ack-restarts>
+            <span>I understand this requests two DayZ restarts and consumes rental restart counts.</span></label>
+          <div class="community-actions wwz-wipe-activation-actions">
+            <button class="primary-action" type="button" data-wipe-enable disabled>Enable Fortnightly Wipes</button>
+            <button class="secondary-action" type="button" data-wipe-disable disabled>Disable Future Wipes</button>
+          </div>
+          <p class="community-inline-note" data-wipe-activation-status role="status">Live maintenance is not armed.</p>
+        </div>
       </section>
 
     <section class="community-panel" data-dashboard-section="analytics">
