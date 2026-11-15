@@ -1,0 +1,14 @@
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const js=fs.readFileSync('assets/js/dashboard/community.js','utf8');
+const lazy=fs.readFileSync('assets/js/dashboard/lazy-assets.js','utf8');
+const sw=fs.readFileSync('sw.js','utf8');
+assert.ok(js.includes('report.player_kill_ban_verified === true'), 'Show verified WWZ protection zone');
+assert.ok(js.includes('WWZ Full Map PvE zone verified'), 'Distinguish native WWZ zones from retired DayZ++ zones');
+assert.ok(js.includes('report.messages_file_verified === true'), 'Show in-game raid notice readiness');
+assert.ok(js.includes('/DayZ\\+\\+/i.test(String(item))'), 'Drop retired external zone check from rolling backend responses');
+assert.ok(js.includes('RAID READINESS PASSED'), 'Provide clear readiness label');
+assert.ok(lazy.includes('preflightclarity=1'), 'Rotate raid controls browser asset');
+assert.ok(sw.includes('2026-11-16-raid-preflight-clarity-1'), 'Refresh PWA app shell');
+console.log('PASS: readiness distinguishes WWZ zones, ignores retired external DayZ++ checks, and refreshes PWA');

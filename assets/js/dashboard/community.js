@@ -634,14 +634,20 @@
       const checks = [
         report.mission_file_verified ? 'Active mission file verified' : 'Mission file NOT verified',
         report.base_damage_enabled === false ? 'Base damage protected' : 'Base damage not verified as protected',
-        report.container_damage_enabled === false ? 'Container damage protected' : 'Container damage not verified as protected'
+        report.container_damage_enabled === false ? 'Container damage protected' : 'Container damage not verified as protected',
+        report.messages_file_verified === true ? 'In-game raid notices verified' : 'In-game raid notices NOT verified',
+        report.player_kill_ban_verified === true ? 'WWZ Full Map PvE zone verified' : 'WWZ Full Map PvE zone NOT verified'
       ];
       const blockers = Array.isArray(report.blockers) ? report.blockers : [];
-      const manual = Array.isArray(report.manual_checks) ? report.manual_checks : [];
+      // The retired DayZ++ zone system is unrelated to the WWZ dashboard zone
+      // validated above. Ignore legacy server notices during rolling deploys.
+      const manual = Array.isArray(report.manual_checks)
+        ? report.manual_checks.filter(item => !/DayZ\+\+/i.test(String(item)))
+        : [];
       if (output) {
         output.dataset.kind = report.ready === true ? 'ready' : 'blocked';
         output.textContent = (report.ready === true
-          ? 'FILE CHECKS PASSED — manual settings still require confirmation.'
+          ? 'RAID READINESS PASSED — remaining server setting needs confirmation.'
           : 'NOT READY — do not arm automation until these checks pass.')
           + '\nChecked: ' + fmtSydney(report.checked_at)
           + '\n' + checks.join(' · ')
