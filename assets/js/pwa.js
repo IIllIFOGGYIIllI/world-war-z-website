@@ -11,6 +11,7 @@
 
   let deferredInstallPrompt = null;
   let reloadingForUpdate = false;
+  let confirmedUpdatePending = false;
   const UPDATE_RELOAD_KEY = 'wwz_pwa_update_pending';
   const COMPANION_RELEASE_URL = 'assets/data/companion-release.json';
   const NATIVE_VERSION_KEY = 'wwz_android_native_version';
@@ -343,6 +344,7 @@
       updateStatus('The update is no longer waiting. Check again.', 'neutral');
       return;
     }
+    confirmedUpdatePending = true;
     try { sessionStorage.setItem(UPDATE_RELOAD_KEY, '1'); } catch {}
     updateStatus('Activating update and reloading…', 'checking');
     registration.waiting.postMessage({ type: 'SKIP_WAITING' });
@@ -503,7 +505,7 @@
   navigator.serviceWorker?.addEventListener('controllerchange', () => {
     let updatePending = false;
     try { updatePending = sessionStorage.getItem(UPDATE_RELOAD_KEY) === '1'; } catch {}
-    if (!updatePending || reloadingForUpdate) return;
+    if ((!updatePending && !confirmedUpdatePending) || reloadingForUpdate) return;
     reloadingForUpdate = true;
     try { sessionStorage.removeItem(UPDATE_RELOAD_KEY); } catch {}
     window.location.reload();
