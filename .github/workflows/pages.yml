@@ -105,6 +105,8 @@ jobs:
           node scripts/test_stage6_raid_automation_ui.js
           node scripts/test_raid_readiness_layout.js
           node scripts/test_raid_lifecycle_status_ui.js
+          node scripts/test_raid_zone_owner_copy.js
+          node scripts/test_raid_preflight_zone_clarity.js
           node scripts/test_raid_preflight_ui.js
           node scripts/test_raid_recovery_ui.js
           node scripts/test_raid_owner_review_ui.js
