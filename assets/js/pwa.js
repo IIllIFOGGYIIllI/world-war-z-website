@@ -429,7 +429,7 @@
     }
     updateButtons().forEach(button => { button.disabled = true; });
     if (manual) updateStatus('Checking for the latest WWZ Companion version…', 'checking');
-    updateCheckPromise = (async () => {
+    const check = (async () => {
       try {
         const registration = activeServiceWorkerRegistration || await registerServiceWorker();
         if (!registration) return false;
@@ -468,12 +468,15 @@
         if (manual) updateStatus('Update check failed. Check your connection and try again.', 'error');
         console.warn('WWZ PWA update check failed.', error);
         return false;
-      } finally {
-        updateCheckPromise = null;
-        updateButtons().forEach(button => { button.disabled = false; });
       }
     })();
-    return updateCheckPromise;
+    updateCheckPromise = check;
+    try {
+      return await check;
+    } finally {
+      if (updateCheckPromise === check) updateCheckPromise = null;
+      updateButtons().forEach(button => { button.disabled = false; });
+    }
   };
 
   const checkForegroundUpdates = () => {
