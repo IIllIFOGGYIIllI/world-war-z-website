@@ -277,8 +277,19 @@
 .wwz-maintenance-report h4{margin:0;font-size:.92rem;color:#f1f8fd}
 .wwz-maintenance-report ul{display:grid;gap:10px;margin:0;padding:0;list-style:none}
 .wwz-maintenance-report li{position:relative;padding:0 0 0 24px;line-height:1.55;color:#d0e0eb;overflow-wrap:anywhere}
-.wwz-maintenance-report li:before{content:'✓';position:absolute;left:1px;top:0;color:#9dd4b6;font-weight:750}
-.wwz-maintenance-issues li:before{content:'!';color:#ffd6a8}
+/* Neutral markers: manual owner checks have NOT been acknowledged or passed. */
+.wwz-maintenance-owner-checks li:before{
+  content:'';position:absolute;left:2px;top:.52em;
+  width:9px;height:9px;border:1.7px solid #9db8c9;border-radius:50%;
+  background:transparent;
+}
+.wwz-maintenance-owner-checks.wwz-maintenance-during li:before{border-style:dashed}
+.wwz-maintenance-issues li:before{content:'!';position:absolute;left:1px;top:0;color:#ffd6a8;font-weight:750}
+.wwz-maintenance-review-note{font-size:.86rem;line-height:1.55;color:#b8cad7}
+.wwz-maintenance-owner-checks.wwz-maintenance-during{
+  padding:12px 13px;border-radius:9px;
+  background:rgba(34,61,78,.42);border:1px solid rgba(166,198,218,.15);
+}
 .wwz-maintenance-owner-checks p{margin:0;line-height:1.6;color:#d0e0eb}
 .wwz-maintenance-report footer{padding-top:11px;border-top:1px solid rgba(173,210,232,.2);font-size:.78rem;line-height:1.5;color:#b7cbda}
 @media(max-width:560px){
