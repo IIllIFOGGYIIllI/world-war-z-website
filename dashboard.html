@@ -480,8 +480,17 @@
     <p class="community-status" data-community-status hidden role="status"></p>
       <section class="community-raid-controls" id="wwz-raid-readiness" data-raid-damage-controls hidden>
         <div><strong>Fortnightly Raid Weekend Automation — Nasdara PvE</strong>
-          <p>Friday 7 PM to Sunday 7 PM (Sydney time), every 14 days from 6 November 2026. With Owner approval, the bot changes base and container damage before requesting a Nitrado restart. The named Full Map PvE player-kill-ban zone is suspended after the raid-opening restart is observed, then restored when the raid closes; unrelated zones are left unchanged. A restart request is not proof the server rebooted. Disabling future starts does not cancel restoration of an already-started raid.</p>
-          <p>Before enabling: confirm Nitrado is using <code>cfggameplay.json</code> (<code>enableCfgGameplayFile</code> enabled). Confirm the named Full Map PvE zone is active with player-kill bans enabled before arming. The read-only check verifies its configuration; a calendar entry alone does not change gameplay rules.</p>
+          <p data-raid-introduction>Fortnightly Raid Weekends run Friday 7 PM to Sunday 7 PM (Sydney time), every 14 days. Once enabled, the bot manages base/container damage, the named Full Map PvE player-kill-ban zone and the game-server restart at each transition. Disabling future starts does not cancel restoration of a raid already in progress.</p>
+          <p data-raid-setup-guidance>Before enabling: confirm Nitrado is using <code>cfggameplay.json</code> (<code>enableCfgGameplayFile</code> enabled). Confirm the named Full Map PvE zone is active with player-kill bans enabled before arming. The read-only check verifies its configuration; a calendar entry alone does not change gameplay rules.</p>
+          <section class="raid-armed-overview" data-raid-armed-overview aria-label="Active Raid Weekend automation" hidden>
+            <div class="raid-armed-overview-title"><span class="raid-armed-indicator" aria-hidden="true"></span><strong>Automated Raid Weekends Enabled</strong></div>
+            <p>Nasdara PvE is armed for the fortnightly schedule. The bot handles the opening and closing transitions; no immediate restart is triggered by enabling it.</p>
+            <div class="raid-armed-steps">
+              <div><span>Friday · 7:00 PM</span><strong>Raid Opens</strong><small>Raid damage enabled and Nitrado restart requested.</small></div>
+              <div><span>Sunday · 7:00 PM</span><strong>PvE Returns</strong><small>Damage protection and the Full Map PvE kill-ban zone restored with the closing transition.</small></div>
+              <div><span>Automatic Notices</span><strong>Events &amp; In-Game Messages</strong><small>Upcoming dates appear in the Event Calendar; managed DayZ notices follow each transition.</small></div>
+            </div>
+          </section>
           <p class="raid-schedule-meta"><b>Next scheduled raid:</b> <span data-raid-next-window>Loading schedule…</span></p>
           <p class="raid-operator-meta" data-raid-phase-readout>Loading recent lifecycle actions…</p>
           <p class="raid-operator-meta" data-raid-restart-observation>Waiting for verified Nitrado restart observations…</p>
