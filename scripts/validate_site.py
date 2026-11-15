@@ -1082,7 +1082,7 @@ def validate_final_parity_polish(errors: list[str]) -> None:
         if token not in lazy_assets:
             errors.append(f"lazy-assets.js: missing command-library lazy-loading guard: {token}")
     for changed_asset in (
-        'assets/js/dashboard/zones.js?v=1.59.5&rev=manual-coords-1',
+        'assets/js/dashboard/zones.js?v=1.59.5&rev=nasdara-policy-cleanup-1',
         'assets/js/dashboard/shop-helpers.js?v=1.54.2&rev=shop-classname-admin-1',
         'assets/js/dashboard/shop.js?v=2.1.1&rev=phase2-reliability-1',
     ):
