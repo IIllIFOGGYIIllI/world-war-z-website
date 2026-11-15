@@ -253,8 +253,6 @@
     const raidServer = window.WWZServerContext?.getSelectedServer?.();
     const raidEligible = raidServer?.map_key === 'badlands' && raidServer?.gameplay_mode === 'pve';
     if (raidControls) raidControls.hidden = !(owner && raidEligible);
-    const previews = qs('[data-automation-preview-owner]');
-    if (previews) previews.hidden = !(owner && raidEligible);
     for (const selector of ['[data-raid-preflight-result]', '[data-raid-recovery-result]', '[data-raid-restoration-result]']) {
       const output = qs(selector);
       if (output && output.dataset.serverScope !== selectedScope()) {
