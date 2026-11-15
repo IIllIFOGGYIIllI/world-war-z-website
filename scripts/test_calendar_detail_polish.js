@@ -59,8 +59,14 @@ ctx.showEventForTest({...base,id:-200001,virtual_vehicle_wipe:true,event_type:'v
   title:'🚗 PLANNED VEHICLE WIPE — POST-RAID'});
 const wipe=details.at(-1);
 assert.equal(wipe.title,'Planned Vehicle Wipe — Post-Raid');
-assert.ok(wipe.html.includes('Planned — Automation Not Enabled'));
-assert.ok(wipe.html.includes('Automated vehicle wipes and the two maintenance restarts are not active'));
+assert.ok(wipe.html.includes('Planned — Confirm Activation In Discord'));
+assert.ok(wipe.html.includes('Activation is not confirmed for this event'));
+ctx.showEventForTest({...base,id:-200001,virtual_vehicle_wipe:true,event_type:'vehicle_wipe',
+  wipe_automation_enabled:true,title:'🚗 PLANNED VEHICLE WIPE — POST-RAID'});
+const armedWipe=details.at(-1);
+assert.ok(armedWipe.html.includes('Scheduled — Automatic Wipe Armed'));
+assert.ok(armedWipe.html.includes('Automatic Maintenance Scheduled'));
+assert.ok(armedWipe.html.includes('Two DayZ restarts will be requested'));
 assert.ok(!wipe.html.includes('Edit / Reschedule'));
 assert.ok(!wipe.html.includes('Register For Event'));
 assert.ok(!wipe.html.includes('No updates yet.'));
