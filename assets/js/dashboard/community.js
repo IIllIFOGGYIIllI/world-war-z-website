@@ -787,15 +787,21 @@
   const showEvent=(e)=>{
     if(!e)return;
     const isWipe=Boolean(e.virtual_vehicle_wipe||e.event_type==='vehicle_wipe');
+    const wipeArmed=e.wipe_automation_enabled===true;
+    const wipeUnverified=e.wipe_automation_enabled==null;
     const isRaid=Boolean(e.virtual_raid_weekend||e.event_type==='raid_weekend');
     const virtual=Boolean(isWipe||e.virtual_raid_weekend);
     const title=isWipe?'Planned Vehicle Wipe — Post-Raid':isRaid?'Fortnightly Raid Weekend':String(e.title||'Community Event');
     const category=isWipe?'Server Maintenance':isRaid?'Raid Weekend':String(e.category||eventLabel(e)||'Community Event');
-    const state=isWipe?'Planned — Automation Not Enabled':
+    const state=isWipe
+      ?(wipeArmed?'Scheduled — Automatic Wipe Armed':
+        wipeUnverified?'Planned — Confirm Activation In Discord':'Planned — Not Armed'):
       isRaid?(e.status==='active'?'Live — Verify Server Rules':'Scheduled — Confirm Activation In Discord'):
       String(e.lifecycle_state||e.status||'Scheduled').replaceAll('_',' ');
     const summary=isWipe
-      ? 'Vehicle maintenance is proposed for the Monday after each raid weekend. All vehicles, including rentals, are included. The two-restart automation is not enabled yet.'
+      ? (wipeArmed
+         ?'Automatic maintenance is armed for this server for the Monday after the raid weekend. All vehicles, including rentals, are included. Player warnings and preflight checks are required.'
+         :'Vehicle maintenance is planned for the Monday after each raid weekend. All vehicles, including rentals, are included. Check Discord for current activation status.')
       :isRaid
         ? 'Fortnightly full-map PvP and base raiding on Nasdara PvE. Check Discord to confirm the raid is active and to review the current rules.'
         :String(e.description||'Event details and schedule.');
@@ -804,7 +810,9 @@
     const ends=e.ongoing?eventEnding(e):fmtDate(e.ends_at);
     const schedule=`<dl class='wwz-event-detail-facts'>${fact(isWipe?'Planned Start':'Starts',starts)}${!isWipe?fact('Ends',ends):''}${fact('Status',state)}</dl>`;
     const alert=isWipe
-      ? `<aside class='wwz-event-detail-notice' role='note'><strong>Planned Maintenance Only</strong><p>Automated vehicle wipes and the two maintenance restarts are not active. Vehicles and stored cargo may be lost when maintenance is eventually enabled; rental orders will remain.</p></aside>`
+      ? `<aside class='wwz-event-detail-notice' role='note'><strong>${wipeArmed?'Automatic Maintenance Scheduled':'Planned Maintenance'}</strong><p>${wipeArmed
+          ?'Two DayZ restarts will be requested after the required player warnings and preflight checks. Vehicles, stored cargo and rental vehicles are included; rental order records remain.'
+          :'Activation is not confirmed for this event. The maintenance procedure removes vehicles, including rentals and their cargo, with two DayZ restarts. Check Discord for the latest status.'}</p></aside>`
       :isRaid?`<aside class='wwz-event-detail-notice' role='note'><strong>Raid Activation Notice</strong><p>The calendar lists published dates only. Verify that PvP, base damage and container damage are active before participating.</p></aside>`:'';
     const rules=String(e.rules_text||'').trim();
     const setup=virtual?'':String(e.setup_text||'').trim();
