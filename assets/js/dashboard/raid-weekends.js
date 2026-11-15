@@ -48,13 +48,13 @@ const vehicleWipesForServer=(server,now=Date.now(),count=12)=>{
     const mode=String(server.gameplay_mode).toUpperCase();
     rows.push({id:-200000-i,title:'🚗 PLANNED VEHICLE WIPE — POST-RAID',category:'Server Maintenance',
       event_type:'vehicle_wipe',starts_at:start.toISOString(),ends_at:end.toISOString(),
-      map_key:'badlands',status:'scheduled',lifecycle_state:'Planned maintenance · Automation not enabled',
-      virtual_vehicle_wipe:true,visibility:'public',location_label:`Nasdara ${mode} — server-wide`,
+      map_key:'badlands',status:'scheduled',lifecycle_state:'Planned maintenance · Activation unverified',
+      virtual_vehicle_wipe:true,wipe_automation_enabled:null,visibility:'public',location_label:`Nasdara ${mode} — server-wide`,
       signup_enabled:false,capacity:0,registered_count:0,waitlist_count:0,
       attendance_money:0,attendance_xp:0,winner_money:0,winner_xp:0,
-      description:'Proposed every second Monday after the Nasdara PvE raid weekend, starting at 5:00 AM Australia/Sydney. All vehicles, including rentals, are included. Automatic two-restart maintenance is not yet enabled.',
+      description:'Proposed every second Monday after the Nasdara PvE raid weekend, starting at 5:00 AM Australia/Sydney. All vehicles, including rentals, are included. Check Discord for the current maintenance activation status.',
       rules_text:'Vehicle contents and parked positions may be lost. Active rental orders remain; their normal restart counters still apply. No player or base wipe is planned.',
-      setup_text:'Maintenance proposal only: activate the existing 28-vehicle cfgignorelist block, restart, restore the original file, then restart again. Pending live-file verification and recovery tests.'});
+      setup_text:'When owner-approved, activate the existing 28-vehicle cfgignorelist block, restart, restore the original file, then restart again. Discord warnings and raid closure checks are required.'});
   }
   return rows;
 };
