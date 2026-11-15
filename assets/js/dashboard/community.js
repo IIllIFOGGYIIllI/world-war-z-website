@@ -611,10 +611,53 @@
   qs('[data-vehicle-wipe-recovery]')?.addEventListener('click',()=>
     inspectVehicleWipe('vehicle_wipe_recovery_check','[data-vehicle-wipe-recovery]'));
 
+
+  // Shared, escaped, read-only result layout matching the Vehicle Wipe check.
+  // These cards report server facts; Owner items remain explicitly unconfirmed.
+  const renderRaidPreflightReport = (report) => {
+    const checks = [
+      ['Nasdara Mission File', report.mission_file_verified === true, 'Verified', 'Not Verified'],
+      ['Base Damage', report.base_damage_enabled === false, 'Protected', 'Not Verified'],
+      ['Container Damage', report.container_damage_enabled === false, 'Protected', 'Not Verified'],
+      ['In-Game Raid Notices', report.messages_file_verified === true, 'Verified', 'Not Verified'],
+      ['WWZ Full Map PvE Zone', report.player_kill_ban_verified === true, 'WWZ Full Map PvE zone verified', 'Not Verified']
+    ];
+    const checksVerified = checks.every(([, passed]) => passed);
+    const ready = report.ready === true && checksVerified;
+    const tiles = checks.map(([label, passed, successText, failureText]) =>
+      '<div class="wwz-maintenance-check" data-check="' + (passed ? 'passed' : 'blocked') + '">' +
+      '<span>' + esc(label) + '</span><strong>' + esc(passed ? successText : failureText) + '</strong></div>'
+    ).join('');
+    const blockers = Array.isArray(report.blockers) ? report.blockers : [];
+    const manual = Array.isArray(report.manual_checks)
+      ? report.manual_checks.filter(item => !/DayZ\+\+/i.test(String(item))) : [];
+    const issues = blockers.length
+      ? '<section class="wwz-maintenance-issues"><h4>Items Requiring Attention</h4><ul>' +
+        blockers.map(item => '<li>' + esc(item) + '</li>').join('') + '</ul></section>'
+      : '';
+    const ownerReview = manual.length
+      ? '<section class="wwz-maintenance-owner-checks">' +
+        '<h4>Owner Review — Not Yet Confirmed</h4>' +
+        '<p class="wwz-maintenance-review-note">These settings still need Owner confirmation. This check does not verify them automatically.</p>' +
+        '<ul>' + manual.map(item => '<li>' + esc(item) + '</li>').join('') + '</ul></section>'
+      : '';
+    const checkedAt = report.checked_at ? fmtSydney(report.checked_at) : 'Unavailable';
+    return '<div class="wwz-maintenance-report wwz-raid-report">' +
+      '<header class="wwz-maintenance-report-header"><strong>' +
+      (ready ? 'RAID READINESS PASSED' : 'Raid Readiness Needs Attention') +
+      '</strong><small>Checked: ' + esc(checkedAt) +
+      ' · Nasdara PvE · Read-only inspection</small></header>' +
+      '<div class="wwz-maintenance-checks" role="group" aria-label="Raid readiness checks">' +
+      tiles + '</div>' + issues + ownerReview +
+      '<footer>No Nitrado Files Were Changed. No Server Restarts Were Requested.</footer>' +
+      '</div>';
+  };
+
   qs('[data-raid-preflight]')?.addEventListener('click', async () => {
     if (dashboardAccessLevel !== 'owner') return;
     const server = window.WWZServerContext?.getSelectedServer?.();
     if (server?.map_key !== 'badlands' || server?.gameplay_mode !== 'pve') return;
+    const scope = selectedScope();
     const button = qs('[data-raid-preflight]');
     const output = qs('[data-raid-preflight-result]');
     if (button) button.disabled = true;
@@ -630,32 +673,14 @@
       const response = await request(API.adminAction, {
         method: 'POST', body: JSON.stringify({action: 'raid_preflight'})
       }, true);
+      if (scope !== selectedScope()) return;
       const report = response.result || {};
-      const checks = [
-        report.mission_file_verified ? 'Active mission file verified' : 'Mission file NOT verified',
-        report.base_damage_enabled === false ? 'Base damage protected' : 'Base damage not verified as protected',
-        report.container_damage_enabled === false ? 'Container damage protected' : 'Container damage not verified as protected',
-        report.messages_file_verified === true ? 'In-game raid notices verified' : 'In-game raid notices NOT verified',
-        report.player_kill_ban_verified === true ? 'WWZ Full Map PvE zone verified' : 'WWZ Full Map PvE zone NOT verified'
-      ];
-      const blockers = Array.isArray(report.blockers) ? report.blockers : [];
-      // The retired DayZ++ zone system is unrelated to the WWZ dashboard zone
-      // validated above. Ignore legacy server notices during rolling deploys.
-      const manual = Array.isArray(report.manual_checks)
-        ? report.manual_checks.filter(item => !/DayZ\+\+/i.test(String(item)))
-        : [];
       if (output) {
         output.dataset.kind = report.ready === true ? 'ready' : 'blocked';
-        output.textContent = (report.ready === true
-          ? 'RAID READINESS PASSED — remaining server setting needs confirmation.'
-          : 'NOT READY — do not arm automation until these checks pass.')
-          + '\nChecked: ' + fmtSydney(report.checked_at)
-          + '\n' + checks.join(' · ')
-          + (blockers.length ? '\nIssues: ' + blockers.join(' | ') : '')
-          + (manual.length ? '\nManual checks still required: ' + manual.join(' | ') : '')
-          + '\nNo Nitrado upload or restart was requested by this check.';
+        output.innerHTML = renderRaidPreflightReport(report);
       }
     } catch (error) {
+      if (scope !== selectedScope()) return;
       if (output) {
         output.dataset.kind = 'blocked';
         output.textContent = 'Preflight could not complete: ' + (error.message || 'Unknown error') + '. No game settings were changed by this check.';

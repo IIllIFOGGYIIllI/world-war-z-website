@@ -8,7 +8,7 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-11-16-raid-preflight-clarity-1';
+const WWZ_PWA_UPDATE_REVISION = '2026-11-16-raid-inspection-layout-1';
 // Each deployed revision gets a fresh shell/static cache, while the bounded map
 // tile/data caches keep their own independent generations. This ensures an
 // accepted update does not reload stale JS/CSS from a previous PWA release.
@@ -267,6 +267,8 @@ self.addEventListener('fetch', (event) => {
       || url.pathname.endsWith('/assets/js/dashboard/core.js')
       || url.pathname.endsWith('/assets/js/dashboard/administration.js')
       || url.pathname.endsWith('/assets/js/dashboard/operations-centre.js')
+      || url.pathname.endsWith('/assets/js/dashboard/community.js')
+      || url.pathname.endsWith('/assets/js/dashboard/zones.js')
       || url.pathname.endsWith('/assets/js/dashboard/shop.js')
       || url.pathname.endsWith('/assets/js/dashboard/delivery.js')) {
     event.respondWith(networkFirstStatic(request));
