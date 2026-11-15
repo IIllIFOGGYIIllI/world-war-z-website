@@ -33,6 +33,9 @@ jobs:
           node scripts/test_raid_recovery_ui.js
           node scripts/test_raid_zone_owner_copy.js
           node scripts/test_raid_preflight_zone_clarity.js
+          node scripts/test_zone_save_fix.js
+          node scripts/test_zone_submit_validation.js
+          node scripts/test_zone_manual_coordinates.js
           node scripts/test_calendar_detail_polish.js
           node scripts/test_raid_readiness_layout.js
           node scripts/test_vehicle_wipe_owner_panel.js
