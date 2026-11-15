@@ -473,27 +473,54 @@
       if(output&&action==='vehicle_wipe_preflight'){
         const issues=Array.isArray(report.blockers)?report.blockers:[];
         const manual=Array.isArray(report.manual_checks)?report.manual_checks:[];
-        output.dataset.kind=report.technical_ready?'ready':'blocked';
-        output.textContent=(report.technical_ready
-          ?'Configuration checks passed — live wipe automation is still disabled.'
-          :'Inspection found blockers — do not start maintenance.')
-          +'\nVehicle exclusions: '+(report.comment_block_verified
-            ?String(report.vehicle_classes||0)+' reviewed classes verified':'Not verified')
-          +'\nMission folder: '+(report.mission_verified?'Verified':'Not verified')
-          +'\nPvE protection: '+(report.raid_protection?.applicable
-            ?report.raid_protection.policy_verified?'Verified':'Not verified'
-            :'Not applicable for PvP')
-          +'\nNext planned window: '+(report.next_proposed_window?fmtSydney(report.next_proposed_window):'Unavailable')
-          +(issues.length?'\nBlockers: '+issues.join(' | '):'')
-          +(manual.length?'\nOwner checks: '+manual.join(' | '):'')
-          +'\nNo files were changed and no restart was requested.';
+        const status=report.technical_ready===true?'ready':'blocked';
+        const checks=[
+          ['Vehicle Exclusions',report.comment_block_verified
+            ?String(report.vehicle_classes||0)+' Classes Verified':'Not Verified',Boolean(report.comment_block_verified)],
+          ['Nasdara Mission File',report.mission_verified?'Verified':'Not Verified',Boolean(report.mission_verified)],
+          ['PvE Protection',report.raid_protection?.applicable
+            ?report.raid_protection.policy_verified?'Verified':'Not Verified'
+            :'Not Applicable (PvP)',report.raid_protection?.applicable?Boolean(report.raid_protection.policy_verified):null]
+        ];
+        const checkList=checks.map(([label,value,passed])=>
+          `<div class="wwz-maintenance-check" data-check="${passed===null?'neutral':passed?'passed':'blocked'}">
+             <span>${esc(label)}</span><strong>${esc(value)}</strong>
+           </div>`).join('');
+        const ownerList=manual.map(item=>`<li>${esc(item)}</li>`).join('');
+        const blockers=issues.length?`<section class="wwz-maintenance-issues">
+          <h4>Items Requiring Attention</h4><ul>${issues.map(item=>`<li>${esc(item)}</li>`).join('')}</ul>
+        </section>`:'';
+        output.dataset.kind=status;
+        output.innerHTML=`<div class="wwz-maintenance-report">
+          <header class="wwz-maintenance-report-header"><strong>${report.technical_ready
+            ?'Configuration Checks Passed':'Maintenance Is Not Ready'}</strong>
+            <small>${report.technical_ready?'Live wipe automation remains disabled.':'Resolve the blockers below before considering maintenance.'}</small>
+          </header>
+          <div class="wwz-maintenance-checks">${checkList}</div>
+          <div class="wwz-maintenance-next"><span>Next Planned Window</span>
+            <strong>${esc(report.next_proposed_window?fmtSydney(report.next_proposed_window):'Unavailable')}</strong></div>
+          ${blockers}
+          ${ownerList?`<section class="wwz-maintenance-owner-checks">
+            <h4>Owner Checklist</h4><ul>${ownerList}</ul>
+          </section>`:''}
+          <footer>No Files Were Changed. No Restarts Were Requested.</footer>
+        </div>`;
       }else if(output){
         output.dataset.kind=report.attention_required?'blocked':'ready';
-        output.textContent=(report.active?'Previous Maintenance Needs Review':'No Unfinished Maintenance')
-          +'\nFile state: '+String(report.file_state||'Unavailable').replaceAll('_',' ')
-          +'\nSaved phase: '+String(report.phase||'Idle').replaceAll('_',' ')
-          +'\nGuidance: '+String(report.guidance||'Inspect the selected server before attempting maintenance.')
-          +'\nNo file upload, recovery write or restart occurred.';
+        output.innerHTML=`<div class="wwz-maintenance-report">
+          <header class="wwz-maintenance-report-header">
+            <strong>${report.active?'Previous Maintenance Needs Review':'No Unfinished Maintenance'}</strong>
+            <small>Read-only recovery inspection</small>
+          </header>
+          <div class="wwz-maintenance-checks">
+            <div class="wwz-maintenance-check"><span>Live File State</span><strong>${esc(String(report.file_state||'Unavailable').replaceAll('_',' '))}</strong></div>
+            <div class="wwz-maintenance-check"><span>Saved Operation Phase</span><strong>${esc(String(report.phase||'Idle').replaceAll('_',' '))}</strong></div>
+          </div>
+          <section class="wwz-maintenance-owner-checks"><h4>Recovery Guidance</h4>
+            <p>${esc(String(report.guidance||'Inspect the selected server before attempting maintenance.'))}</p>
+          </section>
+          <footer>No Upload, Recovery Write Or Restart Was Requested.</footer>
+        </div>`;
       }
     }catch(error){
       if(scope!==selectedScope())return;
