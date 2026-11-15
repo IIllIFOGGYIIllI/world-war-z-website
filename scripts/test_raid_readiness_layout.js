@@ -47,5 +47,5 @@ assert.ok(css.includes('wwz-raid-report .wwz-maintenance-check strong'));
 assert.ok(lazy.includes('raidlayout=1'));
 assert.ok(sw.includes("url.pathname.endsWith('/assets/js/dashboard/zones.js')"), 'Fetch latest Zone Management controllers');
 assert.ok(sw.includes("url.pathname.endsWith('/assets/js/dashboard/community.js')"), 'Fetch latest raid controller');
-assert.ok(sw.includes('2026-11-16-nasdara-notification-preview-1'));
+assert.ok(sw.includes('2026-11-16-visible-raid-test-controls-1'));
 console.log('PASS: structured safe raid readiness cards, mobile styles, server scope, cache refresh');
