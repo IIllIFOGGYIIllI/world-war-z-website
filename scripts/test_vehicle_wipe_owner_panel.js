@@ -13,7 +13,7 @@ for(const text of [
   'data-vehicle-wipe-owner','data-vehicle-wipe-next','data-vehicle-wipe-phase',
   'data-vehicle-wipe-preflight','data-vehicle-wipe-recovery','data-vehicle-wipe-result'
 ])assert.ok(html.includes(text),'Missing owner maintenance field '+text);
-assert.ok(html.includes('Neither button uploads files'));
+assert.ok(html.includes('The inspection buttons are always read-only'));
 assert.ok(html.includes('data-wipe-enable') && html.includes('data-wipe-disable'),
   'Owner-only automation controls are visible when authorised');
 assert.ok(html.includes('data-wipe-ack-vehicles') && html.includes('data-wipe-ack-restarts'));
