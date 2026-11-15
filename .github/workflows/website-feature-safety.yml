@@ -39,6 +39,7 @@ jobs:
           node scripts/test_calendar_detail_polish.js
           node scripts/test_raid_readiness_layout.js
           node scripts/test_raid_armed_overview_and_zones_header.js
+          node scripts/test_automation_notice_preview_ui.js
           node scripts/test_vehicle_wipe_owner_panel.js
           node scripts/test_pwa_auto_updates.js
           node scripts/test_rental_map_and_server_labels.js
