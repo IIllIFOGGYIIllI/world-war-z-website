@@ -258,3 +258,32 @@
   .community-vehicle-wipe .community-actions{display:grid;grid-template-columns:1fr}
   .community-vehicle-wipe .community-actions button{width:100%}
 }
+
+/* Structured, readable wipe inspection results (especially narrow PWAs). */
+.wwz-maintenance-result{white-space:normal!important}
+.wwz-maintenance-report{display:grid;gap:15px;min-width:0;font-size:clamp(.85rem,2vw,.96rem)}
+.wwz-maintenance-report-header{display:grid;gap:5px}
+.wwz-maintenance-report-header strong{color:#f4f9fc;font-size:clamp(1rem,2.5vw,1.15rem)}
+.wwz-maintenance-report-header small{color:#bcd1df;font-size:.85rem;line-height:1.5}
+.wwz-maintenance-checks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.wwz-maintenance-check{display:grid;gap:6px;min-width:0;padding:12px;border:1px solid rgba(173,210,232,.19);border-radius:9px;background:rgba(16,43,59,.52)}
+.wwz-maintenance-check span,.wwz-maintenance-next span{font-size:.76rem;letter-spacing:.05em;text-transform:uppercase;color:#b6cddd}
+.wwz-maintenance-check strong{color:#f0f8fc;font-weight:700;overflow-wrap:anywhere}
+.wwz-maintenance-check[data-check="passed"]{border-color:rgba(107,202,154,.36)}
+.wwz-maintenance-check[data-check="blocked"]{border-color:rgba(241,150,105,.6)}
+.wwz-maintenance-next{display:grid;gap:6px;padding:12px 14px;border-radius:9px;background:rgba(30,73,97,.35)}
+.wwz-maintenance-next strong{font-weight:750;overflow-wrap:anywhere}
+.wwz-maintenance-owner-checks,.wwz-maintenance-issues{display:grid;gap:10px;min-width:0}
+.wwz-maintenance-report h4{margin:0;font-size:.92rem;color:#f1f8fd}
+.wwz-maintenance-report ul{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.wwz-maintenance-report li{position:relative;padding:0 0 0 24px;line-height:1.55;color:#d0e0eb;overflow-wrap:anywhere}
+.wwz-maintenance-report li:before{content:'✓';position:absolute;left:1px;top:0;color:#9dd4b6;font-weight:750}
+.wwz-maintenance-issues li:before{content:'!';color:#ffd6a8}
+.wwz-maintenance-owner-checks p{margin:0;line-height:1.6;color:#d0e0eb}
+.wwz-maintenance-report footer{padding-top:11px;border-top:1px solid rgba(173,210,232,.2);font-size:.78rem;line-height:1.5;color:#b7cbda}
+@media(max-width:560px){
+  .wwz-maintenance-checks{grid-template-columns:1fr}
+  .community-vehicle-wipe .wwz-maintenance-result{padding:13px}
+  .wwz-maintenance-report{gap:13px}
+  .wwz-maintenance-check{padding:11px 12px}
+}

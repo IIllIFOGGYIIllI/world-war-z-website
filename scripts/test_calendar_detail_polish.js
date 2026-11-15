@@ -85,5 +85,5 @@ assert.ok(css.includes('.community-detail-dialog.community-event-detail-modal'))
 assert.ok(css.includes('@media(max-width:520px)'));
 assert.ok(lazy.includes('vehicle-wipe-readiness-1'));
 assert.ok(lazy.includes('dialogpolish=1'));
-assert.ok(sw.includes('2026-11-15-vehicle-wipe-readiness-1'));
+assert.ok(sw.includes('2026-11-16-pwa-auto-updates-1'));
 console.log('PASS: polished raid/wipe/custom event dialogs, XSS escaping, mobile CSS and PWA assets');
