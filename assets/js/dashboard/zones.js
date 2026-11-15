@@ -311,64 +311,6 @@
     ? `X ${formatCoordinate(zone.center_x)} · Z ${formatCoordinate(zone.center_z)} · ${formatCoordinate(zone.radius)} m`
     : `${Number(zone.point_count || zone.points?.length || 0)} points · centre X ${formatCoordinate(zone.center_x)} · Z ${formatCoordinate(zone.center_z)}`;
 
-  const formatRuntimeTime = (value) => {
-    const raw = String(value || '').trim();
-    if (!raw) return 'No recorded change';
-    const date = new Date(raw);
-    return Number.isNaN(date.getTime()) ? raw : date.toLocaleString();
-  };
-
-  const renderKillzoneRuntime = () => {
-    const runtime = state.killzoneRuntime || {};
-    const enabled = Boolean(runtime.enabled);
-    const badge = $('[data-killzone-runtime-badge]');
-    const title = $('[data-killzone-runtime-title]');
-    const copy = $('[data-killzone-runtime-copy]');
-    const meta = $('[data-killzone-runtime-meta]');
-    const enable = $('[data-killzone-runtime-enable]');
-    const suspend = $('[data-killzone-runtime-suspend]');
-    if (badge) {
-      badge.textContent = enabled ? 'ENABLED' : 'SUSPENDED';
-      badge.dataset.enabled = String(enabled);
-    }
-    if (title) title.textContent = enabled ? 'PvP KILLZONES Active' : 'Raid Weekend Mode — KILLZONES Suspended';
-    if (copy) copy.textContent = enabled
-      ? 'Configured PvP KILLZONE alerts and enforcement are active for this server.'
-      : 'PvP KILLZONE alerts and automatic enforcement are suspended. On Chernarus, automatic PvE illegal-kill bans are also suspended for server-wide Raid Weekend PvP.';
-    if (meta) {
-      const actor = String(runtime.updated_by || '').trim();
-      const changed = formatRuntimeTime(runtime.updated_at);
-      meta.textContent = actor ? `Last changed by ${actor} · ${changed}` : changed;
-    }
-    if (enable) enable.disabled = enabled;
-    if (suspend) suspend.disabled = !enabled;
-  };
-
-  const setKillzoneRuntime = async (enabled) => {
-    if (!isAdmin()) return;
-    if (!enabled && !window.confirm('Suspend PvP KILLZONES for the selected server? Use this for Raid Weekends or other full-server PvP periods.')) return;
-    const enable = $('[data-killzone-runtime-enable]');
-    const suspend = $('[data-killzone-runtime-suspend]');
-    enable?.setAttribute('disabled', '');
-    suspend?.setAttribute('disabled', '');
-    message(enabled ? 'Enabling PvP KILLZONES…' : 'Suspending PvP KILLZONES for Raid Weekend mode…');
-    try {
-      const payload = await authenticatedJson(ADMIN_ZONES_ACTION_URL, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'killzones_runtime', enabled: Boolean(enabled) }),
-      }, 30_000);
-      state.killzoneRuntime = payload.killzone_runtime || { enabled: Boolean(enabled) };
-      state.killzonesEnabled = Boolean(state.killzoneRuntime.enabled);
-      renderKillzoneRuntime();
-      renderZoneList();
-      if (state.activeSection === 'map') renderZoneOverlays();
-      message(payload.message || (enabled ? 'PvP KILLZONES enabled.' : 'PvP KILLZONES suspended for Raid Weekend mode.'), 'success');
-    } catch (error) {
-      message(error?.message || 'PvP KILLZONE runtime state could not be changed.', 'error');
-      renderKillzoneRuntime();
-    }
-  };
-
   const renderZoneList = () => {
     const body = $('[data-zone-list]');
     const empty = $('[data-zone-empty]');
@@ -926,7 +868,6 @@
       state.eventOptions = Array.isArray(payload.event_options) ? payload.event_options : [];
       state.killzoneRuntime = payload.killzone_runtime || { enabled: true, updated_at: '', updated_by: '' };
       state.killzonesEnabled = state.killzoneRuntime.enabled !== false;
-      renderKillzoneRuntime();
       state.mapKey = String(payload.map_key || selectedMapKey());
       state.mapName = String(payload.map_name || window.WWZMap?.getConfig?.(state.mapKey)?.name || 'DayZ');
       state.worldSize = Number(payload.world_size) || window.WWZMap?.getConfig?.(state.mapKey)?.mapMetres || 0;
@@ -1048,8 +989,6 @@
     $('[data-zone-create-circle]')?.addEventListener('click', () => openEditor('circle'));
     $('[data-zone-create-polygon]')?.addEventListener('click', () => openEditor('polygon'));
     $('[data-zone-refresh]')?.addEventListener('click', () => loadZones({ force: true }));
-    $('[data-killzone-runtime-enable]')?.addEventListener('click', () => setKillzoneRuntime(true));
-    $('[data-killzone-runtime-suspend]')?.addEventListener('click', () => setKillzoneRuntime(false));
     $('[data-zone-search]')?.addEventListener('input', renderZoneList);
     $('[data-zone-filter]')?.addEventListener('change', renderZoneList);
     $('[data-zone-online-refresh]')?.addEventListener('click', () => loadOnlinePlayers({ force: true }));
@@ -1138,7 +1077,6 @@
       state.dynamicLists = [];
       state.killzonesEnabled = true;
       state.killzoneRuntime = { enabled: true, updated_at: '', updated_by: '' };
-      renderKillzoneRuntime();
       if (state.activeSection) loadZones({ force: true }).then(() => activate({ section: state.activeSection })).catch(() => {});
     });
     document.addEventListener('visibilitychange', () => {
