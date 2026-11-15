@@ -480,8 +480,8 @@
     <p class="community-status" data-community-status hidden role="status"></p>
       <section class="community-raid-controls" id="wwz-raid-readiness" data-raid-damage-controls hidden>
         <div><strong>Fortnightly Raid Weekend Automation — Nasdara PvE</strong>
-          <p>Friday 7 PM to Sunday 7 PM (Sydney time), every 14 days from 6 November 2026. With Owner approval, the bot changes base and container damage before requesting a Nitrado restart. The separate map-wide kill-ban zone is not modified. A restart request is not proof the server rebooted. Disabling future starts does not cancel restoration of an already-started raid.</p>
-          <p>Before enabling: confirm Nitrado is using <code>cfggameplay.json</code> (<code>enableCfgGameplayFile</code> enabled). The existing map-wide kill-ban zone is separate and will not be changed. A calendar entry alone does not change gameplay rules.</p>
+          <p>Friday 7 PM to Sunday 7 PM (Sydney time), every 14 days from 6 November 2026. With Owner approval, the bot changes base and container damage before requesting a Nitrado restart. The named Full Map PvE player-kill-ban zone is suspended after the raid-opening restart is observed, then restored when the raid closes; unrelated zones are left unchanged. A restart request is not proof the server rebooted. Disabling future starts does not cancel restoration of an already-started raid.</p>
+          <p>Before enabling: confirm Nitrado is using <code>cfggameplay.json</code> (<code>enableCfgGameplayFile</code> enabled). Confirm the named Full Map PvE zone is active with player-kill bans enabled before arming. The read-only check verifies its configuration; a calendar entry alone does not change gameplay rules.</p>
           <p class="raid-schedule-meta"><b>Next scheduled raid:</b> <span data-raid-next-window>Loading schedule…</span></p>
           <p class="raid-operator-meta" data-raid-phase-readout>Loading recent lifecycle actions…</p>
           <p class="raid-operator-meta" data-raid-restart-observation>Waiting for verified Nitrado restart observations…</p>

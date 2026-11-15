@@ -312,8 +312,8 @@
       raidStatus.textContent = !live
         ? 'Live automation status unavailable. Read-only checks remain available; activation requires verified server status.'
         : raid.enabled
-        ? 'Raid automation armed · base/container damage and Nitrado restarts only. The separate map-wide kill-ban zone is NOT modified.'
-        : 'Future raid openings disabled · base/container damage and Nitrado restarts only. The map-wide kill-ban zone remains separate and unchanged.';
+        ? 'Raid automation armed · manages base/container damage, the named Full Map PvE player-kill-ban zone, in-game notices and Nitrado restarts. Other zones remain unchanged.'
+        : 'Future raid openings disabled · any earlier started raid still completes its protection restoration. The named Full Map PvE zone is otherwise not changed by this screen.';
       raidStatus.dataset.tone = raid.attention_required ? 'attention' : raid.enabled ? 'armed' : 'idle';
     }
     if (raidToggle) {
@@ -762,7 +762,7 @@
     const toggle = qs('[data-raid-damage-toggle]');
     const turnOn = toggle?.dataset.enabled !== 'true';
     const message = turnOn
-      ? 'Enable automated Nasdara PvE base/container damage changes and Nitrado restart requests? The separate map-wide kill-ban zone will remain untouched. This affects live players.'
+      ? 'Enable fortnightly Nasdara PvE raid automation? This manages base/container damage, the named Full Map PvE player-kill-ban zone, in-game notices and Nitrado restarts at raid boundaries. Unrelated zones remain unchanged. This affects live players.'
       : 'Disable NEW automated raid starts? Any previously started raid will still restore normal PvE damage protection at its scheduled end.';
     if (!confirm(message)) return;
     if (toggle) toggle.disabled = true;
