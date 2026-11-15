@@ -373,7 +373,7 @@
     loadStylesheetOnce('vehicle-bounties-css', 'assets/css/dashboard/vehicle-bounties.css?v=2'),
     ensureRaidWeekendCalendar().then(() => loadAfterDashboardRuntime(() => loadScriptOnce(
       'community',
-      'assets/js/dashboard/community.js?v=2.4.3&rev=nasdara-eventdesk-1&stage6=raid-damage-1&lifecycle=2&preflight=1&events=2&recovery=3&ownerreview=1&pvemode=1&wipenotice=1&dialogpolish=1&ownerwipe=1&reviewpending=2&wipecontrols=1&raidzonecopy=1',
+      'assets/js/dashboard/community.js?v=2.4.3&rev=nasdara-eventdesk-1&stage6=raid-damage-1&lifecycle=2&preflight=1&events=2&recovery=3&ownerreview=1&pvemode=1&wipenotice=1&dialogpolish=1&ownerwipe=1&reviewpending=2&wipecontrols=1&raidzonecopy=1&preflightclarity=1',
       () => window.__wwzCommunityReady === true
     ))),
     loadAfterDashboardRuntime(() => loadScriptOnce(
