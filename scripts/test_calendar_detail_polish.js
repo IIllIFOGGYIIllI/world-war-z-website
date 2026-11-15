@@ -83,7 +83,7 @@ const lazy=fs.readFileSync('assets/js/dashboard/lazy-assets.js','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
 assert.ok(css.includes('.community-detail-dialog.community-event-detail-modal'));
 assert.ok(css.includes('@media(max-width:520px)'));
-assert.ok(lazy.includes('vehicle-wipe-readiness-1'));
+assert.ok(lazy.includes('wipe-owner-review-2'));
 assert.ok(lazy.includes('dialogpolish=1'));
 assert.ok(sw.includes('2026-11-16-owner-review-not-confirmed-1'));
 console.log('PASS: polished raid/wipe/custom event dialogs, XSS escaping, mobile CSS and PWA assets');
