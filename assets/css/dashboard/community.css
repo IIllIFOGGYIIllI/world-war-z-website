@@ -323,3 +323,36 @@
   .wwz-wipe-activation-actions{display:grid;grid-template-columns:1fr}
   .wwz-wipe-activation-actions button{width:100%}
 }
+
+
+/* Raid readiness uses the same structured cards as vehicle maintenance. */
+.community-raid-controls .raid-preflight-result.wwz-raid-inspection {
+  padding: 14px;
+  white-space: normal;
+  border-radius: 12px;
+  background: rgba(9,24,35,.60);
+  color: #dcecf7;
+}
+.community-raid-controls .wwz-raid-report .wwz-maintenance-report-header strong {
+  display: block;
+  margin: 0;
+  font-size: clamp(1rem, 2.5vw, 1.15rem);
+}
+.community-raid-controls .wwz-raid-report .wwz-maintenance-report-header small {
+  color: #bcd1df;
+  margin: 0;
+}
+.community-raid-controls .wwz-raid-report .wwz-maintenance-check strong {
+  display: block;
+  margin: 0;
+  font-size: .96rem;
+}
+.community-raid-controls .wwz-raid-report .wwz-maintenance-owner-checks p {
+  margin: 0;
+  color: #b8cad7;
+}
+@media (max-width: 560px) {
+  .community-raid-controls .raid-preflight-result.wwz-raid-inspection {
+    padding: 12px;
+  }
+}
