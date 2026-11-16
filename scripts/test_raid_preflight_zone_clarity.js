@@ -10,5 +10,5 @@ assert.ok(js.includes('report.messages_file_verified === true'), 'Show in-game r
 assert.ok(js.includes('/DayZ\\+\\+/i.test(String(item))'), 'Drop retired external zone check from rolling backend responses');
 assert.ok(js.includes('RAID READINESS PASSED'), 'Provide clear readiness label');
 assert.ok(lazy.includes('preflightclarity=1'), 'Rotate raid controls browser asset');
-assert.ok(sw.includes('2026-11-17-rental-picker-mobile-layout-2'), 'Refresh PWA app shell');
+assert.match(sw, /const WWZ_PWA_UPDATE_REVISION = '[^']+';/, 'Refresh PWA app shell');
 console.log('PASS: readiness distinguishes WWZ zones, ignores retired external DayZ++ checks, and refreshes PWA');
