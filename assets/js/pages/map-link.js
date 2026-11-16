@@ -11,6 +11,8 @@
   const requestedXRaw = params.get('x');
   const requestedZRaw = params.get('z');
   const isRentalPicker=params.get('rental_picker')==='1';
+  // The embedded rental picker is a compact map canvas, not the public hub.
+  if (isRentalPicker) document.body.classList.add('wwz-rental-picker-mode');
   const requestedX = requestedXRaw === null || requestedXRaw.trim() === '' ? Number.NaN : Number(requestedXRaw);
   const requestedZ = requestedZRaw === null || requestedZRaw.trim() === '' ? Number.NaN : Number(requestedZRaw);
   const hasRequestedCoordinates = requestedXRaw !== null && requestedZRaw !== null && Number.isFinite(requestedX) && Number.isFinite(requestedZ);
@@ -36,6 +38,14 @@
   let atlasPlaces=[],publicRecords=[];
   const dashboardLink = document.querySelector('[data-dashboard-map-link]');
   let selected = null;
+  const relayRentalCoordinates = (x, z) => {
+    if (!isRentalPicker || window.parent === window
+        || ![x, z].every(Number.isFinite)) return;
+    window.parent.postMessage({
+      type: 'wwz:nasdara-rental-coordinate',
+      x: Number(x.toFixed(1)), z: Number(z.toFixed(1))
+    }, window.location.origin);
+  };
 
   const fail = (message) => {
     if (!loading) return;
@@ -68,6 +78,10 @@
   document.title = `WWZ ${config.name} Interactive Map`;
   if (title) title.textContent = hasRequestedCoordinates && requestedMarker ? requestedMarker : `${config.name} Interactive Map`;
   if (mapLabel) mapLabel.textContent = `${config.name} · WWZ public map hub`;
+  if (isRentalPicker) {
+    if (nameLabel) nameLabel.textContent = 'Choose Delivery Location';
+    if (coordinateLabel) coordinateLabel.textContent = 'Tap the map to select your delivery X/Z.';
+  }
   if (dashboardLink) {
     const centre = 8192;
     dashboardLink.href = `dashboard.html?server=${encodeURIComponent(serverKey)}&map=${encodeURIComponent(mapKey)}&x=${centre.toFixed(1)}&z=${centre.toFixed(1)}&marker=${encodeURIComponent('WWZ Map Hub')}&source=map-hub#map`;
@@ -88,8 +102,7 @@
       if(nameLabel)nameLabel.textContent=next.name;
       if(coordinateLabel)coordinateLabel.textContent=`X ${x.toFixed(1)} · Z ${z.toFixed(1)}`;
       if(copyButton)copyButton.disabled=false;
-      if(isRentalPicker&&window.parent!==window)
-        window.parent.postMessage({type:'wwz:nasdara-rental-coordinate',x:Number(x.toFixed(1)),z:Number(z.toFixed(1))},window.location.origin);
+      relayRentalCoordinates(x, z);
     },
     zoomInButton:document.querySelector('[data-marker-zoom-in]'), zoomOutButton:document.querySelector('[data-marker-zoom-out]'),
     resetButton:document.querySelector('[data-marker-reset]'), fullscreenButton:document.querySelector('[data-marker-fullscreen]'), fullscreenTarget:container
@@ -100,7 +113,7 @@
   const selectionLayer = window.L.layerGroup().addTo(map.map);
   const markerById = new Map();
 
-  const selectPoi = (poi, { focus=true } = {}) => {
+  const selectPoi = (poi, { focus=true, relaySelection=false } = {}) => {
     selected = poi;
     if (nameLabel) nameLabel.textContent = poi.name;
     if (coordinateLabel) coordinateLabel.textContent = `${poi.category} · X ${poi.x.toFixed(1)} · Z ${poi.z.toFixed(1)}${poi.approximate?' · approximate 100 m grid centre':''}`;
@@ -108,6 +121,7 @@
     document.querySelectorAll('[data-poi-id]').forEach((button) => button.classList.toggle('active', button.dataset.poiId === poi.id));
     markerById.forEach((marker,id) => marker?._wwzSetSelected?.(id === poi.id));
     if (focus) map.focus(poi.x, poi.z, Math.max(7, map.map.getZoom()));
+    if (relaySelection) relayRentalCoordinates(poi.x, poi.z);
   };
 
   const mergePois = (dynamic) => {
@@ -165,7 +179,7 @@
     }
     // Filtering the sidebar must not silently hide public markers on the map.
     for(const poi of pois){
-      const marker=map.addPoi(poi,{layer:poiLayer,colour:COLOURS[poi.colour]||COLOURS.red,showLabel:true,onClick:()=>selectPoi(poi)});
+      const marker=map.addPoi(poi,{layer:poiLayer,colour:COLOURS[poi.colour]||COLOURS.red,showLabel:true,onClick:()=>selectPoi(poi,{relaySelection:true})});
       if(marker)markerById.set(poi.id,marker);
     }
     poiList?.replaceChildren(fragment);
@@ -208,6 +222,9 @@
       }).catch(error=>console.warn('Map label layer:',error));
   }
   map.map.on('zoomend moveend',renderLabels);
+  if (isRentalPicker) {
+    window.addEventListener('resize', () => map.invalidateSize());
+  }
   searchInput?.addEventListener('input',()=>renderPois(publicRecords));
   Promise.allSettled([fetchJson('/api/map/markers'),fetchJson('/api/map/intelligence')]).then((results)=>{
     const markerPayload=results[0].status==='fulfilled'?results[0].value:null;
@@ -219,8 +236,8 @@
     if (target) selectPoi(target,{focus:true});
     else if (hasRequestedCoordinates) {
       const poi={id:'discord-location',name:requestedMarker||'Discord Location',category:String(params.get('source')||'Discord location').startsWith('zone-')?'Zone detection':'Discord location',description:'Opened directly from a World War Z Discord coordinate link.',x:requestedX,z:requestedZ,colour:'red'};
-      selectionLayer.clearLayers(); map.addPoi(poi,{layer:selectionLayer,colour:COLOURS.red,selected:true,showLabel:true,onClick:()=>selectPoi(poi)}); selectPoi(poi,{focus:true});
-    } else if (viewMode !== 'hub' && pois.length) selectPoi(pois[0],{focus:false});
+      selectionLayer.clearLayers(); map.addPoi(poi,{layer:selectionLayer,colour:COLOURS.red,selected:true,showLabel:true,onClick:()=>selectPoi(poi,{relaySelection:true})}); selectPoi(poi,{focus:true});
+    } else if (viewMode !== 'hub' && !isRentalPicker && pois.length) selectPoi(pois[0],{focus:false});
     window.setTimeout(()=>map.invalidateSize(),80);
   });
 

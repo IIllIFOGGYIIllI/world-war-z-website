@@ -47,7 +47,7 @@
           card.append(lineTitle);
           const label = element('label', 'wwz-route-field'); label.append(element('span', '', 'Destination'));
           const choice = element('select'); choice.setAttribute('aria-label', `${route.name} delivery ${index + 1} destination`);
-          [['shared', 'Main location above'], ['saved', 'Saved delivery location'], ['custom', 'Different coordinates']].forEach(([value, display]) => {
+          [['shared', 'Main checkout location'], ['saved', 'Saved delivery location'], ['custom', 'Different coordinates']].forEach(([value, display]) => {
             const option = element('option', '', display); option.value = value; choice.append(option);
           });
           choice.value = segment.mode;

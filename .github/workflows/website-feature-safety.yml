@@ -43,6 +43,7 @@ jobs:
           node scripts/test_vehicle_wipe_owner_panel.js
           node scripts/test_pwa_auto_updates.js
           node scripts/test_rental_map_and_server_labels.js
+          node scripts/test_mobile_rental_map_picker.js
           node scripts/test_rental_portfolio_gps_performance.js
           node scripts/test_ui_polish_consistency.js
           node scripts/test_v2_navigation.js
@@ -102,5 +103,6 @@ jobs:
           WEB_SERVER_PID=$!
           trap 'kill "$WEB_SERVER_PID" || true' EXIT
           sleep 2
+          node scripts/test_rental_map_browser.js
           node scripts/test_dashboard_browser_audit.js
           node scripts/test_dashboard_authenticated_browser.js
