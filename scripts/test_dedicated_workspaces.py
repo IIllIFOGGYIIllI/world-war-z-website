@@ -55,6 +55,14 @@ def validate(site: Path) -> None:
             assert document.select_one("base") is None
         else:
             assert document.select_one("base").get("href") == "../"
+            # A <base> changes how #fragment links resolve. These must point
+            # back to this real page instead of the site's root URL.
+            for link in document.select('a[href*="#"]'):
+                destination = link.get("href", "")
+                assert not destination.startswith("#"), (
+                    f"{route['key']} contains base-broken fragment {destination}")
+            skip = document.select_one("a.skip-link")
+            assert skip and skip.get("href") == route["url"] + "#dashboard-content"
         if route["key"] == "community/events":
             assert panel.select_one("[data-raid-damage-controls]")
             assert panel.select_one("[data-vehicle-wipe-owner]")
