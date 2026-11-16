@@ -26,10 +26,13 @@ for(const hook of ['id="wwz-detection-map"','data-layer-pois','data-layer-zones'
   assert.ok(map.includes(hook),'Protected map DOM hook missing '+hook);
 }
 for(const asset of ['assets/css/components/wwz-map.css?v=1.29.2',
-  'assets/js/map/wwz-map.js?v=1.29.2',
-  'assets/js/pages/map-link.js?v=1.28.2']){
+  'assets/js/map/wwz-map.js?v=1.29.2']){
   assert.ok(map.includes(asset),'Map engine asset/version must remain intact: '+asset);
 }
+// A cache-busting version is required for the public coordinate viewer, but
+// pinning a historical version breaks every legitimate map-link release.
+assert.match(map,/assets\/js\/pages\/map-link\.js\?v=\d+\.\d+\.\d+/,
+  'Public map-link viewer must load a versioned script');
 assert.ok(!css.includes('.leaflet-'),'V3.5 must not style Leaflet internals');
 assert.ok(!css.includes('#wwz-detection-map'),'V3.5 must not change map geometry');
 assert.ok(!/fetch\s*\(|XMLHttpRequest|WebSocket|localStorage/.test(css),'Map shell is CSS only');
