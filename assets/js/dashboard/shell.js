@@ -131,8 +131,48 @@ const syncProtectedSectionVisibility = (view, section = '') => {
 
 const navigationKey = (view, section = '') => section ? `${view}/${section}` : view;
 
+// Dedicated pages are built as separate static HTML documents. Route
+// switches load the other document; no hidden dashboard section is revived.
+const dedicatedWorkspace = window.WWZDedicatedWorkspace || null;
+const dedicatedRouteFor = (requested) => {
+  if (!dedicatedWorkspace?.routes) return '';
+  let key = navigationKey(requested.view, requested.section);
+  if (Object.hasOwn(dedicatedWorkspace.routes, key)) return key;
+  const fallback = viewButtons.find((button) =>
+    button.dataset.view === requested.view && button.dataset.section
+    && canAccessElement(button)
+  );
+  if (fallback) {
+    key = navigationKey(fallback.dataset.view, fallback.dataset.section);
+    if (Object.hasOwn(dedicatedWorkspace.routes, key)) return key;
+  }
+  return 'overview/summary';
+};
+
 const showView = (viewOrKey, updateHistory = true, explicitSection = '') => {
-  const requested = parseNavigationKey(viewOrKey, explicitSection);
+  // An empty fragment means the current physical page, not Overview.
+  const raw = String(viewOrKey || '').trim();
+  const requested = parseNavigationKey(
+    raw || dedicatedWorkspace?.current || '', explicitSection
+  );
+  if (dedicatedWorkspace) {
+    let key = dedicatedRouteFor(requested);
+    const [requestedPageView, requestedPageSection] = key.split('/', 2);
+    const nav = viewButtons.find((button) =>
+      button.dataset.view === requestedPageView &&
+      button.dataset.section === requestedPageSection
+    );
+    if (!canOpenView(requestedPageView) || (nav && !canAccessElement(nav))) {
+      key = 'overview/summary';
+    }
+    if (key !== dedicatedWorkspace.current) {
+      const destination = dedicatedWorkspace.routes[key];
+      // URLs are resolved relative to the site's <base> (../ for workspaces).
+      // Browser navigation provides genuine back/forward history and direct links.
+      window.location.assign(new URL(destination, document.baseURI).href);
+      return;
+    }
+  }
   const requestedView = availableViews.has(requested.view) ? requested.view : 'overview';
   const selectedView = canOpenView(requestedView) ? requestedView : 'overview';
   const requestedTarget = sectionTargetFor(selectedView, requested.section);
@@ -168,7 +208,7 @@ const showView = (viewOrKey, updateHistory = true, explicitSection = '') => {
   if (activeGroup && 'open' in activeGroup) activeGroup.open = true;
 
   const key = navigationKey(selectedView, selectedSection);
-  if (updateHistory) history.pushState({ view: selectedView, section: selectedSection }, '', `#${key}`);
+  if (updateHistory && !dedicatedWorkspace) history.pushState({ view: selectedView, section: selectedSection }, '', `#${key}`);
 
   window.requestAnimationFrame(() => {
     const targetVisible = selectedTarget && selectedTarget.getClientRects().length > 0;
