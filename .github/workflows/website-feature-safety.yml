@@ -88,3 +88,9 @@ jobs:
           python3 scripts/build_nasdara_assets.py
       - name: Validate page routing and script assets
         run: python3 scripts/validate_site.py --require-map-assets
+      - name: Test generated independent dashboard pages (no deploy)
+        run: |
+          python3 -m pip install beautifulsoup4==4.14.2
+          mkdir -p "$RUNNER_TEMP/wwz-dedicated-pages"
+          python3 scripts/build_dashboard_pages.py --output-root "$RUNNER_TEMP/wwz-dedicated-pages"
+          python3 scripts/test_dedicated_workspaces.py --site-root "$RUNNER_TEMP/wwz-dedicated-pages"
