@@ -45,6 +45,17 @@ for (const url of [
   base + '#login_ticket=' + validTicket + '&other=data',
   validTicket
 ]) assert.equal(auth.parseTransferLink(url), null, 'reject untrusted or malformed transfer link');
+// A real standalone page uses /workspaces/ but canonical Discord OAuth
+// callbacks continue to return to the one allowed /dashboard.html route.
+const canonicalCallback = base + '#login_ticket=' + validTicket;
+ctx.window.WWZDedicatedWorkspace = {current:'community/events',routes:{'community/events':'workspaces/community-events.html'}};
+ctx.document = {baseURI: new URL('./', base).href};
+ctx.location.href = new URL('workspaces/community-events.html', base).href;
+assert.equal(auth.parseTransferLink(canonicalCallback), validTicket, 'accept canonical callback for dedicated workspace');
+assert.equal(auth.parseTransferLink(ctx.location.href + '#login_ticket=' + validTicket), validTicket, 'same-page transfer remains valid');
+assert.equal(auth.parseTransferLink(base.replace('dashboard.html','other.html') + '#login_ticket=' + validTicket), null, 'unrelated same-origin pages must not receive OAuth ticket');
+delete ctx.window.WWZDedicatedWorkspace;
+ctx.location.href = base;
 ua.userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'; ua.platform = 'Win32';
 assert.equal(auth.isIOS(), false);
 assert.equal(auth.shouldOfferSafariHandoff(false), false);
