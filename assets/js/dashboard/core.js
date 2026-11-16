@@ -732,9 +732,20 @@ const clearCallbackFragment = () => {
   const storedKey = storageGet(AUTH_RETURN_VIEW_KEY) || fallbackView || 'overview/summary';
   storageRemove(AUTH_RETURN_VIEW_KEY);
   const requested = parseNavigationKey(storedKey);
-  const view = availableViews.has(requested.view) ? requested.view : 'overview';
-  const section = sectionTargetFor(view, requested.section) ? requested.section : defaultSectionForView(view);
-  const key = navigationKey(view, section);
+  // OAuth callbacks may return to dashboard.html while the requested tab
+  // now lives in a DIFFERENT standalone HTML document. Never discard that
+  // legitimate return route just because its panel is not in this document.
+  const standaloneRoutes = window.WWZDedicatedWorkspace?.routes;
+  const storedRoute = navigationKey(requested.view, requested.section);
+  const key = standaloneRoutes
+    ? (Object.hasOwn(standaloneRoutes, storedRoute) ? storedRoute
+      : (dedicatedRouteFor(requested) || 'overview/summary'))
+    : (() => {
+        const view = availableViews.has(requested.view) ? requested.view : 'overview';
+        const section = sectionTargetFor(view, requested.section) ? requested.section : defaultSectionForView(view);
+        return navigationKey(view, section);
+      })();
+  const [view, section = ''] = key.split('/', 2);
   // OAuth handoff intent is only for the one-time callback, not later visits.
   const currentUrl = new URL(location.href);
   const hadOAuthHandoff = currentUrl.searchParams.has('wwz_handoff')
