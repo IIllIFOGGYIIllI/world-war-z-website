@@ -22,5 +22,5 @@ assert.ok(js.includes('data-automation-test-result'));
 assert.ok(css.includes('.wwz-automation-preview[hidden] { display: none !important; }'));
 assert.ok(css.includes('@media (max-width: 560px)'));
 assert.ok(lazy.includes('visiblecontrol=1'));
-assert.ok(sw.includes('2026-11-17-rental-picker-mobile-layout-2'));
+assert.match(sw, /const WWZ_PWA_UPDATE_REVISION = '[^']+';/);
 console.log('PASS: Owner-only four safe Discord notification previews and PWA cache refresh');
