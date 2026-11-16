@@ -194,7 +194,8 @@
   };
 
   const createQuickAccess = () => {
-    if (fileName() === 'dashboard.html' || $('.wwz-quick-access-button')) return;
+    // The embedded rental map is a coordinate canvas, not a full public page.
+    if (fileName() === 'dashboard.html' || document.body.classList.contains('wwz-rental-picker-mode') || $('.wwz-quick-access-button')) return;
     const trigger = document.createElement('button');
     trigger.type = 'button';
     trigger.disabled = false;
