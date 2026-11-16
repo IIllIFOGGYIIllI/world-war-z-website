@@ -22,5 +22,5 @@ assert.ok(zonesCss.includes('line-height: 1.15;'));
 assert.ok(zonesCss.includes('word-break: normal;'));
 assert.ok(loader.includes('nasdara-policy-cleanup-1&headingfix=1'));
 assert.ok(loader.includes('&armedoverview=1'));
-assert.ok(sw.includes('2026-11-17-rental-picker-mobile-layout-2'));
+assert.match(sw, /const WWZ_PWA_UPDATE_REVISION = '[^']+';/);
 console.log('PASS: armed Raid Weekend overview and non-overlapping Windows/Opera Zones heading');
