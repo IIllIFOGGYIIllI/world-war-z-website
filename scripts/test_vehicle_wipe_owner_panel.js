@@ -71,7 +71,7 @@ assert.ok(css.includes('.community-vehicle-wipe[hidden]{display:none!important}'
 assert.ok(css.includes('@media(max-width:620px)'));
 assert.ok(lazy.includes('wipe-owner-controls-1'));
 assert.ok(lazy.includes('ownerwipe=1&reviewpending=2&wipecontrols=1'));
-assert.ok(sw.includes('2026-11-17-dashboard-route-mobile-audit-1'));
+assert.ok(sw.includes('2026-11-17-rental-picker-mobile-layout-2'));
 assert.ok(js.includes('wwz-maintenance-report-header'),'Structured readiness report should be used');
 assert.ok(js.includes('wwz-maintenance-owner-checks'),'Owner checks should render individually');
 assert.ok(js.includes('pendingOwnerChecks.map(item=>'),'Owner manual checks must be separate bullet items');
