@@ -24,7 +24,7 @@ async function contextFor(browser,role,width=1365) {
     serviceWorkers:'block',ignoreHTTPSErrors:true,reducedMotion:'reduce'});
   await ctx.addInitScript((data)=>{
     if(location.hostname==='127.0.0.1'){
-      sessionStorage.setItem('wwz_dashboard_session','synthetic-test-token');
+      sessionStorage.setItem('wwz_dashboard_session','AUDIT_FAKE_BROWSER_SESSION_KEY_00000000000000000001');
       sessionStorage.setItem('wwz_dashboard_server',JSON.stringify(data));
     }
   },{...pve,access_level:role});
@@ -36,7 +36,7 @@ async function contextFor(browser,role,width=1365) {
     }
     if(!url.startsWith(API))return route.abort('blockedbyclient');
     const pathname=new URL(url).pathname;
-    const headers={'access-control-allow-origin':'*','access-control-allow-headers':'authorization,content-type',
+    const headers={'access-control-allow-origin':'*','access-control-allow-headers':'authorization,content-type,x-wwz-server',
       'access-control-allow-methods':'GET,POST,OPTIONS','content-type':'application/json'};
     if(req.method()==='OPTIONS')return route.fulfill({status:204,headers,body:''});
     if(!['GET','HEAD'].includes(req.method())){
