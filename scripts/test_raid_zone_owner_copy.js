@@ -15,5 +15,5 @@ assert.ok(js.includes('The separate map-wide kill-ban zone is untouched.'),'Read
 assert.ok(!js.includes('The separate map-wide kill-ban zone will remain untouched.'),'Activation consent must accurately describe the named-zone effect');
 assert.ok(!html.includes('The separate map-wide kill-ban zone is not modified.'));
 assert.ok(lazy.includes('&raidzonecopy=1'),'Browser cache invalidation needed');
-assert.ok(sw.includes('2026-11-16-visible-raid-test-controls-1'),'Installed PWA update needed');
+assert.ok(sw.includes('2026-11-16-78-independent-workspace-pages-1'),'Installed PWA update needed');
 console.log('PASS: accurate raid zone consent copy and read-only safeguards');
