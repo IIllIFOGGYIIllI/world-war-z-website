@@ -151,7 +151,9 @@ def make_page(template_html: str, route: dict[str, str],
 
     # Keep common authentication dialogs, overlay controls and shared scripts.
     # Other workspaces' cards and data sections are physically ABSENT.
-    return "<!DOCTYPE html>\n" + str(soup)
+    # BeautifulSoup retains the source doctype; do not emit it twice.
+    content = str(soup)
+    return content if content.lstrip().lower().startswith("<!doctype html") else "<!DOCTYPE html>\n" + content
 
 
 def generate(root: Path) -> list[dict[str, str]]:
