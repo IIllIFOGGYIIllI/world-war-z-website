@@ -84,7 +84,10 @@
   }
   if (dashboardLink) {
     const centre = 8192;
-    dashboardLink.href = `dashboard.html?server=${encodeURIComponent(serverKey)}&map=${encodeURIComponent(mapKey)}&x=${centre.toFixed(1)}&z=${centre.toFixed(1)}&marker=${encodeURIComponent('WWZ Map Hub')}&source=map-hub#map`;
+    // Preserve an exact Discord map marker if an admin chooses the full dashboard.
+    const dashboardX = hasRequestedCoordinates ? requestedX : centre;
+    const dashboardZ = hasRequestedCoordinates ? requestedZ : centre;
+    dashboardLink.href = `dashboard.html?server=${encodeURIComponent(serverKey)}&map=${encodeURIComponent(mapKey)}&x=${dashboardX.toFixed(1)}&z=${dashboardZ.toFixed(1)}&marker=${encodeURIComponent(hasRequestedCoordinates ? (requestedMarker || 'Discord Location') : 'WWZ Map Hub')}&source=${encodeURIComponent(String(params.get('source') || 'map-hub'))}#map`;
   }
 
   // The public map's on-map sidebar must never select coordinates behind UI.
@@ -123,6 +126,21 @@
     if (focus) map.focus(poi.x, poi.z, Math.max(7, map.map.getZoom()));
     if (relaySelection) relayRentalCoordinates(poi.x, poi.z);
   };
+
+  // Draw deep-linked X/Z coordinates as soon as the map is ready, before any
+  // network requests for optional public POIs or zone overlays can delay it.
+  if (hasRequestedCoordinates) {
+    const directPoi = {
+      id: 'discord-location',
+      name: requestedMarker || 'Discord Location',
+      category: String(params.get('source') || 'Discord location').startsWith('zone-') ? 'Zone detection' : 'Discord location',
+      description: 'Opened directly from a World War Z Discord coordinate link.',
+      x: requestedX, z: requestedZ, colour: 'red'
+    };
+    selectionLayer.clearLayers();
+    map.addPoi(directPoi, {layer: selectionLayer, colour: COLOURS.red, selected: true, showLabel: true, onClick: () => selectPoi(directPoi, {relaySelection: true})});
+    selectPoi(directPoi, {focus: true});
+  }
 
   const mergePois = (dynamic) => {
     const live = (Array.isArray(dynamic) ? dynamic : []).map(validPoi).filter(Boolean);
@@ -231,13 +249,10 @@
     const intelPayload=results[1].status==='fulfilled'?results[1].value:null;
     const pois=renderPois(mergePois(markerPayload?.markers)); const zoneCount=renderZones(intelPayload?.kill_zones);
     renderLabels();
-    if (status) status.textContent=`${pois.length} public POI${pois.length===1?'':'s'} · ${zoneCount} public PvP/kill-zone overlay${zoneCount===1?'':'s'} · live map`;
+    if (status) status.textContent=`${pois.length} public POI${pois.length===1?'':'s'} · ${zoneCount} public PvP/kill-zone overlay${zoneCount===1?'':'s'} · ${results.every(result => result.status === 'fulfilled') ? 'live map' : 'map available, optional live layers unavailable'}`;
     const target = requestedPoi ? pois.find(p=>p.id===requestedPoi || p.name.toLowerCase()===requestedPoi.toLowerCase()) : null;
-    if (target) selectPoi(target,{focus:true});
-    else if (hasRequestedCoordinates) {
-      const poi={id:'discord-location',name:requestedMarker||'Discord Location',category:String(params.get('source')||'Discord location').startsWith('zone-')?'Zone detection':'Discord location',description:'Opened directly from a World War Z Discord coordinate link.',x:requestedX,z:requestedZ,colour:'red'};
-      selectionLayer.clearLayers(); map.addPoi(poi,{layer:selectionLayer,colour:COLOURS.red,selected:true,showLabel:true,onClick:()=>selectPoi(poi,{relaySelection:true})}); selectPoi(poi,{focus:true});
-    } else if (viewMode !== 'hub' && !isRentalPicker && pois.length) selectPoi(pois[0],{focus:false});
+    if (!hasRequestedCoordinates && target) selectPoi(target,{focus:true});
+    else if (!hasRequestedCoordinates && viewMode !== 'hub' && !isRentalPicker && pois.length) selectPoi(pois[0],{focus:false});
     window.setTimeout(()=>map.invalidateSize(),80);
   });
 
