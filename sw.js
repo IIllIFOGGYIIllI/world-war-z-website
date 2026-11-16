@@ -8,7 +8,7 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-11-16-visible-raid-test-controls-1';
+const WWZ_PWA_UPDATE_REVISION = '2026-11-16-78-independent-workspace-pages-1';
 // Each deployed revision gets a fresh shell/static cache, while the bounded map
 // tile/data caches keep their own independent generations. This ensures an
 // accepted update does not reload stale JS/CSS from a previous PWA release.
@@ -27,6 +27,7 @@ const scopedUrl = (path) => new URL(path, APP_SCOPE).href;
 
 const APP_SHELL = [
   './index.html',
+  './dashboard.html',
   './companion.html',
   './offline.html',
   './manifest.webmanifest',
@@ -70,7 +71,7 @@ const APP_SHELL = [
   './assets/css/dashboard/getting-started-v323.css?v=3.23.0&rev=player-guide-1',
   './assets/js/dashboard/policy-account-v318.js?v=3.19.1&rev=audit-route-1',
   './assets/js/dashboard/server-context.js?v=3.0.3&rev=topbar-mode-1',
-  './assets/js/dashboard/shell.js?v=1.25.2&rev=palette-touch-1',
+  './assets/js/dashboard/shell.js?v=1.25.2&rev=palette-touch-1&pages=78',
   './assets/js/site-refinement.js?v=2.1.1&rev=breadcrumb-fix-1',
   './assets/js/core/cart-deliveries.js?v=2.1.0',
   './assets/css/components/cart-deliveries.css?v=2.1.0',
@@ -265,6 +266,7 @@ self.addEventListener('fetch', (event) => {
       || url.pathname.endsWith('/assets/js/dashboard/account.js')
       || url.pathname.endsWith('/assets/js/dashboard/ios-auth-handoff.js')
       || url.pathname.endsWith('/assets/js/dashboard/core.js')
+      || url.pathname.endsWith('/assets/js/dashboard/shell.js')
       || url.pathname.endsWith('/assets/js/dashboard/administration.js')
       || url.pathname.endsWith('/assets/js/dashboard/operations-centre.js')
       || url.pathname.endsWith('/assets/js/dashboard/community.js')
