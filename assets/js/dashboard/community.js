@@ -52,6 +52,18 @@
     const element = qs(selector);
     if (element) element.textContent = value;
   };
+  // The Event Planner is a physical page. Pass only harmless UI intent in the
+  // URL; existing authenticated bot APIs still own all event data and writes.
+  const openSeparatePlanner = (options = {}) => {
+    const path = window.WWZDedicatedWorkspace?.routes?.['community/planner'];
+    if (!path) return false;
+    const url = new URL(path, document.baseURI);
+    if (options.day) url.searchParams.set('plan_date', String(options.day).slice(0,10));
+    if (options.runId) url.searchParams.set('edit_run_id', String(Number(options.runId)));
+    if (options.copy) url.searchParams.set('copy_run', '1');
+    window.location.assign(url.href);
+    return true;
+  };
   const status = qs('[data-community-status]');
   const setStatus = (message='', tone='') => { if (!status) return; status.hidden = !message; status.textContent = message; status.dataset.tone = tone; };
   const selectedScope = () => {
@@ -111,7 +123,15 @@
       el.innerHTML=`<div class="community-calendar-month">${weekdays}${cells}</div>`;
     }
     el.querySelectorAll('[data-calendar-event]').forEach(btn=>btn.addEventListener('click',()=>showEvent(events.find(e=>Number(e.id)===Number(btn.dataset.calendarEvent)))));
-    el.querySelectorAll('[data-calendar-date]').forEach(btn=>{btn.disabled=!['staff','owner'].includes(dashboardAccessLevel);btn.addEventListener('click',()=>{location.hash='community/planner';applyPreset('custom');const day=btn.dataset.calendarDate.slice(0,10);plannerForm.elements.starts_at.value=day+'T18:00';plannerForm.elements.ends_at.value=day+'T19:00';});});
+    el.querySelectorAll('[data-calendar-date]').forEach(btn=>{btn.disabled=!['staff','owner'].includes(dashboardAccessLevel);btn.addEventListener('click',()=>{
+      const day = btn.dataset.calendarDate.slice(0,10);
+      if (openSeparatePlanner({day})) return;
+      location.hash='community/planner';applyPreset('custom');
+      if (plannerForm) {
+        plannerForm.elements.starts_at.value=day+'T18:00';
+        plannerForm.elements.ends_at.value=day+'T19:00';
+      }
+    });});
   };
 
   const renderAnalytics = (payload) => {
@@ -199,7 +219,26 @@
   const memberEventAction = async (action, runId) => { try{const r=await request(API.accountEventAction,{method:'POST',body:JSON.stringify({action,run_id:runId})},true);setStatus(r.message||'Event registration updated.','success');await Promise.all([loadAccountEvents(),loadOverview()]);}catch(e){setStatus(e.message,'error');} };
 
   const loadPreferences = async () => { if(!token()){renderTopics({server_enabled:false,available_topics:Object.keys(topicLabels)});return;} preferencePayload=await request(API.preferences,{},true);renderTopics(preferencePayload.push||{}); };
-  const loadAdmin = async () => { if(!['staff','owner'].includes(dashboardAccessLevel)||!token()) return; adminPayload=await request(API.admin,{},true);renderPlanner(adminPayload); };
+  const loadAdmin = async () => {
+    if(!['staff','owner'].includes(dashboardAccessLevel)||!token()) return;
+    adminPayload=await request(API.admin,{},true);renderPlanner(adminPayload);
+    if (!plannerForm || !window.WWZDedicatedWorkspace) return;
+    const query = new URLSearchParams(location.search);
+    const planDate = query.get('plan_date');
+    const runId = Number(query.get('edit_run_id') || 0);
+    if (planDate && /^\d{4}-\d{2}-\d{2}$/.test(planDate)) {
+      applyPreset('custom');
+      plannerForm.elements.starts_at.value = planDate + 'T18:00';
+      plannerForm.elements.ends_at.value = planDate + 'T19:00';
+    } else if (runId > 0 && Number.isSafeInteger(runId)) {
+      editRun(runId, query.get('copy_run') === '1');
+    }
+    if (planDate || runId) {
+      const clean = new URL(location.href);
+      for (const key of ['plan_date','edit_run_id','copy_run']) clean.searchParams.delete(key);
+      history.replaceState(history.state, '', clean.pathname + clean.search + clean.hash);
+    }
+  };
 
   const urlBase64ToUint8Array = (base64String) => {const padding='='.repeat((4-base64String.length%4)%4);const base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');const rawData=atob(base64);return Uint8Array.from([...rawData].map(c=>c.charCodeAt(0)));};
   const selectedTopics = () => [...root.querySelectorAll('[data-community-topic]:checked')].map(el=>el.dataset.communityTopic);
@@ -905,7 +944,10 @@
     d.querySelector('[data-dialog-edit]')?.addEventListener('click',()=>{d.close();editRun(e.id);});
     d.querySelector('[data-dialog-register]')?.addEventListener('click',async()=>{try{await memberEventAction('signup',e.id);d.close();}catch(error){setStatus(error.message,'error');}});
   };
-  const editRun=(id,copy=false)=>{const r=(adminPayload?.runs||[]).find(e=>Number(e.id)===Number(id));if(!r)return;clearTemplate();const E=plannerForm.elements;for(const [key,value] of Object.entries(r)){if(E[key]){if(E[key].type==='checkbox')E[key].checked=Boolean(value);else setFriendlyValue(E[key],value??'');}}E.name.value=r.title;E.run_id.value=copy?'':r.id;E.template_id.value='';E.reward_categories.value=rewardLines(r.reward_categories);E.reward_money.value=r.attendance_money||0;E.winner_reward_money.value=r.winner_money||0;E.reward_xp.value=r.attendance_xp||0;E.winner_reward_xp.value=r.winner_xp||0;
+  const editRun=(id,copy=false)=>{
+    if(!plannerForm && openSeparatePlanner({runId:id,copy})) return;
+    const r=(adminPayload?.runs||[]).find(e=>Number(e.id)===Number(id));if(!r||!plannerForm)return;
+    clearTemplate();const E=plannerForm.elements;for(const [key,value] of Object.entries(r)){if(E[key]){if(E[key].type==='checkbox')E[key].checked=Boolean(value);else setFriendlyValue(E[key],value??'');}}E.name.value=r.title;E.run_id.value=copy?'':r.id;E.template_id.value='';E.reward_categories.value=rewardLines(r.reward_categories);E.reward_money.value=r.attendance_money||0;E.winner_reward_money.value=r.winner_money||0;E.reward_xp.value=r.attendance_xp||0;E.winner_reward_xp.value=r.winner_xp||0;
     E.restart_enabled.checked=Number(r.restart_minutes_before||0)>0;
     E.rewards_enabled.checked=eventHasRewards(r);
     if(E.end_condition)E.end_condition.value=r.end_condition||'manual';
