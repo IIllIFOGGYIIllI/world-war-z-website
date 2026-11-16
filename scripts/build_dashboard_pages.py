@@ -73,6 +73,13 @@ def make_page(template_html: str, route: dict[str, str],
     if soup.title:
         soup.title.string = f'{route["label"]} | World War Z Command Centre'
 
+    # Nested pages have a <base href="../"> for shared assets. Fragment-only
+    # links would otherwise jump to the SITE ROOT rather than this page.
+    # Bind those links to the correct physical HTML document explicitly.
+    if is_nested:
+        for anchor in soup.select('a[href^="#"]'):
+            anchor["href"] = route["url"] + anchor["href"]
+
     # Sidebar keeps every link, but each link addresses a real HTML document.
     for button in soup.select(".sidebar-navigation button.side-link[data-view][data-section]"):
         key = f'{button["data-view"]}/{button["data-section"]}'
