@@ -38,8 +38,15 @@ def routes_from(template: BeautifulSoup) -> tuple[list[dict[str, str]], dict[str
                else f"workspaces/{view}-{section}.html")
         label = str(link.get("data-nav-label") or
                     link.get_text(" ", strip=True) or section.title())
+        # This describes *navigation permissions*, not backend authorization.
+        # The bot API remains the source of truth for any protected action.
+        owner_views = {"configuration", "serverconfig", "shopadmin"}
+        staff_views = {"staff", "delivery", "zones", "feeds"}
+        access = ("owner" if view in owner_views or link.has_attr("data-owner-only")
+                  else "staff" if view in staff_views or link.has_attr("data-staff-only")
+                  else "public")
         routes.append(dict(key=key, view=view, section=section,
-                           url=url, label=label))
+                           url=url, label=label, access=access))
     if not routes or routes[0]["key"] != OVERVIEW:
         raise ValueError("Overview must remain the first standalone route")
     if len(routes) < 70:
