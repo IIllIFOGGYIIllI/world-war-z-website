@@ -103,3 +103,4 @@ jobs:
           trap 'kill "$WEB_SERVER_PID" || true' EXIT
           sleep 2
           node scripts/test_dashboard_browser_audit.js
+          node scripts/test_dashboard_authenticated_browser.js
