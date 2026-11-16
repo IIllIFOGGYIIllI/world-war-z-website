@@ -53,8 +53,15 @@
         queryKeys.length === 1 && queryKeys[0] === 'wwz_handoff'
         && query.get('wwz_handoff') === 'ios_app'
       );
+      // A standalone workspace may receive the one-time OAuth callback at
+      // canonical dashboard.html. Permit exactly that same-origin fallback,
+      // never an arbitrary path or an unrelated token-bearing page.
+      const canonicalDashboard = window.WWZDedicatedWorkspace
+        ? new URL('dashboard.html', document.baseURI).pathname : '';
+      const validPath = link.pathname === current.pathname
+        || (canonicalDashboard && link.pathname === canonicalDashboard);
       if (link.protocol !== 'https:' || link.origin !== current.origin
-          || link.pathname !== current.pathname || !allowedQuery
+          || !validPath || !allowedQuery
           || link.username || link.password) return null;
       const params = new URLSearchParams(link.hash.slice(1));
       const keys = [...params.keys()];
