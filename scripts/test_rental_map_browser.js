@@ -29,11 +29,11 @@ const ROOT='http://127.0.0.1:8765/';
         fallback:getComputedStyle(document.querySelector('[data-rental-map-frame]')).display
       }));
       assert.deepEqual(initial,{atlas:'none',fallback:'none'});
-      await page.evaluate(()=>{
+      await page.evaluate((root)=>{
         const iframe=document.querySelector('[data-rental-map-atlas]');
         iframe.hidden=false;
-        iframe.src=ROOT+'map-link.html?map=badlands&rental_picker=1&server=world-war-z';
-      });
+        iframe.src=root+'map-link.html?map=badlands&rental_picker=1&server=world-war-z';
+      },ROOT);
       await page.waitForFunction(()=>{
         const f=document.querySelector('[data-rental-map-atlas]');
         return f?.contentDocument?.body?.classList.contains('wwz-rental-picker-mode');
