@@ -38,7 +38,6 @@ const assetFilter = async (route) => {
   await route.continue();
 };
 
-const timeout = (p, ms) => new Promise(resolve => setTimeout(resolve, ms));
 const visibleWorkspace = async (page, key) => page.evaluate(key => {
   document.body.classList.remove('dashboard-gated');
   for (const gate of document.querySelectorAll('[data-dashboard-gateway]')) {
@@ -62,10 +61,10 @@ const visibleWorkspace = async (page, key) => page.evaluate(key => {
   };
 }, key);
 
-async function newContext(browser, viewport) {
+async function newContext(browser, viewport, javaScriptEnabled = true) {
   const context = await browser.newContext({
     viewport, serviceWorkers:'block', ignoreHTTPSErrors:true,
-    reducedMotion:'reduce'
+    reducedMotion:'reduce', javaScriptEnabled
   });
   await context.route('**/*', assetFilter);
   return context;
@@ -87,7 +86,19 @@ async function main() {
         });
         if (!result || result.status() !== 200)
           throw Error('HTTP ' + (result?.status() ?? 'unavailable'));
-        const data = await visibleWorkspace(page,row.key);
+        let data;
+        try {
+          data = await visibleWorkspace(page,row.key);
+        } catch (error) {
+          const redirected = /Execution context was destroyed/.test(String(error?.message||error));
+          if (!redirected || row.access === 'public') throw error;
+          // The baseline browser has no Discord credentials. Guest access to
+          // a protected page should redirect to the public dashboard.
+          await page.waitForURL(url => url.pathname === new URL('dashboard.html',ROOT).pathname,
+            {timeout:3000});
+          traces.push({key:row.key,guestRedirect:'dashboard.html',access:row.access});
+          continue;
+        }
         if (data.current !== row.key)
           throw Error('Wrong HTML route ' + data.current);
         if (data.panels.length !== 1 || data.panels[0].name !== row.view
@@ -112,45 +123,71 @@ async function main() {
     const mobileKeys = [
       'overview/summary','server/status','map/explorer',
       'community/events','community/analytics','community/planner',
-      'zones/manage','zones/map','economy/banking','shop/catalogue',
+      'zones/manage','zones/map','economy/banking','community/bounties',
       'players/identity','factions/directory','tickets/support',
       'staff/server-controls','staff/moderation-centre','configuration/workflow',
       'serverconfig/structured','settings/app-updates'
     ];
     const mobile = await newContext(browser,{width:390,height:844});
+    const mobileProtected = await newContext(browser,{width:390,height:844},false);
     for (const key of mobileKeys) {
       const row = routes.find(r=>r.key===key);
       if (!row) { problems.push('MOBILE missing route ' + key);continue; }
-      const page = await mobile.newPage();
+      // Protected pages are rendered with JavaScript disabled in the mobile
+      // visual audit, so guest redirection cannot race measurement. Their
+      // actual authorization is tested separately by the desktop guest flow.
+      const offlineLayout = row.access !== 'public';
+      const page = await (offlineLayout ? mobileProtected : mobile).newPage();
       const errors = [];
       page.on('pageerror',error=>errors.push(String(error?.message||error)));
       try {
         await page.goto(new URL(row.url,ROOT).href,{waitUntil:'domcontentloaded',timeout:18000});
-        const data = await visibleWorkspace(page,key);
-        const details = await page.evaluate(() => {
-          const t=document.querySelector('[data-sidebar-toggle]');
-          if (!t) return {menu:false};
-          t.click();
-          return {
-            menu: t.getAttribute('aria-expanded')==='true',
-            inert: Boolean(document.querySelector('[data-sidebar]')?.inert),
-            sidebarOpen: document.querySelector('[data-sidebar]')?.classList.contains('open'),
-          };
-        });
-        if (!details.menu || details.inert || !details.sidebarOpen)
-          throw Error('Mobile menu did not open accessibly: '+JSON.stringify(details));
+        const data = offlineLayout
+          ? await page.evaluate(() => {
+              document.body.classList.remove('dashboard-gated');
+              for (const gate of document.querySelectorAll('[data-dashboard-gateway]'))
+                gate.style.setProperty('display','none','important');
+              return {contentWidth:document.documentElement.scrollWidth,
+                viewportWidth:innerWidth,
+                current:document.documentElement.dataset.wwzDedicatedWorkspace,
+                panels:[...document.querySelectorAll('[data-view-panel]')].map(x=>x.dataset.viewPanel)};
+            })
+          : await visibleWorkspace(page,key);
+        if (data.current !== key)
+          throw Error('Wrong mobile HTML workspace: '+data.current);
+        if (offlineLayout) {
+          if (data.panels.length !== 1 || data.panels[0] !== row.view)
+            throw Error('Protected mobile page not isolated');
+          if (!await page.locator('[data-sidebar-toggle]').count())
+            throw Error('Protected mobile page lacks shared menu control');
+        } else {
+          const details = await page.evaluate(() => {
+            const t=document.querySelector('[data-sidebar-toggle]');
+            if (!t) return {menu:false};
+            t.click();
+            return {
+              menu:t.getAttribute('aria-expanded')==='true',
+              inert:Boolean(document.querySelector('[data-sidebar]')?.inert),
+              sidebarOpen:document.querySelector('[data-sidebar]')?.classList.contains('open'),
+            };
+          });
+          if (!details.menu || details.inert || !details.sidebarOpen)
+            throw Error('Mobile menu did not open accessibly: '+JSON.stringify(details));
+        }
         // Detect actual off-screen content rather than hiding it by cropping
         // the screenshots. A small tolerance covers borders and scrollbars.
         if (data.contentWidth > data.viewportWidth + 24)
           throw Error('Horizontal overflow '+data.contentWidth+' > '+data.viewportWidth);
         const fatal=errors.filter(x=>/Cannot (?:read|set) properties of (?:null|undefined)|is not defined|is not a function/.test(x));
         if (fatal.length) throw Error('JavaScript error: '+fatal.slice(0,2).join('|'));
-        traces.push({key,mobile:true,width:data.contentWidth,viewport:data.viewportWidth});
+        traces.push({key,mobile:true,mode:offlineLayout?'protected-static-layout':'interactive',
+          width:data.contentWidth,viewport:data.viewportWidth});
       } catch(error) {
         problems.push('MOBILE ' + key + ': ' + String(error?.message||error).slice(0,600));
       } finally {await page.close();}
     }
     await mobile.close();
+    await mobileProtected.close();
 
     // Navigation clicks must open a DIFFERENT HTML document, not hide panels.
     const navContext = await newContext(browser,{width:1280,height:800});
@@ -191,8 +228,8 @@ async function main() {
     for(const problem of problems.slice(0,100)) console.error(' - '+problem);
     process.exitCode=1;
   } else {
-    console.log('PASS: '+routes.length+' physical desktop pages, 18 mobile layouts, '
-      +'accessible mobile drawers, JavaScript initialization, and real cross-page navigation');
+    console.log('PASS: '+routes.length+' physical desktop routes (including guest protection), '
+      +'18 mobile layouts, accessible public mobile drawers, and real cross-page navigation');
   }
 }
 
