@@ -27,7 +27,6 @@ const scopedUrl = (path) => new URL(path, APP_SCOPE).href;
 
 const APP_SHELL = [
   './index.html',
-  './dashboard.html',
   './companion.html',
   './offline.html',
   './manifest.webmanifest',
