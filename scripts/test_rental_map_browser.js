@@ -36,7 +36,17 @@ const ROOT='http://127.0.0.1:8765/';
       },ROOT);
       await page.waitForFunction(()=>{
         const f=document.querySelector('[data-rental-map-atlas]');
-        return f?.contentDocument?.body?.classList.contains('wwz-rental-picker-mode');
+        if(!f?.contentDocument?.body?.classList.contains('wwz-rental-picker-mode'))return false;
+        const doc=f.contentDocument;
+        const map=doc.querySelector('#wwz-detection-map');
+        const readout=doc.querySelector('.marker-readout');
+        if(!map||!readout)return false;
+        const bounds=readout.getBoundingClientRect();
+        // Wait for the iframe's CSS and viewport sizing to settle before
+        // evaluating geometry; transient first-layout frames are not defects.
+        return map.getBoundingClientRect().height>=f.clientHeight-15
+          && bounds.top>=0 && bounds.bottom<=f.clientHeight+5
+          && getComputedStyle(doc.querySelector('.marker-header')).display==='none';
       },null,{timeout:12000});
       const m=await page.evaluate(()=>{
         const dialog=document.querySelector('[data-rental-map-dialog]');
