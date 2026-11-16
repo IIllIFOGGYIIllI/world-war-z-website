@@ -58,6 +58,7 @@ jobs:
           node scripts/test_nasdara_scoped_panels.js
           node scripts/test_nasdara_scoped_objectives.js
           node scripts/test_rental_map_and_server_labels.js
+          node scripts/test_discord_map_link_immediate.js
           node scripts/test_identity_sync_scope.js
           node scripts/test_operation_failure_scope.js
           node scripts/test_operations_centre_2.js
