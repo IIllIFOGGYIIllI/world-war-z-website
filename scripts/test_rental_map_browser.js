@@ -62,6 +62,7 @@ const ROOT='http://127.0.0.1:8765/';
           iframeOverflow:inner.documentElement.scrollWidth>frame.clientWidth+12
         };
       });
+      console.log('RENTAL PICKER MEASUREMENTS '+width+'x'+height+' '+JSON.stringify(m));
       assert.ok(m.frame.h>=200,'iframe must have useful visible height: '+JSON.stringify(m));
       assert.ok(m.frame.y>=m.dialog.y && m.frame.bottom<=m.dialog.bottom+4,'map must fit within modal: '+JSON.stringify(m));
       assert.ok(m.dialog.h<=height+2,'modal height must fit phone: '+JSON.stringify(m));
