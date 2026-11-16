@@ -72,7 +72,7 @@ const APP_SHELL = [
   './assets/js/dashboard/server-context.js?v=3.0.3&rev=topbar-mode-1',
   './assets/js/dashboard/shell.js?v=1.25.2&rev=palette-touch-1&pages=78',
   './assets/js/site-refinement.js?v=2.1.1&rev=breadcrumb-fix-1',
-  './assets/js/core/cart-deliveries.js?v=2.1.0',
+  './assets/js/core/cart-deliveries.js?v=2.1.0&checkout=neutral-location-1',
   './assets/css/components/cart-deliveries.css?v=2.1.0',
   './assets/js/dashboard/modern-navigation.js?v=1.62.0&rev=modern-ui-1',
   './assets/css/workspace-phase2.css?v=2.2.0&rev=dashboard-phase2-1',
