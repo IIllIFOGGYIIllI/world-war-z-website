@@ -12,7 +12,7 @@ permissions:
 jobs:
   static-safety:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -94,3 +94,12 @@ jobs:
           mkdir -p "$RUNNER_TEMP/wwz-dedicated-pages"
           python3 scripts/build_dashboard_pages.py --output-root "$RUNNER_TEMP/wwz-dedicated-pages"
           python3 scripts/test_dedicated_workspaces.py --site-root "$RUNNER_TEMP/wwz-dedicated-pages"
+      - name: Chrome functional and responsive audit of generated workspaces
+        run: |
+          python3 scripts/build_dashboard_pages.py --output-root .
+          npm install --no-save playwright-core@1.56.1
+          python3 -m http.server 8765 --bind 127.0.0.1 >"$RUNNER_TEMP/wwz-browser-server.log" 2>&1 &
+          WEB_SERVER_PID=$!
+          trap 'kill "$WEB_SERVER_PID" || true' EXIT
+          sleep 2
+          node scripts/test_dashboard_browser_audit.js
