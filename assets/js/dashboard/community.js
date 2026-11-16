@@ -46,6 +46,12 @@
   let active = false, refreshTimer = null, overview = null, preferencePayload = null, adminPayload = null, accountPayload = null, selectedRunId = null, calendarView = new URLSearchParams(location.search).get('view')==='list'?'list':'month', calendarCursor = new Date();
 
   const qs = (sel) => root.querySelector(sel);
+  // Each Community tab now has its own HTML document. Absent sibling panels
+  // are not an error, and no ghost/hidden copies are injected into the DOM.
+  const setOptionalText = (selector, value) => {
+    const element = qs(selector);
+    if (element) element.textContent = value;
+  };
   const status = qs('[data-community-status]');
   const setStatus = (message='', tone='') => { if (!status) return; status.hidden = !message; status.textContent = message; status.dataset.tone = tone; };
   const selectedScope = () => {
@@ -110,11 +116,11 @@
 
   const renderAnalytics = (payload) => {
     const a=payload.analytics||{}, s=a.summary||{}, p=a.players||{}, perf=payload.performance||{};
-    qs('[data-community-map-name]').textContent=payload.map_name||'Current server';
-    qs('[data-community-online]').textContent=Number(p.online||0).toLocaleString();
-    qs('[data-community-profiles]').textContent=Number(p.profiles||0).toLocaleString();
-    qs('[data-community-activity]').textContent=Number(s.activity||0).toLocaleString();
-    qs('[data-community-participants]').textContent=Number(s.unique_participants||0).toLocaleString();
+    setOptionalText('[data-community-map-name]',payload.map_name||'Current server');
+    setOptionalText('[data-community-online]',Number(p.online||0).toLocaleString());
+    setOptionalText('[data-community-profiles]',Number(p.profiles||0).toLocaleString());
+    setOptionalText('[data-community-activity]',Number(s.activity||0).toLocaleString());
+    setOptionalText('[data-community-participants]',Number(s.unique_participants||0).toLocaleString());
     const extra=qs('[data-community-extra-metrics]');
     if(extra){
       const rows=payload.map_key==='chernarus'
@@ -158,7 +164,7 @@
       const mapLink=eventMapUrl(e);
       return `<article class="community-event-card community-event-rich" data-event-id="${Number(e.id)}" data-status="${esc(e.status)}">${img}<div class="community-event-top"><div><span class="community-tag ${esc(e.status)}">${esc(e.lifecycle_state||e.status)}</span><span class="community-tag">${esc(e.map_key||overview?.map_key)}</span>${e.category?`<span class="community-tag community-category">${esc(e.category)}</span>`:''}<h4><button class="secondary-action" data-event-details="${Number(e.id)}" type="button">${esc(e.title)}</button></h4></div><b>${esc(fmtDate(e.starts_at))}</b></div><p>${esc(e.description||'Community event')}</p><div class="community-event-meta"><span>📍 ${esc(e.location_label||'Server-wide')}</span>${e.loadout_label?`<span>🎒 ${esc(e.loadout_label)}</span>`:''}<span>👥 ${esc(signupText)}</span><span>${e.ongoing?esc(eventEnding(e)):`Ends ${esc(fmtDate(e.ends_at))}`}</span></div>${reward?`<div class="community-event-rewards"><strong>Rewards</strong><span>${esc(reward)}</span></div>`:''}${e.setup_text?`<details class="community-event-rules"><summary>Event setup</summary><p>${esc(e.setup_text)}</p></details>`:''}${e.rules_text?`<details class="community-event-rules"><summary>Event rules</summary><p>${esc(e.rules_text)}</p></details>`:''}<div class="community-actions">${mapLink?`<a class="secondary-action compact-action" href="${esc(mapLink)}">View on WWZ Map</a>`:''}${action}</div></article>`;
     }).join('')||'<p class="community-empty">No scheduled community events right now.</p>';
-    qs('[data-community-event-count]').textContent=String(events.length);
+    setOptionalText('[data-community-event-count]',String(events.length));
     renderCalendar(events);
     el.querySelectorAll('[data-event-details]').forEach(b=>b.addEventListener('click',()=>showEvent(events.find(e=>Number(e.id)===Number(b.dataset.eventDetails)))));
     el.querySelectorAll('[data-event-signup]').forEach(btn=>btn.addEventListener('click',()=>memberEventAction('signup',Number(btn.dataset.eventSignup))));
@@ -167,16 +173,16 @@
 
   const renderMySignups = () => {
     const el=qs('[data-community-my-signups]'); if(!el)return;
-    if(!token()){el.innerHTML='<p class="community-empty">Sign in with Discord to register for community events.</p>';qs('[data-community-my-count]').textContent='0';return;}
+    if(!token()){el.innerHTML='<p class="community-empty">Sign in with Discord to register for community events.</p>';setOptionalText('[data-community-my-count]','0');return;}
     const activeRows=(accountPayload?.signups||[]).filter(s=>s.status!=='withdrawn'&&['scheduled','active'].includes(s.run_status));
-    qs('[data-community-my-count]').textContent=String(activeRows.length);
+    setOptionalText('[data-community-my-count]',String(activeRows.length));
     el.innerHTML=activeRows.map(s=>`<article class="community-template-card"><div class="community-event-top"><strong>${esc(s.title||'Event')}</strong><span class="community-tag ${esc(s.status)}">${esc(String(s.status||'registered').replace('_',' '))}</span></div><small>${esc(fmtDate(s.starts_at))} · ${esc(s.location_label||'Server-wide')}</small><div class="community-actions"><button class="secondary-action compact-action" data-my-withdraw="${Number(s.run_id)}" type="button">Withdraw</button></div></article>`).join('')||'<p class="community-empty">You have no active event registrations.</p>';
     el.querySelectorAll('[data-my-withdraw]').forEach(btn=>btn.addEventListener('click',()=>memberEventAction('withdraw',Number(btn.dataset.myWithdraw))));
   };
 
   const renderResults = (results=[]) => {
     const el=qs('[data-community-results]'); if(!el)return;
-    qs('[data-community-result-count]').textContent=String(results.length);
+    setOptionalText('[data-community-result-count]',String(results.length));
     const podium=(rows)=>Array.isArray(rows)&&rows.length?`<div class="wwz-event-podium">${rows.slice(0,3).map((entry,i)=>`<span><b>#${i+1}</b> ${esc(entry.name||'Unknown')} · ${money(entry.score)} pts</span>`).join('')}</div>`:'';
     el.innerHTML=results.map(r=>`<article class="community-result-card"><div class="community-event-top"><strong>${esc(r.title||'Event')}</strong><span class="community-tag completed">result</span></div>${r.winner_name?`<p><b>Winner:</b> ${esc(r.winner_name)}</p>`:''}<p>${esc(r.result_summary||'Results published.')}</p>${r.standings?.teams?.length?`<h5>Top teams</h5>${podium(r.standings.teams)}`:''}${r.standings?.individuals?.length?`<h5>Top survivors</h5>${podium(r.standings.individuals)}`:''}<small>${esc(fmtDate(r.result_published_at||r.ends_at))}</small></article>`).join('')||'<p class="community-empty">No published event results yet.</p>';
   };
