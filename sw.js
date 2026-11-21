@@ -8,7 +8,7 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-11-17-discord-map-deeplinks-1';
+const WWZ_PWA_UPDATE_REVISION = '2026-11-22-nasdara-live-availability-1';
 // Each deployed revision gets a fresh shell/static cache, while the bounded map
 // tile/data caches keep their own independent generations. This ensures an
 // accepted update does not reload stale JS/CSS from a previous PWA release.
@@ -39,12 +39,13 @@ const APP_SHELL = [
   './assets/branding/nasdara-community.webp',
   './assets/branding/nasdara-pve.webp',
   './assets/branding/nasdara-pvp.webp',
-  './assets/css/pages/home.css?v=1.22.94&rev=pvp-availability-1',
+  './assets/css/pages/home.css?v=1.22.95&rev=live-availability-1',
   './assets/css/pages/companion.css?v=1.53.0&rev=companion-download-repair-1',
   './assets/css/site-polish.css?v=1.22.93',
   './assets/css/pwa.css?v=1.22.93',
   './assets/css/ui-system.css?v=1.24.0&rev=ops-ui-1',
   './assets/js/pages/home.js?v=1.53.1&rev=companion-nav-1',
+  './assets/js/world-branding.js?v=3.0.1&rev=live-availability-1',
   './assets/js/pages/companion.js?v=1.53.2&rev=android7-compat-1&copy=plain-1',
   './assets/data/companion-release.json',
   './assets/js/pwa.js?v=1.61.1&rev=companion-nav-1',
