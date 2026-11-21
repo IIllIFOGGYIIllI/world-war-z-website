@@ -1803,6 +1803,14 @@ Participation | 50000 | 0"></textarea><small>One line per prize: Prize name | Cu
   <p class="table-note" data-data-volume-note>Read-only scan of persistent files. Railway platform metrics may use different accounting.</p>
   <div class="data-volume-list" data-data-volume-list aria-live="polite"><p class="table-note">Select Refresh Centre to inspect the mounted volume.</p></div>
   <p class="table-note" data-data-volume-duplicates>No backup files will be removed automatically.</p>
+  <div class="data-adm-history" aria-label="Read-only ADM database footprint">
+    <div class="panel-heading compact-panel-heading"><div>
+      <p class="panel-kicker">Database allocation · read only</p>
+      <h4>ADM History Footprint</h4>
+    </div><strong data-data-adm-total>Checking ADM storage…</strong></div>
+    <p class="table-note">Includes ADM registry observations, intelligence events and their indexes. These measurements do not alter or remove historical records.</p>
+    <div class="data-adm-list" data-data-adm-list aria-live="polite"></div>
+  </div>
 </section>
 <div class="data-management-grid">
 <section class="inset-panel data-backup-builder"><div class="panel-heading compact-panel-heading"><div><p class="panel-kicker">Whole Railway database</p><h3>Create Verified SQLite Backup</h3></div><span class="lock-label">Owner only</span></div><p class="table-note">Uses SQLite's online backup API, then performs a checksum and <code>PRAGMA quick_check</code> before the file becomes downloadable. The backup contains all configured WWZ servers.</p><label class="dialog-field"><span>Backup reason</span><input data-data-backup-reason maxlength="500" placeholder="Before major release / recovery snapshot" type="text"/></label><label class="dialog-field"><span>Confirmation <small>Type BACKUP ALL SERVERS</small></span><input autocomplete="off" data-data-backup-confirm placeholder="BACKUP ALL SERVERS" type="text"/></label><button class="primary-action wide" data-data-create-backup type="button">Create &amp; Verify Database Backup</button></section>
