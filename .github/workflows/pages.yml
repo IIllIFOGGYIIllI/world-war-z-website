@@ -90,6 +90,7 @@ jobs:
           node scripts/test_workspace_v317.js
           node scripts/test_armband_calibration.js
           node scripts/test_pvp_paused_ui.js
+          node scripts/test_storage_inventory_ui.js
           node scripts/test_signboard_studio.js
           node scripts/test_billboard_overlay_v03.js
           node scripts/test_highway_billboard_fit_v04.js

@@ -147,6 +147,54 @@
     set('[data-data-scope-notice]', data?.backup_scope_notice || 'Raw backups are global; logical exports are server-scoped.');
   };
 
+  const volumeLabels = Object.freeze({
+    sqlite_databases: 'SQLite Databases',
+    sqlite_journals: 'SQLite Journals',
+    config_backups: 'Configuration Backups',
+    database_backups: 'Full Database Backups',
+    dashboard_exports: 'Saved Data Exports',
+    evidence_images: 'Vehicle Bounty Evidence',
+    temporary_files: 'Temporary Files',
+    local_logs: 'Local Logs',
+    other_files: 'Other Data Files'
+  });
+
+  const renderVolume = (report) => {
+    const list = select('[data-data-volume-list]');
+    if (!list) return;
+    list.replaceChildren();
+    if (!report || !report.categories) {
+      set('[data-data-volume-total]', 'Volume scan unavailable');
+      set('[data-data-volume-note]', 'This server has no accessible persistent volume inventory.');
+      set('[data-data-volume-duplicates]', 'No automatic cleanup or deletion is enabled.');
+      return;
+    }
+    const used = friendlyBytes(report.volume_used_bytes);
+    const capacity = friendlyBytes(report.volume_total_bytes);
+    const percent = Number(report.volume_used_percent || 0);
+    set('[data-data-volume-total]', `${used} / ${capacity} (${percent.toFixed(1)}%)`);
+    set('[data-data-volume-note]',
+      'Mounted-volume filesystem usage, measured inside the WWZ bot. Railway service metrics can differ. ' +
+      (report.truncated ? 'Partial inventory due to file-count limit.' : 'Full read-only file inventory.'));
+    const categories = Object.entries(report.categories)
+      .filter(([key, value]) => Object.hasOwn(volumeLabels, key) && Number(value?.files || 0) > 0)
+      .sort((a, b) => Number(b[1]?.bytes || 0) - Number(a[1]?.bytes || 0));
+    for (const [key, value] of categories) {
+      const row = document.createElement('div');
+      row.className = 'data-volume-row';
+      const name = document.createElement('span');
+      name.textContent = volumeLabels[key];
+      const numbers = document.createElement('strong');
+      numbers.textContent = `${friendlyBytes(value.bytes)} · ${Number(value.files).toLocaleString()} files`;
+      row.append(name, numbers);
+      list.append(row);
+    }
+    set('[data-data-volume-duplicates]',
+      `${Number(report.candidate_duplicate_config_backups || 0)} duplicate-backup candidates · ` +
+      `${friendlyBytes(report.candidate_duplicate_config_backup_bytes)} possible savings. ` +
+      'No files were changed or deleted.');
+  };
+
   const renderExportOptions = (data) => {
     if (!exportKey) return;
     const current = exportKey.value;
@@ -258,6 +306,7 @@
   const render = (data) => {
     payload = data;
     renderHealth(data);
+    renderVolume(data?.volume_inventory);
     renderExportOptions(data);
     renderBackups(data?.backups, data?.health?.schema_hash);
     renderExports(data?.exports);
