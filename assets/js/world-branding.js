@@ -73,4 +73,14 @@
   window.WWZWorldBranding = Object.freeze({refresh, getSnapshot: () => snapshot});
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', refresh, { once: true });
   else refresh();
+  // Keep a long-open homepage current without polling Nitrado or touching
+  // players' authenticated server selections.
+  if (typeof window.setInterval === 'function') {
+    window.setInterval(() => {
+      if (document.visibilityState !== 'hidden') void refresh();
+    }, 180000);
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') void refresh();
+  });
 })();
