@@ -163,6 +163,7 @@
     const list = select('[data-data-volume-list]');
     if (!list) return;
     list.replaceChildren();
+    renderAdmHistory(report?.sqlite_layout);
     if (!report || !report.categories) {
       set('[data-data-volume-total]', 'Volume scan unavailable');
       set('[data-data-volume-note]', 'This server has no accessible persistent volume inventory.');
@@ -193,6 +194,53 @@
       `${Number(report.candidate_duplicate_config_backups || 0)} duplicate-backup candidates · ` +
       `${friendlyBytes(report.candidate_duplicate_config_backup_bytes)} possible savings. ` +
       'No files were changed or deleted.');
+  };
+
+  const renderAdmHistory = (layout) => {
+    const list = select('[data-data-adm-list]');
+    if (!list) return;
+    list.replaceChildren();
+    const labels = Object.freeze({
+      legacy_database: 'Legacy Database',
+      nasdara_pve_database: 'Nasdara PvE',
+      nasdara_pvp_database: 'Nasdara Full PvP'
+    });
+    const entries = (Array.isArray(layout) ? layout : [])
+      .filter((entry) => Object.hasOwn(labels, String(entry?.database || '')));
+    const measured = entries.filter((entry) => entry?.adm_history &&
+      Number.isFinite(Number(entry.adm_history.total_bytes)));
+    const total = measured.reduce((sum, entry) =>
+      sum + Math.max(0, Number(entry.adm_history.total_bytes || 0)), 0);
+    if (!entries.length || !measured.length) {
+      set('[data-data-adm-total]', 'ADM breakdown unavailable');
+      const empty = document.createElement('p');
+      empty.className = 'table-note';
+      empty.textContent = 'Read-only SQLite page statistics are unavailable for this deployment.';
+      list.append(empty);
+      return;
+    }
+    set('[data-data-adm-total]',
+      `${friendlyBytes(total)} ADM history` +
+      (measured.length < entries.length ? ' (partial)' : ' across measured databases'));
+    for (const entry of entries) {
+      const row = document.createElement('div');
+      row.className = 'data-adm-row';
+      const group = document.createElement('div');
+      const title = document.createElement('strong');
+      title.textContent = labels[entry.database];
+      const detail = document.createElement('small');
+      const adm = entry.adm_history;
+      detail.textContent = adm
+        ? `Registry ${friendlyBytes(adm.registry_bytes)} · Intelligence ${friendlyBytes(adm.intelligence_bytes)} · Includes indexes`
+        : 'Allocation details unavailable on this SQLite build';
+      group.append(title, detail);
+      const amount = document.createElement('span');
+      amount.textContent = adm
+        ? `${friendlyBytes(adm.total_bytes)} · ${Number(adm.percent_of_database || 0).toFixed(1)}% of DB`
+        : '—';
+      row.append(group, amount);
+      list.append(row);
+    }
   };
 
   const renderExportOptions = (data) => {
