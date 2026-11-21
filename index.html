@@ -10,13 +10,13 @@
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="WWZ Companion" name="apple-mobile-web-app-title"/>
-<meta content="World War Z DayZ PS4/PS5: Nasdara PvE available with fortnightly raid weekends; Nasdara Full PvP temporarily unavailable. Survivor tools, Discord and Command Centre." name="description"/>
+<meta content="World War Z DayZ PS4/PS5: Nasdara PvE raid weekends and Nasdara Full PvP, with separate survivor tools, Discord communities and Command Centre." name="description"/>
 <title>World War Z Bot | DayZ Community Management</title>
 <link href="manifest.webmanifest" rel="manifest"/>
 <link href="assets/favicon.png?v=nasdara-community-1" rel="icon" type="image/png"/>
 
-<link href="assets/css/pages/home.css?v=1.22.94&amp;rev=pvp-availability-1" rel="stylesheet"/>
-<link href="https://iillifoggyiilli.github.io/world-war-z-website/" rel="canonical"/><meta content="World War Z" property="og:site_name"/><meta content="World War Z | PvE & PvP" property="og:title"/><meta content="World War Z DayZ PS4/PS5: Nasdara PvE available with raid weekends; Nasdara Full PvP temporarily unavailable. Community, Discord and Command Centre." property="og:description"/><meta content="website" property="og:type"/><meta content="https://iillifoggyiilli.github.io/world-war-z-website/" property="og:url"/><meta content="https://iillifoggyiilli.github.io/world-war-z-website/assets/maps/nasdara/preview.jpg?v=wwz-nasdara-1" property="og:image"/><meta content="https://iillifoggyiilli.github.io/world-war-z-website/assets/maps/nasdara/preview.jpg?v=wwz-nasdara-1" property="og:image:secure_url"/><meta content="image/jpeg" property="og:image:type"/><meta content="1200" property="og:image:width"/><meta content="1200" property="og:image:height"/><meta content="World War Z Badlands — calibrated Nasdara satellite terrain and roads" property="og:image:alt"/><meta content="summary_large_image" name="twitter:card"/><meta content="World War Z | PvE & PvP" name="twitter:title"/><meta content="World War Z DayZ PS4/PS5: Nasdara PvE available with raid weekends; Nasdara Full PvP temporarily unavailable. Community, Discord and Command Centre." name="twitter:description"/><meta content="https://iillifoggyiilli.github.io/world-war-z-website/assets/maps/nasdara/preview.jpg?v=wwz-nasdara-1" name="twitter:image"/><link href="assets/css/site-polish.css?v=1.22.93" rel="stylesheet"/><link href="assets/icons/pwa/apple-touch-icon-180.png?v=nasdara-community-1" rel="apple-touch-icon" sizes="180x180"/>
+<link href="assets/css/pages/home.css?v=1.22.95&amp;rev=live-availability-1" rel="stylesheet"/>
+<link href="https://iillifoggyiilli.github.io/world-war-z-website/" rel="canonical"/><meta content="World War Z" property="og:site_name"/><meta content="World War Z | PvE & PvP" property="og:title"/><meta content="World War Z DayZ PS4/PS5: Nasdara PvE raid weekends, Nasdara Full PvP, survivor systems, Discord and Command Centre." property="og:description"/><meta content="website" property="og:type"/><meta content="https://iillifoggyiilli.github.io/world-war-z-website/" property="og:url"/><meta content="https://iillifoggyiilli.github.io/world-war-z-website/assets/maps/nasdara/preview.jpg?v=wwz-nasdara-1" property="og:image"/><meta content="https://iillifoggyiilli.github.io/world-war-z-website/assets/maps/nasdara/preview.jpg?v=wwz-nasdara-1" property="og:image:secure_url"/><meta content="image/jpeg" property="og:image:type"/><meta content="1200" property="og:image:width"/><meta content="1200" property="og:image:height"/><meta content="World War Z Badlands — calibrated Nasdara satellite terrain and roads" property="og:image:alt"/><meta content="summary_large_image" name="twitter:card"/><meta content="World War Z | PvE & PvP" name="twitter:title"/><meta content="World War Z DayZ PS4/PS5: Nasdara PvE raid weekends, Nasdara Full PvP, survivor systems, Discord and Command Centre." name="twitter:description"/><meta content="https://iillifoggyiilli.github.io/world-war-z-website/assets/maps/nasdara/preview.jpg?v=wwz-nasdara-1" name="twitter:image"/><link href="assets/css/site-polish.css?v=1.22.93" rel="stylesheet"/><link href="assets/icons/pwa/apple-touch-icon-180.png?v=nasdara-community-1" rel="apple-touch-icon" sizes="180x180"/>
 <link href="assets/css/pwa.css?v=1.22.93" rel="stylesheet"/>
 <link href="assets/css/ui-system.css?v=1.24.0&rev=ops-ui-1" rel="stylesheet"/>
 <link href="assets/css/modern-foundation.css?v=1.62.0&amp;rev=modern-ui-1" rel="stylesheet"/>
@@ -66,7 +66,7 @@
 <p class="eyebrow"><span class="pulse"></span> World War Z operations network</p>
 <h1 id="hero-title">Survive The World.<br/><span>Control The Network.</span></h1>
 <p class="hero-copy">One connected operations platform for the World War Z PlayStation DayZ community — live server intelligence, survivor systems, economy, shop delivery, moderation and administration across two Nasdara experiences: PvE and PvP.</p>
-<p class="wwz-pvp-availability" role="status"><strong>Server notice:</strong> Nasdara PvE is available. Nasdara Full PvP is temporarily unavailable.</p>
+<p class="wwz-pvp-availability" data-wwz-availability-banner data-availability-state="checking" role="status"><strong>Server notice:</strong> <span data-wwz-service-notice>Checking PvE and Full PvP service availability. See Discord status panels for live game state.</span></p>
 <div class="hero-actions">
 <a class="button button-primary" href="dashboard.html">Enter Command Centre</a><a class="button button-secondary" href="shop.html">Survivor Shop</a><a class="button button-secondary" href="donations.html">Support WWZ</a>
 <a class="button button-secondary" href="https://discord.gg/worldwarzps" rel="noreferrer" target="_blank">Open Discord</a>
@@ -76,7 +76,7 @@
 <aside aria-label="World War Z network overview" class="hero-ops-board">
 <header><small>Operational summary</small><strong>World War Z Network</strong></header>
 <div class="hero-ops-grid">
-<div class="live"><span>Worlds</span><strong>2 Servers</strong><small data-wwz-network-worlds>PvE + PvP · PvP paused</small></div>
+<div class="live"><span>Worlds</span><strong>2 Servers</strong><small data-wwz-network-state>PvE + Full PvP</small></div>
 <div><span>Platform</span><strong>PS4 / PS5</strong><small>Console DayZ community</small></div>
 <div><span>Bot surface</span><strong>Bot Commands</strong><small>Member + Admin operations</small></div>
 <div><span>Account and server services</span><strong>Protected</strong><small>Secure access and automatic updates</small></div>
@@ -102,7 +102,7 @@
 <div class="shell">
 <div class="status-strip reveal">
 <div><span>Platform</span><strong>PlayStation 4 &amp; 5</strong></div>
-<div><span>Maps</span><strong data-wwz-network-worlds>PvE + PvP · PvP paused</strong></div>
+<div><span>Maps</span><strong data-wwz-network-state>PvE + Full PvP</strong></div>
 <div><span>Capacity</span><strong>26 survivors</strong></div>
 <div><span>Community</span><strong>World War Z</strong></div>
 </div>
@@ -198,7 +198,7 @@
 </div>
 <div aria-label="World War Z server identity" class="roadmap-release">
 <small>Network configuration</small>
-<strong>PvE available · PvP paused</strong>
+<strong data-wwz-network-state>PvE + Full PvP</strong>
 <span>One WWZ community · Independent servers</span>
 </div>
 </div>
@@ -219,13 +219,13 @@
 </ul>
 </article>
 <article class="roadmap-card roadmap-card-complete reveal">
-<div class="roadmap-card-heading"><span>02</span><div><small>Secondary server · temporarily unavailable</small><h3>World War Z Full PvP</h3></div></div>
-<p><strong>Temporarily unavailable.</strong> Nasdara Full PvP is paused until its hosting service is restored. Its server identity and separate survivor systems are retained.</p>
+<div class="roadmap-card-heading"><span>02</span><div><small data-wwz-pvp-service-status>Secondary server · Checking availability</small><h3>World War Z Full PvP</h3></div></div>
+<p data-wwz-pvp-description>Nasdara Full PvP offers full-map player-versus-player gameplay with separate survivor systems. Service availability is checked automatically.</p>
 <ul>
 <li>Full PvP and raiding 24 hours a day, seven days a week.</li>
-<li>91 random spawn loadouts, high loot, vehicles and motorbikes — available when PvP resumes.</li>
+<li>91 random spawn loadouts, boosted loot, vehicles and motorbikes.</li>
 <li>Helicopter crashes, military convoys, PvP competition and factions.</li>
-<li>Separate Nitrado and Discord services; PvP is currently unavailable for gameplay.</li>
+<li data-wwz-pvp-operations>Separate Nitrado and Discord services, with independent bot monitoring and shop settings.</li>
 </ul>
 </article>
 <article class="roadmap-card roadmap-card-complete reveal">
@@ -318,7 +318,7 @@
 <p>© <span data-year=""></span> World War Z Community.</p>
 </div>
 </footer>
-<script defer src="assets/js/world-branding.js?v=3.0.0&rev=nasdara-dual"></script>
+<script defer src="assets/js/world-branding.js?v=3.0.1&rev=live-availability-1"></script>
 <script defer="" src="assets/js/pages/home.js?v=1.53.1&rev=companion-nav-1"></script>
 <script defer src="assets/js/pwa.js?v=1.61.1&rev=companion-nav-1"></script>
 <script defer src="assets/js/ui-system.js?v=2.0.1&rev=nav-dedupe-1"></script>
