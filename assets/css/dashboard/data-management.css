@@ -9,3 +9,15 @@
 .data-volume-row span{color:var(--text-muted,#b9c8d3);font-size:.84rem}
 .data-volume-row strong{font-size:.86rem;font-variant-numeric:tabular-nums;text-align:right}
 @media(max-width:760px){.data-volume-list{grid-template-columns:1fr}.data-volume-row{align-items:flex-start;flex-wrap:wrap}}
+
+/* Schema-page allocation only: no sensitive ADM rows or automatic cleanup controls. */
+.data-adm-history{display:grid;gap:.65rem;padding-top:.85rem;border-top:1px solid var(--panel-border,#30343c)}
+.data-adm-history .panel-heading{gap:.75rem;align-items:center;flex-wrap:wrap}
+.data-adm-history [data-data-adm-total]{font-size:.95rem;font-variant-numeric:tabular-nums}
+.data-adm-list{display:grid;gap:.5rem}
+.data-adm-row{display:flex;justify-content:space-between;align-items:center;gap:.8rem;background:rgba(127,154,176,.06);border:1px solid rgba(127,154,176,.17);border-radius:10px;padding:.7rem .85rem}
+.data-adm-row>div{display:grid;gap:.24rem;min-width:0}
+.data-adm-row strong{font-size:.9rem}
+.data-adm-row small{font-size:.78rem;color:var(--text-muted,#b9c8d3);line-height:1.45}
+.data-adm-row>span{white-space:nowrap;font-size:.85rem;font-weight:700;font-variant-numeric:tabular-nums}
+@media(max-width:760px){.data-adm-row{align-items:flex-start;flex-direction:column}.data-adm-row>span{white-space:normal}}
