@@ -13,11 +13,53 @@
     const secondary = (Array.isArray(data.servers) ? data.servers : []).find(item => item.server_key !== primary.server_key && item.map_key === 'badlands');
     const other = sanitize(secondary);
     if (!other) return false;
-    snapshot = Object.freeze({primary: 'Nasdara PvE', secondary: 'Nasdara PvP', mapKey: 'badlands'});
-    document.querySelectorAll('[data-wwz-primary-world]').forEach(el => { el.textContent = snapshot.primary; });
-    document.querySelectorAll('[data-wwz-network-worlds]').forEach(el => { el.textContent = `${snapshot.primary} + ${snapshot.secondary}`; });
-    document.querySelectorAll('[data-wwz-rules-worlds]').forEach(el => { el.textContent = `${snapshot.primary} and ${snapshot.secondary} keep separate published rulesets.`; });
-    document.querySelectorAll('[data-wwz-primary-live-copy]').forEach(el => { el.textContent = `Primary world: ${snapshot.primary} · Secondary world: ${snapshot.secondary}`; });
+    // The public branding endpoint reflects the validated WWZ runtime
+    // registry. This is service availability, NOT a live Nitrado game-state
+    // or player-count reading; keep those on Discord's live status panels.
+    const pvpAvailable = other.status === 'active';
+    snapshot = Object.freeze({
+      primary: 'Nasdara PvE',
+      secondary: 'Nasdara PvP',
+      mapKey: 'badlands',
+      pvpAvailable,
+      pvpServiceStatus: other.status
+    });
+    const updateText = (selector, value) => {
+      document.querySelectorAll(selector).forEach(el => { el.textContent = value; });
+    };
+    updateText('[data-wwz-primary-world]', snapshot.primary);
+    updateText('[data-wwz-network-worlds]', `${snapshot.primary} + ${snapshot.secondary}`);
+    updateText('[data-wwz-rules-worlds]', `${snapshot.primary} and ${snapshot.secondary} keep separate published rulesets.`);
+    updateText('[data-wwz-primary-live-copy]', `Primary world: ${snapshot.primary} · Secondary world: ${snapshot.secondary}`);
+    updateText(
+      '[data-wwz-service-notice]',
+      pvpAvailable
+        ? 'Nasdara PvE and Nasdara Full PvP services are available. See the live Discord status panels for current game state.'
+        : 'Nasdara PvE service is available. Nasdara Full PvP is temporarily unavailable.'
+    );
+    updateText(
+      '[data-wwz-network-state]',
+      pvpAvailable ? 'PvE + Full PvP · Services available' : 'PvE available · Full PvP paused'
+    );
+    updateText(
+      '[data-wwz-pvp-service-status]',
+      pvpAvailable ? 'Secondary server · Service available' : 'Secondary server · Temporarily unavailable'
+    );
+    updateText(
+      '[data-wwz-pvp-description]',
+      pvpAvailable
+        ? 'Nasdara Full PvP hosting and WWZ bot integrations are active again. Enjoy full-map player-versus-player gameplay with a separate economy, rentals and progression.'
+        : 'Nasdara Full PvP is temporarily unavailable. Its server configuration, survivor records and separate economy remain preserved.'
+    );
+    updateText(
+      '[data-wwz-pvp-operations]',
+      pvpAvailable
+        ? 'Separate Nitrado and Discord services, with active bot monitoring and shop integrations.'
+        : 'Separate Nitrado and Discord services; gameplay is temporarily unavailable.'
+    );
+    document.querySelectorAll('[data-wwz-availability-banner]').forEach(el => {
+      el.dataset.availabilityState = pvpAvailable ? 'active' : 'paused';
+    });
     document.dispatchEvent(new CustomEvent('wwz:worldbranding', { detail: snapshot }));
     return true;
   };
