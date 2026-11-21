@@ -14,9 +14,9 @@ assert(js.includes('volumeLabels') && js.includes('document.createElement'), 'Sa
 assert(!/fetch\s*\(|XMLHttpRequest/.test(js.slice(js.indexOf('const renderVolume'), js.indexOf('const renderExportOptions'))), 'Renderer must never make extra network calls');
 assert(js.includes('No files were changed or deleted.'), 'Prominent storage safety notice');
 assert(css.includes('.data-volume-row'), 'Responsive volume styles');
-assert(lazy.includes('data-management.js?v=1.40.0&rev=volume-breakdown-1'));
-assert(lazy.includes('data-management.css?v=1.40.0&rev=volume-breakdown-1'));
-assert(html.includes('assets/js/dashboard/lazy-assets.js?v=2.8.7'));
-assert(sw.includes("WWZ_PWA_UPDATE_REVISION = '2026-11-22-volume-breakdown-1'"));
+assert(lazy.includes('data-management.js?v=1.39.0&rev=data-management-1&authfix=nasdara-2&storage=1'));
+assert(lazy.includes('data-management.css?v=1.39.0&rev=data-management-1&storage=1'));
+assert(html.includes('assets/js/dashboard/lazy-assets.js?v=2.8.6'));
+assert(sw.includes("WWZ_PWA_UPDATE_REVISION = '2026-11-22-volume-breakdown-2'"));
 new (require('node:vm').Script)(js, { filename: 'data-management.js' });
 console.log('PASS: Owner-only Railway volume breakdown, no deletion controls, updated PWA assets');
