@@ -330,10 +330,10 @@
   ])).then(() => undefined);
 
   const ensureDataManagement = () => Promise.all([
-    loadStylesheetOnce('data-management-css', 'assets/css/dashboard/data-management.css?v=1.39.0&rev=data-management-1&storage=1'),
+    loadStylesheetOnce('data-management-css', 'assets/css/dashboard/data-management.css?v=1.39.0&rev=data-management-1&storage=2'),
     loadAfterDashboardRuntime(() => loadScriptOnce(
       'data-management',
-      'assets/js/dashboard/data-management.js?v=1.39.0&rev=data-management-1&authfix=nasdara-2&storage=1',
+      'assets/js/dashboard/data-management.js?v=1.39.0&rev=data-management-1&authfix=nasdara-2&storage=2',
       () => window.__wwzDataManagementReady === true
     ))
   ]).then(() => undefined);
