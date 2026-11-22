@@ -37,3 +37,7 @@
 
 /* Evidence-based DayZ ADM presence explanation, readable on mobile. */
 .quest-objective-copy .quest-tracking-hint{display:block;margin:.35rem 0 .45rem;white-space:normal;overflow:visible;text-overflow:clip;font-size:.78rem;line-height:1.45;color:var(--text-muted,#b9c8d3)}
+
+.quest-dwell-help{margin:.45rem 0 0;font-size:.8rem;color:var(--text-muted,#b9c8d3)}
+.quest-dwell-help summary{cursor:pointer;font-weight:650;list-style:revert}
+.quest-dwell-help p{margin:.4rem 0 0;max-width:65ch;white-space:normal;line-height:1.45}
