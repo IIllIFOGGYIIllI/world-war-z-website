@@ -8,7 +8,7 @@ const WWZ_PWA_CACHE_REVISION = 'community-workflows-1';
 const WWZ_PWA_CACHE_RELEASE_VERSION = '1.27.0';
 // Bump this token on every deployed website update. Changing sw.js makes installed
 // PWAs/TWAs discover the update and surface the existing "Update Now" flow.
-const WWZ_PWA_UPDATE_REVISION = '2026-11-22-adm-storage-footprint-1';
+const WWZ_PWA_UPDATE_REVISION = '2026-11-22-quest-dwell-tracking-1';
 // Each deployed revision gets a fresh shell/static cache, while the bounded map
 // tile/data caches keep their own independent generations. This ensures an
 // accepted update does not reload stale JS/CSS from a previous PWA release.
