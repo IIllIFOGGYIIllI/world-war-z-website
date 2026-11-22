@@ -9,4 +9,13 @@ assert.match(source, /if \(!hasAdmin\(\)\) \{[\s\S]*?adminPanel\.hidden = true/)
 assert.match(source, /catch \(error\) \{\s*adminLoaded = false;\s*adminData = null;[\s\S]*?adminPanel\.hidden = true/);
 assert.ok(!source.includes('Your dashboard session expired. Sign in again to view Objectives.'), 'Scoped denials must not incorrectly claim global session expiry');
 assert.ok(loader.includes('nasdara-scoped-objectives-1'), 'Use refreshed script');
-console.log('PASS: Objectives access denial and data reset are scoped by server');
+const css = fs.readFileSync('assets/css/dashboard/objectives.css', 'utf8');
+assert.ok(source.includes('No ADM position readings recorded'), 'Explain absent location evidence');
+assert.ok(source.includes('Waiting for two consecutive verified readings'), 'Explain pending location samples');
+assert.ok(source.includes('No activation required'), 'Dwell quests must not imply a start control');
+assert.ok(source.includes('value.toFixed(1)'), 'Show fractional tracked dwell progress');
+assert.ok(css.includes('.quest-tracking-hint') && css.includes('white-space:normal'), 'Mobile tracking guidance must wrap');
+assert.ok(loader.includes('nasdara-scoped-objectives-1&tracking=1'), 'Refresh objectives script cache');
+assert.ok(loader.includes('nasdara-community-1&tracking=1'), 'Refresh objectives style cache');
+new (require('node:vm').Script)(source, {filename:'objectives.js'});
+console.log('PASS: Server-isolated objectives and evidence-backed ADM location tracking guidance');
