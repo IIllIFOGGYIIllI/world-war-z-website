@@ -103,6 +103,18 @@
       const title = document.createElement('h3'); title.textContent = `#${quest.quest_id} · ${quest.title}`;
       const description = document.createElement('p'); description.textContent = quest.description || '';
       heading.append(title, description);
+      if ((quest.objectives || []).some((item) => item?.type === 'location_dwell_minutes')) {
+        const help = document.createElement('details');
+        help.className = 'quest-dwell-help';
+        const toggle = document.createElement('summary');
+        toggle.textContent = 'How location tracking works';
+        const explanation = document.createElement('p');
+        explanation.textContent = 'No activation required. DayZ logs player positions about every 5 minutes. ' +
+          'The tracker needs at least two consecutive readings inside the assigned area; ' +
+          'allow around 10–11 minutes from arrival. Only verified intervals count.';
+        help.append(toggle, explanation);
+        heading.append(help);
+      }
       const state = document.createElement('span'); state.className = `objective-status ${quest.status || ''}`; state.textContent = String(quest.status || 'active');
       head.append(heading, state);
       const objectives = document.createElement('div'); objectives.className = 'quest-objectives';
@@ -129,8 +141,7 @@
           trackingInfo.className = 'quest-tracking-hint';
           trackingInfo.textContent = (statusMessages[tracking.status] || 'Location tracking uses periodic ADM readings.') +
             (Number.isFinite(Number(tracking.samples_inside))
-              ? ` ${Number(tracking.samples_inside).toLocaleString()} in-area readings.` : '') +
-            ' No activation required. DayZ logs positions about every 5 minutes; allow around 10–11 minutes within the area.';
+              ? ` ${Number(tracking.samples_inside).toLocaleString()} in-area readings.` : '');
           copy.append(trackingInfo);
         }
         copy.append(track);
