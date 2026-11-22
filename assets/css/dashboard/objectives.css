@@ -34,3 +34,6 @@
 .quest-community-note{margin:0;font-size:.76rem}
 @media(max-width:900px){.quest-community-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.quest-community-grid{grid-template-columns:1fr}}
+
+/* Evidence-based DayZ ADM presence explanation, readable on mobile. */
+.quest-objective-copy .quest-tracking-hint{display:block;margin:.35rem 0 .45rem;white-space:normal;overflow:visible;text-overflow:clip;font-size:.78rem;line-height:1.45;color:var(--text-muted,#b9c8d3)}
