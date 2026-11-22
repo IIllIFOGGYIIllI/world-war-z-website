@@ -13,6 +13,7 @@ const css = fs.readFileSync('assets/css/dashboard/objectives.css', 'utf8');
 assert.ok(source.includes('No ADM position readings recorded'), 'Explain absent location evidence');
 assert.ok(source.includes('Waiting for two consecutive verified readings'), 'Explain pending location samples');
 assert.ok(source.includes('No activation required'), 'Dwell quests must not imply a start control');
+assert.ok(source.includes('How location tracking works') && css.includes('.quest-dwell-help'), 'Sampling guidance should remain collapsed until requested');
 assert.ok(source.includes('value.toFixed(1)'), 'Show fractional tracked dwell progress');
 assert.ok(css.includes('.quest-tracking-hint') && css.includes('white-space:normal'), 'Mobile tracking guidance must wrap');
 assert.ok(loader.includes('nasdara-scoped-objectives-1&tracking=1'), 'Refresh objectives script cache');
