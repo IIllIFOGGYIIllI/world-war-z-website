@@ -68,7 +68,8 @@
   const objectiveValue = (objective, key) => {
     const value = Number(objective?.[key] || 0);
     if (objective?.type === 'shop_spend') return money(value);
-    if (objective?.type === 'location_dwell_minutes' || objective?.type === 'playtime_minutes') return `${Math.floor(value)} min`;
+    if (objective?.type === 'location_dwell_minutes') return `${value.toFixed(1).replace(/\.0$/, '')} min`;
+    if (objective?.type === 'playtime_minutes') return `${Math.floor(value)} min`;
     return Number.isInteger(value) ? number(value) : value.toFixed(1);
   };
 
@@ -115,7 +116,24 @@
         const fill = document.createElement('span');
         const targetValue = Math.max(1, Number(objective.target || 1));
         fill.style.width = `${Math.max(0, Math.min(100, (Number(objective.progress || 0) / targetValue) * 100))}%`;
-        track.append(fill); copy.append(label, detail, track);
+        track.append(fill); copy.append(label, detail);
+        if (objective.type === 'location_dwell_minutes') {
+          const tracking = objective.tracking || {};
+          const statusMessages = {
+            no_positions: 'No ADM position readings recorded during this quest period.',
+            outside_area: 'Position readings exist, but none were inside this quest area.',
+            awaiting_confirmed_interval: 'In-area position detected. Waiting for two consecutive verified readings.',
+            tracking: 'Verified in-area tracking intervals recorded.'
+          };
+          const trackingInfo = document.createElement('small');
+          trackingInfo.className = 'quest-tracking-hint';
+          trackingInfo.textContent = (statusMessages[tracking.status] || 'Location tracking uses periodic ADM readings.') +
+            (Number.isFinite(Number(tracking.samples_inside))
+              ? ` ${Number(tracking.samples_inside).toLocaleString()} in-area readings.` : '') +
+            ' No activation required. DayZ logs positions about every 5 minutes; allow around 10–11 minutes within the area.';
+          copy.append(trackingInfo);
+        }
+        copy.append(track);
         const progress = document.createElement('span'); progress.textContent = `${objectiveValue(objective, 'progress')} / ${objectiveValue(objective, 'target')}`;
         row.append(copy, progress); objectives.append(row);
       });
