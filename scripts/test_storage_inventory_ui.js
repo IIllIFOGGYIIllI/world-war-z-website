@@ -20,6 +20,6 @@ assert(lazy.includes('data-management.js?v=1.39.0&rev=data-management-1&authfix=
 assert(lazy.includes('data-management.css?v=1.39.0&rev=data-management-1&storage=2'));
 assert(html.includes('assets/js/dashboard/lazy-assets.js?v=2.8.6'));
 assert(html.includes('storage=2'), 'Dashboard lazy loader URL must refresh');
-assert(sw.includes("WWZ_PWA_UPDATE_REVISION = '2026-11-22-adm-storage-footprint-1'"));
+assert(sw.includes("WWZ_PWA_UPDATE_REVISION = '2026-11-22-quest-dwell-tracking-1'"));
 new (require('node:vm').Script)(js, { filename: 'data-management.js' });
 console.log('PASS: Owner-only Railway volume and ADM allocation breakdown, no deletion controls, updated PWA assets');
