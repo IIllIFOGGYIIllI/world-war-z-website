@@ -430,6 +430,105 @@
     }
   };
 
+  // Existing SQLite checkpoints only: no Nitrado requests or scheduler actions.
+  // Keep owner and selected-server isolation, including while switching tabs.
+  const renderAutomationHistory = (history = null) => {
+    const panel = qs('[data-automation-history-owner]');
+    if (!panel) return;
+    const server = window.WWZServerContext?.getSelectedServer?.();
+    const eligible = dashboardAccessLevel === 'owner' &&
+      server?.map_key === 'badlands' && ['pve', 'pvp'].includes(server?.gameplay_mode);
+    panel.hidden = !eligible;
+    if (!eligible) return;
+    const raids = server.gameplay_mode === 'pve' && Array.isArray(history?.raid_weekends)
+      ? history.raid_weekends : [];
+    const wipes = Array.isArray(history?.vehicle_wipes) ? history.vehicle_wipes : [];
+    const count = qs('[data-automation-history-count]');
+    if (count) count.textContent = `${raids.length + wipes.length} Recorded Cycles`;
+    const note = qs('[data-automation-history-note]');
+    if (note) note.textContent = String(history?.notice ||
+      'Saved automation checkpoints are not independent proof of in-game state.');
+    const appendText = (element, tag, value, className = '') => {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      node.textContent = String(value || '');
+      element.append(node);
+      return node;
+    };
+    const fmtRecorded = (stamp) => {
+      if (!stamp || Number.isNaN(new Date(stamp).valueOf())) return 'Time unavailable';
+      return fmtSydney(stamp);
+    };
+    const raidTarget = qs('[data-automation-raid-history]');
+    if (raidTarget) {
+      raidTarget.replaceChildren();
+      if (server.gameplay_mode !== 'pve') {
+        appendText(raidTarget, 'p', 'Raid Weekend damage automation applies to Nasdara PvE only.', 'community-inline-note');
+      } else if (!raids.length) {
+        appendText(raidTarget, 'p', 'No persisted raid transition checkpoints were found.', 'community-inline-note');
+      }
+      for (const raid of raids) {
+        const card = document.createElement('article');
+        card.className = 'wwz-automation-history-card';
+        appendText(card, 'strong', `Raid ${fmtRecorded(raid.window_start)}`);
+        const label = {
+          restoration_recorded: 'Restoration actions recorded',
+          attention_required: 'Owner review required',
+          partial_record: 'Incomplete / partial record'
+        }[raid.status] || 'Checkpoint recorded';
+        appendText(card, 'span', label, 'wwz-automation-history-status');
+        const details = document.createElement('details');
+        appendText(details, 'summary', 'View stored checkpoints');
+        const list = document.createElement('div');
+        list.className = 'wwz-automation-stage-list';
+        for (const step of (Array.isArray(raid.stages) ? raid.stages : [])) {
+          const row = document.createElement('div');
+          appendText(row, 'strong', step.label || step.stage);
+          appendText(row, 'span', String(step.status || 'unknown').replaceAll('_', ' '));
+          appendText(row, 'small', fmtRecorded(step.recorded_at));
+          list.append(row);
+        }
+        details.append(list);
+        card.append(details);
+        raidTarget.append(card);
+      }
+    }
+    const wipeTarget = qs('[data-automation-wipe-history]');
+    if (wipeTarget) {
+      wipeTarget.replaceChildren();
+      if (!wipes.length) appendText(wipeTarget, 'p', 'No recorded vehicle-wipe cycles for this server.', 'community-inline-note');
+      for (const wipe of wipes) {
+        const card = document.createElement('article');
+        card.className = 'wwz-automation-history-card';
+        appendText(card, 'strong', `Monday ${wipe.cycle_date || 'date unavailable'}`);
+        const label = {
+          completed: 'Two-restart cycle completed',
+          attention_required: 'Owner review required',
+          in_progress: 'Recorded phase: ' + String(wipe.phase || 'unknown').replaceAll('_', ' ')
+        }[wipe.status] || 'Checkpoint recorded';
+        appendText(card, 'span', label, 'wwz-automation-history-status');
+        appendText(card, 'small', `Last update: ${fmtRecorded(wipe.updated_at)}`);
+        const notices = Array.isArray(wipe.notices) ? wipe.notices : [];
+        if (notices.length) {
+          const details = document.createElement('details');
+          appendText(details, 'summary', 'View Discord notification records');
+          const list = document.createElement('div');
+          list.className = 'wwz-automation-stage-list';
+          for (const notice of notices) {
+            const row = document.createElement('div');
+            appendText(row, 'strong', String(notice.stage || 'notice').replaceAll('_', ' '));
+            appendText(row, 'span', String(notice.status || 'unknown').replaceAll('_', ' '));
+            appendText(row, 'small', fmtRecorded(notice.recorded_at));
+            list.append(row);
+          }
+          details.append(list);
+          card.append(details);
+        }
+        wipeTarget.append(card);
+      }
+    }
+  };
+
   const renderPlanner = (payload={}) => {
     const owner=dashboardAccessLevel==='owner'; const canPlan=['staff','owner'].includes(dashboardAccessLevel);
     const ownerEditor=qs('[data-community-owner-editor]');if(ownerEditor)ownerEditor.hidden=!canPlan;
@@ -444,6 +543,7 @@
     const calendarChannel=qs('[data-community-calendar-channel]');if(calendarChannel){const selected=String(payload.calendar_panel?.channel_id||'');calendarChannel.innerHTML='<option value="">Choose Discord channel…</option>'+channelOptions;if(selected)calendarChannel.value=selected;}
     renderRaidPanel(payload.raid_damage_automation || null);
     renderVehicleWipePanel(payload.vehicle_wipe_maintenance || null);
+    renderAutomationHistory(payload.automation_execution_history || null);
     const panelState=qs('[data-community-calendar-panel-state]');if(panelState)panelState.textContent=payload.calendar_panel?.message_id?`Published · channel ${payload.calendar_panel.channel_id}`:'No panel published yet.';
     const locationSelect=qs('[data-community-template-location]');if(locationSelect)locationSelect.innerHTML='<option value="">Choose reusable location…</option>'+optionList(payload.locations||[],'label');
     const loadoutSelect=qs('[data-community-template-loadout]');if(loadoutSelect)loadoutSelect.innerHTML='<option value="">No preset</option>'+optionList(payload.loadouts||[]);
@@ -984,9 +1084,9 @@
     else if (loud) setStatus('Community data refreshed.', 'success');
     else setStatus();
   };
-  const activate=({section=''}={})=>{active=true;renderRaidPanel(adminPayload?.raid_damage_automation || null);renderVehicleWipePanel(adminPayload?.vehicle_wipe_maintenance || null);refresh();clearInterval(refreshTimer);refreshTimer=setInterval(()=>{if(active)loadOverview().catch(()=>{});},60000);if(section==='planner'&&!['staff','owner'].includes(dashboardAccessLevel))setStatus('Staff access is required for Event Planner.','error');};
+  const activate=({section=''}={})=>{active=true;renderRaidPanel(adminPayload?.raid_damage_automation || null);renderVehicleWipePanel(adminPayload?.vehicle_wipe_maintenance || null);renderAutomationHistory(adminPayload?.automation_execution_history || null);refresh();clearInterval(refreshTimer);refreshTimer=setInterval(()=>{if(active)loadOverview().catch(()=>{});},60000);if(section==='planner'&&!['staff','owner'].includes(dashboardAccessLevel))setStatus('Staff access is required for Event Planner.','error');};
   window.addEventListener('wwz:viewchange',(event)=>{if(event.detail?.view==='community')activate(event.detail);else active=false;});
-  window.addEventListener('wwz:accesschange',()=>{renderRaidPanel(adminPayload?.raid_damage_automation || null);renderVehicleWipePanel(adminPayload?.vehicle_wipe_maintenance || null);});
+  window.addEventListener('wwz:accesschange',()=>{renderRaidPanel(adminPayload?.raid_damage_automation || null);renderVehicleWipePanel(adminPayload?.vehicle_wipe_maintenance || null);renderAutomationHistory(adminPayload?.automation_execution_history || null);});
   window.addEventListener('wwz:serverchange',()=>{selectedRunId=null;adminPayload=null;accountPayload=null;overview=null;clearTemplate();renderPlanner({});document.querySelector('[data-event-dialog]')?.remove();renderEvents([]);if(active)refresh();});
   window.addEventListener('wwz:authchange',()=>{accountPayload=null;adminPayload=null;clearTemplate();renderPlanner({});document.querySelector('[data-event-dialog]')?.remove();renderEvents(overview?.events||[]);if(active)refresh();});
   window.__wwzCommunityReady=true;
